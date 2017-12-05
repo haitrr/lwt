@@ -9,6 +9,6 @@ namespace LWT.Models
         public string Name { get; set; }
         public int TextSize { get; set; }
 
-        public HashSet<string> wordSplitters { get; set; }
+        public HashSet<string> WordSplitters { get; set; }
     }
 }
