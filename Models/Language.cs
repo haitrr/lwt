@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace LWT.Models
 {
@@ -8,6 +9,6 @@ namespace LWT.Models
         public string Name { get; set; }
         public int TextSize { get; set; }
 
-        public string[] wordSplitter { get; set; }
+        public HashSet<string> wordSplitters { get; set; }
     }
 }
