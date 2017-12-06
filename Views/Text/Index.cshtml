@@ -2,11 +2,28 @@
 @{
     ViewData["Title"] = "Texts";
 }
-<div class="container">
-    <ul class="list-group">
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model=>model.Texts[0].Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model=>model.Texts[0].Language)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
         @foreach(var text in Model.Texts)
         {
-            <li class="list-group-item">@text.Title</li>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => text.Title)
+                </td>
+                <td>
+                    //Language here
+                </td>
+            </tr>
         }
-    </ul>
-</div>
+    </tbody>
+</table>
