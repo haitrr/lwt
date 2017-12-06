@@ -13,6 +13,5 @@ namespace LWT.Models
         public string SourceURL { get; set; }
 
         public Language Language { get; set; }
-        public HashSet<Tag> Tags { get; set; }
     }
 }
