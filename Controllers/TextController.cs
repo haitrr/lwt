@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LWT.Controllers
 {
-    public class TextController:Controller
+    public class TextController : Controller
     {
         private readonly LWTContext _context;
 
@@ -23,6 +23,12 @@ namespace LWT.Controllers
                 Texts = texts.ToList()
             };
             return View(listTextViewModel);
+        }
+
+        public IActionResult Detail(int id)
+        {
+            var selectedText = _context.Texts.Include(text => text.Language).FirstOrDefault(text => text.ID == id);
+            return View(selectedText);
         }
     }
 }
