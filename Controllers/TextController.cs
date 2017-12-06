@@ -1,6 +1,7 @@
 using System;
 using LWT.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace LWT.Controllers
 {
@@ -15,8 +16,12 @@ namespace LWT.Controllers
         // The index page show list of all text in current language
         public IActionResult Index()
         {
-            // Todo: Implement
-            return View();
+            var texts = from text in _context.Texts select text;
+            ListTextViewModel listTextViewModel = new ListTextViewModel()
+            {
+                Texts = texts.ToList()
+            };
+            return View(listTextViewModel);
         }
     }
 }

@@ -1,3 +1,12 @@
+@model LWT.Models.ListTextViewModel
 @{
     ViewData["Title"] = "Texts";
 }
+<div class="container">
+    <ul class="list-group">
+        @foreach(var text in Model.Texts)
+        {
+            <li class="list-group-item">@text.Title</li>
+        }
+    </ul>
+</div>
