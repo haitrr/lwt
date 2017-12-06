@@ -18,7 +18,7 @@
         {
             <tr>
                 <td>
-                    @text.Title
+                    <a asp-controller="Text" asp-action="Detail" asp-route-id=@text.ID> @text.Title</a>
                 </td>
                 <td>
                     @text.Language.Name
