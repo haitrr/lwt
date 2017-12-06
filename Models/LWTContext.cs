@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LWT.Models
 {
-    class LWTContext : DbContext
+    public class LWTContext : DbContext
     {
         public LWTContext(DbContextOptions<LWTContext> options):base(options)
         {
