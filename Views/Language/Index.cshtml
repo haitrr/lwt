@@ -2,3 +2,27 @@
 @{
     ViewData["Title"] = "Languages";
 }
+
+<table class="table table-triped">
+    <thead>
+        <th>
+            ID
+        </th>
+        <th>
+            Name
+        </th>
+    </thead>
+    <tbody>
+        @foreach(Language language in Model.Languages)
+        {
+            <tr>
+                <td>
+                    @language.ID
+                </td>
+                <td>
+                    @language.Name
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
