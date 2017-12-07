@@ -11,6 +11,7 @@
             <th>
                 @Html.DisplayNameFor(model=>model.Texts[0].Language)
             </th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -22,6 +23,9 @@
                 </td>
                 <td>
                     @text.Language.Name
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id=@text.ID>Edit</a>
                 </td>
             </tr>
         }
