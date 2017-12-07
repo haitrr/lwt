@@ -11,9 +11,10 @@ using System;
 namespace LWT.Migrations
 {
     [DbContext(typeof(LWTContext))]
-    partial class LWTContextModelSnapshot : ModelSnapshot
+    [Migration("20171207085644_UpdateLanguageModel")]
+    partial class UpdateLanguageModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
