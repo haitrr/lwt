@@ -11,6 +11,8 @@ namespace LWT.Models
         public string Name { get; set; }
         [Required]
         public int TextSize { get; set; }
+        public string WordSplitPattern { get; set; }
 
+        public string SentenceSplitPattern { get; set; }
     }
 }
