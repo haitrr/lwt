@@ -18,11 +18,13 @@ namespace LWT.Services
             _context.SaveChanges();
         }
 
+        // Get all texts from database
         public List<Text> GetAll()
         {
             return _context.Text.ToList();
         }
 
+        // get the text coresponding to given id
         public Text GetByID(int id)
         {
             return _context.Text.FirstOrDefault(text => text.ID == id);
