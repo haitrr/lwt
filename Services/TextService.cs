@@ -30,9 +30,10 @@ namespace LWT.Services
             return _context.Text.FirstOrDefault(text => text.ID == id);
         }
 
+        // check if a text with given id exist
         public bool IsExist(int id)
         {
-            throw new System.NotImplementedException();
+            return _context.Text.Any(text => text.ID == id);
         }
 
         public void Remove(Text text)
