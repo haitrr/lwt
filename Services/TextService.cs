@@ -20,7 +20,7 @@ namespace LWT.Services
 
         public List<Text> GetAll()
         {
-            throw new System.NotImplementedException();
+            return _context.Text.ToList();
         }
 
         public Text GetByID(int id)
