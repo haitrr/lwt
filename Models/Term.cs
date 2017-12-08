@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace LWT.Models
 {
@@ -14,6 +15,8 @@ namespace LWT.Models
 
         public DateTime CreateTime { get; set;}
 
+        // Many to many with text reference
+        public ICollection<TextTerm> ContainingText { get; set; }
 
     }
 }

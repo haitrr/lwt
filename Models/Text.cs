@@ -17,5 +17,7 @@ namespace LWT.Models
 
         [Required]
         public Language Language { get; set; }
+        // Many to many with term reference
+        public ICollection<TextTerm> Terms { get; set; }
     }
 }
