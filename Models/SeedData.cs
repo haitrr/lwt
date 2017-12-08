@@ -15,13 +15,13 @@ namespace LWT.Models
             ))
             {
                 // Look for any text
-                if(context.Texts.Any())
+                if(context.Text.Any())
                 {
                     return;  // Database is seeded
                 }
 
                 // Seed language
-                context.Languages.AddRange(
+                context.Language.AddRange(
                     new Language
                     {
                         Name = "English",
@@ -35,30 +35,30 @@ namespace LWT.Models
                 );
                 context.SaveChanges();
                 // Seed text
-                context.Texts.AddRange(
+                context.Text.AddRange(
                     new Text
                     {
                         Title = "Example text",
                         Content = "This is an example text, don't care about it :D",
-                        Language = context.Languages.Where(language => language.Name == "English").FirstOrDefault()
+                        Language = context.Language.Where(language => language.Name == "English").FirstOrDefault()
                     },
                     new Text
                     {
                         Title = "Example Vietnamese",
                         Content = "Tieng viet rat hay",
-                        Language = context.Languages.Where(language => language.Name == "Vietnamese").FirstOrDefault()
+                        Language = context.Language.Where(language => language.Name == "Vietnamese").FirstOrDefault()
                     },
                     new Text
                     {
                         Title = "Example text in English 2",
                         Content = "This is an example text, don't care about it :D",
-                        Language = context.Languages.Where(language => language.Name == "English").FirstOrDefault()
+                        Language = context.Language.Where(language => language.Name == "English").FirstOrDefault()
                     },
                     new Text
                     {
                         Title = "Example Vietnamese 2",
                         Content = "Tieng viet rat hay",
-                        Language = context.Languages.Where(language => language.Name == "Vietnamese").FirstOrDefault()
+                        Language = context.Language.Where(language => language.Name == "Vietnamese").FirstOrDefault()
                     }
                 );
                 context.SaveChanges();

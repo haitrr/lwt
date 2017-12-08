@@ -15,7 +15,7 @@ namespace LWT.Controllers
         {
             ListLanguageViewModel listLanguageViewModel = new ListLanguageViewModel()
             {
-                Languages = _context.Languages.ToList()
+                Languages = _context.Language.ToList()
             };
             return View(listLanguageViewModel);
         }

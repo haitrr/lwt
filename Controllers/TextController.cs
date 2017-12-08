@@ -18,7 +18,7 @@ namespace LWT.Controllers
         // The index page show list of all text in current language
         public IActionResult Index()
         {
-            var texts = _context.Texts.Include(text => text.Language);
+            var texts = _context.Text.Include(text => text.Language);
             ListTextViewModel listTextViewModel = new ListTextViewModel()
             {
                 Texts = texts.ToList()
@@ -28,7 +28,7 @@ namespace LWT.Controllers
 
         public IActionResult Detail(int id)
         {
-            var selectedText = _context.Texts.Include(text => text.Language).FirstOrDefault(text => text.ID == id);
+            var selectedText = _context.Text.Include(text => text.Language).FirstOrDefault(text => text.ID == id);
             return View(selectedText);
         }
 
@@ -37,14 +37,14 @@ namespace LWT.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            Text selectedText = _context.Texts.Include(text => text.Language).FirstOrDefault(text => text.ID == id);
+            Text selectedText = _context.Text.Include(text => text.Language).FirstOrDefault(text => text.ID == id);
 
             EditTextViewModel editTextViewModel = new EditTextViewModel()
             {
                 Text = selectedText,
                 // All the languages in database
                 Languages = new SelectList(
-                    _context.Languages,
+                    _context.Language,
                     "ID",
                     "Name"
                     )
@@ -63,7 +63,7 @@ namespace LWT.Controllers
             }
             // Get the Language Id from request
             int languageID = Int32.Parse(Request.Form["Language"].Single());
-            text.Language = _context.Languages.FirstOrDefault(language => language.ID == languageID);
+            text.Language = _context.Language.FirstOrDefault(language => language.ID == languageID);
 
             // Save change
             try
