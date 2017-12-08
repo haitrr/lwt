@@ -36,9 +36,13 @@ namespace LWT.Services
             return _context.Text.Any(text => text.ID == id);
         }
 
+        // remove a text from database
         public void Remove(Text text)
         {
-            throw new System.NotImplementedException();
+            if (IsExist(text.ID))
+            {
+                _context.Text.Remove(text);
+            }
         }
 
         public void Update(Text text)
