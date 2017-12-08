@@ -25,7 +25,7 @@ namespace LWT.Services
 
         public Text GetByID(int id)
         {
-            throw new System.NotImplementedException();
+            return _context.Text.FirstOrDefault(text => text.ID == id);
         }
 
         public bool IsExist(int id)
