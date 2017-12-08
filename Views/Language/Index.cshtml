@@ -20,7 +20,7 @@
                     @language.ID
                 </td>
                 <td>
-                    @language.Name
+                    <a asp-controller="Language" asp-action="Detail" asp-route-id=@language.ID>@language.Name</a> 
                 </td>
             </tr>
         }
