@@ -45,9 +45,13 @@ namespace LWT.Services
             }
         }
 
+        // update a text
         public void Update(Text text)
         {
-            throw new System.NotImplementedException();
+            if(IsExist(text.ID))
+            {
+                _context.Text.Update(text);
+            }
         }
     }
 }
