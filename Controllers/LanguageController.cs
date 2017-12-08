@@ -23,7 +23,7 @@ namespace LWT.Controllers
         // GET /Language/Detail/ID
         public IActionResult Detail(int id)
         {
-            Language selectedLanguage = _context.Languages.FirstOrDefault(language => language.ID == id);
+            Language selectedLanguage = _context.Language.FirstOrDefault(language => language.ID == id);
             return View(selectedLanguage);
         }
     }
