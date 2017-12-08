@@ -7,9 +7,9 @@ namespace LWT.Models
         public LWTContext(DbContextOptions<LWTContext> options):base(options)
         {
         }
-        public DbSet<Text> Texts { get; set; }
-        public DbSet<Language> Languages { get; set; }
-        public DbSet<Tag> Tags { get; set; }
-        public DbSet<Term> Terms { get; set; }
+        public DbSet<Text> Text { get; set; }
+        public DbSet<Language> Language { get; set; }
+        public DbSet<Tag> Tag { get; set; }
+        public DbSet<Term> Term { get; set; }
     }
 }
