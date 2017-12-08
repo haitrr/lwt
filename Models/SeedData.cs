@@ -25,12 +25,14 @@ namespace LWT.Models
                     new Language
                     {
                         Name = "English",
-                        TextSize = 12
+                        TextSize = 12,
+                        WordSplitPattern = @"[A-Za-z]+(?:'[A-Za-z]+)*"
                     },
                     new Language
                     {
                         Name = "Vietnamese",
-                        TextSize = 13
+                        TextSize = 13,
+                        WordSplitPattern = @"[A-Za-z]+(?:'[A-Za-z]+)*"
                     }
                 );
                 context.SaveChanges();
