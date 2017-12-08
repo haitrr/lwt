@@ -14,7 +14,8 @@ namespace LWT.Services
         // Add a text to database
         public void Add(Text text)
         {
-            throw new System.NotImplementedException();
+            _context.Text.Add(text);
+            _context.SaveChanges();
         }
 
         public List<Text> GetAll()
