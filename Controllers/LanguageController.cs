@@ -1,4 +1,5 @@
 using LWT.Models;
+using LWT.Services;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,16 +7,17 @@ namespace LWT.Controllers
 {
     public class LanguageController : Controller
     {
-        private LWTContext _context;
-        public LanguageController(LWTContext context){
-            this._context = context;
+        private readonly ILanguageService _service;
+        public LanguageController(ILanguageService service)
+        {
+            _service = service;
         }
         [HttpGet]
         public IActionResult Index()
         {
             ListLanguageViewModel listLanguageViewModel = new ListLanguageViewModel()
             {
-                Languages = _context.Language.ToList()
+                Languages = _service.GetAll()
             };
             return View(listLanguageViewModel);
         }
