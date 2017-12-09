@@ -7,6 +7,10 @@ namespace LWT.Services
     public class LanguageService : ILanguageService
     {
         private readonly LWTContext _context;
+        public LanguageService(LWTContext context)
+        {
+            _context = context;
+        }
         public void Add(Language language)
         {
             _context.Language.Add(language);
