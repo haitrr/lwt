@@ -68,7 +68,7 @@ namespace LWT.Controllers
             int languageID = Int32.Parse(Request.Form["Language"].Single());
             text.Language = _languageService.GetByID(languageID);
             _textService.Update(text);
-            return Redirect(nameof(Detail));
+            return RedirectToAction(nameof(Detail),new {id = id});
         }
     }
 }
