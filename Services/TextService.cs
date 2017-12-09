@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using LWT.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace LWT.Services
 {
@@ -21,13 +22,13 @@ namespace LWT.Services
         // Get all texts from database
         public List<Text> GetAll()
         {
-            return _context.Text.ToList();
+            return _context.Text.Include(text => text.Language).ToList();
         }
 
         // get the text coresponding to given id
         public Text GetByID(int id)
         {
-            return _context.Text.FirstOrDefault(text => text.ID == id);
+            return _context.Text.Include(text => text.Language).FirstOrDefault(text => text.ID == id);
         }
 
         // check if a text with given id exist
