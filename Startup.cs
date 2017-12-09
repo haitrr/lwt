@@ -27,6 +27,7 @@ namespace LWT
             services.AddMvc();
             // Application DBContext
             services.AddDbContext<LWTContext>(options => options.UseSqlite("Data Source=LWT.db"));
+            services.AddSingleton<ITextService, TextService>();
             services.AddSingleton<ILanguageService, LanguageService>();
         }
 
