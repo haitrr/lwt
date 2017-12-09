@@ -1,4 +1,5 @@
 ﻿using System;
+using LWT.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +27,7 @@ namespace LWT
             services.AddMvc();
             // Application DBContext
             services.AddDbContext<LWTContext>(options => options.UseSqlite("Data Source=LWT.db"));
+            services.AddSingleton<ITextService, TextService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
