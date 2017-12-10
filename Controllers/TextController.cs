@@ -70,7 +70,10 @@ namespace LWT.Controllers
         [HttpGet]
         public IActionResult Add()
         {
-            EditTextViewModel editTextViewModel = new EditTextViewModel();
+            EditTextViewModel editTextViewModel = new EditTextViewModel()
+            {
+                Languages = _languageService.GetSelectList()
+            };
             return View(editTextViewModel);
         }
     }
