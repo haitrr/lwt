@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using LWT.Models;
-
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LWT.Services
 {
@@ -12,5 +12,6 @@ namespace LWT.Services
         bool IsExist(int id);
         Language GetByID(int id);
         List<Language> GetAll();
+        SelectList GetSelectList();
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using LWT.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace LWT.Services
 {
@@ -27,6 +28,16 @@ namespace LWT.Services
             return _context.Language.FirstOrDefault(language => language.ID == id);
         }
 
+        public SelectList GetSelectList()
+        {
+            return new SelectList(
+                    GetAll(),
+                    "ID",
+                    "Name"
+                    );
+
+        }
+
         public bool IsExist(int id)
         {
             return _context.Language.Any(language => language.ID == id);
@@ -35,7 +46,7 @@ namespace LWT.Services
         public void Remove(Language language)
         {
             // Remove if the language exist
-            if(IsExist(language.ID))
+            if (IsExist(language.ID))
             {
                 _context.Language.Remove(language);
             }
@@ -44,7 +55,7 @@ namespace LWT.Services
         public void Update(Language language)
         {
             // Update if the language exist
-            if(IsExist(language.ID))
+            if (IsExist(language.ID))
             {
                 _context.Language.Update(language);
             }

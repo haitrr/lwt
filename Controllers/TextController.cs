@@ -46,11 +46,7 @@ namespace LWT.Controllers
             {
                 Text = selectedText,
                 // All the languages in database
-                Languages = new SelectList(
-                    _languageService.GetAll(),
-                    "ID",
-                    "Name"
-                    )
+                Languages = _languageService.GetSelectList()
         };
             return View(editTextViewModel);
         }
