@@ -70,5 +70,12 @@ namespace LWT.Controllers
             _textService.Update(text);
             return RedirectToAction(nameof(Detail),new {id = id});
         }
+        // GET /Text/Add
+        [HttpGet]
+        public IActionResult Add()
+        {
+            EditTextViewModel editTextViewModel = new EditTextViewModel();
+            return View(editTextViewModel);
+        }
     }
 }
