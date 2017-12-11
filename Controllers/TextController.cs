@@ -76,5 +76,16 @@ namespace LWT.Controllers
             };
             return View(editTextViewModel);
         }
+
+        // POST /Text/Add
+        [HttpPost]
+        public IActionResult Add([Bind("Title,Content")] Text text)
+        {
+            // Get the Language Id from request
+            int languageID = Int32.Parse(Request.Form["Language"].Single());
+            text.Language = _languageService.GetByID(languageID);
+            _textService.Add(text);
+            return RedirectToAction(nameof(Detail),new {id = text.ID});
+        }
     }
 }
