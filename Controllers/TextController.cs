@@ -84,7 +84,11 @@ namespace LWT.Controllers
             // Get the Language Id from request
             int languageID = Int32.Parse(Request.Form["Language"].Single());
             text.Language = _languageService.GetByID(languageID);
+
+            // add the text
             _textService.Add(text);
+
+            // redirect to the detail page of the text just added
             return RedirectToAction(nameof(Detail),new {id = text.ID});
         }
     }
