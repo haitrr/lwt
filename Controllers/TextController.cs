@@ -91,5 +91,13 @@ namespace LWT.Controllers
             // redirect to the detail page of the text just added
             return RedirectToAction(nameof(Detail),new {id = text.ID});
         }
+
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            Text text = _textService.GetByID(id);
+            _textService.Delete(text);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
