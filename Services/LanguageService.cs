@@ -43,7 +43,7 @@ namespace LWT.Services
             return _context.Language.Any(language => language.ID == id);
         }
 
-        public void Remove(Language language)
+        public void Delete(Language language)
         {
             // Remove if the language exist
             if (IsExist(language.ID))

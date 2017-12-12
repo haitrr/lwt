@@ -8,7 +8,7 @@ namespace LWT.Services
     {
         bool IsExist(int id);
         void Add(Text text);
-        void Remove(Text text);
+        void Delete(Text text);
         Text GetByID(int id);
         void Update(Text text);
         List<Text> GetAll();

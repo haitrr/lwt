@@ -38,7 +38,7 @@ namespace LWT.Services
         }
 
         // remove a text from database
-        public void Remove(Text text)
+        public void Delete(Text text)
         {
             if (IsExist(text.ID))
             {

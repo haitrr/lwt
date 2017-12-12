@@ -7,7 +7,7 @@ namespace LWT.Services
     public interface ILanguageService
     {
         void Add(Language language);
-        void Remove(Language language);
+        void Delete(Language language);
         void Update(Language language);
         bool IsExist(int id);
         Language GetByID(int id);
