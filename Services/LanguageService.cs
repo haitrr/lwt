@@ -49,6 +49,7 @@ namespace LWT.Services
             if (IsExist(language.ID))
             {
                 _context.Language.Remove(language);
+                _context.SaveChanges();
             }
         }
 
@@ -58,6 +59,7 @@ namespace LWT.Services
             if (IsExist(language.ID))
             {
                 _context.Language.Update(language);
+                _context.SaveChanges();
             }
         }
     }
