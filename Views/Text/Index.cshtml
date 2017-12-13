@@ -2,6 +2,10 @@
 @{
     ViewData["Title"] = "Texts";
 }
+<h1>My Texts</h1>
+<p>
+    <a asp-action="Add" asp-controller="Text">Add new text</a>
+</p>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -26,6 +30,7 @@
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id=@text.ID>Edit</a>
+                    <a asp-action="Delete" asp-route-id=@text.ID>Delete</a>
                 </td>
             </tr>
         }

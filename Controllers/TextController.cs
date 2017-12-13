@@ -4,31 +4,34 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using LWT.Services;
 
 namespace LWT.Controllers
 {
     public class TextController : Controller
     {
-        private readonly LWTContext _context;
+        private readonly ITextService _textService;
+        private readonly ILanguageService _languageService;
 
-        public TextController(LWTContext context)
+        public TextController(ITextService textService,ILanguageService languageService)
         {
-            _context = context;
+            _textService = textService;
+            _languageService = languageService;
         }
         // The index page show list of all text in current language
         public IActionResult Index()
         {
-            var texts = _context.Text.Include(text => text.Language);
+            var texts = _textService.GetAll();
             ListTextViewModel listTextViewModel = new ListTextViewModel()
             {
-                Texts = texts.ToList()
+                Texts = texts
             };
             return View(listTextViewModel);
         }
 
         public IActionResult Detail(int id)
         {
-            var selectedText = _context.Text.Include(text => text.Language).FirstOrDefault(text => text.ID == id);
+            var selectedText = _textService.GetByID(id);
             return View(selectedText);
         }
 
@@ -37,17 +40,13 @@ namespace LWT.Controllers
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            Text selectedText = _context.Text.Include(text => text.Language).FirstOrDefault(text => text.ID == id);
+            Text selectedText = _textService.GetByID(id);
 
             EditTextViewModel editTextViewModel = new EditTextViewModel()
             {
                 Text = selectedText,
                 // All the languages in database
-                Languages = new SelectList(
-                    _context.Language,
-                    "ID",
-                    "Name"
-                    )
+                Languages = _languageService.GetSelectList()
         };
             return View(editTextViewModel);
         }
@@ -63,19 +62,52 @@ namespace LWT.Controllers
             }
             // Get the Language Id from request
             int languageID = Int32.Parse(Request.Form["Language"].Single());
-            text.Language = _context.Language.FirstOrDefault(language => language.ID == languageID);
+            text.Language = _languageService.GetByID(languageID);
+            _textService.Update(text);
+            return RedirectToAction(nameof(Detail),new {id = id});
+        }
+        // GET /Text/Add
+        [HttpGet]
+        public IActionResult Add()
+        {
+            EditTextViewModel editTextViewModel = new EditTextViewModel()
+            {
+                Languages = _languageService.GetSelectList()
+            };
+            return View(editTextViewModel);
+        }
 
-            // Save change
-            try
-            {
-                _context.Update(text);
-                _context.SaveChanges();
-            }
-            catch(DbUpdateConcurrencyException)
-            {
-                throw;
-            }
+        // POST /Text/Add
+        [HttpPost]
+        public IActionResult Add([Bind("Title,Content")] Text text)
+        {
+            // Get the Language Id from request
+            int languageID = Int32.Parse(Request.Form["Language"].Single());
+            text.Language = _languageService.GetByID(languageID);
+
+            // add the text
+            _textService.Add(text);
+
+            // redirect to the detail page of the text just added
+            return RedirectToAction(nameof(Detail),new {id = text.ID});
+        }
+
+        // POST /Text/Delete
+        [HttpPost]
+        [ActionName(nameof(Delete))]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            Text text = _textService.GetByID(id);
+            _textService.Delete(text);
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET /Text/Delete
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            Text text = _textService.GetByID(id);
+            return View(text);
         }
     }
 }

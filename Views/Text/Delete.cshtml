@@ -1,0 +1,9 @@
+@model LWT.Models.Text
+@{
+    ViewData["Title"] = $"Delete \"{Model.Title}\"";
+}
+<h1>Are you sure to delete "@Model.Title"</h1>
+<form asp-action="Delete" method="POST" asp-route-id=@Model.ID>
+    <button type="submit" >Delete</button>
+    <a asp-action="Index">Back to texts</a>
+</form>
