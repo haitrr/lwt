@@ -43,6 +43,7 @@ namespace LWT.Services
             if (IsExist(text.ID))
             {
                 _context.Text.Remove(text);
+                _context.SaveChanges();
             }
         }
 
@@ -52,6 +53,7 @@ namespace LWT.Services
             if(IsExist(text.ID))
             {
                 _context.Text.Update(text);
+                _context.SaveChanges();
             }
         }
     }
