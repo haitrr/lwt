@@ -2,12 +2,15 @@ using System.Collections.Generic;
 using System.Linq;
 using LWT.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace LWT.Services
 {
     public class TextService : ITextService
     {
         private LWTContext _context;
+        private readonly TermService _termService;
+        private readonly TextTermService _textTermServive;
         public TextService(LWTContext context)
         {
             _context = context;
@@ -54,6 +57,30 @@ namespace LWT.Services
             {
                 _context.Text.Update(text);
                 _context.SaveChanges();
+            }
+        }
+
+        // Parse the text
+        public void Parse(int id)
+        {
+            Text text = GetByID(id);
+            string wordSplitPattern = text.Language.WordSplitPattern;
+            Regex wordSplitter = new Regex(wordSplitPattern);
+            string[] words = wordSplitter.Split(text.Content);
+            text.Terms.Clear();
+            foreach(string word in words) 
+            {
+                Term term = _termService.GetByContentAndLanguage(word, text.Language);
+                if(term == null)
+                {
+                    term = new Term() { Content = word, Level = -1, Language = text.Language };
+                    _termService.Add(term);
+                }
+                TextTerm textTerm = new TextTerm { TextID = text.ID, TermID = term.ID, Term = term, Text = text };
+                _textTermServive.Add(textTerm);
+                term.ContainingTexts.Add(textTerm);
+                _termService.Update(term);
+                Update(text);
             }
         }
     }

@@ -16,7 +16,7 @@ namespace LWT.Models
         public DateTime CreateTime { get; set;}
 
         // Many to many with text reference
-        public ICollection<TextTerm> ContainingText { get; set; }
+        public ICollection<TextTerm> ContainingTexts { get; set; }
 
     }
 }
