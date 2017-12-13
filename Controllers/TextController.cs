@@ -92,12 +92,22 @@ namespace LWT.Controllers
             return RedirectToAction(nameof(Detail),new {id = text.ID});
         }
 
+        // POST /Text/Delete
         [HttpPost]
-        public IActionResult Delete(int id)
+        [ActionName(nameof(Delete))]
+        public IActionResult DeleteConfirmed(int id)
         {
             Text text = _textService.GetByID(id);
             _textService.Delete(text);
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET /Text/Delete
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            Text text = _textService.GetByID(id);
+            return View(text);
         }
     }
 }
