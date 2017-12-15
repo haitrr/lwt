@@ -67,7 +67,7 @@ namespace LWT.Services
         {
             Text text = GetByID(id);
             string wordSplitPattern = text.Language.WordSplitPattern;
-            Regex wordSplitter = new Regex(wordSplitPattern);
+            Regex wordSplitter = new Regex($"(\\{wordSplitPattern})");
             string[] words = wordSplitter.Split(text.Content);
             text.Terms.Clear();
             for (int index = 0; index < words.Length; index++)
