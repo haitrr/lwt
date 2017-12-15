@@ -5,6 +5,7 @@ namespace LWT.Models
     {
         // Primary key is text id and term id
         public int TextID { get; set; }
+        public int TermIndex { get; set; }
         public int TermID { get; set; }
         public Text Text { get; set; }
         public Term Term { get; set; }

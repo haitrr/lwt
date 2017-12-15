@@ -16,7 +16,7 @@ namespace LWT.Models
         {
             // Define the primary key for TextTerm
             // the reference between texts and terms
-            modelBuilder.Entity<TextTerm>().HasKey(textTerm => new { textTerm.TextID, textTerm.TermID });
+            modelBuilder.Entity<TextTerm>().HasKey(textTerm => new { textTerm.TextID, textTerm.TermID ,textTerm.TermIndex});
         }
     }
 }

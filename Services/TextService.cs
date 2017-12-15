@@ -10,11 +10,11 @@ namespace LWT.Services
     {
         private LWTContext _context;
         private readonly ITermService _termService;
-        private readonly ITextTermService _textTermServive;
+        private readonly ITextTermService _textTermService;
         public TextService(LWTContext context, ITermService termService, ITextTermService textTermService)
         {
             _context = context;
-            _textTermServive = textTermService;
+            _textTermService = textTermService;
             _termService = termService;
         }
         // Add a text to database
@@ -70,8 +70,9 @@ namespace LWT.Services
             Regex wordSplitter = new Regex(wordSplitPattern);
             string[] words = wordSplitter.Split(text.Content);
             text.Terms.Clear();
-            foreach (string word in words)
+            for (int index = 0; index < words.Length; index++)
             {
+                string word = words[index];
                 Term term;
                 try
                 {
@@ -88,12 +89,12 @@ namespace LWT.Services
                     _termService.Add(term);
                 }
 
-                TextTerm textTerm = new TextTerm { TextID = text.ID, TermID = term.ID, Term = term, Text = text };
-                _textTermServive.Add(textTerm);
+                TextTerm textTerm = new TextTerm { TextID = text.ID, TermID = term.ID, Term = term, Text = text, TermIndex = index };
+                _textTermService.Add(textTerm);
                 term.ContainingTexts.Add(textTerm);
                 _termService.Update(term);
-                Update(text);
             }
+            Update(text);
         }
     }
 }
