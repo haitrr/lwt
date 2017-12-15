@@ -6,6 +6,10 @@ namespace LWT.Models
 {
     public class Text
     {
+        public Text()
+        {
+            this.Terms = new List<TextTerm>();
+        }
         public int ID { get; set; }
         [Required]
         public string Content { get; set; } 

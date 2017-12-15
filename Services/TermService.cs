@@ -8,9 +8,14 @@ namespace LWT.Services
     public class TermService : ITermService
     {
         private readonly LWTContext _context;
+        public TermService(LWTContext context)
+        {
+            _context = context;
+        }
         public void Add(Term term)
         {
-            throw new System.NotImplementedException();
+            _context.Term.Add(term);
+            _context.SaveChanges();
         }
 
         public void Delete(Term term)
@@ -40,7 +45,8 @@ namespace LWT.Services
 
         public void Update(Term term)
         {
-            throw new System.NotImplementedException();
+            _context.Update(term);
+            _context.SaveChanges();
         }
     }
 }

@@ -109,5 +109,15 @@ namespace LWT.Controllers
             Text text = _textService.GetByID(id);
             return View(text);
         }
+
+        public string TestParse(int id)
+        {
+            if(_textService.IsExist(id))
+            {
+                _textService.Parse(id);
+                return "Parse Ok";
+            }
+            return "Fail";
+        }
     }
 }

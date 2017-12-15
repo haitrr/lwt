@@ -29,6 +29,8 @@ namespace LWT
             services.AddDbContext<LWTContext>(options => options.UseSqlite("Data Source=LWT.db"));
             services.AddScoped<ITextService, TextService>();
             services.AddScoped<ILanguageService, LanguageService>();
+            services.AddScoped<ITermService, TermService>();
+            services.AddScoped<ITextTermService, TextTermService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

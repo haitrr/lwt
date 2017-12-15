@@ -5,6 +5,10 @@ namespace LWT.Models
 {
     public class Term
     {
+        public Term()
+        {
+            this.ContainingTexts = new List<TextTerm>();
+        }
         public int ID { get; set; }
         public string Content { get; set; }
         public int Level { get; set; }

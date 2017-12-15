@@ -9,11 +9,13 @@ namespace LWT.Services
     public class TextService : ITextService
     {
         private LWTContext _context;
-        private readonly TermService _termService;
-        private readonly TextTermService _textTermServive;
-        public TextService(LWTContext context)
+        private readonly ITermService _termService;
+        private readonly ITextTermService _textTermServive;
+        public TextService(LWTContext context, ITermService termService, ITextTermService textTermService)
         {
             _context = context;
+            _textTermServive = textTermService;
+            _termService = termService;
         }
         // Add a text to database
         public void Add(Text text)
@@ -53,7 +55,7 @@ namespace LWT.Services
         // update a text
         public void Update(Text text)
         {
-            if(IsExist(text.ID))
+            if (IsExist(text.ID))
             {
                 _context.Text.Update(text);
                 _context.SaveChanges();
@@ -68,14 +70,24 @@ namespace LWT.Services
             Regex wordSplitter = new Regex(wordSplitPattern);
             string[] words = wordSplitter.Split(text.Content);
             text.Terms.Clear();
-            foreach(string word in words) 
+            foreach (string word in words)
             {
-                Term term = _termService.GetByContentAndLanguage(word, text.Language);
-                if(term == null)
+                Term term;
+                try
+                {
+                    term = _termService.GetByContentAndLanguage(word, text.Language);
+                    if (term == null)
+                    {
+                        term = new Term() { Content = word, Level = -1, Language = text.Language };
+                        _termService.Add(term);
+                    }
+                }
+                catch
                 {
                     term = new Term() { Content = word, Level = -1, Language = text.Language };
                     _termService.Add(term);
                 }
+
                 TextTerm textTerm = new TextTerm { TextID = text.ID, TermID = term.ID, Term = term, Text = text };
                 _textTermServive.Add(textTerm);
                 term.ContainingTexts.Add(textTerm);
