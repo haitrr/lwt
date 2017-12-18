@@ -97,7 +97,7 @@ namespace LWT.Services
                         term = new Term() { Content = word, Level = -2, Language = text.Language };
                     }
                     else
-                    
+                    {
                         // Create an unknow term
                         term = new Term() { Content = word, Level = 0, Language = text.Language };
                     }
