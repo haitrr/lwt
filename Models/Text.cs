@@ -6,9 +6,13 @@ namespace LWT.Models
 {
     public class Text
     {
+        public Text()
+        {
+            this.Terms = new List<TextTerm>();
+        }
         public int ID { get; set; }
         [Required]
-        public string Content { get; set; } 
+        public string Content { get; set; }
 
         [Required]
         public string Title { get; set; }
@@ -17,5 +21,7 @@ namespace LWT.Models
 
         [Required]
         public Language Language { get; set; }
+        // Many to many with term reference
+        public IList<TextTerm> Terms { get; set; }
     }
 }

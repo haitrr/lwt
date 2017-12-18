@@ -12,6 +12,7 @@ namespace LWT.Services
         Text GetByID(int id);
         void Update(Text text);
         List<Text> GetAll();
+        void Parse(int id);
 
     }
 }
