@@ -79,6 +79,7 @@ namespace LWT.Services
             // Clear the present terms for reparse
             _textTermService.DeleteRange(text.Terms);
 
+
             // Add terms to the text
             for (int index = 0; index < words.Length; index++)
             {
@@ -90,7 +91,16 @@ namespace LWT.Services
                 if (term == null)
                 {
                     // create new term
-                    term = new Term() { Content = word, Level = -1, Language = text.Language };
+                    if (wordSplitter.Match(word).Success)
+                    {
+                        // This term is not exist in the language set it to don't care
+                        term = new Term() { Content = word, Level = -2, Language = text.Language };
+                    }
+                    else
+                    
+                        // Create an unknow term
+                        term = new Term() { Content = word, Level = 0, Language = text.Language };
+                    }
                     _termService.Add(term);
                 }
                 // create the link
