@@ -33,7 +33,9 @@ namespace LWT.Services
         // get the text coresponding to given id
         public Text GetByID(int id)
         {
-            return _context.Text.Include(text => text.Language).FirstOrDefault(text => text.ID == id);
+            return _context.Text.Include(text => text.Language)
+            .Include(text => text.Terms)
+            .FirstOrDefault(text => text.ID == id);
         }
 
         // check if a text with given id exist
@@ -65,33 +67,38 @@ namespace LWT.Services
         // Parse the text
         public void Parse(int id)
         {
+            // get the text
             Text text = GetByID(id);
+            // get the word split pattern of the language
+            // of the text
             string wordSplitPattern = text.Language.WordSplitPattern;
+            // split the text
             Regex wordSplitter = new Regex($"(\\{wordSplitPattern})");
             string[] words = wordSplitter.Split(text.Content);
-            text.Terms.Clear();
+
+            // Clear the present terms for reparse
+            _textTermService.DeleteRange(text.Terms);
+
+            // Add terms to the text
             for (int index = 0; index < words.Length; index++)
             {
                 string word = words[index];
                 Term term;
-                try
+
+                // check if the term is exist in database
+                term = _termService.GetByContentAndLanguage(word, text.Language);
+                if (term == null)
                 {
-                    term = _termService.GetByContentAndLanguage(word, text.Language);
-                    if (term == null)
-                    {
-                        term = new Term() { Content = word, Level = -1, Language = text.Language };
-                        _termService.Add(term);
-                    }
-                }
-                catch
-                {
+                    // create new term
                     term = new Term() { Content = word, Level = -1, Language = text.Language };
                     _termService.Add(term);
                 }
-
+                // create the link
                 TextTerm textTerm = new TextTerm { TextID = text.ID, TermID = term.ID, Term = term, Text = text, TermIndex = index };
                 _textTermService.Add(textTerm);
+                // add the text the containing list of term
                 term.ContainingTexts.Add(textTerm);
+                //update the term
                 _termService.Update(term);
             }
             Update(text);

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using LWT.Models;
 
 namespace LWT.Services
@@ -11,7 +12,19 @@ namespace LWT.Services
         }
         public void Add(TextTerm textTerm)
         {
-            _context.Add(textTerm);
+            _context.TextTerm.Add(textTerm);
+            _context.SaveChanges();
+        }
+
+        public void Delete(TextTerm textTerm)
+        {
+            _context.TextTerm.Remove(textTerm);
+            _context.SaveChanges();
+        }
+
+        public void DeleteRange(IEnumerable<TextTerm> textTerms)
+        {
+            _context.TextTerm.RemoveRange(textTerms);
             _context.SaveChanges();
         }
     }
