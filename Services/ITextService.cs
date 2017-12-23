@@ -13,6 +13,7 @@ namespace LWT.Services
         void Update(Text text);
         List<Text> GetAll();
         void Parse(int id);
+        IEnumerable<Term> GetAllTerm(int id);
 
     }
 }

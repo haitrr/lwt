@@ -3,6 +3,7 @@ using System.Linq;
 using LWT.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using System;
 
 namespace LWT.Services
 {
@@ -112,6 +113,22 @@ namespace LWT.Services
                 _termService.Update(term);
             }
             Update(text);
+
+        }
+
+        public IEnumerable<Term> GetAllTerm(int id)
+        {
+            Text text = _context.Text.Include(t => t.Terms).FirstOrDefault();
+            if (text == null)
+            {
+                throw new Exception("The text does not exist");
+            }
+            IEnumerable<Term> terms = new List<Term>();
+            foreach (TextTerm textTerm in text.Terms)
+            {
+                terms.Append(_termService.GetByID(textTerm.TextID));
+            }
+            return terms;
         }
     }
 }
