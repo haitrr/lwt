@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using LWT.Repo.Interfaces;
-using LWT.Repo.Contexts;
+using LWT.Repository.Interfaces;
+using LWT.Repository.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace LWT.Repo.Repositories
+namespace LWT.Repository.Repositories
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {

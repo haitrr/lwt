@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace LWT.Repo.Interfaces
+namespace LWT.Repository.Interfaces
 {
     public interface IRepository<TEntity> : IDisposable where TEntity : class
     {

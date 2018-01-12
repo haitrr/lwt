@@ -1,7 +1,7 @@
-using LWT.Repo.Interfaces;
-using LWT.Repo.Contexts;
+using LWT.Repository.Interfaces;
+using LWT.Repository.Contexts;
 
-namespace LWT.Repo.UnitOfWork
+namespace LWT.Repository.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {

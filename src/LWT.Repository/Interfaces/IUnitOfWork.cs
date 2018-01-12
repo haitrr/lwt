@@ -1,6 +1,6 @@
 using System;
 
-namespace LWT.Repo.Interfaces
+namespace LWT.Repository.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {

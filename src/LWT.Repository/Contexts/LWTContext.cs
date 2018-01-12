@@ -2,7 +2,7 @@ using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace LWT.Repo.Contexts
+namespace LWT.Repository.Contexts
 {
     public class LWTContext : DbContext
     {
@@ -22,9 +22,9 @@ namespace LWT.Repo.Contexts
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
-            
+
             // define the database to use
-            optionsBuilder.UseSqlServer(config.GetConnectionString("DefaultConnection"));
+            optionsBuilder.UseInMemoryDatabase(databaseName: "LWT");
         }
     }
 }

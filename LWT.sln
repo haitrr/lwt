@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.Repo", ".\src\LWT.Repo\LWT.Repo.csproj", "{B30CFE24-F335-4D9B-8F18-DAD50E8BD371}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.Repository", "src\LWT.Repository\LWT.Repository.csproj", "{B30CFE24-F335-4D9B-8F18-DAD50E8BD371}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.UI.Web", ".\src\LWT.UI.Web\LWT.UI.Web.csproj", "{E663AC0F-6F01-416F-BC1F-34C2D5FEDCBB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.UI.Web", "src\LWT.UI.Web\LWT.UI.Web.csproj", "{E663AC0F-6F01-416F-BC1F-34C2D5FEDCBB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.API", ".\src\LWT.API\LWT.API.csproj", "{289A8C98-20EA-4929-B174-04AA87873982}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.API", "src\LWT.API\LWT.API.csproj", "{289A8C98-20EA-4929-B174-04AA87873982}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.Service", ".\src\LWT.Service\LWT.Service.csproj", "{CEE02245-6129-419B-BDC7-9E9D17CFDC31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.Service", "src\LWT.Service\LWT.Service.csproj", "{CEE02245-6129-419B-BDC7-9E9D17CFDC31}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.Data", ".\src\LWT.Data\LWT.Data.csproj", "{A1C6B036-CD12-4886-8667-893E409F3F9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWT.Data", "src\LWT.Data\LWT.Data.csproj", "{A1C6B036-CD12-4886-8667-893E409F3F9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

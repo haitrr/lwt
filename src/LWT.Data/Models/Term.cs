@@ -6,6 +6,6 @@ namespace LWT.Data.Models
     {
         public string Content { get; set; }
         public Language Language { get; set; }
-        public ICollection<Text> ContainingTexts { get; set; }
+        public ICollection<TextTerm> TextTerms { get; set; }
     }
 }
