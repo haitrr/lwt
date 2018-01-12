@@ -1,5 +1,4 @@
-
-
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace LWT.Data.Models
@@ -9,5 +8,6 @@ namespace LWT.Data.Models
         [Required]
         public string Content { get; set; }
         public Language Language { get; set; }
+        public ICollection<Term> Terms { get; set; }
     }
 }

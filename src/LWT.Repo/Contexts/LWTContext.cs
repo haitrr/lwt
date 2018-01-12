@@ -2,7 +2,7 @@ using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace LWT.Data.Contexts
+namespace LWT.Repo.Contexts
 {
     public class LWTContext : DbContext
     {
