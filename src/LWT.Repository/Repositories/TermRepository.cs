@@ -1,6 +1,6 @@
 
 using LWT.Data.Models;
-using LWT.Repository.Contexts;
+using LWT.Data.Contexts;
 using LWT.Repository.Interfaces;
 
 namespace LWT.Repository.Repositories

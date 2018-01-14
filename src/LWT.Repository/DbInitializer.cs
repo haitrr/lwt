@@ -1,7 +1,7 @@
 using LWT.Repository.Repositories;
 using System;
 
-namespace LWT.Repository.Contexts
+namespace LWT.Data.Contexts
 {
     public static class DbInitialize
     {

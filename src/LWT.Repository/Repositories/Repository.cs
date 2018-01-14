@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using LWT.Repository.Interfaces;
-using LWT.Repository.Contexts;
+using LWT.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace LWT.Repository.Repositories

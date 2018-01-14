@@ -1,5 +1,5 @@
 using LWT.Repository.Interfaces;
-using LWT.Repository.Contexts;
+using LWT.Data.Contexts;
 
 namespace LWT.Repository.UnitOfWork
 {
