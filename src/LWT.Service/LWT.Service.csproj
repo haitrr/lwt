@@ -5,7 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../LWT.Repository/LWT.Repository.csproj"/>
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../LWT.Repository/LWT.Repository.csproj" />
   </ItemGroup>
 
 </Project>

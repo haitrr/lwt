@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-  <ProjectReference Include="..\LWT.Service\LWT.Service.csproj"/>
+  <ProjectReference Include="..\LWT.Service\LWT.Service.csproj" />
   </ItemGroup>
 
 </Project>
