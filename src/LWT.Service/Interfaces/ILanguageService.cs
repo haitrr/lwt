@@ -5,6 +5,6 @@ namespace LWT.Service.Interfaces
 {
     public interface ILanguageService : IService
     {
-        public Task<bool> Add(AddLanguageViewModel addLanguageViewModel);
+        Task<bool> Add(AddLanguageViewModel addLanguageViewModel);
     }
 }

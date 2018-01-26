@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace LWT_UI_Web
+namespace LWT.UI.Web
 {
     public class Program
     {
