@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LWT.Service.Interfaces;
+using LWT.Service.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LWT.API.Controllers
@@ -9,36 +11,24 @@ namespace LWT.API.Controllers
     [Route("api/language")]
     public class LanguageController : Controller
     {
-        // GET api/values
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly ILanguageService languageService;
+        public LanguageController(ILanguageService languageService)
         {
-            return new string[] { "value1", "value2" };
+            this.languageService = languageService;
         }
-
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpPost()]
+        public async Task<IActionResult> Add(AddLanguageViewModel addLanguageViewModel)
         {
-            return "value";
-        }
-
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            if(ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            bool result = await languageService.Add(addLanguageViewModel).ConfigureAwait(false);
+            if (result)
+            {
+                return Ok();
+            }
+            return BadRequest();
         }
     }
 }
