@@ -5,7 +5,7 @@ namespace LWT.Data.Contexts
 {
     public static class DbInitialize
     {
-        public static void Initialize(LWTContext context)
+        public static void Initialize(LWTDbContext context)
         {
             
         }

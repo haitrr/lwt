@@ -8,7 +8,7 @@ namespace LWT.Repository.Repositories
 {
     public class LanguageRepository : BaseRepository<Language>, ILanguageRepository
     {
-        public LanguageRepository(LWTContext context) : base(context)
+        public LanguageRepository(LWTDbContext context) : base(context)
         {
 
         }

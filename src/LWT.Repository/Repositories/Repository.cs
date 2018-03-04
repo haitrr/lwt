@@ -8,10 +8,10 @@ namespace LWT.Repository.Repositories
 {
     public class BaseRepository<TEntity> : IDisposable,IRepository<TEntity> where TEntity : class
     {
-        protected readonly LWTContext context;
+        protected readonly LWTDbContext context;
         protected readonly DbSet<TEntity> dbSet;
 
-        public BaseRepository(LWTContext context)
+        public BaseRepository(LWTDbContext context)
         {
             this.context = context;
             dbSet = this.context.Set<TEntity>();

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace LWT.Data.Contexts
 {
-    public class LWTContext : DbContext
+    public class LWTDbContext : DbContext
     {
         //public DbSet<Customer> Customers { get; set; }
 
@@ -18,8 +18,8 @@ namespace LWT.Data.Contexts
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // get the configuration from the app settings
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+            var configurationBuilder = new ConfigurationBuilder();
+            IConfigurationRoot config =   configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
 

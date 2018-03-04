@@ -7,7 +7,7 @@ namespace LWT.Repository.Repositories
 {
     public class TermRepository : BaseRepository<Term>,ITermRepository
     {
-        public TermRepository(LWTContext context) : base(context)
+        public TermRepository(LWTDbContext context) : base(context)
         {
 
         }

@@ -6,9 +6,9 @@ namespace LWT.Repository.UnitOfWorks
 {
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
-        private readonly LWTContext context;
+        private readonly LWTDbContext context;
 
-        public UnitOfWork(LWTContext context)
+        public UnitOfWork(LWTDbContext context)
         {
             this.context = context;
         }
