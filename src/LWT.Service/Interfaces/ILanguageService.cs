@@ -1,5 +1,5 @@
-using LWT.Service.ViewModels;
 using System.Threading.Tasks;
+using LWT.Service.ViewModels;
 
 namespace LWT.Service.Interfaces
 {

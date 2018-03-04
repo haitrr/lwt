@@ -1,36 +1,33 @@
-using LWT.Repository.Interfaces;
-using LWT.Data.Contexts;
 using System;
+using LWT.Data.Contexts;
+using LWT.Repository.Interfaces;
 
 namespace LWT.Repository.UnitOfWorks
 {
-    public class UnitOfWork : IUnitOfWork, IDisposable
+    public class UnitOfWork : IUnitOfWork
     {
-        private readonly LWTDbContext context;
+        private readonly LWTDbContext _context;
 
         public UnitOfWork(LWTDbContext context)
         {
-            this.context = context;
+            _context = context;
         }
 
         public int Commit()
         {
-            var rowsAffected = context.SaveChanges();
+            int rowsAffected = _context.SaveChanges();
             return rowsAffected;
         }
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                this.context.Dispose();
-            }
+            if (disposing) _context.Dispose();
         }
     }
 }

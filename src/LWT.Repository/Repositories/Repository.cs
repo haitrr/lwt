@@ -1,60 +1,56 @@
 using System;
 using System.Linq;
-using LWT.Repository.Interfaces;
 using LWT.Data.Contexts;
+using LWT.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace LWT.Repository.Repositories
 {
-    public class BaseRepository<TEntity> : IDisposable,IRepository<TEntity> where TEntity : class
+    public class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        protected readonly LWTDbContext context;
-        protected readonly DbSet<TEntity> dbSet;
+        private readonly LWTDbContext _context;
+        private readonly DbSet<TEntity> _dbSet;
 
-        public BaseRepository(LWTDbContext context)
+        protected BaseRepository(LWTDbContext context)
         {
-            this.context = context;
-            dbSet = this.context.Set<TEntity>();
+            _context = context;
+            _dbSet = _context.Set<TEntity>();
         }
 
         public virtual void Add(TEntity entity)
         {
-            dbSet.Add(entity);
+            _dbSet.Add(entity);
         }
 
         public virtual TEntity GetById(Guid id)
         {
-            return dbSet.Find(id);
+            return _dbSet.Find(id);
         }
 
         public virtual IQueryable<TEntity> GetAll()
         {
-            return dbSet;
+            return _dbSet;
         }
 
         public virtual void Update(TEntity entity)
         {
-            dbSet.Update(entity);
+            _dbSet.Update(entity);
         }
 
         public virtual void Remove(Guid id)
         {
-            dbSet.Remove(dbSet.Find(id));
+            _dbSet.Remove(_dbSet.Find(id));
         }
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if(disposing)
-            {
-                this.context.Dispose();
-            }
+            if (disposing) _context.Dispose();
         }
-
     }
 }

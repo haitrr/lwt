@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using LWT.Service.Interfaces;
 using LWT.Service.ViewModels;
@@ -11,23 +8,20 @@ namespace LWT.API.Controllers
     [Route("api/language")]
     public class LanguageController : Controller
     {
-        private readonly ILanguageService languageService;
+        private readonly ILanguageService _languageService;
+
         public LanguageController(ILanguageService languageService)
         {
-            this.languageService = languageService;
+            _languageService = languageService;
         }
-        [HttpPost()]
+
+
+        [HttpPost]
         public async Task<IActionResult> Add(AddLanguageViewModel addLanguageViewModel)
         {
-            if(ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            bool result = await languageService.Add(addLanguageViewModel).ConfigureAwait(false);
-            if (result)
-            {
-                return Ok();
-            }
+            if (ModelState.IsValid) return BadRequest();
+            bool result = await _languageService.Add(addLanguageViewModel).ConfigureAwait(false);
+            if (result) return Ok();
             return BadRequest();
         }
     }

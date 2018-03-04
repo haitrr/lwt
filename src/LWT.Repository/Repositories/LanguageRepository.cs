@@ -1,5 +1,3 @@
-
-
 using LWT.Data.Contexts;
 using LWT.Data.Models;
 using LWT.Repository.Interfaces;
@@ -10,7 +8,6 @@ namespace LWT.Repository.Repositories
     {
         public LanguageRepository(LWTDbContext context) : base(context)
         {
-
         }
     }
 }
