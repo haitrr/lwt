@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using Lwt.Interfaces.Services;
 using Lwt.Models;
 using Lwt.ViewModels.User;
@@ -26,13 +27,19 @@ namespace Lwt.Controllers
             }
 
             var newUser = _mapper.Map<User>(signUpViewModel);
-            bool success = _service.SignUp(newUser);
-            if (success)
+            if (newUser == null)
             {
-                return Ok();
+                throw new NotSupportedException("Can not map to user.");
             }
 
-            return BadRequest();
+            bool success = _service.SignUp(newUser);
+            if (!success)
+            {
+                return BadRequest();
+            }
+
+
+            return Ok();
         }
     }
 }

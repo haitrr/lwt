@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Lwt.Models;
+﻿using Lwt.Models;
 
 namespace Lwt.Interfaces.Services
 {
