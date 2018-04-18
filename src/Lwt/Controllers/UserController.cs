@@ -18,6 +18,8 @@ namespace Lwt.Controllers
             _service = service;
             _mapper = mapper;
         }
+
+
         [HttpPost("sign-up")]
         public IActionResult SignUp(SignUpViewModel signUpViewModel)
         {

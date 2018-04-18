@@ -1,12 +1,16 @@
 using System;
 using AutoMapper;
 using Lwt.Controllers;
+using Lwt.DbContexts;
 using Lwt.Interfaces.Services;
 using Lwt.Models;
 using Lwt.ViewModels.User;
 using Moq;
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Lwt.Test.Controllers
 {
@@ -23,13 +27,35 @@ namespace Lwt.Test.Controllers
         }
 
         [Fact]
+        public void Constructor_ShouldWork()
+        {
+            // arrange
+            ServiceProvider efServiceProvider = new ServiceCollection().AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
+
+            var services = new ServiceCollection();
+
+            services.AddDbContext<LwtDbContext>(b => b.UseInMemoryDatabase("Lwt").UseInternalServiceProvider(efServiceProvider));
+            var configuration = new Mock<IConfiguration>();
+            var startup = new Startup(configuration.Object);
+            startup.ConfigureServices(services);
+            services.AddTransient<UserController>();
+            ServiceProvider serviceProvider = services.BuildServiceProvider();
+
+            // act
+            var userController = serviceProvider.GetService<UserController>();
+
+            // assert
+            Assert.NotNull(userController);
+        }
+
+        [Fact]
         public void SignUp_ShouldReturnBadRequest_IfViewModelNotValid()
         {
             // arrange
             _userController.ModelState.AddModelError("error", "message");
 
             // act
-            var result = _userController.SignUp(null);
+            IActionResult result = _userController.SignUp(null);
 
             // asert
             Assert.IsType<BadRequestResult>(result);
@@ -59,7 +85,7 @@ namespace Lwt.Test.Controllers
 
 
             // act
-            var result = _userController.SignUp(signUpViewModel);
+            IActionResult result = _userController.SignUp(signUpViewModel);
 
             // assert
             Assert.IsType<OkResult>(result);
@@ -76,7 +102,7 @@ namespace Lwt.Test.Controllers
             _userService.Setup(s => s.SignUp(user)).Returns(false);
 
             // act
-            var result = _userController.SignUp(signUpViewModel);
+            IActionResult result = _userController.SignUp(signUpViewModel);
 
             // assert
             Assert.IsType<BadRequestResult>(result);
