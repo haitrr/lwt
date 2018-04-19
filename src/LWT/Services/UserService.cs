@@ -24,5 +24,10 @@ namespace Lwt.Services
             IdentityResult result = await _userManager.CreateAsync(newUser);
             return result.Succeeded;
         }
+
+        public Task<bool> Login(string userName, string password)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

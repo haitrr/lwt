@@ -108,5 +108,53 @@ namespace Lwt.Test.Controllers
             // assert
             Assert.IsType<BadRequestResult>(result);
         }
+
+        [Fact]
+        public async Task Login_ShouldReturnBadRequest_IfSignUpFail()
+        {
+            // arrange
+            var viewModel = new LoginViewModel();
+            _userController.ModelState.AddModelError("error", "message");
+
+            // act
+            IActionResult actual = await _userController.Login(viewModel);
+
+            //assert
+            Assert.IsType<BadRequestResult>(actual);
+        }
+
+
+        [Fact]
+        public async Task Login_ShouldReturnOk_IfLoginSuccessful()
+        {
+            // arrange
+            var viewModel = new LoginViewModel();
+            _userService.Reset();
+            _userService.Setup(s => s.Login(viewModel.UserName, viewModel.Password)).ReturnsAsync(true);
+            
+            // act
+            IActionResult actual = await _userController.Login(viewModel);
+
+            //assert
+            Assert.IsType<OkResult>(actual);
+
+        }
+
+
+        [Fact]
+        public async Task Login_ShouldBadRequest_IfLoginFail()
+        {
+            // arrange
+            var viewModel = new LoginViewModel();
+            _userService.Reset();
+            _userService.Setup(s => s.Login(viewModel.UserName, viewModel.Password)).ReturnsAsync(false);
+
+            // act
+            IActionResult actual = await _userController.Login(viewModel);
+
+            //assert
+            Assert.IsType<BadRequestResult>(actual);
+
+        }
     }
 }

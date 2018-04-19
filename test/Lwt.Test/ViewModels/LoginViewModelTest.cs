@@ -1,10 +1,10 @@
-﻿using Lwt.ViewModels.User;
+﻿using System.ComponentModel.DataAnnotations;
+using Lwt.ViewModels.User;
 using Xunit;
-using System.ComponentModel.DataAnnotations;
 
 namespace Lwt.Test.ViewModels
 {
-    public class SignUpViewModelTest
+    public class LoginViewModelTest
     {
         [Theory]
         [InlineData("username", "password")]
@@ -14,7 +14,7 @@ namespace Lwt.Test.ViewModels
         public void ShouldValid(string userName, string password)
         {
             // arrange
-            var viewModel = new SignUpViewModel()
+            var viewModel = new LoginViewModel
             {
                 Password = password,
                 UserName = userName
@@ -38,7 +38,7 @@ namespace Lwt.Test.ViewModels
         public void ShouldNotValid(string userName, string password)
         {
             // arrange
-            var viewModel = new SignUpViewModel()
+            var viewModel = new LoginViewModel
             {
                 Password = password,
                 UserName = userName
@@ -51,6 +51,5 @@ namespace Lwt.Test.ViewModels
             // assert
             Assert.False(actual);
         }
-
     }
 }

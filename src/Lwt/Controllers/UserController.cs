@@ -44,5 +44,23 @@ namespace Lwt.Controllers
 
             return Ok();
         }
+
+        public async Task<IActionResult> Login(LoginViewModel viewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+
+                return BadRequest();
+            }
+
+            bool success = await _service.Login(viewModel.UserName, viewModel.Password);
+            if (success)
+            {
+
+                return Ok();
+            }
+
+            return BadRequest();
+        }
     }
 }
