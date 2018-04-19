@@ -21,8 +21,8 @@ namespace Lwt.Controllers
         }
 
 
-        [HttpPost("sign-up")]
-        public async Task<IActionResult> SignUp(SignUpViewModel signUpViewModel)
+        [HttpPost]
+        public async Task<IActionResult> SignUp([FromBody] SignUpViewModel signUpViewModel)
         {
             if (!ModelState.IsValid)
             {
