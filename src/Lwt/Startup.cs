@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
 using Lwt.Interfaces.Services;
+using Lwt.Services;
 
 namespace Lwt
 {
@@ -26,6 +27,9 @@ namespace Lwt
             services.AddDbContext<LwtDbContext>(options => options.UseInMemoryDatabase("Lwt"));
             services.AddIdentity<User, Role>().AddEntityFrameworkStores<LwtDbContext>().AddDefaultTokenProviders();
             services.AddMvc();
+
+            // automapper
+            ServiceCollectionExtensions.UseStaticRegistration = false;
             services.AddAutoMapper();
 
             // user

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using Lwt.Interfaces.Services;
 using Lwt.Models;
@@ -21,7 +22,7 @@ namespace Lwt.Controllers
 
 
         [HttpPost("sign-up")]
-        public IActionResult SignUp(SignUpViewModel signUpViewModel)
+        public async Task<IActionResult> SignUp(SignUpViewModel signUpViewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -34,7 +35,7 @@ namespace Lwt.Controllers
                 throw new NotSupportedException("Can not map to user.");
             }
 
-            bool success = _service.SignUp(newUser);
+            bool success = await _service.SignUp(newUser);
             if (!success)
             {
                 return BadRequest();

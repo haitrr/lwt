@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using Lwt.Controllers;
 using Lwt.DbContexts;
@@ -49,20 +50,20 @@ namespace Lwt.Test.Controllers
         }
 
         [Fact]
-        public void SignUp_ShouldReturnBadRequest_IfViewModelNotValid()
+        public async Task SignUp_ShouldReturnBadRequest_IfViewModelNotValid()
         {
             // arrange
             _userController.ModelState.AddModelError("error", "message");
 
             // act
-            IActionResult result = _userController.SignUp(null);
+            IActionResult result = await _userController.SignUp(null);
 
-            // asert
+            // assert
             Assert.IsType<BadRequestResult>(result);
         }
 
         [Fact]
-        public void SignUp_ShouldReturnThrowException_IfCantMap()
+        public async Task SignUp_ShouldReturnThrowException_IfCantMap()
         {
             // arrange
             _mapper.Setup(m => m.Map<User>(It.IsAny<SignUpViewModel>())).Returns((User)null);
@@ -70,39 +71,39 @@ namespace Lwt.Test.Controllers
 
             // act
 
-            // asert
-            Assert.Throws<NotSupportedException>(() => _userController.SignUp(viewModel));
+            // assert
+            await Assert.ThrowsAsync<NotSupportedException>(() => _userController.SignUp(viewModel));
         }
 
         [Fact]
-        public void SignUp_ShouldReturnOk_IfSignUpSuccess()
+        public async Task SignUp_ShouldReturnOk_IfSignUpSuccess()
         {
             // arrange
             var signUpViewModel = new SignUpViewModel();
             var user = new User();
             _mapper.Setup(m => m.Map<User>(signUpViewModel)).Returns(user);
-            _userService.Setup(s => s.SignUp(user)).Returns(true);
+            _userService.Setup(s => s.SignUp(user)).ReturnsAsync(true);
 
 
             // act
-            IActionResult result = _userController.SignUp(signUpViewModel);
+            IActionResult result = await _userController.SignUp(signUpViewModel);
 
             // assert
             Assert.IsType<OkResult>(result);
         }
 
         [Fact]
-        public void SignUp_ShouldReturnBadRequest_IfSignUpFail()
+        public async Task SignUp_ShouldReturnBadRequest_IfSignUpFail()
         {
             // arrange
             var signUpViewModel = new SignUpViewModel();
             var user = new User();
 
             _mapper.Setup(m => m.Map<User>(signUpViewModel)).Returns(user);
-            _userService.Setup(s => s.SignUp(user)).Returns(false);
+            _userService.Setup(s => s.SignUp(user)).ReturnsAsync(false);
 
             // act
-            IActionResult result = _userController.SignUp(signUpViewModel);
+            IActionResult result = await _userController.SignUp(signUpViewModel);
 
             // assert
             Assert.IsType<BadRequestResult>(result);
