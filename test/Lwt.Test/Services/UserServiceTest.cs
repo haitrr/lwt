@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Lwt.DbContexts;
 using Lwt.Models;
 using Lwt.Services;
+using Lwt.ViewModels.User;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,11 +18,14 @@ namespace Lwt.Test.Services
     {
         private readonly UserService _userService;
         private readonly Mock<UserManager<User>> _userManager;
+        private readonly Mock<SignInManager<User>> _signInManager;
 
         public UserServiceTest()
         {
-            _userManager = new Mock<UserManager<User>>(new Mock<IUserStore<User>>().Object, null, null, null, null, null, null, null, null);
-            _userService = new UserService(_userManager.Object);
+            var userStore = new Mock<IUserStore<User>>();
+            _userManager = new Mock<UserManager<User>>(userStore.Object, null, null, null, null, null, null, null, null);
+            _signInManager = new Mock<SignInManager<User>>(_userManager.Object,new Mock<IHttpContextAccessor>().Object,new Mock<IUserClaimsPrincipalFactory<User>>().Object,null,null,null);
+            _userService = new UserService(_userManager.Object, _signInManager.Object);
         }
 
         [Fact]
@@ -50,7 +55,7 @@ namespace Lwt.Test.Services
         public async Task SignUp_ShouldThrowException_IfUserIsNull()
         {
             // assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _userService.SignUp(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _userService.SignUpAsync(null));
         }
 
         [Fact]
@@ -62,7 +67,7 @@ namespace Lwt.Test.Services
             _userManager.Setup(m => m.CreateAsync(user)).ReturnsAsync(IdentityResult.Success);
 
             // act
-            await _userService.SignUp(user);
+            await _userService.SignUpAsync(user);
 
             // assert
             _userManager.Verify(m => m.CreateAsync(user), Times.Once);
@@ -78,7 +83,7 @@ namespace Lwt.Test.Services
             _userManager.Setup(m => m.CreateAsync(user)).ReturnsAsync(IdentityResult.Failed());
 
             // act
-            bool actual = await _userService.SignUp(user);
+            bool actual = await _userService.SignUpAsync(user);
 
             // assert
             Assert.False(actual);
@@ -93,12 +98,38 @@ namespace Lwt.Test.Services
             _userManager.Setup(m => m.CreateAsync(user)).ReturnsAsync(IdentityResult.Success);
 
             // act
-            bool actual = await _userService.SignUp(user);
+            bool actual = await _userService.SignUpAsync(user);
 
             // assert
             Assert.True(actual);
         }
 
+        [Fact]
+        public async Task LoginAsync_ShouldReturnTrue_IfSuccess()
+        {
+            // arrange
+            var model = new LoginViewModel();
+            _signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false)).ReturnsAsync(SignInResult.Success);
 
+            // act
+            bool actual = await _userService.LoginAsync(model.UserName, model.Password);
+
+            // assert
+            Assert.True(actual);
+        }
+
+        [Fact]
+        public async Task LoginAsync_ShouldReturnFalse_IfLoginFail()
+        {
+            // arrange
+            var model = new LoginViewModel();
+            _signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false)).ReturnsAsync(SignInResult.Failed);
+
+            // act
+            bool actual = await _userService.LoginAsync(model.UserName, model.Password);
+
+            // assert
+            Assert.False(actual);
+        }
     }
 }

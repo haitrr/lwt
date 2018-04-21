@@ -56,7 +56,7 @@ namespace Lwt.Test.Controllers
             _userController.ModelState.AddModelError("error", "message");
 
             // act
-            IActionResult result = await _userController.SignUp(null);
+            IActionResult result = await _userController.SignUpAsync(null);
 
             // assert
             Assert.IsType<BadRequestResult>(result);
@@ -72,7 +72,7 @@ namespace Lwt.Test.Controllers
             // act
 
             // assert
-            await Assert.ThrowsAsync<NotSupportedException>(() => _userController.SignUp(viewModel));
+            await Assert.ThrowsAsync<NotSupportedException>(() => _userController.SignUpAsync(viewModel));
         }
 
         [Fact]
@@ -82,11 +82,11 @@ namespace Lwt.Test.Controllers
             var signUpViewModel = new SignUpViewModel();
             var user = new User();
             _mapper.Setup(m => m.Map<User>(signUpViewModel)).Returns(user);
-            _userService.Setup(s => s.SignUp(user)).ReturnsAsync(true);
+            _userService.Setup(s => s.SignUpAsync(user)).ReturnsAsync(true);
 
 
             // act
-            IActionResult result = await _userController.SignUp(signUpViewModel);
+            IActionResult result = await _userController.SignUpAsync(signUpViewModel);
 
             // assert
             Assert.IsType<OkResult>(result);
@@ -100,10 +100,10 @@ namespace Lwt.Test.Controllers
             var user = new User();
 
             _mapper.Setup(m => m.Map<User>(signUpViewModel)).Returns(user);
-            _userService.Setup(s => s.SignUp(user)).ReturnsAsync(false);
+            _userService.Setup(s => s.SignUpAsync(user)).ReturnsAsync(false);
 
             // act
-            IActionResult result = await _userController.SignUp(signUpViewModel);
+            IActionResult result = await _userController.SignUpAsync(signUpViewModel);
 
             // assert
             Assert.IsType<BadRequestResult>(result);
@@ -117,7 +117,7 @@ namespace Lwt.Test.Controllers
             _userController.ModelState.AddModelError("error", "message");
 
             // act
-            IActionResult actual = await _userController.Login(viewModel);
+            IActionResult actual = await _userController.LoginAsync(viewModel);
 
             //assert
             Assert.IsType<BadRequestResult>(actual);
@@ -130,10 +130,10 @@ namespace Lwt.Test.Controllers
             // arrange
             var viewModel = new LoginViewModel();
             _userService.Reset();
-            _userService.Setup(s => s.Login(viewModel.UserName, viewModel.Password)).ReturnsAsync(true);
+            _userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(true);
             
             // act
-            IActionResult actual = await _userController.Login(viewModel);
+            IActionResult actual = await _userController.LoginAsync(viewModel);
 
             //assert
             Assert.IsType<OkResult>(actual);
@@ -147,10 +147,10 @@ namespace Lwt.Test.Controllers
             // arrange
             var viewModel = new LoginViewModel();
             _userService.Reset();
-            _userService.Setup(s => s.Login(viewModel.UserName, viewModel.Password)).ReturnsAsync(false);
+            _userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(false);
 
             // act
-            IActionResult actual = await _userController.Login(viewModel);
+            IActionResult actual = await _userController.LoginAsync(viewModel);
 
             //assert
             Assert.IsType<BadRequestResult>(actual);

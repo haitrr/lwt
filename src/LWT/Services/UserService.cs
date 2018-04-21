@@ -9,12 +9,14 @@ namespace Lwt.Services
     public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
-        public UserService(UserManager<User> userManager)
+        private readonly SignInManager<User> _signInManager;
+        public UserService(UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        public async Task<bool> SignUp(User newUser)
+        public async Task<bool> SignUpAsync(User newUser)
         {
             if (newUser == null)
             {
@@ -25,9 +27,15 @@ namespace Lwt.Services
             return result.Succeeded;
         }
 
-        public Task<bool> Login(string userName, string password)
+        public async Task<bool> LoginAsync(string userName, string password)
         {
-            throw new NotImplementedException();
+            SignInResult result = await _signInManager.PasswordSignInAsync(userName, password, false, false);
+
+            if (result.Succeeded)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

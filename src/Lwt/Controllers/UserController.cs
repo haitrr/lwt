@@ -22,7 +22,7 @@ namespace Lwt.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> SignUp([FromBody] SignUpViewModel signUpViewModel)
+        public async Task<IActionResult> SignUpAsync([FromBody] SignUpViewModel signUpViewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -35,7 +35,7 @@ namespace Lwt.Controllers
                 throw new NotSupportedException("Can not map to user.");
             }
 
-            bool success = await _service.SignUp(newUser);
+            bool success = await _service.SignUpAsync(newUser);
             if (!success)
             {
                 return BadRequest();
@@ -45,7 +45,7 @@ namespace Lwt.Controllers
             return Ok();
         }
 
-        public async Task<IActionResult> Login(LoginViewModel viewModel)
+        public async Task<IActionResult> LoginAsync(LoginViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -53,7 +53,7 @@ namespace Lwt.Controllers
                 return BadRequest();
             }
 
-            bool success = await _service.Login(viewModel.UserName, viewModel.Password);
+            bool success = await _service.LoginAsync(viewModel.UserName, viewModel.Password);
             if (success)
             {
 

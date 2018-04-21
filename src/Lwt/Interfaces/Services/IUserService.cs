@@ -5,7 +5,7 @@ namespace Lwt.Interfaces.Services
 {
     public interface IUserService
     {
-        Task<bool> SignUp(User newUser);
-        Task<bool> Login(string userName, string password);
+        Task<bool> SignUpAsync(User newUser);
+        Task<bool> LoginAsync(string userName, string password);
     }
 }
