@@ -1,4 +1,5 @@
-﻿using Lwt.DbContexts;
+﻿using System.Threading.Tasks;
+using Lwt.DbContexts;
 using Lwt.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,7 +27,15 @@ namespace Lwt
         {
             services.AddDbContext<LwtDbContext>(options => options.UseInMemoryDatabase("Lwt"));
             services.AddIdentity<User, Role>().AddEntityFrameworkStores<LwtDbContext>().AddDefaultTokenProviders();
-            services.ConfigureApplicationCookie(options => options.Cookie.Name = ".Lwt");
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.Name = ".Lwt";
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                };
+            });
             services.AddMvc();
 
             // automapper
@@ -45,6 +54,7 @@ namespace Lwt
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseAuthentication();
             app.UseMvc();
         }
     }

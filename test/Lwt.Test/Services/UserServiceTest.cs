@@ -27,6 +27,7 @@ namespace Lwt.Test.Services
             _userService = new UserService(_userManager.Object, _signInManager.Object);
         }
 
+        #region constructor
         [Fact]
         public void Constructor_ShouldWork()
         {
@@ -49,7 +50,9 @@ namespace Lwt.Test.Services
             // assert
             Assert.NotNull(userController);
         }
+        #endregion
 
+        #region SignUp
 
         [Fact]
         public async Task SignUp_ShouldCallUserManageCreate_Once()
@@ -98,6 +101,12 @@ namespace Lwt.Test.Services
             Assert.True(actual);
         }
 
+        #endregion
+
+        #region Login
+
+
+
         [Fact]
         public async Task LoginAsync_ShouldReturnTrue_IfSuccess()
         {
@@ -125,5 +134,23 @@ namespace Lwt.Test.Services
             // assert
             Assert.False(actual);
         }
+        #endregion
+
+        #region Logout
+
+        [Fact]
+        public async Task LogoutAsync_ShouldCallLogoutService()
+        {
+            // arrange
+            _signInManager.Reset();
+
+            //act
+            await _userService.LogoutAsync();
+
+            // assert
+            _signInManager.Verify(m=>m.SignOutAsync(),Times.Once);
+        }
+
+        #endregion
     }
 }

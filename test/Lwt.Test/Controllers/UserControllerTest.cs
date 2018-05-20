@@ -22,6 +22,7 @@ namespace Lwt.Test.Controllers
             _userController = new UserController(_userService.Object);
         }
 
+        #region Constructor
         [Fact]
         public void Constructor_ShouldWork()
         {
@@ -43,6 +44,9 @@ namespace Lwt.Test.Controllers
             // assert
             Assert.NotNull(userController);
         }
+        #endregion
+
+        #region SignUp
 
         [Fact]
         public async Task SignUp_ShouldReturnBadRequest_IfViewModelNotValid()
@@ -69,7 +73,7 @@ namespace Lwt.Test.Controllers
                 UserName = userName,
                 Password = passWord
             };
-            _userService.Setup(s => s.SignUpAsync(userName,passWord)).ReturnsAsync(true);
+            _userService.Setup(s => s.SignUpAsync(userName, passWord)).ReturnsAsync(true);
 
 
             // act
@@ -86,7 +90,7 @@ namespace Lwt.Test.Controllers
             var signUpViewModel = new SignUpViewModel();
 
 
-            _userService.Setup(s => s.SignUpAsync("userName","passWord")).ReturnsAsync(false);
+            _userService.Setup(s => s.SignUpAsync("userName", "passWord")).ReturnsAsync(false);
 
             // act
             IActionResult result = await _userController.SignUpAsync(signUpViewModel);
@@ -95,6 +99,9 @@ namespace Lwt.Test.Controllers
             Assert.IsType<BadRequestResult>(result);
         }
 
+        #endregion
+
+        #region Login
         [Fact]
         public async Task Login_ShouldReturnBadRequest_IfSignUpFail()
         {
@@ -117,7 +124,7 @@ namespace Lwt.Test.Controllers
             var viewModel = new LoginViewModel();
             _userService.Reset();
             _userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(true);
-            
+
             // act
             IActionResult actual = await _userController.LoginAsync(viewModel);
 
@@ -142,5 +149,36 @@ namespace Lwt.Test.Controllers
             Assert.IsType<BadRequestResult>(actual);
 
         }
+        #endregion
+
+        #region Logout
+
+        [Fact]
+        public async Task Logout_ShouldReturnOk()
+        {
+            // arrange
+
+
+            // act
+            IActionResult actual = await _userController.LogoutAsync();
+
+            // assert
+            Assert.IsType<OkResult>(actual);
+        }
+
+        [Fact]
+        public async Task Logout_ShouldCallLogoutServiceOnce()
+        {
+            // arrange
+            _userService.Reset();
+
+            // act
+            await _userController.LogoutAsync();
+
+            // assert
+            _userService.Verify(s=>s.LogoutAsync(),Times.Once);
+        }
+
+        #endregion
     }
 }

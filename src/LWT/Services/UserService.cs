@@ -31,5 +31,10 @@ namespace Lwt.Services
             }
             return false;
         }
+
+        public async Task LogoutAsync()
+        {
+            await _signInManager.SignOutAsync();
+        }
     }
 }

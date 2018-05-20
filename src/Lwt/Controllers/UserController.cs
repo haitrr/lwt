@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Lwt.Interfaces.Services;
 using Lwt.ViewModels.User;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Lwt.Controllers
@@ -51,6 +52,14 @@ namespace Lwt.Controllers
             }
 
             return BadRequest();
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> LogoutAsync()
+        {
+            await _service.LogoutAsync();
+            return Ok();
         }
     }
 }
