@@ -26,6 +26,7 @@ namespace Lwt
         {
             services.AddDbContext<LwtDbContext>(options => options.UseInMemoryDatabase("Lwt"));
             services.AddIdentity<User, Role>().AddEntityFrameworkStores<LwtDbContext>().AddDefaultTokenProviders();
+            services.ConfigureApplicationCookie(options => options.Cookie.Name = ".Lwt");
             services.AddMvc();
 
             // automapper

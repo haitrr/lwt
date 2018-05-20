@@ -1,10 +1,7 @@
-using System;
 using System.Threading.Tasks;
-using AutoMapper;
 using Lwt.Controllers;
 using Lwt.DbContexts;
 using Lwt.Interfaces.Services;
-using Lwt.Models;
 using Lwt.ViewModels.User;
 using Moq;
 using Xunit;
@@ -18,13 +15,11 @@ namespace Lwt.Test.Controllers
     public class UserControllerTest
     {
         private readonly Mock<IUserService> _userService;
-        private readonly Mock<IMapper> _mapper;
         private readonly UserController _userController;
         public UserControllerTest()
         {
             _userService = new Mock<IUserService>();
-            _mapper = new Mock<IMapper>();
-            _userController = new UserController(_userService.Object, _mapper.Object);
+            _userController = new UserController(_userService.Object);
         }
 
         [Fact]
@@ -62,27 +57,19 @@ namespace Lwt.Test.Controllers
             Assert.IsType<BadRequestResult>(result);
         }
 
-        [Fact]
-        public async Task SignUp_ShouldReturnThrowException_IfCantMap()
-        {
-            // arrange
-            _mapper.Setup(m => m.Map<User>(It.IsAny<SignUpViewModel>())).Returns((User)null);
-            var viewModel = new SignUpViewModel();
-
-            // act
-
-            // assert
-            await Assert.ThrowsAsync<NotSupportedException>(() => _userController.SignUpAsync(viewModel));
-        }
 
         [Fact]
         public async Task SignUp_ShouldReturnOk_IfSignUpSuccess()
         {
             // arrange
-            var signUpViewModel = new SignUpViewModel();
-            var user = new User();
-            _mapper.Setup(m => m.Map<User>(signUpViewModel)).Returns(user);
-            _userService.Setup(s => s.SignUpAsync(user)).ReturnsAsync(true);
+            var userName = "hai";
+            var passWord = "123";
+            var signUpViewModel = new SignUpViewModel()
+            {
+                UserName = userName,
+                Password = passWord
+            };
+            _userService.Setup(s => s.SignUpAsync(userName,passWord)).ReturnsAsync(true);
 
 
             // act
@@ -97,10 +84,9 @@ namespace Lwt.Test.Controllers
         {
             // arrange
             var signUpViewModel = new SignUpViewModel();
-            var user = new User();
 
-            _mapper.Setup(m => m.Map<User>(signUpViewModel)).Returns(user);
-            _userService.Setup(s => s.SignUpAsync(user)).ReturnsAsync(false);
+
+            _userService.Setup(s => s.SignUpAsync("userName","passWord")).ReturnsAsync(false);
 
             // act
             IActionResult result = await _userController.SignUpAsync(signUpViewModel);

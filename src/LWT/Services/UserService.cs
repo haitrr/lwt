@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Lwt.Interfaces.Services;
 using Lwt.Models;
 using Microsoft.AspNetCore.Identity;
@@ -16,14 +15,9 @@ namespace Lwt.Services
             _signInManager = signInManager;
         }
 
-        public async Task<bool> SignUpAsync(User newUser)
+        public async Task<bool> SignUpAsync(string userName, string passWord)
         {
-            if (newUser == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            IdentityResult result = await _userManager.CreateAsync(newUser);
+            IdentityResult result = await _userManager.CreateAsync(new User { UserName = userName }, passWord);
             return result.Succeeded;
         }
 

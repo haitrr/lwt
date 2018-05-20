@@ -24,7 +24,7 @@ namespace Lwt.Test.Services
         {
             var userStore = new Mock<IUserStore<User>>();
             _userManager = new Mock<UserManager<User>>(userStore.Object, null, null, null, null, null, null, null, null);
-            _signInManager = new Mock<SignInManager<User>>(_userManager.Object,new Mock<IHttpContextAccessor>().Object,new Mock<IUserClaimsPrincipalFactory<User>>().Object,null,null,null);
+            _signInManager = new Mock<SignInManager<User>>(_userManager.Object, new Mock<IHttpContextAccessor>().Object, new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null);
             _userService = new UserService(_userManager.Object, _signInManager.Object);
         }
 
@@ -51,26 +51,19 @@ namespace Lwt.Test.Services
             Assert.NotNull(userController);
         }
 
-        [Fact]
-        public async Task SignUp_ShouldThrowException_IfUserIsNull()
-        {
-            // assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _userService.SignUpAsync(null));
-        }
 
         [Fact]
         public async Task SignUp_ShouldCallUserManageCreate_Once()
         {
             // arrange
             _userManager.Reset();
-            var user = new User();
-            _userManager.Setup(m => m.CreateAsync(user)).ReturnsAsync(IdentityResult.Success);
+            _userManager.Setup(m => m.CreateAsync(It.IsAny<User>(), "pass")).ReturnsAsync(IdentityResult.Success);
 
             // act
-            await _userService.SignUpAsync(user);
+            await _userService.SignUpAsync("user", "pass");
 
             // assert
-            _userManager.Verify(m => m.CreateAsync(user), Times.Once);
+            _userManager.Verify(m => m.CreateAsync(It.IsAny<User>(), "pass"), Times.Once);
 
         }
 
@@ -78,12 +71,13 @@ namespace Lwt.Test.Services
         public async Task SignUp_ShouldReturnsFalse_IfFailToCreateUser()
         {
             // arrange
-            var user = new User();
             _userManager.Reset();
-            _userManager.Setup(m => m.CreateAsync(user)).ReturnsAsync(IdentityResult.Failed());
+            var userName = "user";
+            var password = "pass";
+            _userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password)).ReturnsAsync(IdentityResult.Failed());
 
             // act
-            bool actual = await _userService.SignUpAsync(user);
+            bool actual = await _userService.SignUpAsync(userName, password);
 
             // assert
             Assert.False(actual);
@@ -93,12 +87,13 @@ namespace Lwt.Test.Services
         public async Task SignUp_ShouldReturnTrue_IfCreateUserSuccess()
         {
             // arrange
-            var user = new User();
             _userManager.Reset();
-            _userManager.Setup(m => m.CreateAsync(user)).ReturnsAsync(IdentityResult.Success);
+            var userName = "user";
+            var password = "pass";
+            _userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password)).ReturnsAsync(IdentityResult.Success);
 
             // act
-            bool actual = await _userService.SignUpAsync(user);
+            bool actual = await _userService.SignUpAsync(userName, password);
 
             // assert
             Assert.True(actual);

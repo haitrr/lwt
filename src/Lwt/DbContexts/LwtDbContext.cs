@@ -1,13 +1,12 @@
-﻿using Lwt.Models;
+﻿using System;
+using Lwt.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lwt.DbContexts
 {
-    public class LwtDbContext : DbContext
+    public class LwtDbContext : IdentityDbContext<User, Role, Guid>
     {
-        public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
-
         public LwtDbContext(DbContextOptions<LwtDbContext> options) : base(options)
         {
         }
