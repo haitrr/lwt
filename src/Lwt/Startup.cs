@@ -44,6 +44,8 @@ namespace Lwt
 
             // user
             services.AddScoped<IUserService, UserService>();
+            // text
+            services.AddScoped<ITextService, TextService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
