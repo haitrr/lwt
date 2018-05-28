@@ -1,8 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AutoMapper;
 using Lwt.Controllers;
 using Lwt.DbContexts;
 using Lwt.Interfaces;
 using Lwt.Interfaces.Services;
+using LWT.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,11 +22,21 @@ namespace Lwt.Test.Controllers
     {
         private readonly TextController _textController;
         private readonly Mock<ITextService> _textService;
+        private readonly Mock<IMapper> _mapper;
+        private readonly Mock<IAuthenticationHelper> _authenticationHelper;
 
         public TextControllerTest()
         {
             _textService = new Mock<ITextService>();
-            _textController = new TextController(_textService.Object);
+            _mapper = new Mock<IMapper>();
+            _authenticationHelper = new Mock<IAuthenticationHelper>();
+            _textController = new TextController(_textService.Object, _mapper.Object, _authenticationHelper.Object)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext()
+                }
+            };
         }
 
         #region Constructor
@@ -55,12 +72,17 @@ namespace Lwt.Test.Controllers
         {
             // arrange
             _textService.Reset();
+            TextCreateModel model = new TextCreateModel();
+            Text text = new Text();
+            Guid userId = Guid.NewGuid();
+            _mapper.Setup(m => m.Map<Text>(model)).Returns(text);
+            _authenticationHelper.Setup(h => h.GetLoggedInUser(_textController.User.Identity)).Returns(userId);
 
             // act
-            await _textController.CreateAsync();
+            await _textController.CreateAsync(model);
 
             // assert
-            _textService.Verify(s => s.CreateAsync(), Times.Once);
+            _textService.Verify(s => s.CreateAsync(userId, text), Times.Once);
 
         }
 

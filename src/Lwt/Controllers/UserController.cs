@@ -16,7 +16,6 @@ namespace Lwt.Controllers
             _service = service;
         }
 
-
         [HttpPost]
         public async Task<IActionResult> SignUpAsync([FromBody] SignUpViewModel signUpViewModel)
         {

@@ -10,6 +10,9 @@ using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
 using Lwt.Interfaces.Services;
 using Lwt.Services;
+using Lwt.Interfaces;
+using Lwt.Transactions;
+using Lwt.Utilities;
 
 namespace Lwt
 {
@@ -46,6 +49,13 @@ namespace Lwt
             services.AddScoped<IUserService, UserService>();
             // text
             services.AddScoped<ITextService, TextService>();
+            services.AddScoped<ITextRepository, TextRepository>();
+
+            // transaction
+            services.AddScoped<ITransaction, Transaction<LwtDbContext>>();
+
+            // utilities
+            services.AddScoped<IAuthenticationHelper,AuthenticationHelper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
