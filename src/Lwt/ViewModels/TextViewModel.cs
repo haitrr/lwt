@@ -1,4 +1,4 @@
-﻿namespace Lwt.Controllers
+﻿namespace Lwt.ViewModels
 {
     public class TextViewModel
     {

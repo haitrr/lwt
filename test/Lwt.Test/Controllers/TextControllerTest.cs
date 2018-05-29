@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Lwt.Controllers;
 using Lwt.DbContexts;
 using Lwt.Interfaces;
 using Lwt.Interfaces.Services;
+using Lwt.ViewModels;
 using LWT.Models;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -87,13 +86,16 @@ namespace Lwt.Test.Controllers
         }
 
         [Fact]
-        public void CreateAsync_ShouldReturnOk_IfSuccess()
+        public async  Task CreateAsync_ShouldReturnOk_IfSuccess()
         {
             // arrange
+            _textService.Setup(m => m.CreateAsync(It.IsAny<Guid>(), It.IsAny<Text>())).ReturnsAsync(true);
 
+            // act
+            var actual = await _textController.CreateAsync(new TextCreateModel());
 
-            //
-
+            // assert
+            Assert.IsType<OkResult>(actual);
         }
 
         #endregion

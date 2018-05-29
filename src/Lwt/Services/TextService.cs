@@ -16,12 +16,11 @@ namespace Lwt.Services
             _textRepository = textRepository;
             _transaction = transaction;
         }
-        public async Task<bool> CreateAsync(Guid userId, Text text)
+        public Task<bool> CreateAsync(Guid userId, Text text)
         {
             text.UserId = userId;
             _textRepository.Add(text);
-            await _transaction.Commit();
-            return true;
+            return _transaction.Commit();
         }
 
         public Task<IEnumerable<Text>> GetByUserAsync(Guid userId)

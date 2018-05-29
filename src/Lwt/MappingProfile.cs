@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Lwt.Controllers;
 using Lwt.Models;
+using Lwt.ViewModels;
 using Lwt.ViewModels.User;
 using LWT.Models;
 

@@ -8,6 +8,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Lwt.Interfaces;
+using Lwt.ViewModels;
 
 namespace Lwt.Controllers
 {
