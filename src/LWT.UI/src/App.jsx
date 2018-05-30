@@ -1,17 +1,13 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Route from 'react-route';
+import HomePage from './components/pages/HomePage';
+import LoginPage from './components/pages/LoginPage';
 
-const App = () =>
-  (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h1 className="App-title">Hello world</h1>
-      </header>
-      <p className="App-intro">
-        To get started, edit <code>src/App.js</code> and save to reload.
-      </p>
-    </div>
-  );
+const App = () => (
+  <div>
+    <Route path="/" exact component={HomePage} />
+    <Route path="/login" exact component={LoginPage} />
+  </div>
+);
+
 export default App;

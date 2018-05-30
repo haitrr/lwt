@@ -4,5 +4,10 @@
   ],
   "rules": {
     "linebreak-style": 0
-  }
+  },
+  "env":{
+    "es6": true,
+    "browser": true
+  },
+  "parser": "babel-eslint"
 }
