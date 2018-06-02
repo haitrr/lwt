@@ -1,11 +1,12 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import LoginForm from '../forms/LoginForm';
 
 class LoginPage extends React.Component {
   state = { }
 
   submit = (data) => {
-    console.log(data);
+    this.props.login(data).then(() => this.props.history.push('/'));
   }
   render() {
     return (
@@ -17,5 +18,11 @@ class LoginPage extends React.Component {
   }
 }
 
+LoginPage.propTypes = {
+  login: PropTypes.func.isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }).isRequired,
+};
 
 export default LoginPage;
