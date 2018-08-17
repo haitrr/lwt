@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
 using Lwt.Interfaces.Services;
@@ -13,18 +12,12 @@ using Lwt.Services;
 using Lwt.Interfaces;
 using Lwt.Transactions;
 using Lwt.Utilities;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Lwt
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -55,7 +48,12 @@ namespace Lwt
             services.AddScoped<ITransaction, Transaction<LwtDbContext>>();
 
             // utilities
-            services.AddScoped<IAuthenticationHelper,AuthenticationHelper>();
+            services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
+
+            // swagger
+            services.AddSwaggerGen(
+                configure => { configure.SwaggerDoc("v1", new Info() {Title = "Lwt API", Version = "v1"}); }
+            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,6 +66,11 @@ namespace Lwt
 
             app.UseAuthentication();
             app.UseMvc();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1");
+            });
         }
     }
 }
