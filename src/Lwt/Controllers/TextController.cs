@@ -4,7 +4,6 @@ using AutoMapper;
 using Lwt.Interfaces.Services;
 using LWT.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Lwt.Interfaces;
@@ -20,7 +19,7 @@ namespace Lwt.Controllers
         private readonly IMapper _mapper;
         private readonly IAuthenticationHelper _authenticationHelper;
 
-        public TextController(ITextService textService, IMapper mapper,IAuthenticationHelper authenticationHelper)
+        public TextController(ITextService textService, IMapper mapper, IAuthenticationHelper authenticationHelper)
         {
             _textService = textService;
             _mapper = mapper;
@@ -29,7 +28,7 @@ namespace Lwt.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreateAsync([FromBody]TextCreateModel model)
+        public async Task<IActionResult> CreateAsync([FromBody] TextCreateModel model)
         {
             Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
             Text text = _mapper.Map<Text>(model);
@@ -37,6 +36,7 @@ namespace Lwt.Controllers
             {
                 return Ok();
             }
+
             return BadRequest();
         }
 
@@ -44,7 +44,7 @@ namespace Lwt.Controllers
         [Authorize]
         public async Task<IActionResult> GetAllAsync()
         {
-            Guid userId = new Guid(User.Identity.GetUserId());
+            Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
             IEnumerable<Text> texts = await _textService.GetByUserAsync(userId);
             IEnumerable<TextViewModel> viewModels = _mapper.Map<IEnumerable<TextViewModel>>(texts);
             return Ok(viewModels);

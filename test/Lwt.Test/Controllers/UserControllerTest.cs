@@ -1,14 +1,10 @@
 using System.Threading.Tasks;
 using Lwt.Controllers;
-using Lwt.DbContexts;
 using Lwt.Interfaces.Services;
 using Lwt.ViewModels.User;
 using Moq;
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Lwt.Test.Controllers
 {
@@ -16,37 +12,13 @@ namespace Lwt.Test.Controllers
     {
         private readonly Mock<IUserService> _userService;
         private readonly UserController _userController;
+
         public UserControllerTest()
         {
             _userService = new Mock<IUserService>();
             _userController = new UserController(_userService.Object);
         }
 
-        #region Constructor
-        [Fact]
-        public void Constructor_ShouldWork()
-        {
-            // arrange
-            ServiceProvider efServiceProvider = new ServiceCollection().AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
-
-            var services = new ServiceCollection();
-
-            services.AddDbContext<LwtDbContext>(b => b.UseInMemoryDatabase("Lwt").UseInternalServiceProvider(efServiceProvider));
-            var configuration = new Mock<IConfiguration>();
-            var startup = new Startup(configuration.Object);
-            startup.ConfigureServices(services);
-            services.AddTransient<UserController>();
-            ServiceProvider serviceProvider = services.BuildServiceProvider();
-
-            // act
-            var userController = serviceProvider.GetService<UserController>();
-
-            // assert
-            Assert.NotNull(userController);
-        }
-        #endregion
-
-        #region SignUp
 
         [Fact]
         public async Task SignUp_ShouldReturnBadRequest_IfViewModelNotValid()
@@ -99,9 +71,6 @@ namespace Lwt.Test.Controllers
             Assert.IsType<BadRequestResult>(result);
         }
 
-        #endregion
-
-        #region Login
         [Fact]
         public async Task Login_ShouldReturnBadRequest_IfSignUpFail()
         {
@@ -130,7 +99,6 @@ namespace Lwt.Test.Controllers
 
             //assert
             Assert.IsType<OkResult>(actual);
-
         }
 
 
@@ -147,11 +115,8 @@ namespace Lwt.Test.Controllers
 
             //assert
             Assert.IsType<BadRequestResult>(actual);
-
         }
-        #endregion
 
-        #region Logout
 
         [Fact]
         public async Task Logout_ShouldReturnOk()
@@ -176,9 +141,7 @@ namespace Lwt.Test.Controllers
             await _userController.LogoutAsync();
 
             // assert
-            _userService.Verify(s=>s.LogoutAsync(),Times.Once);
+            _userService.Verify(s => s.LogoutAsync(), Times.Once);
         }
-
-        #endregion
     }
 }

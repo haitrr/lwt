@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Lwt.Controllers;
@@ -14,10 +15,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Lwt.Test.Controllers
 {
-    public class TextControllerTest
+    public class TextControllerTest : TestClass
     {
         private readonly TextController _textController;
         private readonly Mock<ITextService> _textService;
@@ -38,19 +40,20 @@ namespace Lwt.Test.Controllers
             };
         }
 
-        #region Constructor
 
         [Fact]
         public void Constructor_ShouldWork()
         {
             // arrange
-            ServiceProvider efServiceProvider = new ServiceCollection().AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
+            ServiceProvider efServiceProvider =
+                new ServiceCollection().AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
 
             var services = new ServiceCollection();
 
-            services.AddDbContext<LwtDbContext>(b => b.UseInMemoryDatabase("Lwt").UseInternalServiceProvider(efServiceProvider));
+            services.AddDbContext<LwtDbContext>(b =>
+                b.UseInMemoryDatabase("Lwt").UseInternalServiceProvider(efServiceProvider));
             var configuration = new Mock<IConfiguration>();
-            var startup = new Startup(configuration.Object);
+            var startup = new Startup();
             startup.ConfigureServices(services);
             services.AddTransient<TextController>();
             ServiceProvider serviceProvider = services.BuildServiceProvider();
@@ -62,9 +65,6 @@ namespace Lwt.Test.Controllers
             Assert.NotNull(instance);
         }
 
-        #endregion
-
-        #region Create
 
         [Fact]
         public async Task CreateAsync_ShouldCallService()
@@ -82,11 +82,10 @@ namespace Lwt.Test.Controllers
 
             // assert
             _textService.Verify(s => s.CreateAsync(userId, text), Times.Once);
-
         }
 
         [Fact]
-        public async  Task CreateAsync_ShouldReturnOk_IfSuccess()
+        public async Task CreateAsync_ShouldReturnOk_IfSuccess()
         {
             // arrange
             _textService.Setup(m => m.CreateAsync(It.IsAny<Guid>(), It.IsAny<Text>())).ReturnsAsync(true);
@@ -98,8 +97,22 @@ namespace Lwt.Test.Controllers
             Assert.IsType<OkResult>(actual);
         }
 
-        #endregion
+        [Fact]
+        public async Task GetAllAsync_ShouldReturnOk_IfSuccess()
+        {
+            // arrange
+            Guid userId = Guid.NewGuid();
+            var texts = new List<Text>();
+            _textService.Setup(s => s.GetByUserAsync(userId)).ReturnsAsync(texts);
+            var textViewModels = new List<TextViewModel>();
+            _authenticationHelper.Setup(h => h.GetLoggedInUser(_textController.User.Identity)).Returns(userId);
+            _mapper.Setup(m => m.Map<IEnumerable<TextViewModel>>(texts)).Returns(textViewModels);
 
+            //act
+            IActionResult actual = await _textController.GetAllAsync();
 
+            //assert
+            Assert.IsType<OkObjectResult>(actual);
+        }
     }
 }

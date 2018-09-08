@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Lwt.DbContexts;
 using Lwt.Interfaces;
 using Lwt.Services;
 using LWT.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -23,28 +19,6 @@ namespace Lwt.Test.Services
             _textRepository = new Mock<ITextRepository>();
             _transaction = new Mock<ITransaction>();
             _textService = new TextService(_textRepository.Object, _transaction.Object);
-        }
-        [Fact]
-        public void Constructor_ShouldWork()
-        {
-            // arrange
-            ServiceProvider efServiceProvider = new ServiceCollection().AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
-
-            var services = new ServiceCollection();
-
-            services.AddDbContext<LwtDbContext>(b => b.UseInMemoryDatabase("Lwt").UseInternalServiceProvider(efServiceProvider));
-            var configuration = new Mock<IConfiguration>();
-            var startup = new Startup(configuration.Object);
-            startup.ConfigureServices(services);
-
-            services.AddTransient<TextService>();
-            ServiceProvider serviceProvider = services.BuildServiceProvider();
-
-            // act
-            var userController = serviceProvider.GetService<TextService>();
-
-            // assert
-            Assert.NotNull(userController);
         }
 
         [Fact]
@@ -71,7 +45,7 @@ namespace Lwt.Test.Services
             await _textService.CreateAsync(Guid.Empty, text);
 
             //assert
-            _textRepository.Verify(r=>r.Add(text),Times.Once);
+            _textRepository.Verify(r => r.Add(text), Times.Once);
         }
 
         [Fact]
@@ -98,8 +72,7 @@ namespace Lwt.Test.Services
             await _textService.GetByUserAsync(userId);
 
             // assert
-            _textRepository.Verify(r=>r.GetByUserAsync(userId),Times.Once);
-
+            _textRepository.Verify(r => r.GetByUserAsync(userId), Times.Once);
         }
     }
 }

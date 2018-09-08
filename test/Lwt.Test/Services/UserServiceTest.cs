@@ -1,13 +1,9 @@
 ﻿using System.Threading.Tasks;
-using Lwt.DbContexts;
 using Lwt.Models;
 using Lwt.Services;
 using Lwt.ViewModels.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -15,44 +11,63 @@ namespace Lwt.Test.Services
 {
     public class UserServiceTest
     {
+        public UserServiceTest()
+        {
+            var userStore = new Mock<IUserStore<User>>();
+            _userManager =
+                new Mock<UserManager<User>>(userStore.Object, null, null, null, null, null, null, null, null);
+            _signInManager = new Mock<SignInManager<User>>(_userManager.Object, new Mock<IHttpContextAccessor>().Object,
+                new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null);
+            _userService = new UserService(_userManager.Object, _signInManager.Object);
+        }
+
         private readonly UserService _userService;
         private readonly Mock<UserManager<User>> _userManager;
         private readonly Mock<SignInManager<User>> _signInManager;
 
-        public UserServiceTest()
-        {
-            var userStore = new Mock<IUserStore<User>>();
-            _userManager = new Mock<UserManager<User>>(userStore.Object, null, null, null, null, null, null, null, null);
-            _signInManager = new Mock<SignInManager<User>>(_userManager.Object, new Mock<IHttpContextAccessor>().Object, new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null);
-            _userService = new UserService(_userManager.Object, _signInManager.Object);
-        }
-
-        #region constructor
         [Fact]
-        public void Constructor_ShouldWork()
+        public async Task LoginAsync_ShouldReturnFalse_IfLoginFail()
         {
             // arrange
-            ServiceProvider efServiceProvider = new ServiceCollection().AddEntityFrameworkInMemoryDatabase().BuildServiceProvider();
-
-            var services = new ServiceCollection();
-
-            services.AddDbContext<LwtDbContext>(b => b.UseInMemoryDatabase("Lwt").UseInternalServiceProvider(efServiceProvider));
-            var configuration = new Mock<IConfiguration>();
-            var startup = new Startup(configuration.Object);
-            startup.ConfigureServices(services);
-
-            services.AddTransient<UserService>();
-            ServiceProvider serviceProvider = services.BuildServiceProvider();
+            var model = new LoginViewModel();
+            _signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false))
+                .ReturnsAsync(SignInResult.Failed);
 
             // act
-            var userController = serviceProvider.GetService<UserService>();
+            bool actual = await _userService.LoginAsync(model.UserName, model.Password);
 
             // assert
-            Assert.NotNull(userController);
+            Assert.False(actual);
         }
-        #endregion
 
-        #region SignUp
+
+        [Fact]
+        public async Task LoginAsync_ShouldReturnTrue_IfSuccess()
+        {
+            // arrange
+            var model = new LoginViewModel();
+            _signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false))
+                .ReturnsAsync(SignInResult.Success);
+
+            // act
+            bool actual = await _userService.LoginAsync(model.UserName, model.Password);
+
+            // assert
+            Assert.True(actual);
+        }
+
+        [Fact]
+        public async Task LogoutAsync_ShouldCallLogoutService()
+        {
+            // arrange
+            _signInManager.Reset();
+
+            //act
+            await _userService.LogoutAsync();
+
+            // assert
+            _signInManager.Verify(m => m.SignOutAsync(), Times.Once);
+        }
 
         [Fact]
         public async Task SignUp_ShouldCallUserManageCreate_Once()
@@ -66,7 +81,6 @@ namespace Lwt.Test.Services
 
             // assert
             _userManager.Verify(m => m.CreateAsync(It.IsAny<User>(), "pass"), Times.Once);
-
         }
 
         [Fact]
@@ -76,7 +90,8 @@ namespace Lwt.Test.Services
             _userManager.Reset();
             var userName = "user";
             var password = "pass";
-            _userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password)).ReturnsAsync(IdentityResult.Failed());
+            _userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password))
+                .ReturnsAsync(IdentityResult.Failed());
 
             // act
             bool actual = await _userService.SignUpAsync(userName, password);
@@ -92,7 +107,8 @@ namespace Lwt.Test.Services
             _userManager.Reset();
             var userName = "user";
             var password = "pass";
-            _userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password)).ReturnsAsync(IdentityResult.Success);
+            _userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password))
+                .ReturnsAsync(IdentityResult.Success);
 
             // act
             bool actual = await _userService.SignUpAsync(userName, password);
@@ -100,57 +116,5 @@ namespace Lwt.Test.Services
             // assert
             Assert.True(actual);
         }
-
-        #endregion
-
-        #region Login
-
-
-
-        [Fact]
-        public async Task LoginAsync_ShouldReturnTrue_IfSuccess()
-        {
-            // arrange
-            var model = new LoginViewModel();
-            _signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false)).ReturnsAsync(SignInResult.Success);
-
-            // act
-            bool actual = await _userService.LoginAsync(model.UserName, model.Password);
-
-            // assert
-            Assert.True(actual);
-        }
-
-        [Fact]
-        public async Task LoginAsync_ShouldReturnFalse_IfLoginFail()
-        {
-            // arrange
-            var model = new LoginViewModel();
-            _signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false)).ReturnsAsync(SignInResult.Failed);
-
-            // act
-            bool actual = await _userService.LoginAsync(model.UserName, model.Password);
-
-            // assert
-            Assert.False(actual);
-        }
-        #endregion
-
-        #region Logout
-
-        [Fact]
-        public async Task LogoutAsync_ShouldCallLogoutService()
-        {
-            // arrange
-            _signInManager.Reset();
-
-            //act
-            await _userService.LogoutAsync();
-
-            // assert
-            _signInManager.Verify(m=>m.SignOutAsync(),Times.Once);
-        }
-
-        #endregion
     }
 }
