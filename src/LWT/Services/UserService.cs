@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Lwt.Exceptions;
 using Lwt.Interfaces.Services;
 using Lwt.Models;
 using Microsoft.AspNetCore.Identity;
@@ -9,6 +11,7 @@ namespace Lwt.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+
         public UserService(UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _userManager = userManager;
@@ -17,8 +20,13 @@ namespace Lwt.Services
 
         public async Task<bool> SignUpAsync(string userName, string passWord)
         {
-            IdentityResult result = await _userManager.CreateAsync(new User { UserName = userName }, passWord);
-            return result.Succeeded;
+            IdentityResult result = await _userManager.CreateAsync(new User {UserName = userName}, passWord);
+            if (result.Succeeded)
+            {
+                return true;
+            }
+
+            throw new BadRequestException(result.Errors.First().Description);
         }
 
         public async Task<bool> LoginAsync(string userName, string password)
@@ -29,6 +37,7 @@ namespace Lwt.Services
             {
                 return true;
             }
+
             return false;
         }
 

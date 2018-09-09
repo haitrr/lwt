@@ -10,6 +10,7 @@ using AutoMapper;
 using Lwt.Interfaces.Services;
 using Lwt.Services;
 using Lwt.Interfaces;
+using Lwt.Middleware;
 using Lwt.Transactions;
 using Lwt.Utilities;
 using Swashbuckle.AspNetCore.Swagger;
@@ -50,6 +51,9 @@ namespace Lwt
             // utilities
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
 
+            // middleware
+            services.AddSingleton<ExceptionHandleMiddleware>();
+
             // swagger
             services.AddSwaggerGen(
                 configure => { configure.SwaggerDoc("v1", new Info() {Title = "Lwt API", Version = "v1"}); }
@@ -65,12 +69,10 @@ namespace Lwt
             }
 
             app.UseAuthentication();
+            app.UseMiddleware<ExceptionHandleMiddleware>();
             app.UseMvc();
             app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1");
-            });
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
         }
     }
 }
