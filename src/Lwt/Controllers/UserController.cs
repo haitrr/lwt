@@ -19,24 +19,13 @@ namespace Lwt.Controllers
         [HttpPost]
         public async Task<IActionResult> SignUpAsync([FromBody] SignUpViewModel signUpViewModel)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-
-            bool success = await _service.SignUpAsync(signUpViewModel.UserName, signUpViewModel.Password);
-            if (!success)
-            {
-                return BadRequest();
-            }
-
+            await _service.SignUpAsync(signUpViewModel.UserName, signUpViewModel.Password);
 
             return Ok();
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> LoginAsync([FromBody]LoginViewModel viewModel)
+        public async Task<IActionResult> LoginAsync([FromBody] LoginViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -44,9 +33,9 @@ namespace Lwt.Controllers
             }
 
             bool success = await _service.LoginAsync(viewModel.UserName, viewModel.Password);
+
             if (success)
             {
-
                 return Ok();
             }
 

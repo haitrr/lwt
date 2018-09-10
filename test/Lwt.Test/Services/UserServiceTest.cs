@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Lwt.Exceptions;
 using Lwt.Models;
 using Lwt.Services;
 using Lwt.ViewModels.User;
@@ -14,8 +15,10 @@ namespace Lwt.Test.Services
         public UserServiceTest()
         {
             var userStore = new Mock<IUserStore<User>>();
+
             _userManager =
                 new Mock<UserManager<User>>(userStore.Object, null, null, null, null, null, null, null, null);
+
             _signInManager = new Mock<SignInManager<User>>(_userManager.Object, new Mock<IHttpContextAccessor>().Object,
                 new Mock<IUserClaimsPrincipalFactory<User>>().Object, null, null, null);
             _userService = new UserService(_userManager.Object, _signInManager.Object);
@@ -30,6 +33,7 @@ namespace Lwt.Test.Services
         {
             // arrange
             var model = new LoginViewModel();
+
             _signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false))
                 .ReturnsAsync(SignInResult.Failed);
 
@@ -46,6 +50,7 @@ namespace Lwt.Test.Services
         {
             // arrange
             var model = new LoginViewModel();
+
             _signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false))
                 .ReturnsAsync(SignInResult.Success);
 
@@ -84,37 +89,36 @@ namespace Lwt.Test.Services
         }
 
         [Fact]
-        public async Task SignUp_ShouldReturnsFalse_IfFailToCreateUser()
+        public async Task SignUp_ShouldThrowException_IfFailToCreateUser()
         {
             // arrange
             _userManager.Reset();
             var userName = "user";
             var password = "pass";
+
             _userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password))
-                .ReturnsAsync(IdentityResult.Failed());
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError {Description = "Hello"}));
 
             // act
-            bool actual = await _userService.SignUpAsync(userName, password);
+
 
             // assert
-            Assert.False(actual);
+            await Assert.ThrowsAsync<BadRequestException>(() => _userService.SignUpAsync(userName, password));
         }
 
         [Fact]
-        public async Task SignUp_ShouldReturnTrue_IfCreateUserSuccess()
+        public async Task SignUp_ShouldReturnNotThrow_IfCreateUserSuccess()
         {
             // arrange
             _userManager.Reset();
             var userName = "user";
             var password = "pass";
+
             _userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password))
                 .ReturnsAsync(IdentityResult.Success);
 
             // act
-            bool actual = await _userService.SignUpAsync(userName, password);
-
-            // assert
-            Assert.True(actual);
+            await _userService.SignUpAsync(userName, password);
         }
     }
 }

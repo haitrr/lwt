@@ -18,15 +18,14 @@ namespace Lwt.Services
             _signInManager = signInManager;
         }
 
-        public async Task<bool> SignUpAsync(string userName, string passWord)
+        public async Task SignUpAsync(string userName, string passWord)
         {
             IdentityResult result = await _userManager.CreateAsync(new User {UserName = userName}, passWord);
-            if (result.Succeeded)
-            {
-                return true;
-            }
 
-            throw new BadRequestException(result.Errors.First().Description);
+            if (!result.Succeeded)
+            {
+                throw new BadRequestException(result.Errors.First().Description);
+            }
         }
 
         public async Task<bool> LoginAsync(string userName, string password)

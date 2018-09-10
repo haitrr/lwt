@@ -19,56 +19,24 @@ namespace Lwt.Test.Controllers
             _userController = new UserController(_userService.Object);
         }
 
-
-        [Fact]
-        public async Task SignUp_ShouldReturnBadRequest_IfViewModelNotValid()
-        {
-            // arrange
-            _userController.ModelState.AddModelError("error", "message");
-
-            // act
-            IActionResult result = await _userController.SignUpAsync(null);
-
-            // assert
-            Assert.IsType<BadRequestResult>(result);
-        }
-
-
         [Fact]
         public async Task SignUp_ShouldReturnOk_IfSignUpSuccess()
         {
             // arrange
             var userName = "hai";
             var passWord = "123";
-            var signUpViewModel = new SignUpViewModel()
+
+            var signUpViewModel = new SignUpViewModel
             {
                 UserName = userName,
                 Password = passWord
             };
-            _userService.Setup(s => s.SignUpAsync(userName, passWord)).ReturnsAsync(true);
-
 
             // act
             IActionResult result = await _userController.SignUpAsync(signUpViewModel);
 
             // assert
             Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
-        public async Task SignUp_ShouldReturnBadRequest_IfSignUpFail()
-        {
-            // arrange
-            var signUpViewModel = new SignUpViewModel();
-
-
-            _userService.Setup(s => s.SignUpAsync("userName", "passWord")).ReturnsAsync(false);
-
-            // act
-            IActionResult result = await _userController.SignUpAsync(signUpViewModel);
-
-            // assert
-            Assert.IsType<BadRequestResult>(result);
         }
 
         [Fact]
