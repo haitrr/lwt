@@ -8,6 +8,7 @@ namespace Lwt.Interfaces
     {
         void Add(T entity);
         void DeleteById(T entity);
+        void Update(T entity);
         Task<T> GetByIdAsync(Guid id);
     }
 }

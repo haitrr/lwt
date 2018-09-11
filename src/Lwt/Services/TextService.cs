@@ -13,11 +13,14 @@ namespace Lwt.Services
     {
         private readonly ITextRepository _textRepository;
         private readonly ITransaction _transaction;
+        private readonly IMapper<TextEditModel, Text> _textEditMapper;
 
-        public TextService(ITextRepository textRepository, ITransaction transaction)
+        public TextService(ITextRepository textRepository, ITransaction transaction,
+            IMapper<TextEditModel, Text> textEditMapper)
         {
             _textRepository = textRepository;
             _transaction = transaction;
+            _textEditMapper = textEditMapper;
         }
 
         public Task CreateAsync(Guid userId, Text text)
@@ -47,9 +50,20 @@ namespace Lwt.Services
             }
         }
 
-        public Task EditAsync(Guid textId, Guid userId, TextEditModel editModel)
+        public async Task EditAsync(Guid textId, Guid userId, TextEditModel editModel)
         {
-            throw new NotImplementedException();
+            Text text = await _textRepository.GetByIdAsync(textId);
+
+            if (text.UserId == userId)
+            {
+                Text editedText = _textEditMapper.Map(editModel, text);
+                _textRepository.Update(editedText);
+                await _transaction.Commit();
+            }
+            else
+            {
+                throw new ForbiddenException("You do not have permission to edit this text");
+            }
         }
     }
 }

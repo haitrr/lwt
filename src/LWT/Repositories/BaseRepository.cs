@@ -12,11 +12,13 @@ namespace Lwt.Repositories
     {
         protected readonly LwtDbContext LwtDbContext;
         protected readonly DbSet<T> DbSet;
+
         public BaseRepository(LwtDbContext lwtDbContext)
         {
             LwtDbContext = lwtDbContext;
             DbSet = LwtDbContext.Set<T>();
         }
+
         public void Add(T entity)
         {
             DbSet.Add(entity);
@@ -25,6 +27,11 @@ namespace Lwt.Repositories
         public void DeleteById(T entity)
         {
             DbSet.Remove(entity);
+        }
+
+        public void Update(T entity)
+        {
+            DbSet.Update(entity);
         }
 
         public Task<T> GetByIdAsync(Guid id)

@@ -10,9 +10,11 @@ using AutoMapper;
 using Lwt.Interfaces.Services;
 using Lwt.Services;
 using Lwt.Interfaces;
+using Lwt.Mappers;
 using Lwt.Middleware;
 using Lwt.Transactions;
 using Lwt.Utilities;
+using LWT.Models;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Lwt
@@ -24,9 +26,11 @@ namespace Lwt
         {
             services.AddDbContext<LwtDbContext>(options => options.UseInMemoryDatabase("Lwt"));
             services.AddIdentity<User, Role>().AddEntityFrameworkStores<LwtDbContext>().AddDefaultTokenProviders();
+
             services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.Name = ".Lwt";
+
                 options.Events.OnRedirectToLogin = context =>
                 {
                     context.Response.StatusCode = 401;
@@ -38,6 +42,9 @@ namespace Lwt
             // automapper
             ServiceCollectionExtensions.UseStaticRegistration = false;
             services.AddAutoMapper();
+
+            // mapper
+            services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
 
             // user
             services.AddScoped<IUserService, UserService>();
