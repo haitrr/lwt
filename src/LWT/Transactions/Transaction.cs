@@ -7,14 +7,15 @@ namespace Lwt.Transactions
     public class Transaction<T> : ITransaction where T : DbContext
     {
         private readonly T _dbContext;
+
         public Transaction(T dbContext)
         {
             _dbContext = dbContext;
         }
-        public async Task<bool> Commit()
+
+        public async Task Commit()
         {
-            int rowsChanged = await _dbContext.SaveChangesAsync();
-            return rowsChanged > 0;
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

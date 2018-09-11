@@ -4,6 +4,6 @@ namespace Lwt.Interfaces
 {
     public interface ITransaction
     {
-        Task<bool> Commit();
+        Task Commit();
     }
 }

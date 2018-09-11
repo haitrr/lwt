@@ -19,6 +19,15 @@ namespace Lwt.Middleware
             {
                 await HandleBadRequestException(context, exception);
             }
+            catch (ForbiddenException forbiddenException)
+            {
+                await HandleForbiddenException(context);
+            }
+            catch (NotFoundException notFoundException)
+            {
+                await HandleNotFoundException(context);
+            }
+
             catch (Exception)
             {
                 await HandleExceptionAsync(context);
@@ -34,6 +43,30 @@ namespace Lwt.Middleware
             (
                 context.Response.StatusCode,
                 exception.Message
+            ).ToString());
+        }
+
+        private static Task HandleForbiddenException(HttpContext context)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int) HttpStatusCode.Forbidden;
+
+            return context.Response.WriteAsync(new ErrorDetails
+            (
+                context.Response.StatusCode,
+                "Internal Server Error."
+            ).ToString());
+        }
+
+        private static Task HandleNotFoundException(HttpContext context)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int) HttpStatusCode.NotFound;
+
+            return context.Response.WriteAsync(new ErrorDetails
+            (
+                context.Response.StatusCode,
+                "Internal Server Error."
             ).ToString());
         }
 

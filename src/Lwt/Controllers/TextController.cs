@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Lwt.Interfaces;
+using Lwt.Models;
 using Lwt.ViewModels;
 
 namespace Lwt.Controllers
@@ -31,13 +32,9 @@ namespace Lwt.Controllers
         public async Task<IActionResult> CreateAsync([FromBody] TextCreateModel model)
         {
             Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
-            Text text = _mapper.Map<Text>(model);
-            if (await _textService.CreateAsync(userId, text))
-            {
-                return Ok();
-            }
-
-            return BadRequest();
+            var text = _mapper.Map<Text>(model);
+            await _textService.CreateAsync(userId, text);
+            return Ok();
         }
 
         [HttpGet]
@@ -46,8 +43,26 @@ namespace Lwt.Controllers
         {
             Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
             IEnumerable<Text> texts = await _textService.GetByUserAsync(userId);
-            IEnumerable<TextViewModel> viewModels = _mapper.Map<IEnumerable<TextViewModel>>(texts);
+            var viewModels = _mapper.Map<IEnumerable<TextViewModel>>(texts);
             return Ok(viewModels);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
+        {
+            Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
+            await _textService.DeleteAsync(id, userId);
+            return Ok();
+        }
+
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<IActionResult> EditAsync([FromRoute] Guid id, [FromBody] TextEditModel editModel)
+        {
+            Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
+            await _textService.EditAsync(id, userId, editModel);
+            return Ok();
         }
     }
 }

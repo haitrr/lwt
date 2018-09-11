@@ -1,4 +1,7 @@
-﻿using Lwt.DbContexts;
+﻿using System;
+using System.Threading.Tasks;
+using Lwt.DbContexts;
+using Lwt.Exceptions;
 using Lwt.Interfaces;
 using Lwt.Models;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +20,23 @@ namespace Lwt.Repositories
         public void Add(T entity)
         {
             DbSet.Add(entity);
+        }
+
+        public void DeleteById(T entity)
+        {
+            DbSet.Remove(entity);
+        }
+
+        public Task<T> GetByIdAsync(Guid id)
+        {
+            try
+            {
+                return DbSet.SingleAsync(ad => ad.Id == id);
+            }
+            catch
+            {
+                throw new NotFoundException($"Item with id {id} not found.");
+            }
         }
     }
 }
