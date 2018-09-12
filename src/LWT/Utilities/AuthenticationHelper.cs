@@ -1,15 +1,14 @@
 ﻿using Lwt.Interfaces;
-using Microsoft.AspNet.Identity;
 using System;
-using System.Security.Principal;
+using System.Security.Claims;
 
 namespace Lwt.Utilities
 {
     public class AuthenticationHelper : IAuthenticationHelper
     {
-        public Guid GetLoggedInUser(IIdentity identity)
+        public Guid GetLoggedInUser(ClaimsPrincipal principal)
         {
-            return new Guid(identity.GetUserId());
+            return new Guid(principal.FindFirstValue(ClaimTypes.NameIdentifier));
         }
     }
 }

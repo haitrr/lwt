@@ -31,7 +31,7 @@ namespace Lwt.Controllers
         [Authorize]
         public async Task<IActionResult> CreateAsync([FromBody] TextCreateModel model)
         {
-            Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
+            Guid userId = _authenticationHelper.GetLoggedInUser(User);
             var text = _mapper.Map<Text>(model);
             await _textService.CreateAsync(userId, text);
             return Ok();
@@ -41,7 +41,7 @@ namespace Lwt.Controllers
         [Authorize]
         public async Task<IActionResult> GetAllAsync()
         {
-            Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
+            Guid userId = _authenticationHelper.GetLoggedInUser(User);
             IEnumerable<Text> texts = await _textService.GetByUserAsync(userId);
             var viewModels = _mapper.Map<IEnumerable<TextViewModel>>(texts);
             return Ok(viewModels);
@@ -51,7 +51,7 @@ namespace Lwt.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
         {
-            Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
+            Guid userId = _authenticationHelper.GetLoggedInUser(User);
             await _textService.DeleteAsync(id, userId);
             return Ok();
         }
@@ -60,7 +60,7 @@ namespace Lwt.Controllers
         [Authorize]
         public async Task<IActionResult> EditAsync([FromRoute] Guid id, [FromBody] TextEditModel editModel)
         {
-            Guid userId = _authenticationHelper.GetLoggedInUser(User.Identity);
+            Guid userId = _authenticationHelper.GetLoggedInUser(User);
             await _textService.EditAsync(id, userId, editModel);
             return Ok();
         }

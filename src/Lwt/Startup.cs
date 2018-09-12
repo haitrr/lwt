@@ -40,7 +40,6 @@ namespace Lwt
             services.AddMvc();
 
             // automapper
-            ServiceCollectionExtensions.UseStaticRegistration = false;
             services.AddAutoMapper();
 
             // mapper

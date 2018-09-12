@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Security.Claims;
 using System.Security.Principal;
 
 namespace Lwt.Interfaces
 {
     public interface IAuthenticationHelper
     {
-        Guid GetLoggedInUser(IIdentity identity);
+        Guid GetLoggedInUser(ClaimsPrincipal principal);
     }
 }

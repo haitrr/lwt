@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Principal;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Lwt.Controllers;
@@ -47,7 +47,7 @@ namespace Lwt.Test.Controllers
             var text = new Text();
             Guid userId = Guid.NewGuid();
             _mapper.Setup(m => m.Map<Text>(model)).Returns(text);
-            _authenticationHelper.Setup(h => h.GetLoggedInUser(_textController.User.Identity)).Returns(userId);
+            _authenticationHelper.Setup(h => h.GetLoggedInUser(_textController.User)).Returns(userId);
             _textService.Setup(s => s.CreateAsync(userId, text)).Returns(Task.CompletedTask);
 
             // act
@@ -77,7 +77,7 @@ namespace Lwt.Test.Controllers
             Guid userId = Guid.NewGuid();
             var texts = new List<Text>();
             _textService.Setup(s => s.GetByUserAsync(userId)).ReturnsAsync(texts);
-            _authenticationHelper.Setup(h => h.GetLoggedInUser(_textController.User.Identity)).Returns(userId);
+            _authenticationHelper.Setup(h => h.GetLoggedInUser(_textController.User)).Returns(userId);
             _mapper.Setup(m => m.Map<IEnumerable<TextViewModel>>(texts)).Returns(new List<TextViewModel>());
 
             //act
@@ -93,7 +93,7 @@ namespace Lwt.Test.Controllers
             // arrange
             Guid id = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
-            _authenticationHelper.Setup(h => h.GetLoggedInUser(It.IsAny<IIdentity>())).Returns(userId);
+            _authenticationHelper.Setup(h => h.GetLoggedInUser(It.IsAny<ClaimsPrincipal>())).Returns(userId);
 
             //act
             await _textController.DeleteAsync(id);
@@ -108,7 +108,7 @@ namespace Lwt.Test.Controllers
             // arrange
             Guid id = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
-            _authenticationHelper.Setup(h => h.GetLoggedInUser(It.IsAny<IIdentity>())).Returns(userId);
+            _authenticationHelper.Setup(h => h.GetLoggedInUser(It.IsAny<ClaimsPrincipal>())).Returns(userId);
 
             //act
             IActionResult actual = await _textController.DeleteAsync(id);
@@ -116,8 +116,8 @@ namespace Lwt.Test.Controllers
             // assert
             Assert.IsType<OkResult>(actual);
         }
-        
-        
+
+
         [Fact]
         public async Task EditAsync_ShouldReturnOk()
         {
@@ -126,12 +126,12 @@ namespace Lwt.Test.Controllers
             var editModel = new TextEditModel();
 
             //act
-            IActionResult actual = await _textController.EditAsync(id,editModel);
+            IActionResult actual = await _textController.EditAsync(id, editModel);
 
             // assert
             Assert.IsType<OkResult>(actual);
         }
-        
+
         [Fact]
         public async Task EditAsync_ShouldCallService()
         {
@@ -139,13 +139,13 @@ namespace Lwt.Test.Controllers
             Guid textId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             var editModel = new TextEditModel();
-            _authenticationHelper.Setup(h => h.GetLoggedInUser(It.IsAny<IIdentity>())).Returns(userId);
+            _authenticationHelper.Setup(h => h.GetLoggedInUser(It.IsAny<ClaimsPrincipal>())).Returns(userId);
 
             //act
-            await _textController.EditAsync(textId,editModel);
+            await _textController.EditAsync(textId, editModel);
 
             // assert
-            _textService.Verify(s=>s.EditAsync(textId,userId,editModel),Times.Once);
+            _textService.Verify(s => s.EditAsync(textId, userId, editModel), Times.Once);
         }
     }
 }
