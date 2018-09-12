@@ -21,11 +21,11 @@ namespace Lwt.Middleware
             }
             catch (ForbiddenException forbiddenException)
             {
-                await HandleForbiddenException(context);
+                await HandleForbiddenException(context, forbiddenException);
             }
             catch (NotFoundException notFoundException)
             {
-                await HandleNotFoundException(context);
+                await HandleNotFoundException(context, notFoundException);
             }
 
             catch (Exception)
@@ -41,32 +41,29 @@ namespace Lwt.Middleware
 
             return context.Response.WriteAsync(new ErrorDetails
             (
-                context.Response.StatusCode,
                 exception.Message
             ).ToString());
         }
 
-        private static Task HandleForbiddenException(HttpContext context)
+        private static Task HandleForbiddenException(HttpContext context, ForbiddenException forbiddenException)
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int) HttpStatusCode.Forbidden;
 
             return context.Response.WriteAsync(new ErrorDetails
             (
-                context.Response.StatusCode,
-                "Internal Server Error."
+                forbiddenException.Message
             ).ToString());
         }
 
-        private static Task HandleNotFoundException(HttpContext context)
+        private static Task HandleNotFoundException(HttpContext context, NotFoundException notFoundException)
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int) HttpStatusCode.NotFound;
 
             return context.Response.WriteAsync(new ErrorDetails
             (
-                context.Response.StatusCode,
-                "Internal Server Error."
+                notFoundException.Message
             ).ToString());
         }
 
@@ -77,7 +74,6 @@ namespace Lwt.Middleware
 
             return context.Response.WriteAsync(new ErrorDetails
             (
-                context.Response.StatusCode,
                 "Internal Server Error."
             ).ToString());
         }

@@ -4,13 +4,11 @@ namespace Lwt.Models
 {
     public class ErrorDetails
     {
-        private readonly int _statusCode;
-        private readonly string _message;
+        public string Message { get; }
 
-        public ErrorDetails(int statusCode, string message)
+        public ErrorDetails(string message)
         {
-            _statusCode = statusCode;
-            _message = message;
+            Message = message;
         }
 
         public override string ToString()
