@@ -32,7 +32,7 @@ namespace Lwt.Services
             return objectCollection;
         }
 
-        public abstract TTo Map(TFrom from, TTo editedText);
+        public abstract TTo Map(TFrom from, TTo to);
     }
 
     public abstract class BaseMapper<TFrom1, TFrom2, TTo> : IMapper<TFrom1, TFrom2, TTo> where TTo : class, new()

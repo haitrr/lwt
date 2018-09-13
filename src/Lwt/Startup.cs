@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
+using FluentValidation.AspNetCore;
 using Lwt.Interfaces.Services;
 using Lwt.Services;
 using Lwt.Interfaces;
@@ -37,7 +38,7 @@ namespace Lwt
                     return Task.CompletedTask;
                 };
             });
-            services.AddMvc();
+            services.AddMvc().AddFluentValidation();
 
             // automapper
             services.AddAutoMapper();
