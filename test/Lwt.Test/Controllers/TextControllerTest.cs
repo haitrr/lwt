@@ -22,14 +22,17 @@ namespace Lwt.Test.Controllers
         private readonly Mock<ITextService> _textService;
         private readonly Mock<IMapper> _mapper;
         private readonly Mock<IAuthenticationHelper> _authenticationHelper;
+        private readonly Mock<IMapper<TextCreateModel, Guid, Text>> _textCreateMapper;
 
         public TextControllerTest()
         {
             _textService = new Mock<ITextService>();
             _mapper = new Mock<IMapper>();
+            _textCreateMapper = new Mock<IMapper<TextCreateModel, Guid, Text>>();
             _authenticationHelper = new Mock<IAuthenticationHelper>();
 
-            _textController = new TextController(_textService.Object, _mapper.Object, _authenticationHelper.Object)
+            _textController = new TextController(_textService.Object, _mapper.Object, _authenticationHelper.Object,
+                _textCreateMapper.Object)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -46,22 +49,22 @@ namespace Lwt.Test.Controllers
             var model = new TextCreateModel();
             var text = new Text();
             Guid userId = Guid.NewGuid();
-            _mapper.Setup(m => m.Map<Text>(model)).Returns(text);
+            _textCreateMapper.Setup(m => m.Map(model, userId)).Returns(text);
             _authenticationHelper.Setup(h => h.GetLoggedInUser(_textController.User)).Returns(userId);
-            _textService.Setup(s => s.CreateAsync(userId, text)).Returns(Task.CompletedTask);
+            _textService.Setup(s => s.CreateAsync(text)).Returns(Task.CompletedTask);
 
             // act
             await _textController.CreateAsync(model);
 
             // assert
-            _textService.Verify(s => s.CreateAsync(userId, text), Times.Once);
+            _textService.Verify(s => s.CreateAsync(text), Times.Once);
         }
 
         [Fact]
         public async Task CreateAsync_ShouldReturnOk_IfSuccess()
         {
             // arrange
-            _textService.Setup(m => m.CreateAsync(It.IsAny<Guid>(), It.IsAny<Text>())).Returns(Task.CompletedTask);
+            _textService.Setup(m => m.CreateAsync(It.IsAny<Text>())).Returns(Task.CompletedTask);
 
             // act
             IActionResult actual = await _textController.CreateAsync(new TextCreateModel());

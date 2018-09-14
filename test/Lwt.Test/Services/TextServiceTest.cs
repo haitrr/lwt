@@ -33,7 +33,7 @@ namespace Lwt.Test.Services
             _transaction.Setup(t => t.Commit()).Returns(expect);
 
             //act
-            Task actual = _textService.CreateAsync(Guid.NewGuid(), new Text());
+            Task actual = _textService.CreateAsync(new Text());
 
             //assert
             Assert.Equal(expect, actual);
@@ -47,7 +47,7 @@ namespace Lwt.Test.Services
             var text = new Text();
 
             // act
-            await _textService.CreateAsync(Guid.Empty, text);
+            await _textService.CreateAsync(text);
 
             //assert
             _textRepository.Verify(r => r.Add(text), Times.Once);
@@ -59,7 +59,7 @@ namespace Lwt.Test.Services
             // arrange
             //act
             //assert
-            await _textService.CreateAsync(It.IsAny<Guid>(), new Text());
+            await _textService.CreateAsync(new Text());
         }
 
         [Fact]

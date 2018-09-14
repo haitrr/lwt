@@ -5,6 +5,7 @@ using Lwt.Exceptions;
 using Lwt.Interfaces;
 using Lwt.Interfaces.Services;
 using Lwt.Models;
+using Lwt.ViewModels;
 using LWT.Models;
 
 namespace Lwt.Services
@@ -23,9 +24,8 @@ namespace Lwt.Services
             _textEditMapper = textEditMapper;
         }
 
-        public Task CreateAsync(Guid userId, Text text)
+        public Task CreateAsync(Text text)
         {
-            text.UserId = userId;
             _textRepository.Add(text);
             return _transaction.Commit();
         }

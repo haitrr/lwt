@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Lwt.DbContexts;
 using Lwt.Models;
 using Microsoft.AspNetCore.Builder;
@@ -15,6 +16,7 @@ using Lwt.Mappers;
 using Lwt.Middleware;
 using Lwt.Transactions;
 using Lwt.Utilities;
+using Lwt.ViewModels;
 using LWT.Models;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -45,6 +47,7 @@ namespace Lwt
 
             // mapper
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
+            services.AddTransient<BaseMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
 
             // user
             services.AddScoped<IUserService, UserService>();

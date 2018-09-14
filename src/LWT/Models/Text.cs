@@ -8,5 +8,6 @@ namespace LWT.Models
         public Guid UserId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
+        public Guid LanguageId { get; set; }
     }
 }

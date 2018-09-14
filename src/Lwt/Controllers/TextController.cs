@@ -18,13 +18,15 @@ namespace Lwt.Controllers
     {
         private readonly ITextService _textService;
         private readonly IMapper _mapper;
+        private readonly IMapper<TextCreateModel,Guid,Text> _textCreateMapper;
         private readonly IAuthenticationHelper _authenticationHelper;
 
-        public TextController(ITextService textService, IMapper mapper, IAuthenticationHelper authenticationHelper)
+        public TextController(ITextService textService, IMapper mapper, IAuthenticationHelper authenticationHelper, IMapper<TextCreateModel, Guid, Text> textCreateMapper)
         {
             _textService = textService;
             _mapper = mapper;
             _authenticationHelper = authenticationHelper;
+            _textCreateMapper = textCreateMapper;
         }
 
         [HttpPost]
@@ -32,8 +34,8 @@ namespace Lwt.Controllers
         public async Task<IActionResult> CreateAsync([FromBody] TextCreateModel model)
         {
             Guid userId = _authenticationHelper.GetLoggedInUser(User);
-            var text = _mapper.Map<Text>(model);
-            await _textService.CreateAsync(userId, text);
+            Text text = _textCreateMapper.Map(model, userId);
+            await _textService.CreateAsync(text);
             return Ok();
         }
 
