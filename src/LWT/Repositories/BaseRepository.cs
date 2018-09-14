@@ -45,5 +45,10 @@ namespace Lwt.Repositories
                 throw new NotFoundException($"Item with id {id} not found.");
             }
         }
+
+        public async Task<bool> IsExists(Guid id)
+        {
+            return await DbSet.FindAsync(id.ToString()) != null;
+        }
     }
 }

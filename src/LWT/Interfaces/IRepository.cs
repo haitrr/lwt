@@ -10,5 +10,6 @@ namespace Lwt.Interfaces
         void DeleteById(T entity);
         void Update(T entity);
         Task<T> GetByIdAsync(Guid id);
+        Task<bool> IsExists(Guid id);
     }
 }

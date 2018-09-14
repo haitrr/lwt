@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using FluentValidation;
+using FluentValidation.Results;
 using Lwt.Exceptions;
 using Lwt.Interfaces;
 using Lwt.Models;
@@ -16,50 +18,49 @@ namespace Lwt.Test.Services
         private readonly Mock<ITextRepository> _textRepository;
         private readonly Mock<ITransaction> _transaction;
         private readonly Mock<IMapper<TextEditModel, Text>> _textEditMapper;
+        private readonly Mock<IValidator<Text>> _textValidator;
 
         public TextServiceTest()
         {
             _textEditMapper = new Mock<IMapper<TextEditModel, Text>>();
             _textRepository = new Mock<ITextRepository>();
             _transaction = new Mock<ITransaction>();
-            _textService = new TextService(_textRepository.Object, _transaction.Object, _textEditMapper.Object);
+            _textValidator = new Mock<IValidator<Text>>();
+
+            _textService = new TextService(_textRepository.Object, _transaction.Object, _textEditMapper.Object,
+                _textValidator.Object);
         }
 
-        [Fact]
-        public void CreateAsync_ShouldWork_IfSuccess()
-        {
-            // arrange
-            Task expect = Task.CompletedTask;
-            _transaction.Setup(t => t.Commit()).Returns(expect);
-
-            //act
-            Task actual = _textService.CreateAsync(new Text());
-
-            //assert
-            Assert.Equal(expect, actual);
-        }
 
         [Fact]
-        public async Task CreateAsync_ShouldCallRepository()
+        public async Task CreateAsync_ShouldThrowException_IfTextNotValid()
         {
             // arrange
-            _textRepository.Reset();
             var text = new Text();
+            var validationResult = new Mock<ValidationResult>();
+            _textValidator.Setup(v => v.Validate(text)).Returns(validationResult.Object);
+            // add an error
+            validationResult.Object.Errors.Add(new ValidationFailure("p", "e"));
+            validationResult.Setup(r => r.IsValid).Returns(false);
+
+            // assert
+            await Assert.ThrowsAsync<BadRequestException>(() => _textService.CreateAsync(text));
+        }
+
+        [Fact]
+        public async Task CreateAsync_ShouldCallRepository_IfTexValid()
+        {
+            // arrange
+            var text = new Text();
+            var validationResult = new Mock<ValidationResult>();
+            _textValidator.Setup(v => v.Validate(text)).Returns(validationResult.Object);
+            validationResult.Setup(r => r.IsValid).Returns(true);
 
             // act
             await _textService.CreateAsync(text);
 
             //assert
             _textRepository.Verify(r => r.Add(text), Times.Once);
-        }
-
-        [Fact]
-        public async Task CreateAsync_ShouldWork()
-        {
-            // arrange
-            //act
-            //assert
-            await _textService.CreateAsync(new Text());
         }
 
         [Fact]
