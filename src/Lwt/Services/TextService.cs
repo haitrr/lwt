@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
+using FluentValidation.Results;
 using Lwt.Exceptions;
 using Lwt.Interfaces;
 using Lwt.Interfaces.Services;
 using Lwt.Models;
-using Lwt.ViewModels;
 using LWT.Models;
 
 namespace Lwt.Services
@@ -14,18 +16,27 @@ namespace Lwt.Services
     {
         private readonly ITextRepository _textRepository;
         private readonly ITransaction _transaction;
+        private readonly IValidator<Text> _textValidator;
         private readonly IMapper<TextEditModel, Text> _textEditMapper;
 
         public TextService(ITextRepository textRepository, ITransaction transaction,
-            IMapper<TextEditModel, Text> textEditMapper)
+            IMapper<TextEditModel, Text> textEditMapper, IValidator<Text> textValidator)
         {
             _textRepository = textRepository;
             _transaction = transaction;
             _textEditMapper = textEditMapper;
+            _textValidator = textValidator;
         }
 
         public Task CreateAsync(Text text)
         {
+            ValidationResult validationResult = _textValidator.Validate(text);
+
+            if (!validationResult.IsValid)
+            {
+                throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
+            }
+
             _textRepository.Add(text);
             return _transaction.Commit();
         }
