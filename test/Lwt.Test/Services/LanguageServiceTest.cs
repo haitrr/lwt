@@ -40,6 +40,7 @@ namespace Lwt.Test.Services
             _languageCreateMapper.Setup(m => m.Map(userId, languageCreateModel)).Returns(language);
             var validateResult = new Mock<ValidationResult>();
             validateResult.Setup(v => v.IsValid).Returns(false);
+            validateResult.Object.Errors.Add(new ValidationFailure("propertyName","error"));
             _languageValidator.Setup(v => v.Validate(language)).Returns(validateResult.Object);
 
             // assert

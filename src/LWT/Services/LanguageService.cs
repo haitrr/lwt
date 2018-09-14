@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using FluentValidation.Results;
@@ -32,7 +33,7 @@ namespace Lwt.Services
 
             if (!validationResult.IsValid)
             {
-                throw new BadRequestException("Test passed");
+                throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
             }
 
             _languageRepository.Add(language);
