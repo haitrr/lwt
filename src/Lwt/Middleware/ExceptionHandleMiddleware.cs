@@ -26,7 +26,7 @@ namespace Lwt.Middleware
             }
             catch (BadRequestException exception)
             {
-                await this.HandleBadRequestException(context, exception);
+                await HandleBadRequestException(context, exception);
             }
             catch (ForbiddenException forbiddenException)
             {
