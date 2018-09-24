@@ -1,43 +1,56 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentValidation;
-using FluentValidation.Results;
-using Lwt.Exceptions;
-using Lwt.Interfaces;
-using Lwt.Models;
-
 namespace Lwt.Services
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using FluentValidation;
+    using FluentValidation.Results;
+    using Lwt.Exceptions;
+    using Lwt.Interfaces;
+    using Lwt.Models;
+
+    /// <summary>
+    /// a.
+    /// </summary>
     public class LanguageService : ILanguageService
     {
-        private readonly IValidator<Language> _languageValidator;
-        private readonly IMapper<Guid, LanguageCreateModel, Language> _languageCreateMapper;
-        private readonly ILanguageRepository _languageRepository;
-        private readonly ITransaction _transaction;
+        private readonly IValidator<Language> languageValidator;
+        private readonly IMapper<Guid, LanguageCreateModel, Language> languageCreateMapper;
+        private readonly ILanguageRepository languageRepository;
+        private readonly ITransaction transaction;
 
-        public LanguageService(IValidator<Language> languageValidator,
-            IMapper<Guid, LanguageCreateModel, Language> languageCreateMapper, ILanguageRepository languageRepository,
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LanguageService"/> class.
+        /// </summary>
+        /// <param name="languageValidator">languageValidator.</param>
+        /// <param name="languageCreateMapper">languageCreateMapper.</param>
+        /// <param name="languageRepository">languageRepository.</param>
+        /// <param name="transaction">transaction.</param>
+        public LanguageService(
+            IValidator<Language> languageValidator,
+            IMapper<Guid, LanguageCreateModel, Language> languageCreateMapper,
+            ILanguageRepository languageRepository,
             ITransaction transaction)
         {
-            _languageValidator = languageValidator;
-            _languageCreateMapper = languageCreateMapper;
-            _languageRepository = languageRepository;
-            _transaction = transaction;
+            this.languageValidator = languageValidator;
+            this.languageCreateMapper = languageCreateMapper;
+            this.languageRepository = languageRepository;
+            this.transaction = transaction;
         }
 
+        /// <inheritdoc/>
         public async Task<Guid> CreateAsync(Guid creatorId, LanguageCreateModel languageCreateModel)
         {
-            Language language = _languageCreateMapper.Map(creatorId, languageCreateModel);
-            ValidationResult validationResult = _languageValidator.Validate(language);
+            Language language = this.languageCreateMapper.Map(creatorId, languageCreateModel);
+            ValidationResult validationResult = this.languageValidator.Validate(language);
 
             if (!validationResult.IsValid)
             {
                 throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
             }
 
-            _languageRepository.Add(language);
-            await _transaction.Commit();
+            this.languageRepository.Add(language);
+            await this.transaction.Commit();
             return language.Id;
         }
     }

@@ -1,24 +1,35 @@
-using System.Threading.Tasks;
-using Lwt.Controllers;
-using Lwt.Interfaces.Services;
-using Lwt.ViewModels.User;
-using Moq;
-using Xunit;
-using Microsoft.AspNetCore.Mvc;
-
 namespace Lwt.Test.Controllers
 {
-    public class UserControllerTest
-    {
-        private readonly Mock<IUserService> _userService;
-        private readonly UserController _userController;
+    using System;
+    using System.Threading.Tasks;
+    using Lwt.Controllers;
+    using Lwt.Interfaces.Services;
+    using Lwt.ViewModels.User;
+    using Microsoft.AspNetCore.Mvc;
+    using Moq;
+    using Xunit;
 
+    /// <summary>
+    /// a.
+    /// </summary>
+    public class UserControllerTest : System.IDisposable
+    {
+        private readonly Mock<IUserService> userService;
+        private readonly UserController userController;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserControllerTest"/> class.
+        /// </summary>
         public UserControllerTest()
         {
-            _userService = new Mock<IUserService>();
-            _userController = new UserController(_userService.Object);
+            this.userService = new Mock<IUserService>();
+            this.userController = new UserController(this.userService.Object);
         }
 
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task SignUp_ShouldReturnOk_IfSignUpSuccess()
         {
@@ -29,87 +40,124 @@ namespace Lwt.Test.Controllers
             var signUpViewModel = new SignUpViewModel
             {
                 UserName = userName,
-                Password = passWord
+                Password = passWord,
             };
 
             // act
-            IActionResult result = await _userController.SignUpAsync(signUpViewModel);
+            IActionResult result = await this.userController.SignUpAsync(signUpViewModel);
 
             // assert
             Assert.IsType<OkResult>(result);
         }
 
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task Login_ShouldReturnBadRequest_IfSignUpFail()
         {
             // arrange
             var viewModel = new LoginViewModel();
-            _userController.ModelState.AddModelError("error", "message");
+            this.userController.ModelState.AddModelError("error", "message");
 
             // act
-            IActionResult actual = await _userController.LoginAsync(viewModel);
+            IActionResult actual = await this.userController.LoginAsync(viewModel);
 
-            //assert
+            // assert
             Assert.IsType<BadRequestResult>(actual);
         }
 
-
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task Login_ShouldReturnOk_IfLoginSuccessful()
         {
             // arrange
             var viewModel = new LoginViewModel();
-            _userService.Reset();
-            _userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(true);
+            this.userService.Reset();
+            this.userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(true);
 
             // act
-            IActionResult actual = await _userController.LoginAsync(viewModel);
+            IActionResult actual = await this.userController.LoginAsync(viewModel);
 
-            //assert
+            // assert
             Assert.IsType<OkResult>(actual);
         }
 
-
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task Login_ShouldBadRequest_IfLoginFail()
         {
             // arrange
             var viewModel = new LoginViewModel();
-            _userService.Reset();
-            _userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(false);
+            this.userService.Reset();
+            this.userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(false);
 
             // act
-            IActionResult actual = await _userController.LoginAsync(viewModel);
+            IActionResult actual = await this.userController.LoginAsync(viewModel);
 
-            //assert
+            // assert
             Assert.IsType<BadRequestResult>(actual);
         }
 
-
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task Logout_ShouldReturnOk()
         {
             // arrange
 
-
             // act
-            IActionResult actual = await _userController.LogoutAsync();
+            IActionResult actual = await this.userController.LogoutAsync();
 
             // assert
             Assert.IsType<OkResult>(actual);
         }
 
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
         public async Task Logout_ShouldCallLogoutServiceOnce()
         {
             // arrange
-            _userService.Reset();
+            this.userService.Reset();
 
             // act
-            await _userController.LogoutAsync();
+            await this.userController.LogoutAsync();
 
             // assert
-            _userService.Verify(s => s.LogoutAsync(), Times.Once);
+            this.userService.Verify(s => s.LogoutAsync(), Times.Once);
+        }
+
+        /// <summary>
+        /// a.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <param name="disposing">asd.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.userController?.Dispose();
+            }
         }
     }
 }

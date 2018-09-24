@@ -1,12 +1,16 @@
-using System;
-using Lwt.Services;
-using Lwt.ViewModels;
-using LWT.Models;
-
 namespace Lwt.Mappers
 {
-    public class TextCreateMapper:BaseMapper<TextCreateModel,Guid,Text>
+    using System;
+    using LWT.Models;
+    using Lwt.Services;
+    using Lwt.ViewModels;
+
+    /// <summary>
+    /// a.
+    /// </summary>
+    public class TextCreateMapper : BaseMapper<TextCreateModel, Guid, Text>
     {
+        /// <inheritdoc/>
         public override Text Map(TextCreateModel createModel, Guid creatorId, Text text)
         {
             text.Title = createModel.Title;

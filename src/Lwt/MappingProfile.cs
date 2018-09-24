@@ -1,18 +1,24 @@
-﻿using AutoMapper;
-using Lwt.Models;
-using Lwt.ViewModels;
-using Lwt.ViewModels.User;
-using LWT.Models;
-
 namespace Lwt
 {
-    public class MappingProfile  : Profile
+    using AutoMapper;
+    using Lwt.Models;
+    using LWT.Models;
+    using Lwt.ViewModels;
+    using Lwt.ViewModels.User;
+
+    /// <summary>
+    /// a.
+    /// </summary>
+    public class MappingProfile : Profile
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MappingProfile"/> class.
+        /// </summary>
         public MappingProfile()
         {
-            CreateMap<SignUpViewModel, User>();
-            CreateMap<TextCreateModel,Text>();
-            CreateMap<Text,TextViewModel>();
+            this.CreateMap<SignUpViewModel, User>();
+            this.CreateMap<TextCreateModel, Text>();
+            this.CreateMap<Text, TextViewModel>();
         }
     }
 }

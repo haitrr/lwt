@@ -1,60 +1,106 @@
-using System;
-using System.Threading.Tasks;
-using Lwt.Controllers;
-using Lwt.Interfaces;
-using Lwt.Models;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-using Xunit;
-
 namespace Lwt.Test.Controllers
 {
-    public class TermControllerTest
-    {
-        private readonly TermController _termController;
-        private readonly Mock<ITermService> _termService;
-        private readonly Mock<IMapper<TermCreateModel, Guid, Term>> _termCreateMapper;
-        private readonly Mock<IAuthenticationHelper> _authenticationHelper;
+    using System;
+    using System.Threading.Tasks;
+    using Lwt.Controllers;
+    using Lwt.Interfaces;
+    using Lwt.Models;
+    using Microsoft.AspNetCore.Mvc;
+    using Moq;
+    using Xunit;
 
+    /// <summary>
+    /// a.
+    /// </summary>
+    public class TermControllerTest : IDisposable
+    {
+        private readonly TermController termController;
+        private readonly Mock<ITermService> termService;
+        private readonly Mock<IMapper<TermCreateModel, Guid, Term>> termCreateMapper;
+        private readonly Mock<IAuthenticationHelper> authenticationHelper;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TermControllerTest"/> class.
+        /// </summary>
         public TermControllerTest()
         {
-            _termService = new Mock<ITermService>();
-            _termCreateMapper = new Mock<IMapper<TermCreateModel, Guid, Term>>();
-            _authenticationHelper = new Mock<IAuthenticationHelper>();
-            _termController = new TermController(_termService.Object, _termCreateMapper.Object,
-                _authenticationHelper.Object);
+            this.termService = new Mock<ITermService>();
+            this.termCreateMapper = new Mock<IMapper<TermCreateModel, Guid, Term>>();
+            this.authenticationHelper = new Mock<IAuthenticationHelper>();
+
+            this.termController = new TermController(
+                this.termService.Object,
+                this.termCreateMapper.Object,
+                this.authenticationHelper.Object);
         }
 
+        /// <summary>
+        /// Finalizes an instance of the <see cref="TermControllerTest"/> class.
+        /// </summary>
+        ~TermControllerTest()
+        {
+            this.Dispose(false);
+        }
+
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
         public async Task CreateAsync_ShouldReturnOkTermId()
         {
             // arrange
-            var termId = Guid.NewGuid();
-            _termService.Setup(s => s.CreateAsync(It.IsAny<Term>())).ReturnsAsync(termId);
-            //act
-            var actual = await _termController.CreateAsync(new TermCreateModel());
+            Guid termId = Guid.NewGuid();
+            this.termService.Setup(s => s.CreateAsync(It.IsAny<Term>())).ReturnsAsync(termId);
+
+            // act
+            IActionResult actual = await this.termController.CreateAsync(new TermCreateModel());
 
             // assert
             var obj = Assert.IsType<OkObjectResult>(actual);
-            Guid id = Assert.IsType<Guid>(obj.Value);
+            var id = Assert.IsType<Guid>(obj.Value);
             Assert.Equal(termId, id);
         }
 
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
         public async Task CreateAsync_ShouldCallService()
         {
             // arrange
-            var userId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
             var term = new Term();
-            _authenticationHelper.Setup(h => h.GetLoggedInUser(_termController.User)).Returns(userId);
+            this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.termController.User)).Returns(userId);
             var termCreateModel = new TermCreateModel();
 
-            _termCreateMapper.Setup(m => m.Map(termCreateModel, userId)).Returns(term);
-            //act
-            await _termController.CreateAsync(termCreateModel);
+            this.termCreateMapper.Setup(m => m.Map(termCreateModel, userId)).Returns(term);
 
-            //assert
-            _termService.Verify(s => s.CreateAsync(term), Times.Once);
+            // act
+            await this.termController.CreateAsync(termCreateModel);
+
+            // assert
+            this.termService.Verify(s => s.CreateAsync(term), Times.Once);
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        ///  dispose.
+        /// </summary>
+        /// <param name="disposing">disposing.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.termController?.Dispose();
+            }
         }
     }
 }

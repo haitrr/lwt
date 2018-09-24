@@ -1,35 +1,49 @@
-using System;
-using FluentValidation.Results;
-using Lwt.Models;
-using Lwt.Validators;
-using Xunit;
-
 namespace Lwt.Test.Validators
 {
+    using System;
+    using FluentValidation.Results;
+    using Lwt.Models;
+    using Lwt.Validators;
+    using Xunit;
+
+    /// <summary>
+    /// a.
+    /// </summary>
     public class LanguageValidatorTest
     {
-        private readonly LanguageValidator _languageValidator;
+        private readonly LanguageValidator languageValidator;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LanguageValidatorTest"/> class.
+        /// </summary>
         public LanguageValidatorTest()
         {
-            _languageValidator = new LanguageValidator();
+            this.languageValidator = new LanguageValidator();
         }
 
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <param name="name">name.</param>
         [Theory]
         [InlineData("")]
         [InlineData(null)]
         public void Validate_ShouldReturnNotValid_IfModelNotValid(string name)
         {
             // arrange
-            var language = new Language {Name = name};
+            var language = new Language { Name = name };
+
             // act
-            ValidationResult actual = _languageValidator.Validate(language);
+            ValidationResult actual = this.languageValidator.Validate(language);
 
             // assert
             Assert.False(actual.IsValid);
         }
 
-
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <param name="name">name.</param>
         [Theory]
         [InlineData("")]
         [InlineData(null)]
@@ -38,14 +52,19 @@ namespace Lwt.Test.Validators
         public void Validate_ShouldReturnInValid_IfNameNotValid(string name)
         {
             // arrange
-            var language = new Language {Name = name};
+            var language = new Language { Name = name };
+
             // act
-            ValidationResult actual = _languageValidator.Validate(language);
+            ValidationResult actual = this.languageValidator.Validate(language);
 
             // assert
             Assert.False(actual.IsValid);
         }
 
+        /// <summary>
+        /// a.
+        /// </summary>
+        /// <param name="name">name.</param>
         [Theory]
         [InlineData("Eng")]
         [InlineData("English")]
@@ -54,22 +73,26 @@ namespace Lwt.Test.Validators
         public void Validate_ShouldReturnValid_IfNameValid(string name)
         {
             // arrange
-            var language = new Language {Name = name, CreatorId = Guid.NewGuid()};
+            var language = new Language { Name = name, CreatorId = Guid.NewGuid() };
+
             // act
-            ValidationResult actual = _languageValidator.Validate(language);
+            ValidationResult actual = this.languageValidator.Validate(language);
 
             // assert
             Assert.True(actual.IsValid);
         }
 
+        /// <summary>
+        /// a.
+        /// </summary>
         [Fact]
         public void Validate_ShouldReturnInvalid_IfGuidIsEmpty()
         {
             // arrange
-            var language = new Language {Name = "asdl", CreatorId = Guid.Empty};
+            var language = new Language { Name = "asdl", CreatorId = Guid.Empty };
 
             // act
-            ValidationResult actual = _languageValidator.Validate(language);
+            ValidationResult actual = this.languageValidator.Validate(language);
 
             // assert
             Assert.False(actual.IsValid);

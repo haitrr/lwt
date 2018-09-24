@@ -1,44 +1,74 @@
-﻿using System;
-using System.Threading.Tasks;
-using Lwt.DbContexts;
-using Lwt.Exceptions;
-using Lwt.Interfaces;
-using Lwt.Models;
-using Microsoft.EntityFrameworkCore;
-
 namespace Lwt.Repositories
 {
-    public abstract class BaseRepository<T> : IRepository<T> where T : Entity
-    {
-        protected readonly LwtDbContext LwtDbContext;
-        protected readonly DbSet<T> DbSet;
+    using System;
+    using System.Threading.Tasks;
+    using Lwt.DbContexts;
+    using Lwt.Exceptions;
+    using Lwt.Interfaces;
+    using Lwt.Models;
+    using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// a.
+    /// </summary>
+    /// <typeparam name="T">type.</typeparam>
+    public abstract class BaseRepository<T> : IRepository<T>
+        where T : Entity
+    {
+        /// <summary>
+        /// a.
+        /// </summary>
+        private readonly LwtDbContext lwtDbContext;
+
+        /// <summary>
+        /// a.
+        /// </summary>
+        private readonly DbSet<T> dbSet;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BaseRepository{T}"/> class.
+        /// </summary>
+        /// <param name="lwtDbContext">a.</param>
         public BaseRepository(LwtDbContext lwtDbContext)
         {
-            LwtDbContext = lwtDbContext;
-            DbSet = LwtDbContext.Set<T>();
+            this.lwtDbContext = lwtDbContext;
+            this.dbSet = this.lwtDbContext.Set<T>();
         }
 
+        /// <summary>
+        /// Gets contex.
+        /// </summary>
+        protected LwtDbContext LwtDbContext => lwtDbContext;
+
+        /// <summary>
+        /// gets dbset.
+        /// </summary>
+        protected DbSet<T> DbSet => dbSet;
+
+        /// <inheritdoc/>
         public void Add(T entity)
         {
-            DbSet.Add(entity);
+            this.DbSet.Add(entity);
         }
 
+        /// <inheritdoc/>
         public void DeleteById(T entity)
         {
-            DbSet.Remove(entity);
+            this.DbSet.Remove(entity);
         }
 
+        /// <inheritdoc/>
         public void Update(T entity)
         {
-            DbSet.Update(entity);
+            this.DbSet.Update(entity);
         }
 
+        /// <inheritdoc/>
         public Task<T> GetByIdAsync(Guid id)
         {
             try
             {
-                return DbSet.SingleAsync(ad => ad.Id == id);
+                return this.DbSet.SingleAsync(ad => ad.Id == id);
             }
             catch
             {
@@ -46,9 +76,10 @@ namespace Lwt.Repositories
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> IsExists(Guid id)
         {
-            return await DbSet.FindAsync(id.ToString()) != null;
+            return await this.DbSet.FindAsync(id.ToString()) != null;
         }
     }
 }

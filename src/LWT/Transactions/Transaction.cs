@@ -1,21 +1,31 @@
-﻿using Lwt.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-
 namespace Lwt.Transactions
 {
-    public class Transaction<T> : ITransaction where T : DbContext
-    {
-        private readonly T _dbContext;
+    using System.Threading.Tasks;
+    using Lwt.Interfaces;
+    using Microsoft.EntityFrameworkCore;
 
+    /// <summary>
+    /// transaction.
+    /// </summary>
+    /// <typeparam name="T">type.</typeparam>
+    public class Transaction<T> : ITransaction
+        where T : DbContext
+    {
+        private readonly T dbContext;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Transaction{T}"/> class.
+        /// </summary>
+        /// <param name="dbContext">dbContext.</param>
         public Transaction(T dbContext)
         {
-            _dbContext = dbContext;
+            this.dbContext = dbContext;
         }
 
+        /// <inheritdoc/>
         public async Task Commit()
         {
-            await _dbContext.SaveChangesAsync();
+            await this.dbContext.SaveChangesAsync();
         }
     }
 }

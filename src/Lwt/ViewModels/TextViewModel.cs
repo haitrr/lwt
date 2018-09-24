@@ -1,8 +1,18 @@
-﻿namespace Lwt.ViewModels
+namespace Lwt.ViewModels
 {
+    /// <summary>
+    /// a.
+    /// </summary>
     public class TextViewModel
     {
-        public string Title {get;set;}
-        public string Content {get;set;}
+        /// <summary>
+        /// Gets or sets x.
+        /// </summary>
+        public string Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets a.
+        /// </summary>
+        public string Content { get; set; }
     }
 }

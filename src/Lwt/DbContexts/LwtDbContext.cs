@@ -1,17 +1,28 @@
-﻿using System;
-using Lwt.Models;
-using LWT.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-
 namespace Lwt.DbContexts
 {
+    using System;
+    using Lwt.Models;
+    using LWT.Models;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
+
+    /// <summary>
+    /// a.
+    /// </summary>
     public class LwtDbContext : IdentityDbContext<User, Role, Guid>
     {
-        public LwtDbContext(DbContextOptions<LwtDbContext> options) : base(options)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LwtDbContext"/> class.
+        /// </summary>
+        /// <param name="options">a.</param>
+        public LwtDbContext(DbContextOptions<LwtDbContext> options)
+            : base(options)
         {
         }
 
-        public DbSet<Text> Texts {get;set;}
+        /// <summary>
+        /// Gets or sets texts.
+        /// </summary>
+        public DbSet<Text> Texts { get; set; }
     }
 }

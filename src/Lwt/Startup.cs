@@ -1,30 +1,36 @@
-﻿using System;
-using System.Threading.Tasks;
-using Lwt.DbContexts;
-using Lwt.Models;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using AutoMapper;
-using FluentValidation.AspNetCore;
-using Lwt.Interfaces.Services;
-using Lwt.Services;
-using Lwt.Interfaces;
-using Lwt.Mappers;
-using Lwt.Middleware;
-using Lwt.Transactions;
-using Lwt.Utilities;
-using Lwt.ViewModels;
-using LWT.Models;
-using Swashbuckle.AspNetCore.Swagger;
-
 namespace Lwt
 {
+    using System;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using FluentValidation.AspNetCore;
+    using Lwt.DbContexts;
+    using Lwt.Interfaces;
+    using Lwt.Interfaces.Services;
+    using Lwt.Mappers;
+    using Lwt.Middleware;
+    using Lwt.Models;
+    using LWT.Models;
+    using Lwt.Services;
+    using Lwt.Transactions;
+    using Lwt.Utilities;
+    using Lwt.ViewModels;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
+    using Swashbuckle.AspNetCore.Swagger;
+
+    /// <summary>
+    /// statup.
+    /// </summary>
     public class Startup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services">services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<LwtDbContext>(options => options.UseInMemoryDatabase("Lwt"));
@@ -51,6 +57,7 @@ namespace Lwt
 
             // user
             services.AddScoped<IUserService, UserService>();
+
             // text
             services.AddScoped<ITextService, TextService>();
             services.AddScoped<ITextRepository, TextRepository>();
@@ -66,11 +73,14 @@ namespace Lwt
 
             // swagger
             services.AddSwaggerGen(
-                configure => { configure.SwaggerDoc("v1", new Info() {Title = "Lwt API", Version = "v1"}); }
-            );
+                configure => { configure.SwaggerDoc("v1", new Info() { Title = "Lwt API", Version = "v1" }); });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app">app.</param>
+        /// <param name="env">env.</param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
