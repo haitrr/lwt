@@ -1,10 +1,10 @@
-﻿namespace Lwt.Models
+namespace Lwt.Models
 {
     using System;
     using Microsoft.AspNetCore.Identity;
 
     /// <summary>
-    /// a.
+    /// User.
     /// </summary>
     public class User : IdentityUser<Guid>
     {

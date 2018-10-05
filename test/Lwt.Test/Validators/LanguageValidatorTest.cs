@@ -2,46 +2,31 @@ namespace Lwt.Test.Validators
 {
     using System;
     using FluentValidation.Results;
+    using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Validators;
+    using Moq;
     using Xunit;
 
     /// <summary>
-    /// a.
+    /// Test for language validator.
     /// </summary>
     public class LanguageValidatorTest
     {
         private readonly LanguageValidator languageValidator;
+        private readonly Mock<IUserRepository> userRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LanguageValidatorTest"/> class.
         /// </summary>
         public LanguageValidatorTest()
         {
-            this.languageValidator = new LanguageValidator();
+            this.userRepository = new Mock<IUserRepository>();
+            this.languageValidator = new LanguageValidator(this.userRepository.Object);
         }
 
         /// <summary>
-        /// a.
-        /// </summary>
-        /// <param name="name">name.</param>
-        [Theory]
-        [InlineData("")]
-        [InlineData(null)]
-        public void Validate_ShouldReturnNotValid_IfModelNotValid(string name)
-        {
-            // arrange
-            var language = new Language { Name = name };
-
-            // act
-            ValidationResult actual = this.languageValidator.Validate(language);
-
-            // assert
-            Assert.False(actual.IsValid);
-        }
-
-        /// <summary>
-        /// a.
+        /// Name should be valid.
         /// </summary>
         /// <param name="name">name.</param>
         [Theory]
@@ -52,7 +37,7 @@ namespace Lwt.Test.Validators
         public void Validate_ShouldReturnInValid_IfNameNotValid(string name)
         {
             // arrange
-            var language = new Language { Name = name };
+            var language = new Language { Name = name, CreatorId = this.GetValidUserId() };
 
             // act
             ValidationResult actual = this.languageValidator.Validate(language);
@@ -62,7 +47,7 @@ namespace Lwt.Test.Validators
         }
 
         /// <summary>
-        /// a.
+        /// Name should be valid.
         /// </summary>
         /// <param name="name">name.</param>
         [Theory]
@@ -73,7 +58,7 @@ namespace Lwt.Test.Validators
         public void Validate_ShouldReturnValid_IfNameValid(string name)
         {
             // arrange
-            var language = new Language { Name = name, CreatorId = Guid.NewGuid() };
+            var language = new Language { Name = name, CreatorId = this.GetValidUserId() };
 
             // act
             ValidationResult actual = this.languageValidator.Validate(language);
@@ -83,7 +68,7 @@ namespace Lwt.Test.Validators
         }
 
         /// <summary>
-        /// a.
+        /// Creator id should not empty.
         /// </summary>
         [Fact]
         public void Validate_ShouldReturnInvalid_IfGuidIsEmpty()
@@ -96,6 +81,31 @@ namespace Lwt.Test.Validators
 
             // assert
             Assert.False(actual.IsValid);
+        }
+
+        /// <summary>
+        /// creator should exist.
+        /// </summary>
+        [Fact]
+        public void Validate_ShouldReturnInvalid_IfCreatorNotExist()
+        {
+            // arrange
+            Guid creatorId = Guid.NewGuid();
+            var language = new Language { CreatorId = creatorId, Name = "asdd", Id = Guid.NewGuid() };
+            this.userRepository.Setup(m => m.IsExistAsync(creatorId)).ReturnsAsync(false);
+
+            // act
+            ValidationResult actual = this.languageValidator.Validate(language);
+
+            // assert
+            Assert.False(actual.IsValid);
+        }
+
+        private Guid GetValidUserId()
+        {
+            Guid validId = Guid.NewGuid();
+            this.userRepository.Setup(m => m.IsExistAsync(validId)).ReturnsAsync(true);
+            return validId;
         }
     }
 }
