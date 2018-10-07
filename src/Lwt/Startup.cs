@@ -58,6 +58,10 @@ namespace Lwt
             // user
             services.AddScoped<IUserService, UserService>();
 
+
+            // cors
+            services.AddCors();
+
             // text
             services.AddScoped<ITextService, TextService>();
             services.AddScoped<ITextRepository, TextRepository>();
@@ -73,7 +77,7 @@ namespace Lwt
 
             // swagger
             services.AddSwaggerGen(
-                configure => { configure.SwaggerDoc("v1", new Info() { Title = "Lwt API", Version = "v1" }); });
+                configure => { configure.SwaggerDoc("v1", new Info() {Title = "Lwt API", Version = "v1"}); });
         }
 
         /// <summary>
@@ -90,6 +94,7 @@ namespace Lwt
 
             app.UseAuthentication();
             app.UseMiddleware<ExceptionHandleMiddleware>();
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
