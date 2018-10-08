@@ -13,12 +13,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath></OutputPath>
-    <DocumentationFile>C:\Users\haitran\Documents\Mine\lwt\test\Lwt.Test\bin\Lwt.Test.xml</DocumentationFile>
+    <DocumentationFile>bin\Lwt.Test.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>C:\Users\haitran\Documents\Mine\lwt\test\Lwt.Test\bin\Lwt.Test.xml</DocumentationFile>
+    <DocumentationFile>bin\Lwt.Test.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

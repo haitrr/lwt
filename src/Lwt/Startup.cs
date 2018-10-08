@@ -58,7 +58,6 @@ namespace Lwt
             // user
             services.AddScoped<IUserService, UserService>();
 
-
             // cors
             services.AddCors();
 
@@ -77,7 +76,7 @@ namespace Lwt
 
             // swagger
             services.AddSwaggerGen(
-                configure => { configure.SwaggerDoc("v1", new Info() {Title = "Lwt API", Version = "v1"}); });
+                configure => { configure.SwaggerDoc("v1", new Info { Title = "Lwt API", Version = "v1" }); });
         }
 
         /// <summary>
