@@ -34,7 +34,17 @@ namespace Lwt
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<LwtDbContext>(options => options.UseInMemoryDatabase("Lwt"));
+            
+            // identity
             services.AddIdentity<User, Role>().AddEntityFrameworkStores<LwtDbContext>().AddDefaultTokenProviders();
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 1;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireNonAlphanumeric = false;
+            });
 
             services.ConfigureApplicationCookie(options =>
             {
