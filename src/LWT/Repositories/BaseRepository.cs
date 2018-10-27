@@ -79,7 +79,7 @@ namespace Lwt.Repositories
         /// <inheritdoc/>
         public async Task<bool> IsExists(Guid id)
         {
-            return await this.DbSet.FindAsync(id.ToString()) != null;
+            return await this.DbSet.FindAsync(id) != null;
         }
     }
 }

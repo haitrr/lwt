@@ -1,3 +1,5 @@
+using Lwt.Models;
+
 namespace Lwt.Interfaces
 {
     using System;
@@ -14,5 +16,13 @@ namespace Lwt.Interfaces
         /// <param name="id">id of the user.</param>
         /// <returns>whether the user is exist or not.</returns>
         Task<bool> IsExistAsync(Guid id);
+
+        /// <summary>
+        /// create a new user
+        /// </summary>
+        /// <param name="user">the new user.</param>
+        /// <param name="password">password</param>
+        /// <returns></returns>
+        Task CreateAsync(User user,string password);
     }
 }
