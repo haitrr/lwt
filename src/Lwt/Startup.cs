@@ -1,3 +1,5 @@
+using Lwt.Repositories;
+
 namespace Lwt
 {
     using System;
@@ -34,7 +36,7 @@ namespace Lwt
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<LwtDbContext>(options => options.UseInMemoryDatabase("Lwt"));
-            
+
             // identity
             services.AddIdentity<User, Role>().AddEntityFrameworkStores<LwtDbContext>().AddDefaultTokenProviders();
             services.Configure<IdentityOptions>(options =>
@@ -56,14 +58,15 @@ namespace Lwt
                     return Task.CompletedTask;
                 };
             });
-            services.AddMvc().AddFluentValidation();
+            services.AddMvc()
+                .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
             // automapper
             services.AddAutoMapper();
 
             // mapper
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
-            services.AddTransient<BaseMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
+            services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
 
             // user
             services.AddScoped<IUserService, UserService>();
@@ -74,9 +77,17 @@ namespace Lwt
             // text
             services.AddScoped<ITextService, TextService>();
             services.AddScoped<ITextRepository, TextRepository>();
+            
+            // repos
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ILanguageRepository, LanguageRepository>();
 
             // transaction
             services.AddScoped<ITransaction, Transaction<LwtDbContext>>();
+
+            // database seeder
+            services.AddTransient<IDatabaseSeeder, DatabaseSeeder>();
+
 
             // utilities
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
@@ -86,7 +97,7 @@ namespace Lwt
 
             // swagger
             services.AddSwaggerGen(
-                configure => { configure.SwaggerDoc("v1", new Info { Title = "Lwt API", Version = "v1" }); });
+                configure => { configure.SwaggerDoc("v1", new Info {Title = "Lwt API", Version = "v1"}); });
         }
 
         /// <summary>
@@ -94,7 +105,7 @@ namespace Lwt
         /// </summary>
         /// <param name="app">app.</param>
         /// <param name="env">env.</param>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IDatabaseSeeder databaseSeeder)
         {
             if (env.IsDevelopment())
             {
@@ -107,6 +118,7 @@ namespace Lwt
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
+            databaseSeeder.SeedData();
         }
     }
 }
