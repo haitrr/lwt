@@ -1,5 +1,3 @@
-using Lwt.Repositories;
-
 namespace Lwt
 {
     using System;
@@ -13,6 +11,7 @@ namespace Lwt
     using Lwt.Middleware;
     using Lwt.Models;
     using LWT.Models;
+    using Lwt.Repositories;
     using Lwt.Services;
     using Lwt.Transactions;
     using Lwt.Utilities;
@@ -105,6 +104,7 @@ namespace Lwt
         /// </summary>
         /// <param name="app">app.</param>
         /// <param name="env">env.</param>
+        /// <param name="databaseSeeder"> the database seeder.</param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IDatabaseSeeder databaseSeeder)
         {
             if (env.IsDevelopment())

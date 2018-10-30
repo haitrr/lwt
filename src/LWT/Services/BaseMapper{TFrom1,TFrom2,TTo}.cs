@@ -21,14 +21,16 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public ICollection<TTo> Map(IEnumerable<TFrom1> from1s, IEnumerable<TFrom2> from2s)
+        public ICollection<TTo> Map(IEnumerable<TFrom1> from1S, IEnumerable<TFrom2> from2S)
         {
             var tos = new List<TTo>();
 
-            if (from1s != null && from2s != null && from1s.Count() == from2s.Count())
+            var from1Array = from1S as TFrom1[] ?? from1S.ToArray();
+            var from2A = from2S as TFrom2[] ?? from2S.ToArray();
+            if (from1Array.Length == from2A.Length)
             {
-                IEnumerable<(TFrom1 From1, TFrom2 From2)> froms = from1s.Zip(
-                    from2s,
+                IEnumerable<(TFrom1 From1, TFrom2 From2)> froms = from1Array.Zip(
+                    from2A,
                     (from1, from2) => (From1: from1, From2: from2));
 
                 foreach ((TFrom1 from11, TFrom2 from21) in froms)

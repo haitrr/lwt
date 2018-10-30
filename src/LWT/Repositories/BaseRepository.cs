@@ -38,12 +38,12 @@ namespace Lwt.Repositories
         /// <summary>
         /// Gets contex.
         /// </summary>
-        protected LwtDbContext LwtDbContext => lwtDbContext;
+        protected LwtDbContext LwtDbContext => this.lwtDbContext;
 
         /// <summary>
         /// gets dbset.
         /// </summary>
-        protected DbSet<T> DbSet => dbSet;
+        protected DbSet<T> DbSet => this.dbSet;
 
         /// <inheritdoc/>
         public void Add(T entity)

@@ -22,16 +22,19 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public ICollection<TTo> Map(IEnumerable<TFrom1> from1s, IEnumerable<TFrom2> from2s, IEnumerable<TFrom3> from3s)
+        public ICollection<TTo> Map(IEnumerable<TFrom1> from1S, IEnumerable<TFrom2> from2S, IEnumerable<TFrom3> from3S)
         {
             var tos = new List<TTo>();
 
-            if (from1s != null && from2s != null && from3s != null && from1s.Count() == from2s.Count() &&
-                from2s.Count() == from3s.Count())
+            var enumerable = from3S as TFrom3[] ?? from3S.ToArray();
+            var from1Array = from1S as TFrom1[] ?? from1S.ToArray();
+            var from2Array = from2S as TFrom2[] ?? from2S.ToArray();
+            if (from1Array.Length == from2Array.Length &&
+                from2Array.Length == enumerable.Length)
             {
                 IEnumerable<(TFrom1 From1, TFrom2 From2, TFrom3 TFrom3)> froms =
-                    from1s.Zip(
-                        from2s.Zip(from3s, (from2, from3) => (from2, from3)),
+                    from1Array.Zip(
+                        from2Array.Zip(enumerable, (from2, from3) => (from2, from3)),
                         (from1, from2) => (From1: from1, From2: from2.from2, TFrom3: from2.from3));
 
                 foreach ((TFrom1 From1, TFrom2 From2, TFrom3 TFrom3) from in froms)

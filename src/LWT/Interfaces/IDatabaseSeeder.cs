@@ -1,12 +1,12 @@
 namespace Lwt.Interfaces
 {
     /// <summary>
-    /// database seeder
+    /// database seeder.
     /// </summary>
     public interface IDatabaseSeeder
     {
         /// <summary>
-        /// Seed the database
+        /// Seed the database.
         /// </summary>
         void SeedData();
     }

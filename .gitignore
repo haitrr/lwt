@@ -1,5 +1,6 @@
 /Properties/launchSettings.json
-
+// Mac
+.DS_Store
 #jetbrains
 .idea
 

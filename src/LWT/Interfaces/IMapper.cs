@@ -61,10 +61,10 @@ namespace Lwt.Interfaces
         /// <summary>
         /// d.
         /// </summary>
-        /// <param name="from1s">from1s.</param>
-        /// <param name="from2s">from2s.</param>
+        /// <param name="from1S">from1s.</param>
+        /// <param name="from2S">from2s.</param>
         /// <returns>a.</returns>
-        ICollection<TTo> Map(IEnumerable<TFrom1> from1s, IEnumerable<TFrom2> from2s);
+        ICollection<TTo> Map(IEnumerable<TFrom1> from1S, IEnumerable<TFrom2> from2S);
     }
 
     /// <summary>
@@ -98,10 +98,10 @@ namespace Lwt.Interfaces
         /// <summary>
         /// a.
         /// </summary>
-        /// <param name="from1s">from1s.</param>
-        /// <param name="from2s">from2s.</param>
-        /// <param name="from3s">from3s.</param>
+        /// <param name="from1S">from1s.</param>
+        /// <param name="from2S">from2s.</param>
+        /// <param name="from3S">from3s.</param>
         /// <returns>f.</returns>
-        ICollection<TTo> Map(IEnumerable<TFrom1> from1s, IEnumerable<TFrom2> from2s, IEnumerable<TFrom3> from3s);
+        ICollection<TTo> Map(IEnumerable<TFrom1> from1S, IEnumerable<TFrom2> from2S, IEnumerable<TFrom3> from3S);
     }
 }

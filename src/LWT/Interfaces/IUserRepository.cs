@@ -1,9 +1,8 @@
-using Lwt.Models;
-
 namespace Lwt.Interfaces
 {
     using System;
     using System.Threading.Tasks;
+    using Lwt.Models;
 
     /// <summary>
     /// repository for user.
@@ -18,11 +17,11 @@ namespace Lwt.Interfaces
         Task<bool> IsExistAsync(Guid id);
 
         /// <summary>
-        /// create a new user
+        /// create a new user.
         /// </summary>
         /// <param name="user">the new user.</param>
-        /// <param name="password">password</param>
-        /// <returns></returns>
+        /// <param name="password">password.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task CreateAsync(User user,string password);
     }
 }
