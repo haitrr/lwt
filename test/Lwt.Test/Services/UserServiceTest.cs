@@ -1,11 +1,11 @@
 namespace Lwt.Test.Services
 {
+    using System;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
+    using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Services;
-    using Lwt.ViewModels.User;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Moq;
     using Xunit;
@@ -17,7 +17,7 @@ namespace Lwt.Test.Services
     {
         private readonly UserService userService;
         private readonly Mock<UserManager<User>> userManager;
-        private readonly Mock<SignInManager<User>> signInManager;
+        private readonly Mock<ITokenProvider> tokenProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserServiceTest"/> class.
@@ -30,71 +30,69 @@ namespace Lwt.Test.Services
             this.userManager =
                 new Mock<UserManager<User>>(userStore.Object, null, null, null, null, null, null, null, null);
 
-            this.signInManager = new Mock<SignInManager<User>>(
-                this.userManager.Object,
-                new Mock<IHttpContextAccessor>().Object,
-                new Mock<IUserClaimsPrincipalFactory<User>>().Object,
-                null,
-                null,
-                null);
-            this.userService = new UserService(this.userManager.Object, this.signInManager.Object);
+            this.tokenProvider = new Mock<ITokenProvider>();
+            this.userService = new UserService(this.userManager.Object, this.tokenProvider.Object);
         }
 
         /// <summary>
-        /// a.
+        /// test login throw bad request if user does not exist.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task LoginAsync_ShouldReturnFalse_IfLoginFail()
+        public async Task LoginAsync_ShouldThrowBadRequest_IfUserNotExist()
         {
             // arrange
-            var model = new LoginViewModel();
+            var userName = "userName";
+            var password = "password";
+            this.userManager.Setup(m => m.FindByNameAsync(userName)).ReturnsAsync((User)null);
 
-            this.signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false))
-                .ReturnsAsync(SignInResult.Failed);
 
             // act
-            bool actual = await this.userService.LoginAsync(model.UserName, model.Password);
 
             // assert
-            Assert.False(actual);
+            await Assert.ThrowsAsync<BadRequestException>(() => this.userService.LoginAsync(userName, password));
         }
 
         /// <summary>
-        /// a.
+        /// login should throw bad request if the password is wrong.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task LoginAsync_ShouldReturnTrue_IfSuccess()
+        public async Task LoginAsync_ShouldThrowBadRequest_IfWrongPassword()
         {
             // arrange
-            var model = new LoginViewModel();
-
-            this.signInManager.Setup(m => m.PasswordSignInAsync(model.UserName, model.Password, false, false))
-                .ReturnsAsync(SignInResult.Success);
-
-            // act
-            bool actual = await this.userService.LoginAsync(model.UserName, model.Password);
+            var userName = "userName";
+            var password = "password";
+            User user = new User();
+            this.userManager.Setup(m => m.FindByNameAsync(userName)).ReturnsAsync(user);
+            this.userManager.Setup(m => m.CheckPasswordAsync(user, password)).ReturnsAsync(false);
 
             // assert
-            Assert.True(actual);
+            await Assert.ThrowsAsync<BadRequestException>(() => this.userService.LoginAsync(userName, password));
         }
 
         /// <summary>
-        /// a.
+        /// login should return authentication token if success.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task LogoutAsync_ShouldCallLogoutService()
+        public async Task LoginAsync_ShouldReturnToken_IfSuccess()
         {
             // arrange
-            this.signInManager.Reset();
+            var userName = "user";
+            var password = "pass";
+            User user = new User();
+            var token = Guid.NewGuid().ToString();
+            this.userManager.Setup(m => m.FindByNameAsync(userName)).ReturnsAsync(user);
+            this.userManager.Setup(m => m.CheckPasswordAsync(user, password)).ReturnsAsync(true);
+            this.tokenProvider.Setup(p => p.GenerateUserToken(user)).Returns(token);
+
 
             // act
-            await this.userService.LogoutAsync();
+            string actual = await this.userService.LoginAsync(userName, password);
 
             // assert
-            this.signInManager.Verify(m => m.SignOutAsync(), Times.Once);
+            Assert.Equal(token, actual);
         }
 
         /// <summary>
@@ -147,7 +145,7 @@ namespace Lwt.Test.Services
             var password = "pass";
 
             this.userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password))
-                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Hello" }));
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError {Description = "Hello"}));
 
             // act
 

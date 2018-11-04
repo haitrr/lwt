@@ -2,8 +2,8 @@ namespace Lwt.Controllers
 {
     using System.Threading.Tasks;
     using Lwt.Interfaces.Services;
+    using Lwt.Models;
     using Lwt.ViewModels.User;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
@@ -33,11 +33,11 @@ namespace Lwt.Controllers
         {
             await this.service.SignUpAsync(signUpViewModel.UserName, signUpViewModel.Password);
 
-            return this.Ok();
+            return this.Ok(new { });
         }
 
         /// <summary>
-        /// a.
+        /// login.
         /// </summary>
         /// <param name="viewModel">viewModel.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
@@ -49,26 +49,8 @@ namespace Lwt.Controllers
                 return this.BadRequest();
             }
 
-            bool success = await this.service.LoginAsync(viewModel.UserName, viewModel.Password);
-
-            if (success)
-            {
-                return this.Ok(new {});
-            }
-
-            return this.BadRequest();
-        }
-
-        /// <summary>
-        /// a.
-        /// </summary>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        [HttpPost("logout")]
-        [Authorize]
-        public async Task<IActionResult> LogoutAsync()
-        {
-            await this.service.LogoutAsync();
-            return this.Ok(new {});
+            string token = await this.service.LoginAsync(viewModel.UserName, viewModel.Password);
+            return this.Ok(new LoginResult {Token = token});
         }
     }
 }

@@ -21,12 +21,6 @@ namespace Lwt.Interfaces.Services
         /// <param name="userName">userName.</param>
         /// <param name="password">password.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> LoginAsync(string userName, string password);
-
-        /// <summary>
-        /// a.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task LogoutAsync();
+        Task<string> LoginAsync(string userName, string password);
     }
 }

@@ -1,7 +1,8 @@
 namespace Lwt
 {
     using System;
-    using System.Threading.Tasks;
+    using System.Collections.Generic;
+    using System.Text;
     using AutoMapper;
     using FluentValidation.AspNetCore;
     using Lwt.DbContexts;
@@ -16,11 +17,14 @@ namespace Lwt
     using Lwt.Transactions;
     using Lwt.Utilities;
     using Lwt.ViewModels;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.IdentityModel.Tokens;
     using Swashbuckle.AspNetCore.Swagger;
 
     /// <summary>
@@ -29,15 +33,55 @@ namespace Lwt
     public class Startup
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="configuration">the configuration.</param>
+        public Startup(IConfiguration configuration)
+        {
+            this.Configuration = configuration;
+        }
+
+        /// <summary>
+        /// Gets the configration.
+        /// </summary>
+        public IConfiguration Configuration { get; }
+
+        /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
         /// </summary>
         /// <param name="services">services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<LwtDbContext>(options => options.UseInMemoryDatabase("Lwt"));
+            services.AddMvc()
+                .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
+
+            services.AddDbContext<LwtDbContext>(options => options.UseSqlite("Data Source=lwt.db"));
 
             // identity
             services.AddIdentity<User, Role>().AddEntityFrameworkStores<LwtDbContext>().AddDefaultTokenProviders();
+
+            var appSettingsSection = this.Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+            var appSettings = appSettingsSection.Get<AppSettings>();
+
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                    };
+                });
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequireDigit = false;
@@ -47,18 +91,6 @@ namespace Lwt
                 options.Password.RequireNonAlphanumeric = false;
             });
 
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.Name = ".Lwt";
-
-                options.Events.OnRedirectToLogin = context =>
-                {
-                    context.Response.StatusCode = 401;
-                    return Task.CompletedTask;
-                };
-            });
-            services.AddMvc()
-                .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
             // automapper
             services.AddAutoMapper();
@@ -76,7 +108,7 @@ namespace Lwt
             // text
             services.AddScoped<ITextService, TextService>();
             services.AddScoped<ITextRepository, TextRepository>();
-            
+
             // repos
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ILanguageRepository, LanguageRepository>();
@@ -90,13 +122,28 @@ namespace Lwt
 
             // utilities
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
+            services.AddScoped<ITokenProvider, TokenProvider>();
 
             // middleware
             services.AddSingleton<ExceptionHandleMiddleware>();
 
             // swagger
-            services.AddSwaggerGen(
-                configure => { configure.SwaggerDoc("v1", new Info {Title = "Lwt API", Version = "v1"}); });
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info {Title = "Lwt API", Version = "v1"});
+                c.AddSecurityDefinition("Bearer", new ApiKeyScheme()
+                {
+                    Description =
+                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = "header",
+                    Type = "apiKey",
+                });
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                {
+                    {"Bearer", Array.Empty<string>()},
+                });
+            });
         }
 
         /// <summary>

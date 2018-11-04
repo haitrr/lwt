@@ -4,6 +4,7 @@ namespace Lwt.Test.Controllers
     using System.Threading.Tasks;
     using Lwt.Controllers;
     using Lwt.Interfaces.Services;
+    using Lwt.Models;
     using Lwt.ViewModels.User;
     using Microsoft.AspNetCore.Mvc;
     using Moq;
@@ -47,7 +48,7 @@ namespace Lwt.Test.Controllers
             IActionResult result = await this.userController.SignUpAsync(signUpViewModel);
 
             // assert
-            Assert.IsType<OkResult>(result);
+            Assert.IsType<OkObjectResult>(result);
         }
 
         /// <summary>
@@ -69,7 +70,7 @@ namespace Lwt.Test.Controllers
         }
 
         /// <summary>
-        /// a.
+        /// test if login return token if success.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
@@ -78,66 +79,18 @@ namespace Lwt.Test.Controllers
             // arrange
             var viewModel = new LoginViewModel();
             this.userService.Reset();
-            this.userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(true);
+            string token = Guid.NewGuid().ToString();
+            this.userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(token);
 
             // act
             IActionResult actual = await this.userController.LoginAsync(viewModel);
 
             // assert
-            Assert.IsType<OkResult>(actual);
+            var result = Assert.IsType<OkObjectResult>(actual);
+            var resultValue = Assert.IsType<LoginResult>(result.Value);
+            Assert.Equal(token, resultValue.Token);
         }
 
-        /// <summary>
-        /// a.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task Login_ShouldBadRequest_IfLoginFail()
-        {
-            // arrange
-            var viewModel = new LoginViewModel();
-            this.userService.Reset();
-            this.userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(false);
-
-            // act
-            IActionResult actual = await this.userController.LoginAsync(viewModel);
-
-            // assert
-            Assert.IsType<BadRequestResult>(actual);
-        }
-
-        /// <summary>
-        /// a.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task Logout_ShouldReturnOk()
-        {
-            // arrange
-
-            // act
-            IActionResult actual = await this.userController.LogoutAsync();
-
-            // assert
-            Assert.IsType<OkResult>(actual);
-        }
-
-        /// <summary>
-        /// a.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task Logout_ShouldCallLogoutServiceOnce()
-        {
-            // arrange
-            this.userService.Reset();
-
-            // act
-            await this.userController.LogoutAsync();
-
-            // assert
-            this.userService.Verify(s => s.LogoutAsync(), Times.Once);
-        }
 
         /// <summary>
         /// a.

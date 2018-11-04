@@ -3,6 +3,7 @@ namespace Lwt.Services
     using System.Linq;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
+    using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Microsoft.AspNetCore.Identity;
@@ -13,23 +14,25 @@ namespace Lwt.Services
     public class UserService : IUserService
     {
         private readonly UserManager<User> userManager;
-        private readonly SignInManager<User> signInManager;
+        private readonly ITokenProvider tokenProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
         /// </summary>
         /// <param name="userManager">userManager.</param>
-        /// <param name="signInManager">signInManager.</param>
-        public UserService(UserManager<User> userManager, SignInManager<User> signInManager)
+        /// <param name="tokenProvider">authentication token provider.</param>
+        public UserService(
+            UserManager<User> userManager,
+            ITokenProvider tokenProvider)
         {
             this.userManager = userManager;
-            this.signInManager = signInManager;
+            this.tokenProvider = tokenProvider;
         }
 
         /// <inheritdoc/>
         public async Task SignUpAsync(string userName, string passWord)
         {
-            IdentityResult result = await this.userManager.CreateAsync(new User { UserName = userName }, passWord);
+            IdentityResult result = await this.userManager.CreateAsync(new User {UserName = userName}, passWord);
 
             if (!result.Succeeded)
             {
@@ -38,22 +41,18 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public async Task<bool> LoginAsync(string userName, string password)
+        public async Task<string> LoginAsync(string userName, string password)
         {
-            SignInResult result = await this.signInManager.PasswordSignInAsync(userName, password, false, false);
-
-            if (result.Succeeded)
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user != null)
             {
-                return true;
+                if (await this.userManager.CheckPasswordAsync(user, password))
+                {
+                    return this.tokenProvider.GenerateUserToken(user);
+                }
             }
 
-            return false;
-        }
-
-        /// <inheritdoc/>
-        public async Task LogoutAsync()
-        {
-            await this.signInManager.SignOutAsync();
+            throw new BadRequestException("Username or password is incorrect.");
         }
     }
 }
