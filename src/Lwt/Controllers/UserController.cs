@@ -53,7 +53,7 @@ namespace Lwt.Controllers
 
             if (success)
             {
-                return this.Ok();
+                return this.Ok(new {});
             }
 
             return this.BadRequest();
@@ -68,7 +68,7 @@ namespace Lwt.Controllers
         public async Task<IActionResult> LogoutAsync()
         {
             await this.service.LogoutAsync();
-            return this.Ok();
+            return this.Ok(new {});
         }
     }
 }
