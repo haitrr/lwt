@@ -2,6 +2,7 @@ namespace Lwt.Utilities
 {
     using System;
     using System.Security.Claims;
+
     using Lwt.Interfaces;
 
     /// <summary>

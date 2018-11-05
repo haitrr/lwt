@@ -1,6 +1,7 @@
 namespace Lwt.Validators
 {
     using FluentValidation;
+
     using Lwt.Interfaces;
     using Lwt.Models;
 

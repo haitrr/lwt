@@ -3,8 +3,10 @@ namespace Lwt.Services
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+
     using FluentValidation;
     using FluentValidation.Results;
+
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
@@ -15,8 +17,11 @@ namespace Lwt.Services
     public class LanguageService : ILanguageService
     {
         private readonly IValidator<Language> languageValidator;
+
         private readonly IMapper<Guid, LanguageCreateModel, Language> languageCreateMapper;
+
         private readonly ILanguageRepository languageRepository;
+
         private readonly ITransaction transaction;
 
         /// <summary>
@@ -51,6 +56,7 @@ namespace Lwt.Services
 
             this.languageRepository.Add(language);
             await this.transaction.Commit();
+
             return language.Id;
         }
     }

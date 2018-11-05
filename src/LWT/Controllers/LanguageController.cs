@@ -2,10 +2,13 @@ namespace Lwt.Controllers
 {
     using System;
     using System.Threading.Tasks;
+
     using Lwt.Interfaces;
     using Lwt.Models;
+
     using Microsoft.AspNetCore.Mvc;
 
+    /// <inheritdoc />
     /// <summary>
     /// a.
     /// </summary>
@@ -13,6 +16,7 @@ namespace Lwt.Controllers
     public class LanguageController : Controller
     {
         private readonly ILanguageService languageService;
+
         private readonly IAuthenticationHelper authenticationHelper;
 
         /// <summary>
@@ -36,6 +40,7 @@ namespace Lwt.Controllers
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             Guid id = await this.languageService.CreateAsync(userId, languageCreateModel);
+
             return this.Ok(id);
         }
     }

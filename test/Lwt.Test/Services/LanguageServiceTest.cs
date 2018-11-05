@@ -2,13 +2,17 @@ namespace Lwt.Test.Services
 {
     using System;
     using System.Threading.Tasks;
+
     using FluentValidation;
     using FluentValidation.Results;
+
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Services;
+
     using Moq;
+
     using Xunit;
 
     /// <summary>
@@ -17,9 +21,13 @@ namespace Lwt.Test.Services
     public class LanguageServiceTest
     {
         private readonly LanguageService languageService;
+
         private readonly Mock<IValidator<Language>> languageValidator;
+
         private readonly Mock<IMapper<Guid, LanguageCreateModel, Language>> languageCreateMapper;
+
         private readonly Mock<ILanguageRepository> languageRepository;
+
         private readonly Mock<ITransaction> transaction;
 
         /// <summary>
@@ -57,8 +65,8 @@ namespace Lwt.Test.Services
             this.languageValidator.Setup(v => v.Validate(language)).Returns(validateResult.Object);
 
             // assert
-            await Assert.ThrowsAsync<BadRequestException>(() =>
-                this.languageService.CreateAsync(userId, languageCreateModel));
+            await Assert.ThrowsAsync<BadRequestException>(
+                () => this.languageService.CreateAsync(userId, languageCreateModel));
         }
 
         /// <summary>

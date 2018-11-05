@@ -20,7 +20,7 @@ namespace Lwt.Utilities
         /// <inheritdoc />
         public void SeedData()
         {
-            var hai = new User {UserName = "hai"};
+            var hai = new User { UserName = "hai" };
             this.userRepository.CreateAsync(hai, "q");
         }
     }

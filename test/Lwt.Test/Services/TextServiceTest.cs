@@ -2,14 +2,20 @@ namespace Lwt.Test.Services
 {
     using System;
     using System.Threading.Tasks;
+
     using FluentValidation;
     using FluentValidation.Results;
+
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
+
     using LWT.Models;
+
     using Lwt.Services;
+
     using Moq;
+
     using Xunit;
 
     /// <summary>
@@ -18,9 +24,13 @@ namespace Lwt.Test.Services
     public class TextServiceTest
     {
         private readonly TextService textService;
+
         private readonly Mock<ITextRepository> textRepository;
+
         private readonly Mock<ITransaction> transaction;
+
         private readonly Mock<IMapper<TextEditModel, Text>> textEditMapper;
+
         private readonly Mock<IValidator<Text>> textValidator;
 
         /// <summary>

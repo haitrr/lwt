@@ -5,7 +5,7 @@ namespace Lwt.Repositories
     using Lwt.Models;
 
     /// <inheritdoc cref="ILanguageRepository" />
-    public class LanguageRepository : BaseRepository<Language>,ILanguageRepository
+    public class LanguageRepository : BaseRepository<Language>, ILanguageRepository
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LanguageRepository"/> class.

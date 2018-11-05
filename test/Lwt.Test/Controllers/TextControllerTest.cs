@@ -4,27 +4,39 @@ namespace Lwt.Test.Controllers
     using System.Collections.Generic;
     using System.Security.Claims;
     using System.Threading.Tasks;
+
     using AutoMapper;
+
     using Lwt.Controllers;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+
     using LWT.Models;
+
     using Lwt.ViewModels;
+
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+
     using Moq;
+
     using Xunit;
 
+    /// <inheritdoc />
     /// <summary>
     /// a.
     /// </summary>
     public class TextControllerTest : IDisposable
     {
         private readonly TextController textController;
+
         private readonly Mock<ITextService> textService;
+
         private readonly Mock<IMapper> mapper;
+
         private readonly Mock<IAuthenticationHelper> authenticationHelper;
+
         private readonly Mock<IMapper<TextCreateModel, Guid, Text>> textCreateMapper;
 
         /// <summary>

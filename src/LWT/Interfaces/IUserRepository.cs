@@ -2,6 +2,7 @@ namespace Lwt.Interfaces
 {
     using System;
     using System.Threading.Tasks;
+
     using Lwt.Models;
 
     /// <summary>
@@ -22,6 +23,6 @@ namespace Lwt.Interfaces
         /// <param name="user">the new user.</param>
         /// <param name="password">password.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task CreateAsync(User user,string password);
+        Task CreateAsync(User user, string password);
     }
 }

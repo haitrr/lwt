@@ -2,10 +2,12 @@ namespace Lwt.Services
 {
     using System.Linq;
     using System.Threading.Tasks;
+
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+
     using Microsoft.AspNetCore.Identity;
 
     /// <summary>
@@ -14,6 +16,7 @@ namespace Lwt.Services
     public class UserService : IUserService
     {
         private readonly UserManager<User> userManager;
+
         private readonly ITokenProvider tokenProvider;
 
         /// <summary>
@@ -21,9 +24,7 @@ namespace Lwt.Services
         /// </summary>
         /// <param name="userManager">userManager.</param>
         /// <param name="tokenProvider">authentication token provider.</param>
-        public UserService(
-            UserManager<User> userManager,
-            ITokenProvider tokenProvider)
+        public UserService(UserManager<User> userManager, ITokenProvider tokenProvider)
         {
             this.userManager = userManager;
             this.tokenProvider = tokenProvider;
@@ -32,7 +33,7 @@ namespace Lwt.Services
         /// <inheritdoc/>
         public async Task SignUpAsync(string userName, string passWord)
         {
-            IdentityResult result = await this.userManager.CreateAsync(new User {UserName = userName}, passWord);
+            IdentityResult result = await this.userManager.CreateAsync(new User { UserName = userName }, passWord);
 
             if (!result.Succeeded)
             {
@@ -43,7 +44,8 @@ namespace Lwt.Services
         /// <inheritdoc/>
         public async Task<string> LoginAsync(string userName, string password)
         {
-            var user = await this.userManager.FindByNameAsync(userName);
+            User user = await this.userManager.FindByNameAsync(userName);
+
             if (user != null)
             {
                 if (await this.userManager.CheckPasswordAsync(user, password))

@@ -2,6 +2,7 @@ namespace Lwt.Services
 {
     using System.Collections.Generic;
     using System.Linq;
+
     using Lwt.Interfaces;
 
     /// <summary>
@@ -17,6 +18,7 @@ namespace Lwt.Services
         public TTo Map(TFrom1 from1, TFrom2 from2)
         {
             var to = new TTo();
+
             return this.Map(from1, from2, to);
         }
 
@@ -25,13 +27,14 @@ namespace Lwt.Services
         {
             var tos = new List<TTo>();
 
-            var from1Array = from1S as TFrom1[] ?? from1S.ToArray();
-            var from2A = from2S as TFrom2[] ?? from2S.ToArray();
+            TFrom1[] from1Array = from1S as TFrom1[] ?? from1S.ToArray();
+            TFrom2[] from2A = from2S as TFrom2[] ?? from2S.ToArray();
+
             if (from1Array.Length == from2A.Length)
             {
                 IEnumerable<(TFrom1 From1, TFrom2 From2)> froms = from1Array.Zip(
                     from2A,
-                    (from1, from2) => (From1: from1, From2: from2));
+                    (from1, from2) => (From1 : from1, From2 : from2));
 
                 foreach ((TFrom1 from11, TFrom2 from21) in froms)
                 {

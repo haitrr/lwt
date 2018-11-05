@@ -1,6 +1,7 @@
 ﻿namespace Lwt.Services
 {
     using System.Collections.Generic;
+
     using Lwt.Interfaces;
 
     /// <summary>
@@ -15,6 +16,7 @@
         public TTo Map(TFrom from)
         {
             var to = new TTo();
+
             return this.Map(from, to);
         }
 

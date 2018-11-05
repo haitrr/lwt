@@ -2,21 +2,29 @@ namespace Lwt.Test.Controllers
 {
     using System;
     using System.Threading.Tasks;
+
     using Lwt.Controllers;
     using Lwt.Interfaces;
     using Lwt.Models;
+
     using Microsoft.AspNetCore.Mvc;
+
     using Moq;
+
     using Xunit;
 
+    /// <inheritdoc />
     /// <summary>
     /// a.
     /// </summary>
     public class TermControllerTest : IDisposable
     {
         private readonly TermController termController;
+
         private readonly Mock<ITermService> termService;
+
         private readonly Mock<IMapper<TermCreateModel, Guid, Term>> termCreateMapper;
+
         private readonly Mock<IAuthenticationHelper> authenticationHelper;
 
         /// <summary>

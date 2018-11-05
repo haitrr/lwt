@@ -2,20 +2,27 @@ namespace Lwt.Test.Controllers
 {
     using System;
     using System.Threading.Tasks;
+
     using Lwt.Controllers;
     using Lwt.Interfaces;
     using Lwt.Models;
+
     using Microsoft.AspNetCore.Mvc;
+
     using Moq;
+
     using Xunit;
 
+    /// <inheritdoc />
     /// <summary>
     /// test.
     /// </summary>
     public class LanguageControllerTest : IDisposable
     {
         private readonly Mock<ILanguageService> languageService;
+
         private readonly LanguageController languageController;
+
         private readonly Mock<IAuthenticationHelper> authenticationHelper;
 
         /// <summary>
@@ -27,8 +34,9 @@ namespace Lwt.Test.Controllers
             this.languageService = new Mock<ILanguageService>();
             this.authenticationHelper = new Mock<IAuthenticationHelper>();
 
-            this.languageController =
-                new LanguageController(this.languageService.Object, this.authenticationHelper.Object);
+            this.languageController = new LanguageController(
+                this.languageService.Object,
+                this.authenticationHelper.Object);
         }
 
         /// <summary>
@@ -63,6 +71,7 @@ namespace Lwt.Test.Controllers
             Assert.True(value == id);
         }
 
+        /// <inheritdoc />
         /// <summary>
         ///  dispose.
         /// </summary>

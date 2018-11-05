@@ -1,15 +1,18 @@
 namespace Lwt.Validators
 {
     using FluentValidation;
+
     using Lwt.Interfaces;
     using Lwt.Models;
+
     using LWT.Models;
+
     using Microsoft.AspNetCore.Identity;
 
 #pragma warning disable CA1710 // Identifiers should have correct suffix
-                              /// <summary>
-                              /// a.
-                              /// </summary>
+    /// <summary>
+    /// a.
+    /// </summary>
     public class TextValidator : AbstractValidator<Text>
 #pragma warning restore CA1710 // Identifiers should have correct suffix
     {
@@ -20,8 +23,10 @@ namespace Lwt.Validators
         /// <param name="languageRepository">languageRepository.</param>
         public TextValidator(UserManager<User> userManager, ILanguageRepository languageRepository)
         {
-            this.RuleFor(text => text.UserId).NotEmpty().MustAsync(async (id, token) =>
-                await userManager.FindByIdAsync(id.ToString()) != null).WithMessage("Creator does not exist");
+            this.RuleFor(text => text.UserId).NotEmpty()
+                .MustAsync(async (id, token) => await userManager.FindByIdAsync(id.ToString()) != null)
+                .WithMessage("Creator does not exist");
+
             this.RuleFor(text => text.Content).NotEmpty();
             this.RuleFor(text => text.Title).NotEmpty();
 

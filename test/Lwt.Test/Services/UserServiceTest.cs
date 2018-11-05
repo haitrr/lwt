@@ -2,12 +2,16 @@ namespace Lwt.Test.Services
 {
     using System;
     using System.Threading.Tasks;
+
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Services;
+
     using Microsoft.AspNetCore.Identity;
+
     using Moq;
+
     using Xunit;
 
     /// <summary>
@@ -16,7 +20,9 @@ namespace Lwt.Test.Services
     public class UserServiceTest
     {
         private readonly UserService userService;
+
         private readonly Mock<UserManager<User>> userManager;
+
         private readonly Mock<ITokenProvider> tokenProvider;
 
         /// <summary>
@@ -27,8 +33,16 @@ namespace Lwt.Test.Services
         {
             var userStore = new Mock<IUserStore<User>>();
 
-            this.userManager =
-                new Mock<UserManager<User>>(userStore.Object, null, null, null, null, null, null, null, null);
+            this.userManager = new Mock<UserManager<User>>(
+                userStore.Object,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
 
             this.tokenProvider = new Mock<ITokenProvider>();
             this.userService = new UserService(this.userManager.Object, this.tokenProvider.Object);
@@ -46,7 +60,6 @@ namespace Lwt.Test.Services
             var password = "password";
             this.userManager.Setup(m => m.FindByNameAsync(userName)).ReturnsAsync((User)null);
 
-
             // act
 
             // assert
@@ -63,7 +76,7 @@ namespace Lwt.Test.Services
             // arrange
             var userName = "userName";
             var password = "password";
-            User user = new User();
+            var user = new User();
             this.userManager.Setup(m => m.FindByNameAsync(userName)).ReturnsAsync(user);
             this.userManager.Setup(m => m.CheckPasswordAsync(user, password)).ReturnsAsync(false);
 
@@ -81,12 +94,11 @@ namespace Lwt.Test.Services
             // arrange
             var userName = "user";
             var password = "pass";
-            User user = new User();
-            var token = Guid.NewGuid().ToString();
+            var user = new User();
+            string token = Guid.NewGuid().ToString();
             this.userManager.Setup(m => m.FindByNameAsync(userName)).ReturnsAsync(user);
             this.userManager.Setup(m => m.CheckPasswordAsync(user, password)).ReturnsAsync(true);
             this.tokenProvider.Setup(p => p.GenerateUserToken(user)).Returns(token);
-
 
             // act
             string actual = await this.userService.LoginAsync(userName, password);
@@ -145,7 +157,7 @@ namespace Lwt.Test.Services
             var password = "pass";
 
             this.userManager.Setup(m => m.CreateAsync(It.Is<User>(u => u.UserName == userName), password))
-                .ReturnsAsync(IdentityResult.Failed(new IdentityError {Description = "Hello"}));
+                .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Hello" }));
 
             // act
 

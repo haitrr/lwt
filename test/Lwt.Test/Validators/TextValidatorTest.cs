@@ -2,13 +2,20 @@ namespace Lwt.Test.Validators
 {
     using System;
     using System.Linq;
+
     using FluentValidation.Results;
+
     using Lwt.Interfaces;
     using Lwt.Models;
+
     using LWT.Models;
+
     using Lwt.Validators;
+
     using Microsoft.AspNetCore.Identity;
+
     using Moq;
+
     using Xunit;
 
     /// <summary>
@@ -17,7 +24,9 @@ namespace Lwt.Test.Validators
     public class TextValidatorTest
     {
         private readonly TextValidator textValidator;
+
         private readonly Mock<UserManager<User>> userManager;
+
         private readonly Mock<ILanguageRepository> languageRepository;
 
         /// <summary>
@@ -28,8 +37,17 @@ namespace Lwt.Test.Validators
         {
             var userStore = new Mock<IUserStore<User>>();
 
-            this.userManager =
-                new Mock<UserManager<User>>(userStore.Object, null, null, null, null, null, null, null, null);
+            this.userManager = new Mock<UserManager<User>>(
+                userStore.Object,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+
             this.languageRepository = new Mock<ILanguageRepository>();
             this.textValidator = new TextValidator(this.userManager.Object, this.languageRepository.Object);
         }
@@ -80,6 +98,7 @@ namespace Lwt.Test.Validators
             // arrange
             var text = new Text
                 { UserId = Guid.NewGuid(), Content = "valid", Title = string.Empty, LanguageId = Guid.NewGuid() };
+
             this.languageRepository.Setup(r => r.IsExists(text.LanguageId)).ReturnsAsync(true);
             this.userManager.Setup(m => m.FindByIdAsync(text.UserId.ToString())).ReturnsAsync(new User());
 
@@ -100,6 +119,7 @@ namespace Lwt.Test.Validators
             // arrange
             var text = new Text
                 { UserId = Guid.NewGuid(), Content = string.Empty, Title = "yolo", LanguageId = Guid.NewGuid() };
+
             this.languageRepository.Setup(r => r.IsExists(text.LanguageId)).ReturnsAsync(true);
             this.userManager.Setup(m => m.FindByIdAsync(text.UserId.ToString())).ReturnsAsync(new User());
 
@@ -120,6 +140,7 @@ namespace Lwt.Test.Validators
             // arrange
             var text = new Text
                 { UserId = Guid.NewGuid(), Content = "yolo", Title = "yolo", LanguageId = Guid.NewGuid() };
+
             this.languageRepository.Setup(r => r.IsExists(text.LanguageId)).ReturnsAsync(true);
             this.userManager.Setup(m => m.FindByIdAsync(text.UserId.ToString())).ReturnsAsync((User)null);
 

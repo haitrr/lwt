@@ -1,6 +1,7 @@
 namespace LWT.Models
 {
     using System;
+
     using Lwt.Models;
 
     /// <summary>

@@ -1,11 +1,15 @@
 namespace Lwt.Test.Validators
 {
     using System;
+
     using FluentValidation.Results;
+
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Validators;
+
     using Moq;
+
     using Xunit;
 
     /// <summary>
@@ -14,6 +18,7 @@ namespace Lwt.Test.Validators
     public class LanguageValidatorTest
     {
         private readonly LanguageValidator languageValidator;
+
         private readonly Mock<IUserRepository> userRepository;
 
         /// <summary>
@@ -105,6 +110,7 @@ namespace Lwt.Test.Validators
         {
             Guid validId = Guid.NewGuid();
             this.userRepository.Setup(m => m.IsExistAsync(validId)).ReturnsAsync(true);
+
             return validId;
         }
     }

@@ -2,20 +2,26 @@ namespace Lwt.Test.Controllers
 {
     using System;
     using System.Threading.Tasks;
+
     using Lwt.Controllers;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Lwt.ViewModels.User;
+
     using Microsoft.AspNetCore.Mvc;
+
     using Moq;
+
     using Xunit;
 
+    /// <inheritdoc />
     /// <summary>
     /// a.
     /// </summary>
     public class UserControllerTest : System.IDisposable
     {
         private readonly Mock<IUserService> userService;
+
         private readonly UserController userController;
 
         /// <summary>
@@ -91,7 +97,7 @@ namespace Lwt.Test.Controllers
             Assert.Equal(token, resultValue.Token);
         }
 
-
+        /// <inheritdoc />
         /// <summary>
         /// a.
         /// </summary>

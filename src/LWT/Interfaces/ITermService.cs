@@ -6,16 +6,15 @@ namespace Lwt.Interfaces
     using Lwt.Models;
 
     /// <summary>
-    /// d.
+    /// a.
     /// </summary>
-    public interface ILanguageService
+    public interface ITermService
     {
         /// <summary>
-        /// z.
+        /// a.
         /// </summary>
-        /// <param name="creatorId">creatorId.</param>
-        /// <param name="languageCreateModel">languageCreateModel.</param>
+        /// <param name="term">term.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<Guid> CreateAsync(Guid creatorId, LanguageCreateModel languageCreateModel);
+        Task<Guid> CreateAsync(Term term);
     }
 }

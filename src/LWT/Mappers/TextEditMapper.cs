@@ -1,7 +1,9 @@
 namespace Lwt.Mappers
 {
     using Lwt.Models;
+
     using LWT.Models;
+
     using Lwt.Services;
 
     /// <summary>
@@ -14,6 +16,7 @@ namespace Lwt.Mappers
         {
             editedText.Title = editModel.Title;
             editedText.Content = editModel.Content;
+
             return editedText;
         }
     }
