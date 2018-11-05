@@ -4,10 +4,8 @@ namespace Lwt.Utilities
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Text;
-
     using Lwt.Interfaces;
     using Lwt.Models;
-
     using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
 
@@ -34,11 +32,11 @@ namespace Lwt.Utilities
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(
-                    new[]
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    }),
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(Constants.UserIdClaimType, user.Id.ToString()),
+                    new Claim("userName", user.UserName),
+                }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
