@@ -2,11 +2,14 @@ namespace Lwt.Controllers
 {
     using System;
     using System.Threading.Tasks;
+
     using Lwt.Interfaces;
     using Lwt.Models;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
+    /// <inheritdoc />
     /// <summary>
     /// a.
     /// </summary>
@@ -14,7 +17,9 @@ namespace Lwt.Controllers
     public class TermController : Controller
     {
         private readonly ITermService termService;
+
         private readonly IMapper<TermCreateModel, Guid, Term> termCreateMapper;
+
         private readonly IAuthenticationHelper authenticationHelper;
 
         /// <summary>
@@ -45,6 +50,7 @@ namespace Lwt.Controllers
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             Term term = this.termCreateMapper.Map(termCreateModel, userId);
             Guid id = await this.termService.CreateAsync(term);
+
             return this.Ok(id);
         }
     }

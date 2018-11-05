@@ -3,15 +3,21 @@ namespace Lwt.Controllers
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+
     using AutoMapper;
+
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+
     using LWT.Models;
+
     using Lwt.ViewModels;
+
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
+    /// <inheritdoc />
     /// <summary>
     /// a.
     /// </summary>
@@ -20,8 +26,11 @@ namespace Lwt.Controllers
     public class TextController : Controller
     {
         private readonly ITextService textService;
+
         private readonly IMapper mapper;
+
         private readonly IMapper<TextCreateModel, Guid, Text> textCreateMapper;
+
         private readonly IAuthenticationHelper authenticationHelper;
 
         /// <summary>
@@ -31,7 +40,11 @@ namespace Lwt.Controllers
         /// <param name="mapper">mapper.</param>
         /// <param name="authenticationHelper">authenticationHelper.</param>
         /// <param name="textCreateMapper">textCreateMapper.</param>
-        public TextController(ITextService textService, IMapper mapper, IAuthenticationHelper authenticationHelper, IMapper<TextCreateModel, Guid, Text> textCreateMapper)
+        public TextController(
+            ITextService textService,
+            IMapper mapper,
+            IAuthenticationHelper authenticationHelper,
+            IMapper<TextCreateModel, Guid, Text> textCreateMapper)
         {
             this.textService = textService;
             this.mapper = mapper;
@@ -51,6 +64,7 @@ namespace Lwt.Controllers
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             Text text = this.textCreateMapper.Map(model, userId);
             await this.textService.CreateAsync(text);
+
             return this.Ok();
         }
 
@@ -65,6 +79,7 @@ namespace Lwt.Controllers
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             IEnumerable<Text> texts = await this.textService.GetByUserAsync(userId);
             var viewModels = this.mapper.Map<IEnumerable<TextViewModel>>(texts);
+
             return this.Ok(viewModels);
         }
 
@@ -79,6 +94,7 @@ namespace Lwt.Controllers
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             await this.textService.DeleteAsync(id, userId);
+
             return this.Ok();
         }
 
@@ -94,6 +110,7 @@ namespace Lwt.Controllers
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             await this.textService.EditAsync(id, userId, editModel);
+
             return this.Ok();
         }
     }

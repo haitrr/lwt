@@ -4,12 +4,15 @@ namespace Lwt.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+
     using FluentValidation;
     using FluentValidation.Results;
+
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+
     using LWT.Models;
 
     /// <summary>
@@ -18,8 +21,11 @@ namespace Lwt.Services
     public class TextService : ITextService
     {
         private readonly ITextRepository textRepository;
+
         private readonly ITransaction transaction;
+
         private readonly IValidator<Text> textValidator;
+
         private readonly IMapper<TextEditModel, Text> textEditMapper;
 
         /// <summary>
@@ -52,6 +58,7 @@ namespace Lwt.Services
             }
 
             this.textRepository.Add(text);
+
             return this.transaction.Commit();
         }
 

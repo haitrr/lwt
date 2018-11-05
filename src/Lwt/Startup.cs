@@ -3,20 +3,26 @@ namespace Lwt
     using System;
     using System.Collections.Generic;
     using System.Text;
+
     using AutoMapper;
+
     using FluentValidation.AspNetCore;
+
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Mappers;
     using Lwt.Middleware;
     using Lwt.Models;
+
     using LWT.Models;
+
     using Lwt.Repositories;
     using Lwt.Services;
     using Lwt.Transactions;
     using Lwt.Utilities;
     using Lwt.ViewModels;
+
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -25,6 +31,7 @@ namespace Lwt
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
+
     using Swashbuckle.AspNetCore.Swagger;
 
     /// <summary>
@@ -65,15 +72,18 @@ namespace Lwt
             var appSettings = appSettingsSection.Get<AppSettings>();
 
             byte[] key = Encoding.ASCII.GetBytes(appSettings.Secret);
-            services.AddAuthentication(options =>
+
+            services.AddAuthentication(
+                options =>
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(options =>
+                }).AddJwtBearer(
+                options =>
                 {
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
+
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
@@ -82,16 +92,16 @@ namespace Lwt
                         ValidateAudience = false,
                     };
                 });
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 1;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredUniqueChars = 0;
-                options.Password.RequireNonAlphanumeric = false;
-                options.ClaimsIdentity.UserIdClaimType = Constants.UserIdClaimType;
-            });
 
+            services.Configure<IdentityOptions>(
+                options =>
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequiredLength = 1;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredUniqueChars = 0;
+                    options.Password.RequireNonAlphanumeric = false;
+                });
 
             // automapper
             services.AddAutoMapper();
@@ -120,7 +130,6 @@ namespace Lwt
             // database seeder
             services.AddTransient<IDatabaseSeeder, DatabaseSeeder>();
 
-
             // utilities
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
             services.AddScoped<ITokenProvider, TokenProvider>();
@@ -129,22 +138,28 @@ namespace Lwt
             services.AddSingleton<ExceptionHandleMiddleware>();
 
             // swagger
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info {Title = "Lwt API", Version = "v1"});
-                c.AddSecurityDefinition("Bearer", new ApiKeyScheme()
+            services.AddSwaggerGen(
+                c =>
                 {
-                    Description =
-                        "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                    Name = "Authorization",
-                    In = "header",
-                    Type = "apiKey",
+                    c.SwaggerDoc("v1", new Info { Title = "Lwt API", Version = "v1" });
+
+                    c.AddSecurityDefinition(
+                        "Bearer",
+                        new ApiKeyScheme()
+                        {
+                            Description =
+                                "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                            Name = "Authorization",
+                            In = "header",
+                            Type = "apiKey",
+                        });
+
+                    c.AddSecurityRequirement(
+                        new Dictionary<string, IEnumerable<string>>
+                        {
+                            { "Bearer", Array.Empty<string>() },
+                        });
                 });
-                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
-                {
-                    {"Bearer", Array.Empty<string>()},
-                });
-            });
         }
 
         /// <summary>

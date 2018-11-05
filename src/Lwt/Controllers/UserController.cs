@@ -1,11 +1,14 @@
 namespace Lwt.Controllers
 {
     using System.Threading.Tasks;
+
     using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Lwt.ViewModels.User;
+
     using Microsoft.AspNetCore.Mvc;
 
+    /// <inheritdoc />
     /// <summary>
     /// a.
     /// </summary>
@@ -50,7 +53,8 @@ namespace Lwt.Controllers
             }
 
             string token = await this.service.LoginAsync(viewModel.UserName, viewModel.Password);
-            return this.Ok(new LoginResult {Token = token});
+
+            return this.Ok(new LoginResult { Token = token });
         }
     }
 }
