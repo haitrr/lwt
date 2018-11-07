@@ -9,9 +9,6 @@ namespace Lwt.Controllers
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
-
-    using LWT.Models;
-
     using Lwt.ViewModels;
 
     using Microsoft.AspNetCore.Authorization;

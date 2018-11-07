@@ -6,8 +6,6 @@ namespace Lwt.Interfaces.Services
 
     using Lwt.Models;
 
-    using LWT.Models;
-
     /// <summary>
     /// a.
     /// </summary>

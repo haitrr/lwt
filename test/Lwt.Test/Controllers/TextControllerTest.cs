@@ -11,9 +11,6 @@ namespace Lwt.Test.Controllers
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
-
-    using LWT.Models;
-
     using Lwt.ViewModels;
 
     using Microsoft.AspNetCore.Http;

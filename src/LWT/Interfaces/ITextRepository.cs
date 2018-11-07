@@ -4,7 +4,7 @@ namespace Lwt.Interfaces
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    using LWT.Models;
+    using Lwt.Models;
 
     /// <summary>
     /// a.

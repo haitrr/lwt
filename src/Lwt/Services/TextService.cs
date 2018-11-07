@@ -13,8 +13,6 @@ namespace Lwt.Services
     using Lwt.Interfaces.Services;
     using Lwt.Models;
 
-    using LWT.Models;
-
     /// <summary>
     /// a.
     /// </summary>
@@ -73,7 +71,7 @@ namespace Lwt.Services
         {
             Text text = await this.textRepository.GetByIdAsync(id);
 
-            if (text.UserId == userId)
+            if (text.CreatorId == userId)
             {
                 this.textRepository.DeleteById(text);
                 await this.transaction.Commit();
@@ -89,7 +87,7 @@ namespace Lwt.Services
         {
             Text text = await this.textRepository.GetByIdAsync(textId);
 
-            if (text.UserId == userId)
+            if (text.CreatorId == userId)
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
                 this.textRepository.Update(editedText);

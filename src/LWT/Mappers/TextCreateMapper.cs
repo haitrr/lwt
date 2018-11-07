@@ -2,8 +2,7 @@ namespace Lwt.Mappers
 {
     using System;
 
-    using LWT.Models;
-
+    using Lwt.Models;
     using Lwt.Services;
     using Lwt.ViewModels;
 
@@ -18,7 +17,7 @@ namespace Lwt.Mappers
             text.Title = createModel.Title;
             text.Content = createModel.Content;
             text.LanguageId = createModel.LanguageId;
-            text.UserId = creatorId;
+            text.CreatorId = creatorId;
 
             return text;
         }

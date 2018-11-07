@@ -14,9 +14,6 @@ namespace Lwt
     using Lwt.Mappers;
     using Lwt.Middleware;
     using Lwt.Models;
-
-    using LWT.Models;
-
     using Lwt.Repositories;
     using Lwt.Services;
     using Lwt.Transactions;

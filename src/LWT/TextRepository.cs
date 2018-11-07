@@ -7,9 +7,7 @@ namespace Lwt
 
     using Lwt.DbContexts;
     using Lwt.Interfaces;
-
-    using LWT.Models;
-
+    using Lwt.Models;
     using Lwt.Repositories;
 
     using Microsoft.EntityFrameworkCore;
@@ -31,7 +29,7 @@ namespace Lwt
         /// <inheritdoc/>
         public async Task<IEnumerable<Text>> GetByUserAsync(Guid userId)
         {
-            return await this.DbSet.Where(t => t.UserId == userId).ToListAsync();
+            return await this.DbSet.Where(t => t.CreatorId == userId).ToListAsync();
         }
     }
 }

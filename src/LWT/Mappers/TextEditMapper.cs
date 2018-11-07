@@ -1,9 +1,6 @@
 namespace Lwt.Mappers
 {
     using Lwt.Models;
-
-    using LWT.Models;
-
     using Lwt.Services;
 
     /// <summary>

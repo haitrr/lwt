@@ -9,9 +9,6 @@ namespace Lwt.Test.Services
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
-
-    using LWT.Models;
-
     using Lwt.Services;
 
     using Moq;
@@ -120,7 +117,7 @@ namespace Lwt.Test.Services
             Guid creatorId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             Guid textId = Guid.NewGuid();
-            var text = new Text { UserId = creatorId };
+            var text = new Text { CreatorId = creatorId };
             this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
 
             // assert
@@ -137,7 +134,7 @@ namespace Lwt.Test.Services
             // arrange
             Guid creatorId = Guid.NewGuid();
             Guid textId = Guid.NewGuid();
-            var text = new Text { UserId = creatorId };
+            var text = new Text { CreatorId = creatorId };
             this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
 
             // act
@@ -159,7 +156,7 @@ namespace Lwt.Test.Services
             Guid userId = Guid.NewGuid();
             Guid textId = Guid.NewGuid();
             var editModel = new TextEditModel();
-            var text = new Text { UserId = creatorId };
+            var text = new Text { CreatorId = creatorId };
             this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
 
             // assert
@@ -176,7 +173,7 @@ namespace Lwt.Test.Services
             // arrange
             Guid creatorId = Guid.NewGuid();
             Guid textId = Guid.NewGuid();
-            var text = new Text { UserId = creatorId };
+            var text = new Text { CreatorId = creatorId };
             var editedText = new Text();
             var editModel = new TextEditModel();
             this.textEditMapper.Setup(m => m.Map(editModel, text)).Returns(editedText);

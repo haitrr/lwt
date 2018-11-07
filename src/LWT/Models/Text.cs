@@ -1,8 +1,7 @@
-namespace LWT.Models
+namespace Lwt.Models
 {
     using System;
-
-    using Lwt.Models;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     /// <summary>
     /// a.
@@ -10,9 +9,14 @@ namespace LWT.Models
     public class Text : Entity
     {
         /// <summary>
-        /// Gets or sets UserId.
+        /// Gets or sets creator id.
         /// </summary>
-        public Guid UserId { get; set; }
+        public Guid CreatorId { get; set; }
+
+        /// <summary>
+        /// Gets or sets creator.
+        /// </summary>
+        public User Creator { get; set; }
 
         /// <summary>
         /// Gets or sets Title.
@@ -27,6 +31,12 @@ namespace LWT.Models
         /// <summary>
         /// Gets or sets Language id.
         /// </summary>
+        [ForeignKey(nameof(Language))]
         public Guid LanguageId { get; set; }
+
+        /// <summary>
+        /// Gets or sets language.
+        /// </summary>
+        public Language Language { get; set; }
     }
 }

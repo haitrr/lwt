@@ -4,8 +4,6 @@ namespace Lwt.DbContexts
 
     using Lwt.Models;
 
-    using LWT.Models;
-
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
 
