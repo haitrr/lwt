@@ -24,5 +24,12 @@ namespace Lwt.Interfaces
         /// <param name="password">password.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task CreateAsync(User user, string password);
+
+        /// <summary>
+        /// get user by id.
+        /// </summary>
+        /// <param name="userId">the user id.</param>
+        /// <returns>the user.</returns>
+        Task<User> GetByIdAsync(Guid userId);
     }
 }

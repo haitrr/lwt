@@ -25,6 +25,8 @@ namespace Lwt.Services
 
         private readonly ITransaction transaction;
 
+        private readonly IUserRepository userRepository;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LanguageService"/> class.
         /// </summary>
@@ -32,16 +34,19 @@ namespace Lwt.Services
         /// <param name="languageCreateMapper">languageCreateMapper.</param>
         /// <param name="languageRepository">languageRepository.</param>
         /// <param name="transaction">transaction.</param>
+        /// <param name="userRepository"> the user repository.</param>
         public LanguageService(
             IValidator<Language> languageValidator,
             IMapper<Guid, LanguageCreateModel, Language> languageCreateMapper,
             ILanguageRepository languageRepository,
-            ITransaction transaction)
+            ITransaction transaction,
+            IUserRepository userRepository)
         {
             this.languageValidator = languageValidator;
             this.languageCreateMapper = languageCreateMapper;
             this.languageRepository = languageRepository;
             this.transaction = transaction;
+            this.userRepository = userRepository;
         }
 
         /// <inheritdoc/>
@@ -62,9 +67,16 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public Task<ICollection<Language>> GetByUserAsync(Guid userId)
+        public async Task<ICollection<Language>> GetByUserAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            User user = await this.userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new BadRequestException("User not found.");
+            }
+
+            return await this.languageRepository.GetByUserAsync(userId);
         }
     }
 }
