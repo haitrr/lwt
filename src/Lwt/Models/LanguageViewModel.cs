@@ -1,0 +1,20 @@
+namespace Lwt.Models
+{
+    using System;
+
+    /// <summary>
+    /// Language view model.
+    /// </summary>
+    public class LanguageViewModel
+    {
+        /// <summary>
+        /// Gets or sets language name.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets language id.
+        /// </summary>
+        public Guid Id { get; set; }
+    }
+}

@@ -1,6 +1,7 @@
 namespace Lwt.Test.Controllers
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     using Lwt.Controllers;
@@ -25,6 +26,8 @@ namespace Lwt.Test.Controllers
 
         private readonly Mock<IAuthenticationHelper> authenticationHelper;
 
+        private readonly Mock<IMapper<Language, LanguageViewModel>> languageViewModelMapper;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LanguageControllerTest"/> class.
         /// test.
@@ -33,10 +36,12 @@ namespace Lwt.Test.Controllers
         {
             this.languageService = new Mock<ILanguageService>();
             this.authenticationHelper = new Mock<IAuthenticationHelper>();
+            this.languageViewModelMapper = new Mock<IMapper<Language, LanguageViewModel>>();
 
             this.languageController = new LanguageController(
                 this.languageService.Object,
-                this.authenticationHelper.Object);
+                this.authenticationHelper.Object,
+                this.languageViewModelMapper.Object);
         }
 
         /// <summary>
@@ -46,6 +51,29 @@ namespace Lwt.Test.Controllers
         ~LanguageControllerTest()
         {
             this.Dispose(false);
+        }
+
+        /// <summary>
+        /// make sure get async work.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetAsync_ShouldWork()
+        {
+            // arrange
+            Guid userId = Guid.NewGuid();
+            var languages = new List<Language>();
+            var viewModels = new List<LanguageViewModel>();
+            this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.languageController.User)).Returns(userId);
+            this.languageService.Setup(h => h.GetByUserAsync(userId)).ReturnsAsync(languages);
+            this.languageViewModelMapper.Setup(m => m.Map(languages)).Returns(viewModels);
+
+            // assert
+            IActionResult actual = await this.languageController.GetAsync();
+
+            // assert
+            var objectResult = Assert.IsType<OkObjectResult>(actual);
+            Assert.Equal(viewModels, objectResult.Value);
         }
 
         /// <summary>

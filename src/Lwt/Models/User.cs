@@ -12,7 +12,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets current language.
         /// </summary>
-        public Guid CurrentLanguageId { get; set; }
+        public Guid? CurrentLanguageId { get; set; }
 
         /// <summary>
         /// Gets or sets current language.

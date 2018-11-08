@@ -1,6 +1,7 @@
 namespace Lwt.Services
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -58,6 +59,12 @@ namespace Lwt.Services
             await this.transaction.Commit();
 
             return language.Id;
+        }
+
+        /// <inheritdoc/>
+        public Task<ICollection<Language>> GetByUserAsync(Guid userId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
