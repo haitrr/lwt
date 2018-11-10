@@ -39,5 +39,11 @@ namespace Lwt.Repositories
         {
             return this.userManager.FindByIdAsync(userId.ToString());
         }
+
+        /// <inheritdoc/>
+        public Task<User> GetByUserNameAsync(string userName)
+        {
+            return this.userManager.FindByNameAsync(userName);
+        }
     }
 }

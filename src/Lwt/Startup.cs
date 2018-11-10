@@ -106,6 +106,8 @@ namespace Lwt
             // mapper
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
             services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
+            services.AddTransient<IMapper<Guid, LanguageCreateModel, Language>, LanguageCreateMapper>();
+            services.AddTransient<IMapper<Language, LanguageViewModel>, LanguageViewMapper>();
 
             // user
             services.AddScoped<IUserService, UserService>();
@@ -116,6 +118,7 @@ namespace Lwt
             // text
             services.AddScoped<ITextService, TextService>();
             services.AddScoped<ITextRepository, TextRepository>();
+            services.AddScoped<ILanguageService, LanguageService>();
 
             // repos
             services.AddScoped<IUserRepository, UserRepository>();
@@ -178,7 +181,7 @@ namespace Lwt
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
-            databaseSeeder.SeedData();
+            databaseSeeder.SeedData().Wait();
         }
     }
 }

@@ -13,7 +13,9 @@ namespace Lwt.Utilities
         /// <inheritdoc/>
         public Guid GetLoggedInUser(ClaimsPrincipal principal)
         {
-            return new Guid(principal.FindFirstValue(ClaimTypes.NameIdentifier));
+            string userId = principal.FindFirstValue(Constants.UserIdClaimType);
+
+            return Guid.Parse(userId);
         }
     }
 }

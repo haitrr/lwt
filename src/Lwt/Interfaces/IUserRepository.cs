@@ -31,5 +31,12 @@ namespace Lwt.Interfaces
         /// <param name="userId">the user id.</param>
         /// <returns>the user.</returns>
         Task<User> GetByIdAsync(Guid userId);
+
+        /// <summary>
+        /// get user by user name.
+        /// </summary>
+        /// <param name="userName">the user name.</param>
+        /// <returns>the user.</returns>
+        Task<User> GetByUserNameAsync(string userName);
     }
 }
