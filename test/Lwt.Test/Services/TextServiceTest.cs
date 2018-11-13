@@ -93,24 +93,6 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task GetByUserAsync_ShouldCallRepository()
-        {
-            // arrange
-            this.textRepository.Reset();
-            Guid userId = Guid.NewGuid();
-
-            // act
-            await this.textService.GetByUserAsync(userId);
-
-            // assert
-            this.textRepository.Verify(r => r.GetByUserAsync(userId), Times.Once);
-        }
-
-        /// <summary>
-        /// test.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
         public async Task DeleteAsync_ShouldThrowException_IfNotCreator()
         {
             // arrange

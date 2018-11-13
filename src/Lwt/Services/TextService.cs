@@ -61,9 +61,12 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<Text>> GetByUserAsync(Guid userId)
+        public Task<IEnumerable<Text>> GetByUserAsync(
+            Guid userId,
+            TextFilter textFilter,
+            PaginationQuery paginationQuery)
         {
-            return this.textRepository.GetByUserAsync(userId);
+            return this.textRepository.GetByUserAsync(userId, textFilter, paginationQuery);
         }
 
         /// <inheritdoc/>
@@ -97,6 +100,12 @@ namespace Lwt.Services
             {
                 throw new ForbiddenException("You do not have permission to edit this text");
             }
+        }
+
+        /// <inheritdoc/>
+        public Task<int> CountAsync(Guid userId, TextFilter textFilter)
+        {
+            return this.textRepository.CountByUserAsync(userId, textFilter);
         }
     }
 }

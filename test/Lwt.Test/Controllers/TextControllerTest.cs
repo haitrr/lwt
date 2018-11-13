@@ -101,7 +101,7 @@ namespace Lwt.Test.Controllers
         }
 
         /// <summary>
-        /// a.
+        /// get all should return ok if the action success.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
@@ -109,13 +109,15 @@ namespace Lwt.Test.Controllers
         {
             // arrange
             Guid userId = Guid.NewGuid();
+            var filter = new TextFilter();
+            var paginationQuery = new PaginationQuery();
             var texts = new List<Text>();
-            this.textService.Setup(s => s.GetByUserAsync(userId)).ReturnsAsync(texts);
+            this.textService.Setup(s => s.GetByUserAsync(userId, filter, paginationQuery)).ReturnsAsync(texts);
             this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.textController.User)).Returns(userId);
             this.mapper.Setup(m => m.Map<IEnumerable<TextViewModel>>(texts)).Returns(new List<TextViewModel>());
 
             // act
-            IActionResult actual = await this.textController.GetAllAsync();
+            IActionResult actual = await this.textController.GetAllAsync(filter, paginationQuery);
 
             // assert
             Assert.IsType<OkObjectResult>(actual);

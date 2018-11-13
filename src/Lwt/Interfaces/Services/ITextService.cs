@@ -22,8 +22,10 @@ namespace Lwt.Interfaces.Services
         /// a.
         /// </summary>
         /// <param name="userId">userId.</param>
+        /// <param name="textFilter">the filters.</param>
+        /// <param name="paginationQuery">the pagination query.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<IEnumerable<Text>> GetByUserAsync(Guid userId);
+        Task<IEnumerable<Text>> GetByUserAsync(Guid userId, TextFilter textFilter, PaginationQuery paginationQuery);
 
         /// <summary>
         /// a.
@@ -41,5 +43,13 @@ namespace Lwt.Interfaces.Services
         /// <param name="editModel">editModel.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         Task EditAsync(Guid textId, Guid userId, TextEditModel editModel);
+
+        /// <summary>
+        /// count the ad from the user that match the filters.
+        /// </summary>
+        /// <param name="userId">the user id.</param>
+        /// <param name="textFilter">the filters.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        Task<int> CountAsync(Guid userId, TextFilter textFilter);
     }
 }

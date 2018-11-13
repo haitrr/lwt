@@ -68,16 +68,21 @@ namespace Lwt.Controllers
         /// <summary>
         /// a.
         /// </summary>
+        /// <param name="filters"> the filters.</param>
+        /// <param name="paginationQuery"> the pagination query.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync(
+            [FromQuery] TextFilter filters,
+            [FromQuery] PaginationQuery paginationQuery)
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            IEnumerable<Text> texts = await this.textService.GetByUserAsync(userId);
+            IEnumerable<Text> texts = await this.textService.GetByUserAsync(userId, filters, paginationQuery);
+            int count = await this.textService.CountAsync(userId, filters);
             var viewModels = this.mapper.Map<IEnumerable<TextViewModel>>(texts);
 
-            return this.Ok(viewModels);
+            return this.Ok(new TextList { Total = count, Items = viewModels });
         }
 
         /// <summary>
