@@ -4,8 +4,6 @@ namespace Lwt.Controllers
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    using AutoMapper;
-
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
@@ -24,9 +22,9 @@ namespace Lwt.Controllers
     {
         private readonly ITextService textService;
 
-        private readonly IMapper mapper;
-
         private readonly IMapper<TextCreateModel, Guid, Text> textCreateMapper;
+
+        private readonly IMapper<Text, TextViewModel> textViewMapper;
 
         private readonly IAuthenticationHelper authenticationHelper;
 
@@ -34,19 +32,19 @@ namespace Lwt.Controllers
         /// Initializes a new instance of the <see cref="TextController"/> class.
         /// </summary>
         /// <param name="textService">textService.</param>
-        /// <param name="mapper">mapper.</param>
+        /// <param name="textViewMapper">text view mapper.</param>
         /// <param name="authenticationHelper">authenticationHelper.</param>
         /// <param name="textCreateMapper">textCreateMapper.</param>
         public TextController(
             ITextService textService,
-            IMapper mapper,
             IAuthenticationHelper authenticationHelper,
-            IMapper<TextCreateModel, Guid, Text> textCreateMapper)
+            IMapper<TextCreateModel, Guid, Text> textCreateMapper,
+            IMapper<Text, TextViewModel> textViewMapper)
         {
             this.textService = textService;
-            this.mapper = mapper;
             this.authenticationHelper = authenticationHelper;
             this.textCreateMapper = textCreateMapper;
+            this.textViewMapper = textViewMapper;
         }
 
         /// <summary>
@@ -80,7 +78,7 @@ namespace Lwt.Controllers
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             IEnumerable<Text> texts = await this.textService.GetByUserAsync(userId, filters, paginationQuery);
             int count = await this.textService.CountAsync(userId, filters);
-            var viewModels = this.mapper.Map<IEnumerable<TextViewModel>>(texts);
+            ICollection<TextViewModel> viewModels = this.textViewMapper.Map(texts);
 
             return this.Ok(new TextList { Total = count, Items = viewModels });
         }

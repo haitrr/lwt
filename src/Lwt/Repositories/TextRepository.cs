@@ -33,7 +33,8 @@ namespace Lwt.Repositories
         {
             int skip = paginationQuery.ItemPerPage * (paginationQuery.Page - 1);
 
-            return await this.Filter(userId, textFilter).Skip(skip).Take(paginationQuery.ItemPerPage).ToListAsync();
+            return await this.Filter(userId, textFilter).Skip(skip).Take(paginationQuery.ItemPerPage)
+                .Include(text => text.Language).ToListAsync();
         }
 
         /// <inheritdoc/>

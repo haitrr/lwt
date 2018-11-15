@@ -4,8 +4,6 @@ namespace Lwt
     using System.Collections.Generic;
     using System.Text;
 
-    using AutoMapper;
-
     using FluentValidation.AspNetCore;
 
     using Lwt.DbContexts;
@@ -100,14 +98,12 @@ namespace Lwt
                     options.Password.RequireNonAlphanumeric = false;
                 });
 
-            // automapper
-            services.AddAutoMapper();
-
             // mapper
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
             services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
             services.AddTransient<IMapper<Guid, LanguageCreateModel, Language>, LanguageCreateMapper>();
             services.AddTransient<IMapper<Language, LanguageViewModel>, LanguageViewMapper>();
+            services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
 
             // user
             services.AddScoped<IUserService, UserService>();

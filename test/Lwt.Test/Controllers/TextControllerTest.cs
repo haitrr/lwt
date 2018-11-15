@@ -5,8 +5,6 @@ namespace Lwt.Test.Controllers
     using System.Security.Claims;
     using System.Threading.Tasks;
 
-    using AutoMapper;
-
     using Lwt.Controllers;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
@@ -30,7 +28,7 @@ namespace Lwt.Test.Controllers
 
         private readonly Mock<ITextService> textService;
 
-        private readonly Mock<IMapper> mapper;
+        private readonly Mock<IMapper<Text, TextViewModel>> textViewMapper;
 
         private readonly Mock<IAuthenticationHelper> authenticationHelper;
 
@@ -43,15 +41,15 @@ namespace Lwt.Test.Controllers
         public TextControllerTest()
         {
             this.textService = new Mock<ITextService>();
-            this.mapper = new Mock<IMapper>();
+            this.textViewMapper = new Mock<IMapper<Text, TextViewModel>>();
             this.textCreateMapper = new Mock<IMapper<TextCreateModel, Guid, Text>>();
             this.authenticationHelper = new Mock<IAuthenticationHelper>();
 
             this.textController = new TextController(
                 this.textService.Object,
-                this.mapper.Object,
                 this.authenticationHelper.Object,
-                this.textCreateMapper.Object)
+                this.textCreateMapper.Object,
+                this.textViewMapper.Object)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -111,10 +109,10 @@ namespace Lwt.Test.Controllers
             Guid userId = Guid.NewGuid();
             var filter = new TextFilter();
             var paginationQuery = new PaginationQuery();
-            var texts = new List<Text>();
+            Text[] texts = Array.Empty<Text>();
             this.textService.Setup(s => s.GetByUserAsync(userId, filter, paginationQuery)).ReturnsAsync(texts);
             this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.textController.User)).Returns(userId);
-            this.mapper.Setup(m => m.Map<IEnumerable<TextViewModel>>(texts)).Returns(new List<TextViewModel>());
+            this.textViewMapper.Setup(m => m.Map(texts)).Returns(new List<TextViewModel>());
 
             // act
             IActionResult actual = await this.textController.GetAllAsync(filter, paginationQuery);

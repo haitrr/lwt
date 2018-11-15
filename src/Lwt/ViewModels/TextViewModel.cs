@@ -1,7 +1,5 @@
 namespace Lwt.ViewModels
 {
-    using System;
-
     /// <summary>
     /// text view model.
     /// </summary>
@@ -13,8 +11,8 @@ namespace Lwt.ViewModels
         public string Title { get; set; }
 
         /// <summary>
-        /// Gets or sets language id.
+        /// Gets or sets language.
         /// </summary>
-        public Guid LanguageId { get; set; }
+        public string Language { get; set; }
     }
 }
