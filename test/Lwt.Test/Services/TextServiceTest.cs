@@ -151,29 +151,5 @@ namespace Lwt.Test.Services
             // assert
             await Assert.ThrowsAsync<ForbiddenException>(() => this.textService.EditAsync(textId, userId, editModel));
         }
-
-        /// <summary>
-        /// test.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task EditAsync_ShouldCallRepository_IfHasPermission()
-        {
-            // arrange
-            Guid creatorId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
-            var text = new Text { CreatorId = creatorId };
-            var editedText = new Text();
-            var editModel = new TextEditModel();
-            this.textEditMapper.Setup(m => m.Map(editModel, text)).Returns(editedText);
-            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
-
-            // act
-            await this.textService.EditAsync(textId, creatorId, editModel);
-
-            // assert
-            this.textRepository.Verify(r => r.UpdateAsync(editedText), Times.Once);
-            this.transaction.Verify(t => t.Commit(), Times.Once);
-        }
     }
 }
