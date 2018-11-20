@@ -12,7 +12,7 @@ namespace Lwt.Utilities
     {
         private readonly IUserRepository userRepository;
 
-        private readonly LwtDbContext lwtDbContext;
+        private readonly IdentityDbContext lwtDbContext;
 
         private readonly ILanguageRepository languageRepository;
 
@@ -24,7 +24,7 @@ namespace Lwt.Utilities
         /// <param name="languageRepository">the language repository.</param>
         public DatabaseSeeder(
             IUserRepository userRepository,
-            LwtDbContext lwtDbContext,
+            IdentityDbContext lwtDbContext,
             ILanguageRepository languageRepository)
         {
             this.userRepository = userRepository;
@@ -55,6 +55,7 @@ namespace Lwt.Utilities
                 Name = "English",
                 Id = Guid.NewGuid(),
                 CreatorId = hai.Id,
+                DelimiterPattern = @"[ ]",
             };
 
             var mandarin = new Language()
@@ -62,11 +63,11 @@ namespace Lwt.Utilities
                 Name = "Mandarin",
                 Id = Guid.NewGuid(),
                 CreatorId = hai.Id,
+                DelimiterPattern = string.Empty,
             };
 
-            this.languageRepository.Add(english);
-            this.languageRepository.Add(mandarin);
-            this.lwtDbContext.SaveChanges();
+            this.languageRepository.AddAsync(english).GetAwaiter().GetResult();
+            this.languageRepository.AddAsync(mandarin).GetAwaiter().GetResult();
         }
     }
 }

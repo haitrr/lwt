@@ -77,7 +77,7 @@ namespace Lwt.Controllers
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             IEnumerable<Text> texts = await this.textService.GetByUserAsync(userId, filters, paginationQuery);
-            int count = await this.textService.CountAsync(userId, filters);
+            long count = await this.textService.CountAsync(userId, filters);
             ICollection<TextViewModel> viewModels = this.textViewMapper.Map(texts);
 
             return this.Ok(new TextList { Total = count, Items = viewModels });

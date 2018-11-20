@@ -57,10 +57,11 @@ namespace Lwt
             services.AddMvc()
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
-            services.AddDbContext<LwtDbContext>(options => options.UseSqlite("Data Source=lwt.db"));
+            services.AddDbContext<IdentityDbContext>(options => options.UseSqlite("Data Source=lwt.db"));
+            services.AddTransient<LwtDbContext>();
 
             // identity
-            services.AddIdentity<User, Role>().AddEntityFrameworkStores<LwtDbContext>().AddDefaultTokenProviders();
+            services.AddIdentity<User, Role>().AddEntityFrameworkStores<IdentityDbContext>().AddDefaultTokenProviders();
 
             IConfigurationSection appSettingsSection = this.Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
@@ -104,6 +105,8 @@ namespace Lwt
             services.AddTransient<IMapper<Guid, LanguageCreateModel, Language>, LanguageCreateMapper>();
             services.AddTransient<IMapper<Language, LanguageViewModel>, LanguageViewMapper>();
             services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
+            services.AddTransient<ITextParser, TextParser>();
+            services.AddTransient<ITextSplitter, TextSplitter>();
 
             // user
             services.AddScoped<IUserService, UserService>();
@@ -119,9 +122,10 @@ namespace Lwt
             // repos
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ILanguageRepository, LanguageRepository>();
+            services.AddScoped<ITermRepository, TermRepository>();
 
             // transaction
-            services.AddScoped<ITransaction, Transaction<LwtDbContext>>();
+            services.AddScoped<ITransaction, Transaction<IdentityDbContext>>();
 
             // database seeder
             services.AddTransient<IDatabaseSeeder, DatabaseSeeder>();

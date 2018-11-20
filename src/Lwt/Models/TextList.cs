@@ -12,7 +12,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the total number of texts.
         /// </summary>
-        public int Total { get; set; }
+        public long Total { get; set; }
 
         /// <summary>
         /// Gets or sets the text in the current page.

@@ -23,8 +23,6 @@ namespace Lwt.Services
 
         private readonly ILanguageRepository languageRepository;
 
-        private readonly ITransaction transaction;
-
         private readonly IUserRepository userRepository;
 
         /// <summary>
@@ -33,19 +31,16 @@ namespace Lwt.Services
         /// <param name="languageValidator">languageValidator.</param>
         /// <param name="languageCreateMapper">languageCreateMapper.</param>
         /// <param name="languageRepository">languageRepository.</param>
-        /// <param name="transaction">transaction.</param>
         /// <param name="userRepository"> the user repository.</param>
         public LanguageService(
             IValidator<Language> languageValidator,
             IMapper<Guid, LanguageCreateModel, Language> languageCreateMapper,
             ILanguageRepository languageRepository,
-            ITransaction transaction,
             IUserRepository userRepository)
         {
             this.languageValidator = languageValidator;
             this.languageCreateMapper = languageCreateMapper;
             this.languageRepository = languageRepository;
-            this.transaction = transaction;
             this.userRepository = userRepository;
         }
 
@@ -60,8 +55,7 @@ namespace Lwt.Services
                 throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
             }
 
-            this.languageRepository.Add(language);
-            await this.transaction.Commit();
+            await this.languageRepository.AddAsync(language);
 
             return language.Id;
         }

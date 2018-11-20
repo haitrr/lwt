@@ -29,8 +29,6 @@ namespace Lwt.Test.Services
 
         private readonly Mock<ILanguageRepository> languageRepository;
 
-        private readonly Mock<ITransaction> transaction;
-
         private readonly Mock<IUserRepository> userRepository;
 
         /// <summary>
@@ -41,14 +39,12 @@ namespace Lwt.Test.Services
             this.languageRepository = new Mock<ILanguageRepository>();
             this.languageCreateMapper = new Mock<IMapper<Guid, LanguageCreateModel, Language>>();
             this.languageValidator = new Mock<IValidator<Language>>();
-            this.transaction = new Mock<ITransaction>();
             this.userRepository = new Mock<IUserRepository>();
 
             this.languageService = new LanguageService(
                 this.languageValidator.Object,
                 this.languageCreateMapper.Object,
                 this.languageRepository.Object,
-                this.transaction.Object,
                 this.userRepository.Object);
         }
 

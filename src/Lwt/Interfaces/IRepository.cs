@@ -13,35 +13,38 @@ namespace Lwt.Interfaces
         where T : Entity
     {
         /// <summary>
-        /// a.
+        /// insert an new entity to database.
         /// </summary>
         /// <param name="entity">entity.</param>
-        void Add(T entity);
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task<bool> AddAsync(T entity);
 
         /// <summary>
-        /// a.
+        /// delete an entity by id.
         /// </summary>
         /// <param name="entity">entity.</param>
-        void DeleteById(T entity);
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task<bool> DeleteByIdAsync(T entity);
 
         /// <summary>
-        /// a.
+        /// update an entity.
         /// </summary>
         /// <param name="entity">entity.</param>
-        void Update(T entity);
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task<bool> UpdateAsync(T entity);
 
         /// <summary>
-        /// a.
+        /// get an entity by id.
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<T> GetByIdAsync(Guid id);
 
         /// <summary>
-        /// a.
+        /// check if an entity exist.
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> IsExists(Guid id);
+        Task<bool> IsExistAsync(Guid id);
     }
 }

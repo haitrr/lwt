@@ -24,11 +24,15 @@ namespace Lwt.Test.Services
 
         private readonly Mock<ITextRepository> textRepository;
 
+        private readonly Mock<ILanguageRepository> languageRepository;
+
         private readonly Mock<ITransaction> transaction;
 
         private readonly Mock<IMapper<TextEditModel, Text>> textEditMapper;
 
         private readonly Mock<IValidator<Text>> textValidator;
+
+        private readonly Mock<ITextParser> textParser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextServiceTest"/> class.
@@ -40,12 +44,15 @@ namespace Lwt.Test.Services
             this.textRepository = new Mock<ITextRepository>();
             this.transaction = new Mock<ITransaction>();
             this.textValidator = new Mock<IValidator<Text>>();
+            this.textParser = new Mock<ITextParser>();
+            this.languageRepository = new Mock<ILanguageRepository>();
 
             this.textService = new TextService(
                 this.textRepository.Object,
-                this.transaction.Object,
                 this.textEditMapper.Object,
-                this.textValidator.Object);
+                this.textValidator.Object,
+                this.textParser.Object,
+                this.languageRepository.Object);
         }
 
         /// <summary>
@@ -85,7 +92,7 @@ namespace Lwt.Test.Services
             await this.textService.CreateAsync(text);
 
             // assert
-            this.textRepository.Verify(r => r.Add(text), Times.Once);
+            this.textRepository.Verify(r => r.AddAsync(text), Times.Once);
         }
 
         /// <summary>
@@ -123,7 +130,7 @@ namespace Lwt.Test.Services
             await this.textService.DeleteAsync(textId, creatorId);
 
             // assert
-            this.textRepository.Verify(r => r.DeleteById(text), Times.Once);
+            this.textRepository.Verify(r => r.DeleteByIdAsync(text), Times.Once);
         }
 
         /// <summary>
@@ -165,7 +172,7 @@ namespace Lwt.Test.Services
             await this.textService.EditAsync(textId, creatorId, editModel);
 
             // assert
-            this.textRepository.Verify(r => r.Update(editedText), Times.Once);
+            this.textRepository.Verify(r => r.UpdateAsync(editedText), Times.Once);
             this.transaction.Verify(t => t.Commit(), Times.Once);
         }
     }

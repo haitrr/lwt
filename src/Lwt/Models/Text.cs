@@ -1,6 +1,7 @@
 namespace Lwt.Models
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
 
     /// <summary>
@@ -38,5 +39,10 @@ namespace Lwt.Models
         /// Gets or sets language.
         /// </summary>
         public Language Language { get; set; }
+
+        /// <summary>
+        /// Gets or sets the words.
+        /// </summary>
+        public ICollection<string> Words { get; set; }
     }
 }

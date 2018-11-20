@@ -8,24 +8,19 @@ namespace Lwt.Repositories
     using Lwt.Interfaces;
     using Lwt.Models;
 
-    using Microsoft.EntityFrameworkCore;
+    using MongoDB.Driver;
 
     /// <summary>
-    /// a.
+    /// the base repository.
     /// </summary>
     /// <typeparam name="T">type.</typeparam>
     public abstract class BaseRepository<T> : IRepository<T>
         where T : Entity
     {
         /// <summary>
-        /// a.
+        /// the db context.
         /// </summary>
         private readonly LwtDbContext lwtDbContext;
-
-        /// <summary>
-        /// a.
-        /// </summary>
-        private readonly DbSet<T> dbSet;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseRepository{T}"/> class.
@@ -34,35 +29,53 @@ namespace Lwt.Repositories
         public BaseRepository(LwtDbContext lwtDbContext)
         {
             this.lwtDbContext = lwtDbContext;
-            this.dbSet = this.lwtDbContext.Set<T>();
+            this.Collection = this.lwtDbContext.GetCollection<T>();
         }
 
         /// <summary>
-        /// Gets contex.
+        /// Gets the collection.
         /// </summary>
-        protected LwtDbContext LwtDbContext => this.lwtDbContext;
-
-        /// <summary>
-        /// gets dbset.
-        /// </summary>
-        protected DbSet<T> DbSet => this.dbSet;
+        protected IMongoCollection<T> Collection { get; }
 
         /// <inheritdoc/>
-        public void Add(T entity)
+        public async Task<bool> AddAsync(T entity)
         {
-            this.DbSet.Add(entity);
+            try
+            {
+                await this.Collection.InsertOneAsync(entity);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         /// <inheritdoc/>
-        public void DeleteById(T entity)
+        public async Task<bool> DeleteByIdAsync(T entity)
         {
-            this.DbSet.Remove(entity);
+            DeleteResult result = await this.Collection.DeleteOneAsync(e => e.Id == entity.Id);
+
+            if (result.DeletedCount == 0)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc/>
-        public void Update(T entity)
+        public async Task<bool> UpdateAsync(T entity)
         {
-            this.DbSet.Update(entity);
+            ReplaceOneResult result = await this.Collection.ReplaceOneAsync(e => e.Id == entity.Id, entity);
+
+            if (result.ModifiedCount == 0)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc/>
@@ -70,7 +83,7 @@ namespace Lwt.Repositories
         {
             try
             {
-                return this.DbSet.SingleAsync(ad => ad.Id == id);
+                return this.Collection.Find(e => e.Id == id).SingleAsync();
             }
             catch
             {
@@ -79,9 +92,9 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<bool> IsExists(Guid id)
+        public Task<bool> IsExistAsync(Guid id)
         {
-            return await this.DbSet.FindAsync(id) != null;
+            return this.Collection.Find(e => e.Id == id).AnyAsync();
         }
     }
 }

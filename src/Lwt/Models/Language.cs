@@ -3,7 +3,7 @@ namespace Lwt.Models
     using System;
 
     /// <summary>
-    /// a.
+    /// the language.
     /// </summary>
     public class Language : Entity
     {
@@ -16,5 +16,10 @@ namespace Lwt.Models
         /// Gets or sets b.
         /// </summary>
         public Guid CreatorId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the delimiter pattern.
+        /// </summary>
+        public string DelimiterPattern { get; set; }
     }
 }

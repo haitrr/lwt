@@ -14,39 +14,44 @@ namespace Lwt.Services
     using Lwt.Models;
 
     /// <summary>
-    /// a.
+    /// the text service.
     /// </summary>
     public class TextService : ITextService
     {
         private readonly ITextRepository textRepository;
 
-        private readonly ITransaction transaction;
+        private readonly ILanguageRepository languageRepository;
 
         private readonly IValidator<Text> textValidator;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
 
+        private readonly ITextParser textParser;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TextService"/> class.
         /// </summary>
         /// <param name="textRepository">textRepository.</param>
-        /// <param name="transaction">transaction.</param>
         /// <param name="textEditMapper">textEditMapper.</param>
         /// <param name="textValidator">textValidator.</param>
+        /// <param name="textParser">the text parser.</param>
+        /// <param name="languageRepository">the language repository.</param>
         public TextService(
             ITextRepository textRepository,
-            ITransaction transaction,
             IMapper<TextEditModel, Text> textEditMapper,
-            IValidator<Text> textValidator)
+            IValidator<Text> textValidator,
+            ITextParser textParser,
+            ILanguageRepository languageRepository)
         {
             this.textRepository = textRepository;
-            this.transaction = transaction;
             this.textEditMapper = textEditMapper;
             this.textValidator = textValidator;
+            this.textParser = textParser;
+            this.languageRepository = languageRepository;
         }
 
         /// <inheritdoc/>
-        public Task CreateAsync(Text text)
+        public async Task CreateAsync(Text text)
         {
             ValidationResult validationResult = this.textValidator.Validate(text);
 
@@ -55,9 +60,10 @@ namespace Lwt.Services
                 throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
             }
 
-            this.textRepository.Add(text);
+            Language language = await this.languageRepository.GetByIdAsync(text.LanguageId);
+            text.Words = await this.textParser.ParseAsync(text, language);
 
-            return this.transaction.Commit();
+            await this.textRepository.AddAsync(text);
         }
 
         /// <inheritdoc/>
@@ -76,8 +82,7 @@ namespace Lwt.Services
 
             if (text.CreatorId == userId)
             {
-                this.textRepository.DeleteById(text);
-                await this.transaction.Commit();
+                await this.textRepository.DeleteByIdAsync(text);
             }
             else
             {
@@ -93,8 +98,7 @@ namespace Lwt.Services
             if (text.CreatorId == userId)
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
-                this.textRepository.Update(editedText);
-                await this.transaction.Commit();
+                await this.textRepository.UpdateAsync(editedText);
             }
             else
             {
@@ -103,7 +107,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public Task<int> CountAsync(Guid userId, TextFilter textFilter)
+        public Task<long> CountAsync(Guid userId, TextFilter textFilter)
         {
             return this.textRepository.CountByUserAsync(userId, textFilter);
         }

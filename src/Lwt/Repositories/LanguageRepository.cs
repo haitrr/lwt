@@ -2,14 +2,13 @@ namespace Lwt.Repositories
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
 
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
 
-    using Microsoft.EntityFrameworkCore;
+    using MongoDB.Driver;
 
     /// <inheritdoc cref="ILanguageRepository" />
     public class LanguageRepository : BaseRepository<Language>, ILanguageRepository
@@ -26,7 +25,7 @@ namespace Lwt.Repositories
         /// <inheritdoc/>
         public async Task<ICollection<Language>> GetByUserAsync(Guid userId)
         {
-            return await this.DbSet.Where(language => language.CreatorId == userId).ToListAsync();
+            return await this.Collection.Find(language => language.CreatorId == userId).ToListAsync();
         }
     }
 }

@@ -75,7 +75,7 @@ namespace Lwt.Test.Validators
         {
             // arrange
             var text = new Text { CreatorId = Guid.NewGuid(), Content = "yolo", Title = "yolo", LanguageId = Guid.Empty };
-            this.languageRepository.Setup(r => r.IsExists(text.LanguageId)).ReturnsAsync(true);
+            this.languageRepository.Setup(r => r.IsExistAsync(text.LanguageId)).ReturnsAsync(true);
             this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString())).ReturnsAsync(new User());
 
             // act
@@ -96,7 +96,7 @@ namespace Lwt.Test.Validators
             var text = new Text
                 { CreatorId = Guid.NewGuid(), Content = "valid", Title = string.Empty, LanguageId = Guid.NewGuid() };
 
-            this.languageRepository.Setup(r => r.IsExists(text.LanguageId)).ReturnsAsync(true);
+            this.languageRepository.Setup(r => r.IsExistAsync(text.LanguageId)).ReturnsAsync(true);
             this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString())).ReturnsAsync(new User());
 
             // act
@@ -117,7 +117,7 @@ namespace Lwt.Test.Validators
             var text = new Text
                 { CreatorId = Guid.NewGuid(), Content = string.Empty, Title = "yolo", LanguageId = Guid.NewGuid() };
 
-            this.languageRepository.Setup(r => r.IsExists(text.LanguageId)).ReturnsAsync(true);
+            this.languageRepository.Setup(r => r.IsExistAsync(text.LanguageId)).ReturnsAsync(true);
             this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString())).ReturnsAsync(new User());
 
             // act
@@ -138,7 +138,7 @@ namespace Lwt.Test.Validators
             var text = new Text
                 { CreatorId = Guid.NewGuid(), Content = "yolo", Title = "yolo", LanguageId = Guid.NewGuid() };
 
-            this.languageRepository.Setup(r => r.IsExists(text.LanguageId)).ReturnsAsync(true);
+            this.languageRepository.Setup(r => r.IsExistAsync(text.LanguageId)).ReturnsAsync(true);
             this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString())).ReturnsAsync((User)null);
 
             // act
@@ -159,7 +159,7 @@ namespace Lwt.Test.Validators
             Guid languageId = Guid.NewGuid();
             var text = new Text { CreatorId = Guid.NewGuid(), Content = "yolo", Title = "yolo", LanguageId = languageId };
             this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString())).ReturnsAsync(new User());
-            this.languageRepository.Setup(r => r.IsExists(languageId)).ReturnsAsync(false);
+            this.languageRepository.Setup(r => r.IsExistAsync(languageId)).ReturnsAsync(false);
 
             // act
             ValidationResult actual = this.textValidator.Validate(text);

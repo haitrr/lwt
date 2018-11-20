@@ -2,14 +2,13 @@ namespace Lwt.Repositories
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
 
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
 
-    using Microsoft.EntityFrameworkCore;
+    using MongoDB.Driver;
 
     /// <summary>
     /// a.
@@ -33,26 +32,26 @@ namespace Lwt.Repositories
         {
             int skip = paginationQuery.ItemPerPage * (paginationQuery.Page - 1);
 
-            return await this.Filter(userId, textFilter).Skip(skip).Take(paginationQuery.ItemPerPage)
-                .Include(text => text.Language).ToListAsync();
+            return await this.Filter(userId, textFilter).Skip(skip).Limit(paginationQuery.ItemPerPage).ToListAsync();
         }
 
         /// <inheritdoc/>
-        public Task<int> CountByUserAsync(Guid userId, TextFilter textFilter)
+        public Task<long> CountByUserAsync(Guid userId, TextFilter textFilter)
         {
-            return this.Filter(userId, textFilter).CountAsync();
+            return this.Filter(userId, textFilter).CountDocumentsAsync();
         }
 
-        private IQueryable<Text> Filter(Guid userId, TextFilter textFilter)
+        private IFindFluent<Text, Text> Filter(Guid userId, TextFilter textFilter)
         {
-            IQueryable<Text> texts = this.DbSet.Where(t => t.CreatorId == userId);
+            FilterDefinitionBuilder<Text> builder = Builders<Text>.Filter;
+            FilterDefinition<Text> filter = builder.Eq(t => t.CreatorId, userId);
 
             if (textFilter.LanguageId != null)
             {
-                texts = texts.Where(t => t.LanguageId == textFilter.LanguageId);
+                filter = builder.And(filter, builder.Eq(t => t.LanguageId, textFilter.LanguageId));
             }
 
-            return texts;
+            return this.Collection.Find(filter);
         }
     }
 }

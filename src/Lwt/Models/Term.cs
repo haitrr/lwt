@@ -1,9 +1,18 @@
 namespace Lwt.Models
 {
     /// <summary>
-    /// a.
+    /// the term.
     /// </summary>
-    public class Term
+    public class Term : Entity
     {
+        /// <summary>
+        /// Gets or sets the content.
+        /// </summary>
+        public string Content { get; set; }
+
+        /// <summary>
+        /// the translate.
+        /// </summary>
+        public string Translate { get; set; }
     }
 }

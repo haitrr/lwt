@@ -29,7 +29,7 @@ namespace Lwt.Validators
             this.RuleFor(text => text.Title).NotEmpty();
 
             this.RuleFor(text => text.LanguageId).NotEmpty()
-                .MustAsync(async (id, toke) => await languageRepository.IsExists(id))
+                .MustAsync(async (id, toke) => await languageRepository.IsExistAsync(id))
                 .WithMessage("Text language is not exist.");
         }
     }
