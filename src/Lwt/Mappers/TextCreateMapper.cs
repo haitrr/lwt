@@ -16,8 +16,8 @@ namespace Lwt.Mappers
         {
             text.Title = createModel.Title;
             text.Content = createModel.Content;
-            text.LanguageId = createModel.LanguageId;
             text.CreatorId = creatorId;
+            text.Language = createModel.Language;
 
             return text;
         }

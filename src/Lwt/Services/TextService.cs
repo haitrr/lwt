@@ -20,13 +20,11 @@ namespace Lwt.Services
     {
         private readonly ITextRepository textRepository;
 
-        private readonly ILanguageRepository languageRepository;
 
         private readonly IValidator<Text> textValidator;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
 
-        private readonly ITextParser textParser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextService"/> class.
@@ -34,20 +32,14 @@ namespace Lwt.Services
         /// <param name="textRepository">textRepository.</param>
         /// <param name="textEditMapper">textEditMapper.</param>
         /// <param name="textValidator">textValidator.</param>
-        /// <param name="textParser">the text parser.</param>
-        /// <param name="languageRepository">the language repository.</param>
         public TextService(
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
-            IValidator<Text> textValidator,
-            ITextParser textParser,
-            ILanguageRepository languageRepository)
+            IValidator<Text> textValidator)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
             this.textValidator = textValidator;
-            this.textParser = textParser;
-            this.languageRepository = languageRepository;
         }
 
         /// <inheritdoc/>
@@ -60,8 +52,6 @@ namespace Lwt.Services
                 throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
             }
 
-            Language language = await this.languageRepository.GetByIdAsync(text.LanguageId);
-            text.Words = await this.textParser.ParseAsync(text, language);
 
             await this.textRepository.AddAsync(text);
         }

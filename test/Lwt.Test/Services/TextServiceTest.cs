@@ -2,17 +2,13 @@ namespace Lwt.Test.Services
 {
     using System;
     using System.Threading.Tasks;
-
     using FluentValidation;
     using FluentValidation.Results;
-
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Services;
-
     using Moq;
-
     using Xunit;
 
     /// <summary>
@@ -24,15 +20,11 @@ namespace Lwt.Test.Services
 
         private readonly Mock<ITextRepository> textRepository;
 
-        private readonly Mock<ILanguageRepository> languageRepository;
-
-        private readonly Mock<ITransaction> transaction;
 
         private readonly Mock<IMapper<TextEditModel, Text>> textEditMapper;
 
         private readonly Mock<IValidator<Text>> textValidator;
 
-        private readonly Mock<ITextParser> textParser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextServiceTest"/> class.
@@ -42,17 +34,12 @@ namespace Lwt.Test.Services
         {
             this.textEditMapper = new Mock<IMapper<TextEditModel, Text>>();
             this.textRepository = new Mock<ITextRepository>();
-            this.transaction = new Mock<ITransaction>();
             this.textValidator = new Mock<IValidator<Text>>();
-            this.textParser = new Mock<ITextParser>();
-            this.languageRepository = new Mock<ILanguageRepository>();
 
             this.textService = new TextService(
                 this.textRepository.Object,
                 this.textEditMapper.Object,
-                this.textValidator.Object,
-                this.textParser.Object,
-                this.languageRepository.Object);
+                this.textValidator.Object);
         }
 
         /// <summary>
@@ -106,7 +93,7 @@ namespace Lwt.Test.Services
             Guid creatorId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
             Guid textId = Guid.NewGuid();
-            var text = new Text { CreatorId = creatorId };
+            var text = new Text {CreatorId = creatorId};
             this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
 
             // assert
@@ -123,7 +110,7 @@ namespace Lwt.Test.Services
             // arrange
             Guid creatorId = Guid.NewGuid();
             Guid textId = Guid.NewGuid();
-            var text = new Text { CreatorId = creatorId };
+            var text = new Text {CreatorId = creatorId};
             this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
 
             // act
@@ -145,7 +132,7 @@ namespace Lwt.Test.Services
             Guid userId = Guid.NewGuid();
             Guid textId = Guid.NewGuid();
             var editModel = new TextEditModel();
-            var text = new Text { CreatorId = creatorId };
+            var text = new Text {CreatorId = creatorId};
             this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
 
             // assert

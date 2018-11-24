@@ -11,7 +11,7 @@ namespace Lwt.Models
         public string Content { get; set; }
 
         /// <summary>
-        /// the translate.
+        /// Gets or sets the translate.
         /// </summary>
         public string Translate { get; set; }
     }

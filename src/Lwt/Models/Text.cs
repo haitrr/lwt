@@ -2,7 +2,6 @@ namespace Lwt.Models
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations.Schema;
 
     /// <summary>
     /// a.
@@ -28,12 +27,6 @@ namespace Lwt.Models
         /// Gets or sets Content.
         /// </summary>
         public string Content { get; set; }
-
-        /// <summary>
-        /// Gets or sets Language id.
-        /// </summary>
-        [ForeignKey(nameof(Language))]
-        public Guid LanguageId { get; set; }
 
         /// <summary>
         /// Gets or sets language.

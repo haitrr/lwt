@@ -2,7 +2,6 @@ namespace Lwt.Validators
 {
     using FluentValidation;
 
-    using Lwt.Interfaces;
     using Lwt.Models;
 
     using Microsoft.AspNetCore.Identity;
@@ -18,8 +17,7 @@ namespace Lwt.Validators
         /// Initializes a new instance of the <see cref="TextValidator"/> class.
         /// </summary>
         /// <param name="userManager">userManager.</param>
-        /// <param name="languageRepository">languageRepository.</param>
-        public TextValidator(UserManager<User> userManager, ILanguageRepository languageRepository)
+        public TextValidator(UserManager<User> userManager)
         {
             this.RuleFor(text => text.CreatorId).NotEmpty()
                 .MustAsync(async (id, token) => await userManager.FindByIdAsync(id.ToString()) != null)
@@ -27,10 +25,6 @@ namespace Lwt.Validators
 
             this.RuleFor(text => text.Content).NotEmpty();
             this.RuleFor(text => text.Title).NotEmpty();
-
-            this.RuleFor(text => text.LanguageId).NotEmpty()
-                .MustAsync(async (id, toke) => await languageRepository.IsExistAsync(id))
-                .WithMessage("Text language is not exist.");
         }
     }
 }

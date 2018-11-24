@@ -1,7 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
-
     /// <summary>
     /// the text filters.
     /// </summary>
@@ -10,6 +8,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the language of the text.
         /// </summary>
-        public Guid? LanguageId { get; set; }
+        public Language? Language { get; set; }
     }
 }

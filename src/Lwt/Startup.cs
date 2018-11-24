@@ -102,10 +102,7 @@ namespace Lwt
             // mapper
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
             services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
-            services.AddTransient<IMapper<Guid, LanguageCreateModel, Language>, LanguageCreateMapper>();
-            services.AddTransient<IMapper<Language, LanguageViewModel>, LanguageViewMapper>();
             services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
-            services.AddTransient<ITextParser, TextParser>();
             services.AddTransient<ITextSplitter, TextSplitter>();
 
             // user
@@ -117,11 +114,9 @@ namespace Lwt
             // text
             services.AddScoped<ITextService, TextService>();
             services.AddScoped<ITextRepository, TextRepository>();
-            services.AddScoped<ILanguageService, LanguageService>();
 
             // repos
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ILanguageRepository, LanguageRepository>();
             services.AddScoped<ITermRepository, TermRepository>();
 
             // transaction

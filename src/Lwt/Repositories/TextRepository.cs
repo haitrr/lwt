@@ -46,9 +46,9 @@ namespace Lwt.Repositories
             FilterDefinitionBuilder<Text> builder = Builders<Text>.Filter;
             FilterDefinition<Text> filter = builder.Eq(t => t.CreatorId, userId);
 
-            if (textFilter.LanguageId != null)
+            if (textFilter.Language != null)
             {
-                filter = builder.And(filter, builder.Eq(t => t.LanguageId, textFilter.LanguageId));
+                filter = builder.And(filter, builder.Eq(t => t.Language, textFilter.Language));
             }
 
             return this.Collection.Find(filter);

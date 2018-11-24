@@ -13,7 +13,6 @@ namespace Lwt.Mappers
         public override TextViewModel Map(Text text, TextViewModel viewModel)
         {
             viewModel.Title = text.Title;
-            viewModel.Language = text.Language.Name;
 
             return viewModel;
         }
