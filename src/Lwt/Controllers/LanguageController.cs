@@ -1,12 +1,8 @@
 namespace Lwt.Controllers
 {
-    using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
-
     using Lwt.Interfaces;
     using Lwt.Models;
-
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
@@ -17,40 +13,19 @@ namespace Lwt.Controllers
     [Route("/api/language")]
     public class LanguageController : Controller
     {
-        private readonly ILanguageService languageService;
+        private readonly ILanguageHelper languageHelper;
 
-        private readonly IAuthenticationHelper authenticationHelper;
-
-        private IMapper<Language, LanguageViewModel> languageViewMapper;
+        private IMapper<ILanguage, LanguageViewModel> languageViewMapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LanguageController"/> class.
         /// </summary>
-        /// <param name="languageService">the language service.</param>
-        /// <param name="authenticationHelper">the authentication helper.</param>
         /// <param name="languageViewMapper">language view model mapper.</param>
-        public LanguageController(
-            ILanguageService languageService,
-            IAuthenticationHelper authenticationHelper,
-            IMapper<Language, LanguageViewModel> languageViewMapper)
+        /// <param name="languageHelper">language helper.</param>
+        public LanguageController(IMapper<ILanguage, LanguageViewModel> languageViewMapper, ILanguageHelper languageHelper)
         {
-            this.languageService = languageService;
-            this.authenticationHelper = authenticationHelper;
             this.languageViewMapper = languageViewMapper;
-        }
-
-        /// <summary>
-        /// aa.
-        /// </summary>
-        /// <param name="languageCreateModel">asdsad.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        [HttpPost]
-        public async Task<IActionResult> CreateAsync(LanguageCreateModel languageCreateModel)
-        {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            Guid id = await this.languageService.CreateAsync(userId, languageCreateModel);
-
-            return this.Ok(id);
+            this.languageHelper = languageHelper;
         }
 
         /// <summary>
@@ -59,10 +34,10 @@ namespace Lwt.Controllers
         /// <returns>list of the language view model.</returns>
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetAsync()
+        public IActionResult GetAsync()
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            ICollection<Language> languages = await this.languageService.GetByUserAsync(userId);
+            ICollection<ILanguage> languages = this.languageHelper.GetAllLanguages();
+
             ICollection<LanguageViewModel> languageViewModels = this.languageViewMapper.Map(languages);
 
             return this.Ok(languageViewModels);

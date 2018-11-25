@@ -20,6 +20,7 @@ namespace Lwt.Test.Services
 
         private readonly Mock<ITextRepository> textRepository;
 
+        private readonly Mock<ILanguageHelper> languageHelper;
 
         private readonly Mock<IMapper<TextEditModel, Text>> textEditMapper;
 
@@ -35,11 +36,13 @@ namespace Lwt.Test.Services
             this.textEditMapper = new Mock<IMapper<TextEditModel, Text>>();
             this.textRepository = new Mock<ITextRepository>();
             this.textValidator = new Mock<IValidator<Text>>();
+            this.languageHelper = new Mock<ILanguageHelper>();
 
             this.textService = new TextService(
                 this.textRepository.Object,
                 this.textEditMapper.Object,
-                this.textValidator.Object);
+                this.textValidator.Object,
+                this.languageHelper.Object);
         }
 
         /// <summary>
@@ -62,25 +65,6 @@ namespace Lwt.Test.Services
             await Assert.ThrowsAsync<BadRequestException>(() => this.textService.CreateAsync(text));
         }
 
-        /// <summary>
-        /// test.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task CreateAsync_ShouldCallRepository_IfTexValid()
-        {
-            // arrange
-            var text = new Text();
-            var validationResult = new Mock<ValidationResult>();
-            this.textValidator.Setup(v => v.Validate(text)).Returns(validationResult.Object);
-            validationResult.Setup(r => r.IsValid).Returns(true);
-
-            // act
-            await this.textService.CreateAsync(text);
-
-            // assert
-            this.textRepository.Verify(r => r.AddAsync(text), Times.Once);
-        }
 
         /// <summary>
         /// test.

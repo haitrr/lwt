@@ -1,7 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
-
     /// <summary>
     /// Language view model.
     /// </summary>
@@ -15,6 +13,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets language id.
         /// </summary>
-        public Guid Id { get; set; }
+        public Language Id { get; set; }
     }
 }

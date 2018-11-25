@@ -4,10 +4,8 @@ namespace Lwt.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-
     using FluentValidation;
     using FluentValidation.Results;
-
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
@@ -19,7 +17,7 @@ namespace Lwt.Services
     public class TextService : ITextService
     {
         private readonly ITextRepository textRepository;
-
+        private readonly ILanguageHelper languageHelper;
 
         private readonly IValidator<Text> textValidator;
 
@@ -32,14 +30,17 @@ namespace Lwt.Services
         /// <param name="textRepository">textRepository.</param>
         /// <param name="textEditMapper">textEditMapper.</param>
         /// <param name="textValidator">textValidator.</param>
+        /// <param name="languageHelper">the language helper.</param>
         public TextService(
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
-            IValidator<Text> textValidator)
+            IValidator<Text> textValidator,
+            ILanguageHelper languageHelper)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
             this.textValidator = textValidator;
+            this.languageHelper = languageHelper;
         }
 
         /// <inheritdoc/>
@@ -52,7 +53,7 @@ namespace Lwt.Services
                 throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
             }
 
-
+            text.Words = this.languageHelper.GetLanguage(text.Language).SplitText(text.Content);
             await this.textRepository.AddAsync(text);
         }
 
