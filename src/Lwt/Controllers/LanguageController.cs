@@ -3,7 +3,6 @@ namespace Lwt.Controllers
     using System.Collections.Generic;
     using Lwt.Interfaces;
     using Lwt.Models;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     /// <inheritdoc />
@@ -33,7 +32,6 @@ namespace Lwt.Controllers
         /// </summary>
         /// <returns>list of the language view model.</returns>
         [HttpGet]
-        [Authorize]
         public IActionResult GetAsync()
         {
             ICollection<ILanguage> languages = this.languageHelper.GetAllLanguages();

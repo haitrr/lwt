@@ -103,6 +103,7 @@ namespace Lwt
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
             services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
             services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
+            services.AddTransient<IMapper<ILanguage, LanguageViewModel>, LanguageViewMapper>();
             services.AddTransient<ITextSplitter, TextSplitter>();
 
             // user
@@ -127,6 +128,7 @@ namespace Lwt
 
             // utilities
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
+            services.AddScoped<ILanguageHelper, LanguageHelper>();
             services.AddScoped<ITokenProvider, TokenProvider>();
 
             // middleware
