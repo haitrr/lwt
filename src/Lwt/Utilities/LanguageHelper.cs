@@ -16,14 +16,14 @@ namespace Lwt.Utilities
                 case Language.English:
                     return new English();
             }
-            
+
             throw new NotSupportedException($"Language {language.ToString()} is not supported.");
         }
 
         /// <inheritdoc/>
         public ICollection<ILanguage> GetAllLanguages()
         {
-            return new List<ILanguage>(){new English()};
+            return new List<ILanguage>() { new English() };
         }
     }
 }

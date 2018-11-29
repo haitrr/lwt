@@ -51,5 +51,13 @@ namespace Lwt.Interfaces.Services
         /// <param name="textFilter">the filters.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<long> CountAsync(Guid userId, TextFilter textFilter);
+
+        /// <summary>
+        /// get the text to read.
+        /// </summary>
+        /// <param name="id">the text id.</param>
+        /// <param name="userId">the user id.</param>
+        /// <returns>the text read model.</returns>
+        Task<TextReadModel> ReadAsync(Guid id, Guid userId);
     }
 }

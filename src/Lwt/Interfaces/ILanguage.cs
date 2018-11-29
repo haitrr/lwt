@@ -12,7 +12,6 @@ namespace Lwt.Interfaces
         /// </summary>
         string Name { get; set; }
 
-
         /// <summary>
         /// Gets or sets the enum.
         /// </summary>

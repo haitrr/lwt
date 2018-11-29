@@ -99,6 +99,20 @@ namespace Lwt.Controllers
         }
 
         /// <summary>
+        /// get the text for reading.
+        /// </summary>
+        /// <param name="id">the text id.</param>
+        /// <returns>the text read model.</returns>
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<IActionResult> ReadAsync([FromRoute] Guid id)
+        {
+            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            TextReadModel textReadModel = await this.textService.ReadAsync(id, userId);
+            return this.Ok(textReadModel);
+        }
+
+        /// <summary>
         /// a.
         /// </summary>
         /// <param name="id">id.</param>

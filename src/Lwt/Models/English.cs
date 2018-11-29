@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Lwt.Models
 {
     using Lwt.Interfaces;
@@ -16,7 +18,7 @@ namespace Lwt.Models
         /// <inheritdoc/>
         public string[] SplitText(string text)
         {
-            return text.Split(" ");
+            return Regex.Split(text, @"(?<=[.,;] )");
         }
     }
 }

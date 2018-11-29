@@ -20,9 +20,9 @@ namespace Lwt.Services
         private readonly ILanguageHelper languageHelper;
 
         private readonly IValidator<Text> textValidator;
+        private readonly ITermRepository termRepository;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextService"/> class.
@@ -31,16 +31,19 @@ namespace Lwt.Services
         /// <param name="textEditMapper">textEditMapper.</param>
         /// <param name="textValidator">textValidator.</param>
         /// <param name="languageHelper">the language helper.</param>
+        /// <param name="termRepository">the term repository.</param>
         public TextService(
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
             IValidator<Text> textValidator,
-            ILanguageHelper languageHelper)
+            ILanguageHelper languageHelper,
+            ITermRepository termRepository)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
             this.textValidator = textValidator;
             this.languageHelper = languageHelper;
+            this.termRepository = termRepository;
         }
 
         /// <inheritdoc/>
@@ -101,6 +104,47 @@ namespace Lwt.Services
         public Task<long> CountAsync(Guid userId, TextFilter textFilter)
         {
             return this.textRepository.CountByUserAsync(userId, textFilter);
+        }
+
+        /// <inheritdoc />
+        public async Task<TextReadModel> ReadAsync(Guid id, Guid userId)
+        {
+            Text text = await this.textRepository.GetByIdAsync(id);
+
+            if (text == null)
+            {
+                throw new BadRequestException("Text does not exist.");
+            }
+
+            if (text.CreatorId != userId)
+            {
+                throw new ForbiddenException("You don't have permission to access this text.");
+            }
+
+            var readModel = new TextReadModel();
+            readModel.Title = text.Title;
+            var termViewModels = new List<TermViewModel>();
+
+            foreach (string word in text.Words)
+            {
+                Term term = await this.termRepository.GetByUserIdAndContentAsync(userId, word);
+                TermViewModel viewModel;
+
+                if (term == null)
+                {
+                    viewModel = new TermViewModel() { Content = word, LearningLevel = TermLearningLevel.Unknow };
+                }
+                else
+                {
+                    viewModel = new TermViewModel()
+                        { Content = term.Content, LearningLevel = term.LearningLevel, Mearning = term.Mearning };
+                }
+
+                termViewModels.Add(viewModel);
+            }
+
+            readModel.Terms = termViewModels;
+            return readModel;
         }
     }
 }
