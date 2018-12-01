@@ -18,7 +18,7 @@ namespace Lwt.Models
         /// <inheritdoc/>
         public string[] SplitText(string text)
         {
-            return Regex.Split(text, @"(?<=[.,;] )");
+            return Regex.Split(text, @"([.,;?<= ])");
         }
     }
 }

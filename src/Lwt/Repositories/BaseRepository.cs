@@ -4,7 +4,6 @@ namespace Lwt.Repositories
     using System.Threading.Tasks;
 
     using Lwt.DbContexts;
-    using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
 
@@ -81,14 +80,7 @@ namespace Lwt.Repositories
         /// <inheritdoc/>
         public Task<T> GetByIdAsync(Guid id)
         {
-            try
-            {
-                return this.Collection.Find(e => e.Id == id).SingleAsync();
-            }
-            catch
-            {
-                throw new NotFoundException($"Item with id {id} not found.");
-            }
+            return this.Collection.Find(e => e.Id == id).SingleOrDefaultAsync();
         }
 
         /// <inheritdoc/>
