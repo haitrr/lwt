@@ -2,11 +2,15 @@ namespace Lwt.Test.Controllers
 {
     using System;
     using System.Collections.Generic;
+
     using Lwt.Controllers;
     using Lwt.Interfaces;
     using Lwt.Models;
+
     using Microsoft.AspNetCore.Mvc;
+
     using Moq;
+
     using Xunit;
 
     /// <inheritdoc />
@@ -18,6 +22,7 @@ namespace Lwt.Test.Controllers
         private readonly LanguageController languageController;
 
         private readonly Mock<IAuthenticationHelper> authenticationHelper;
+
         private readonly Mock<ILanguageHelper> languageHelper;
 
         private readonly Mock<IMapper<ILanguage, LanguageViewModel>> languageViewModelMapper;
@@ -32,8 +37,9 @@ namespace Lwt.Test.Controllers
             this.languageViewModelMapper = new Mock<IMapper<ILanguage, LanguageViewModel>>();
             this.languageHelper = new Mock<ILanguageHelper>();
 
-            this.languageController =
-                new LanguageController(this.languageViewModelMapper.Object, this.languageHelper.Object);
+            this.languageController = new LanguageController(
+                this.languageViewModelMapper.Object,
+                this.languageHelper.Object);
         }
 
         /// <summary>
@@ -66,7 +72,6 @@ namespace Lwt.Test.Controllers
             var objectResult = Assert.IsType<OkObjectResult>(actual);
             Assert.Equal(viewModels, objectResult.Value);
         }
-
 
         /// <inheritdoc />
         /// <summary>

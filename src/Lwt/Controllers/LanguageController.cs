@@ -1,8 +1,10 @@
 namespace Lwt.Controllers
 {
     using System.Collections.Generic;
+
     using Lwt.Interfaces;
     using Lwt.Models;
+
     using Microsoft.AspNetCore.Mvc;
 
     /// <inheritdoc />
@@ -21,7 +23,9 @@ namespace Lwt.Controllers
         /// </summary>
         /// <param name="languageViewMapper">language view model mapper.</param>
         /// <param name="languageHelper">language helper.</param>
-        public LanguageController(IMapper<ILanguage, LanguageViewModel> languageViewMapper, ILanguageHelper languageHelper)
+        public LanguageController(
+            IMapper<ILanguage, LanguageViewModel> languageViewMapper,
+            ILanguageHelper languageHelper)
         {
             this.languageViewMapper = languageViewMapper;
             this.languageHelper = languageHelper;

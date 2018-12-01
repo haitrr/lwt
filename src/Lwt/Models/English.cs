@@ -1,7 +1,7 @@
-using System.Text.RegularExpressions;
-
 namespace Lwt.Models
 {
+    using System.Text.RegularExpressions;
+
     using Lwt.Interfaces;
 
     /// <summary>

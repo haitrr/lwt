@@ -2,6 +2,7 @@ namespace Lwt.Utilities
 {
     using System;
     using System.Threading.Tasks;
+
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
@@ -18,9 +19,7 @@ namespace Lwt.Utilities
         /// </summary>
         /// <param name="userRepository"> user repo.</param>
         /// <param name="lwtDbContext">the db context.</param>
-        public DatabaseSeeder(
-            IUserRepository userRepository,
-            IdentityDbContext lwtDbContext)
+        public DatabaseSeeder(IUserRepository userRepository, IdentityDbContext lwtDbContext)
         {
             this.userRepository = userRepository;
             this.lwtDbContext = lwtDbContext;
@@ -40,7 +39,7 @@ namespace Lwt.Utilities
 
             if (hai == null)
             {
-                hai = new User {Id = new Guid("9E18BB68-66D2-4711-A27B-1A54AC2E8077"), UserName = "hai"};
+                hai = new User { Id = new Guid("9E18BB68-66D2-4711-A27B-1A54AC2E8077"), UserName = "hai" };
                 await this.userRepository.CreateAsync(hai, "q");
             }
         }

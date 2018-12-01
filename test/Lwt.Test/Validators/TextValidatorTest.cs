@@ -2,11 +2,16 @@ namespace Lwt.Test.Validators
 {
     using System;
     using System.Linq;
+
     using FluentValidation.Results;
+
     using Lwt.Models;
     using Lwt.Validators;
+
     using Microsoft.AspNetCore.Identity;
+
     using Moq;
+
     using Xunit;
 
     /// <summary>
@@ -17,7 +22,6 @@ namespace Lwt.Test.Validators
         private readonly TextValidator textValidator;
 
         private readonly Mock<UserManager<User>> userManager;
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextValidatorTest"/> class.
@@ -37,6 +41,7 @@ namespace Lwt.Test.Validators
                 null,
                 null,
                 null);
+
             this.textValidator = new TextValidator(this.userManager.Object);
         }
 
@@ -48,7 +53,7 @@ namespace Lwt.Test.Validators
         {
             // arrange
             Guid userId = Guid.Empty;
-            var text = new Text {CreatorId = userId};
+            var text = new Text { CreatorId = userId };
 
             // act
             ValidationResult actual = this.textValidator.Validate(text);
@@ -65,8 +70,7 @@ namespace Lwt.Test.Validators
         public void Validate_ShouldReturnInValid_IfTitleEmpty()
         {
             // arrange
-            var text = new Text
-                {CreatorId = Guid.NewGuid(), Content = "valid", Title = string.Empty};
+            var text = new Text { CreatorId = Guid.NewGuid(), Content = "valid", Title = string.Empty };
 
             this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString())).ReturnsAsync(new User());
 
@@ -85,8 +89,7 @@ namespace Lwt.Test.Validators
         public void Validate_ShouldReturnInValid_IfContentEmpty()
         {
             // arrange
-            var text = new Text
-                {CreatorId = Guid.NewGuid(), Content = string.Empty, Title = "yolo"};
+            var text = new Text { CreatorId = Guid.NewGuid(), Content = string.Empty, Title = "yolo" };
 
             this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString())).ReturnsAsync(new User());
 
@@ -105,8 +108,7 @@ namespace Lwt.Test.Validators
         public void Validate_ShouldReturnInValid_IfUserNotExist()
         {
             // arrange
-            var text = new Text
-                {CreatorId = Guid.NewGuid(), Content = "yolo", Title = "yolo"};
+            var text = new Text { CreatorId = Guid.NewGuid(), Content = "yolo", Title = "yolo" };
 
             this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString())).ReturnsAsync((User)null);
 

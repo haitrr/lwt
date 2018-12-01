@@ -109,6 +109,7 @@ namespace Lwt.Controllers
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             TextReadModel textReadModel = await this.textService.ReadAsync(id, userId);
+
             return this.Ok(textReadModel);
         }
 

@@ -4,8 +4,10 @@ namespace Lwt.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+
     using FluentValidation;
     using FluentValidation.Results;
+
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
@@ -17,9 +19,11 @@ namespace Lwt.Services
     public class TextService : ITextService
     {
         private readonly ITextRepository textRepository;
+
         private readonly ILanguageHelper languageHelper;
 
         private readonly IValidator<Text> textValidator;
+
         private readonly ITermRepository termRepository;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
@@ -144,6 +148,7 @@ namespace Lwt.Services
             }
 
             readModel.Terms = termViewModels;
+
             return readModel;
         }
     }

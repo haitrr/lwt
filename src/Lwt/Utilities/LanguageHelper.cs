@@ -2,6 +2,7 @@ namespace Lwt.Utilities
 {
     using System;
     using System.Collections.Generic;
+
     using Lwt.Interfaces;
     using Lwt.Models;
 
@@ -14,6 +15,7 @@ namespace Lwt.Utilities
             switch (language)
             {
                 case Language.English:
+
                     return new English();
             }
 
