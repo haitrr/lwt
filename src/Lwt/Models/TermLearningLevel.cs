@@ -6,29 +6,39 @@ namespace Lwt.Models
     public enum TermLearningLevel
     {
         /// <summary>
+        /// ignored terms.
+        /// </summary>
+        Ignored = 0,
+
+        /// <summary>
         /// not know yet.
         /// </summary>
-        Unknow = 1,
+        UnKnow = 1,
 
         /// <summary>
         /// learning level 1.
         /// </summary>
-        Learning1 = 3,
+        Learning1 = 2,
 
         /// <summary>
         /// learning level 2.
         /// </summary>
-        Learning2 = 4,
+        Learning2 = 3,
 
         /// <summary>
         /// learning level 3.
         /// </summary>
-        Learning3 = 5,
+        Learning3 = 4,
 
         /// <summary>
-        /// knew.
+        /// learning level 4.
         /// </summary>
-        Knew = 6,
+        Learning4 = 5,
+
+        /// <summary>
+        /// learning level 5.
+        /// </summary>
+        Learning5 = 6,
 
         /// <summary>
         /// well know.

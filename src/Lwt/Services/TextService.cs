@@ -136,12 +136,12 @@ namespace Lwt.Services
 
                 if (term == null)
                 {
-                    viewModel = new TermViewModel() { Content = word, LearningLevel = TermLearningLevel.Unknow };
+                    viewModel = new TermViewModel() { Content = word, LearningLevel = TermLearningLevel.UnKnow };
                 }
                 else
                 {
                     viewModel = new TermViewModel()
-                        { Content = term.Content, LearningLevel = term.LearningLevel, Mearning = term.Mearning };
+                        { Content = term.Content, LearningLevel = term.LearningLevel, Mearning = term.Meaning };
                 }
 
                 termViewModels.Add(viewModel);

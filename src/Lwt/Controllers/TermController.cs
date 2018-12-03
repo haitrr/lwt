@@ -11,7 +11,7 @@ namespace Lwt.Controllers
 
     /// <inheritdoc />
     /// <summary>
-    /// a.
+    /// the controller for term apis.
     /// </summary>
     [Route("/api/term")]
     public class TermController : Controller
@@ -25,9 +25,9 @@ namespace Lwt.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="TermController"/> class.
         /// </summary>
-        /// <param name="termService">a.</param>
-        /// <param name="termCreateMapper">aaa.</param>
-        /// <param name="authenticationHelper">aa.</param>
+        /// <param name="termService">the term service.</param>
+        /// <param name="termCreateMapper">the term create mapper.</param>
+        /// <param name="authenticationHelper">the authentication helper.</param>
         public TermController(
             ITermService termService,
             IMapper<TermCreateModel, Guid, Term> termCreateMapper,
@@ -52,6 +52,22 @@ namespace Lwt.Controllers
             Guid id = await this.termService.CreateAsync(term);
 
             return this.Ok(id);
+        }
+
+        /// <summary>
+        /// edit a term.
+        /// </summary>
+        /// <param name="termEditModel">the edit model.</param>
+        /// <param name="id">the term id.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<IActionResult> CreateAsync([FromBody] TermEditModel termEditModel, [FromRoute] Guid id)
+        {
+            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            await this.termService.EditAsync(termEditModel, id, userId);
+
+            return this.Ok();
         }
     }
 }

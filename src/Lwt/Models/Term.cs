@@ -15,7 +15,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the meaning.
         /// </summary>
-        public string Mearning { get; set; }
+        public string Meaning { get; set; }
 
         /// <summary>
         /// Gets or sets the creator's id.
