@@ -141,7 +141,9 @@ namespace Lwt.Services
                 else
                 {
                     viewModel = new TermViewModel()
-                        { Content = term.Content, LearningLevel = term.LearningLevel, Mearning = term.Meaning };
+                    {
+                        Id = term.Id, Content = term.Content, LearningLevel = term.LearningLevel, Meaning = term.Meaning,
+                    };
                 }
 
                 termViewModels.Add(viewModel);
