@@ -11,7 +11,6 @@ namespace Lwt.Mappers
         /// <inheritdoc/>
         public override Term Map(TermEditModel editModel, Term term)
         {
-            term.Content = editModel.Content;
             term.Meaning = editModel.Meaning;
             term.LearningLevel = editModel.LearningLevel;
 
