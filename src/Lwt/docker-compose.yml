@@ -1,0 +1,16 @@
+version: "3"
+services:
+    server:
+        build: .
+        ports:
+          - "5000:80"
+        container_name: server
+        links:
+          - mongo
+        depends_on:
+          - mongo
+    mongo:
+        image: mongo
+        container_name: mongo
+        ports:
+          - "27017:27017"
