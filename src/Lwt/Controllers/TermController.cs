@@ -2,10 +2,8 @@ namespace Lwt.Controllers
 {
     using System;
     using System.Threading.Tasks;
-
     using Lwt.Interfaces;
     using Lwt.Models;
-
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
@@ -52,6 +50,20 @@ namespace Lwt.Controllers
             Guid id = await this.termService.CreateAsync(term);
 
             return this.Ok(id);
+        }
+
+        /// <summary>
+        /// get a term.
+        /// </summary>
+        /// <param name="termId">the term's id.</param>
+        /// <returns>the term view model.</returns>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetAsync([FromRoute] Guid termId)
+        {
+            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            TermViewModel termViewModel = await this.termService.GetAsync(userId, termId);
+            return this.Ok(termViewModel);
         }
 
         /// <summary>

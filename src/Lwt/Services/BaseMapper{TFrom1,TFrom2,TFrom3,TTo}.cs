@@ -2,7 +2,6 @@ namespace Lwt.Services
 {
     using System.Collections.Generic;
     using System.Linq;
-
     using Lwt.Interfaces;
 
     /// <summary>
@@ -36,7 +35,7 @@ namespace Lwt.Services
             {
                 IEnumerable<(TFrom1 From1, TFrom2 From2, TFrom3 TFrom3)> froms = from1Array.Zip(
                     from2Array.Zip(enumerable, (from2, from3) => (from2, from3)),
-                    (from1, from2) => (From1 : from1, From2 : from2.from2, TFrom3 : from2.from3));
+                    (from1, from2) => (From1: from1, From2: from2.from2, TFrom3: from2.from3));
 
                 foreach ((TFrom1 From1, TFrom2 From2, TFrom3 TFrom3) from in froms)
                 {

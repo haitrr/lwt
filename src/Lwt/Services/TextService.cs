@@ -127,20 +127,20 @@ namespace Lwt.Services
 
             var readModel = new TextReadModel();
             readModel.Title = text.Title;
-            var termViewModels = new List<TermViewModel>();
+            var termViewModels = new List<TermReadModel>();
 
             foreach (string word in text.Words)
             {
                 Term term = await this.termRepository.GetByUserIdAndContentAsync(userId, word);
-                TermViewModel viewModel;
+                TermReadModel viewModel;
 
                 if (term == null)
                 {
-                    viewModel = new TermViewModel() { Content = word, LearningLevel = TermLearningLevel.UnKnow };
+                    viewModel = new TermReadModel() { Content = word, LearningLevel = TermLearningLevel.UnKnow };
                 }
                 else
                 {
-                    viewModel = new TermViewModel()
+                    viewModel = new TermReadModel()
                     {
                         Id = term.Id, Content = term.Content, LearningLevel = term.LearningLevel, Meaning = term.Meaning,
                     };

@@ -3,28 +3,28 @@ namespace Lwt.Models
     using System;
 
     /// <summary>
-    /// the term's view model.
+    /// term view model.
     /// </summary>
     public class TermViewModel
     {
         /// <summary>
-        /// Gets or sets the term's id.
-        /// </summary>
-        public Guid? Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the term content.
+        /// Gets or sets content.
         /// </summary>
         public string Content { get; set; }
 
         /// <summary>
-        /// Gets or sets the term's meaning.
+        /// Gets or sets meaning.
         /// </summary>
         public string Meaning { get; set; }
 
         /// <summary>
-        /// Gets or sets the term's learning level.
+        /// Gets or sets learning level.
         /// </summary>
         public TermLearningLevel LearningLevel { get; set; }
+
+        /// <summary>
+        /// Gets or sets term's id.
+        /// </summary>
+        public Guid Id { get; set; }
     }
 }

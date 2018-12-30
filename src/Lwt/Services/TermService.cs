@@ -2,7 +2,6 @@ namespace Lwt.Services
 {
     using System;
     using System.Threading.Tasks;
-
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
@@ -15,16 +14,22 @@ namespace Lwt.Services
         private readonly ITermRepository termRepository;
 
         private readonly IMapper<TermEditModel, Term> termEditMapper;
+        private readonly IMapper<Term, TermViewModel> termViewMapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TermService"/> class.
         /// </summary>
         /// <param name="termRepository">the term repository.</param>
         /// <param name="termEditMapper">the term edit mapper.</param>
-        public TermService(ITermRepository termRepository, IMapper<TermEditModel, Term> termEditMapper)
+        /// <param name="termViewMapper">term view mapper.</param>
+        public TermService(
+            ITermRepository termRepository,
+            IMapper<TermEditModel, Term> termEditMapper,
+            IMapper<Term, TermViewModel> termViewMapper)
         {
             this.termRepository = termRepository;
             this.termEditMapper = termEditMapper;
+            this.termViewMapper = termViewMapper;
         }
 
         /// <inheritdoc/>
@@ -47,6 +52,24 @@ namespace Lwt.Services
 
             Term edited = this.termEditMapper.Map(editModel, current);
             await this.termRepository.UpdateAsync(edited);
+        }
+
+        /// <inheritdoc />
+        public async Task<TermViewModel> GetAsync(Guid userId, Guid termId)
+        {
+            Term term = await this.termRepository.GetByIdAsync(termId);
+
+            if (term == null)
+            {
+                throw new NotFoundException("Term not found.");
+            }
+
+            if (term.CreatorId != userId)
+            {
+                throw new ForbiddenException("You don't have permission to access this term.");
+            }
+
+            return this.termViewMapper.Map(term);
         }
     }
 }
