@@ -57,7 +57,7 @@ namespace Lwt.Controllers
         /// </summary>
         /// <param name="termId">the term's id.</param>
         /// <returns>the term view model.</returns>
-        [HttpGet]
+        [HttpGet("{termId}")]
         [Authorize]
         public async Task<IActionResult> GetAsync([FromRoute] Guid termId)
         {
