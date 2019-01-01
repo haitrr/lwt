@@ -13,7 +13,7 @@ namespace Lwt.Mappers
         /// <inheritdoc/>
         public override Term Map(TermCreateModel createModel, Guid userId, Term term)
         {
-            term.Content = createModel.Content;
+            term.Content = createModel.Content.ToUpperInvariant();
             term.Meaning = createModel.Meaning;
             term.LearningLevel = createModel.LearningLevel;
             term.CreatorId = userId;

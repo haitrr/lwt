@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Lwt.Repositories
 {
     using System;
@@ -26,13 +28,13 @@ namespace Lwt.Repositories
         /// <inheritdoc/>
         public Task<Term> GetByContentAsync(string content)
         {
-            return this.Collection.Find(term => term.Content == content).SingleOrDefaultAsync();
+            return this.Collection.Find(term => term.Content == content.ToUpperInvariant()).SingleOrDefaultAsync();
         }
 
         /// <inheritdoc />
         public Task<Term> GetByUserIdAndContentAsync(Guid userId, string word)
         {
-            return this.Collection.Find(term => term.Content == word && term.CreatorId == userId)
+            return this.Collection.Find(term => term.Content == word.ToUpperInvariant() && term.CreatorId == userId)
                 .SingleOrDefaultAsync();
         }
     }
