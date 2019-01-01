@@ -142,7 +142,7 @@ namespace Lwt.Services
                 {
                     viewModel = new TermReadModel()
                     {
-                        Id = term.Id, Content = term.Content, LearningLevel = term.LearningLevel, Meaning = term.Meaning,
+                        Id = term.Id, Content = word, LearningLevel = term.LearningLevel, Meaning = term.Meaning,
                     };
                 }
 
