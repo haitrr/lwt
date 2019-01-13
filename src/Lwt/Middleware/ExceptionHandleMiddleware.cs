@@ -65,6 +65,8 @@ namespace Lwt.Middleware
         {
             // todo: uncomment
             Console.WriteLine(context.Request.IsHttps);
+            Console.WriteLine(e.HResult);
+            return Task.CompletedTask;
             /*
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
