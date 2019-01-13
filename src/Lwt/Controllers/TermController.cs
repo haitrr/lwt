@@ -79,7 +79,7 @@ namespace Lwt.Controllers
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             await this.termService.EditAsync(termEditModel, id, userId);
 
-            return this.Ok(new {});
+            return this.Ok(new { });
         }
     }
 }

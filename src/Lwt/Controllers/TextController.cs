@@ -3,12 +3,10 @@ namespace Lwt.Controllers
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Lwt.ViewModels;
-
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
@@ -24,27 +22,22 @@ namespace Lwt.Controllers
 
         private readonly IMapper<TextCreateModel, Guid, Text> textCreateMapper;
 
-        private readonly IMapper<Text, TextViewModel> textViewMapper;
-
         private readonly IAuthenticationHelper authenticationHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextController"/> class.
         /// </summary>
         /// <param name="textService">textService.</param>
-        /// <param name="textViewMapper">text view mapper.</param>
         /// <param name="authenticationHelper">authenticationHelper.</param>
         /// <param name="textCreateMapper">textCreateMapper.</param>
         public TextController(
             ITextService textService,
             IAuthenticationHelper authenticationHelper,
-            IMapper<TextCreateModel, Guid, Text> textCreateMapper,
-            IMapper<Text, TextViewModel> textViewMapper)
+            IMapper<TextCreateModel, Guid, Text> textCreateMapper)
         {
             this.textService = textService;
             this.authenticationHelper = authenticationHelper;
             this.textCreateMapper = textCreateMapper;
-            this.textViewMapper = textViewMapper;
         }
 
         /// <summary>
@@ -76,9 +69,10 @@ namespace Lwt.Controllers
             [FromQuery] PaginationQuery paginationQuery)
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            IEnumerable<Text> texts = await this.textService.GetByUserAsync(userId, filters, paginationQuery);
+
             long count = await this.textService.CountAsync(userId, filters);
-            ICollection<TextViewModel> viewModels = this.textViewMapper.Map(texts);
+            IEnumerable<TextViewModel> viewModels =
+                await this.textService.GetByUserAsync(userId, filters, paginationQuery);
 
             return this.Ok(new TextList { Total = count, Items = viewModels });
         }

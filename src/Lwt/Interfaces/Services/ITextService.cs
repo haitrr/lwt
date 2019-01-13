@@ -3,8 +3,8 @@ namespace Lwt.Interfaces.Services
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-
     using Lwt.Models;
+    using Lwt.ViewModels;
 
     /// <summary>
     /// a.
@@ -25,7 +25,10 @@ namespace Lwt.Interfaces.Services
         /// <param name="textFilter">the filters.</param>
         /// <param name="paginationQuery">the pagination query.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<IEnumerable<Text>> GetByUserAsync(Guid userId, TextFilter textFilter, PaginationQuery paginationQuery);
+        Task<IEnumerable<TextViewModel>> GetByUserAsync(
+            Guid userId,
+            TextFilter textFilter,
+            PaginationQuery paginationQuery);
 
         /// <summary>
         /// a.

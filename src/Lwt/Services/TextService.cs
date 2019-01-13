@@ -4,14 +4,13 @@ namespace Lwt.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-
     using FluentValidation;
     using FluentValidation.Results;
-
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+    using Lwt.ViewModels;
 
     /// <summary>
     /// the text service.
@@ -24,6 +23,7 @@ namespace Lwt.Services
 
         private readonly IValidator<Text> textValidator;
 
+        private readonly IMapper<Text, TextViewModel> textViewMapper;
         private readonly ITermRepository termRepository;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
@@ -32,6 +32,7 @@ namespace Lwt.Services
         /// Initializes a new instance of the <see cref="TextService"/> class.
         /// </summary>
         /// <param name="textRepository">textRepository.</param>
+        /// <param name="textViewMapper">text view mapper.</param>
         /// <param name="textEditMapper">textEditMapper.</param>
         /// <param name="textValidator">textValidator.</param>
         /// <param name="languageHelper">the language helper.</param>
@@ -41,13 +42,15 @@ namespace Lwt.Services
             IMapper<TextEditModel, Text> textEditMapper,
             IValidator<Text> textValidator,
             ILanguageHelper languageHelper,
-            ITermRepository termRepository)
+            ITermRepository termRepository,
+            IMapper<Text, TextViewModel> textViewMapper)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
             this.textValidator = textValidator;
             this.languageHelper = languageHelper;
             this.termRepository = termRepository;
+            this.textViewMapper = textViewMapper;
         }
 
         /// <inheritdoc/>
@@ -65,12 +68,27 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<Text>> GetByUserAsync(
+        public async Task<IEnumerable<TextViewModel>> GetByUserAsync(
             Guid userId,
             TextFilter textFilter,
             PaginationQuery paginationQuery)
         {
-            return this.textRepository.GetByUserAsync(userId, textFilter, paginationQuery);
+            IEnumerable<Text> texts = await this.textRepository.GetByUserAsync(userId, textFilter, paginationQuery);
+            var viewModels = new List<TextViewModel>();
+
+            foreach (Text text in texts)
+            {
+                TextViewModel viewModel = this.textViewMapper.Map(text);
+
+                foreach (KeyValuePair<TermLearningLevel, long> keyValuePair in await this.CountTermByLearningLevel(text))
+                {
+                    viewModel.Counts.Add(keyValuePair.Key, keyValuePair.Value);
+                }
+
+                viewModels.Add(viewModel);
+            }
+
+            return viewModels;
         }
 
         /// <inheritdoc/>
@@ -152,6 +170,27 @@ namespace Lwt.Services
             readModel.Terms = termViewModels;
 
             return readModel;
+        }
+
+        private async Task<Dictionary<TermLearningLevel, long>> CountTermByLearningLevel(Text text)
+        {
+            var result = new Dictionary<TermLearningLevel, long>();
+
+            foreach (string word in text.Words)
+            {
+                Term term = await this.termRepository.GetByUserIdAndContentAsync(text.CreatorId, word);
+
+                if (result.ContainsKey(term.LearningLevel))
+                {
+                    result[term.LearningLevel] += 1;
+                }
+                else
+                {
+                    result[term.LearningLevel] = 1;
+                }
+            }
+
+            return result;
         }
     }
 }

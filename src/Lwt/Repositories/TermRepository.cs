@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace Lwt.Repositories
 {
     using System;
