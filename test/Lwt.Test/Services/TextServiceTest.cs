@@ -2,17 +2,14 @@ namespace Lwt.Test.Services
 {
     using System;
     using System.Threading.Tasks;
-
     using FluentValidation;
     using FluentValidation.Results;
-
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Services;
-
+    using Lwt.ViewModels;
     using Moq;
-
     using Xunit;
 
     /// <summary>
@@ -27,6 +24,7 @@ namespace Lwt.Test.Services
         private readonly Mock<ILanguageHelper> languageHelper;
 
         private readonly Mock<IMapper<TextEditModel, Text>> textEditMapper;
+        private readonly Mock<IMapper<Text, TextViewModel>> textViewMapper;
 
         private readonly Mock<IValidator<Text>> textValidator;
 
@@ -39,6 +37,7 @@ namespace Lwt.Test.Services
         public TextServiceTest()
         {
             this.textEditMapper = new Mock<IMapper<TextEditModel, Text>>();
+            this.textViewMapper = new Mock<IMapper<Text, TextViewModel>>();
             this.textRepository = new Mock<ITextRepository>();
             this.textValidator = new Mock<IValidator<Text>>();
             this.languageHelper = new Mock<ILanguageHelper>();
@@ -49,7 +48,8 @@ namespace Lwt.Test.Services
                 this.textEditMapper.Object,
                 this.textValidator.Object,
                 this.languageHelper.Object,
-                this.termRepository.Object);
+                this.termRepository.Object,
+                this.textViewMapper.Object);
         }
 
         /// <summary>

@@ -1,7 +1,6 @@
 namespace Lwt.Test.Controllers
 {
     using System;
-    using System.Collections.Generic;
     using System.Security.Claims;
     using System.Threading.Tasks;
 
@@ -28,8 +27,6 @@ namespace Lwt.Test.Controllers
 
         private readonly Mock<ITextService> textService;
 
-        private readonly Mock<IMapper<Text, TextViewModel>> textViewMapper;
-
         private readonly Mock<IAuthenticationHelper> authenticationHelper;
 
         private readonly Mock<IMapper<TextCreateModel, Guid, Text>> textCreateMapper;
@@ -41,15 +38,13 @@ namespace Lwt.Test.Controllers
         public TextControllerTest()
         {
             this.textService = new Mock<ITextService>();
-            this.textViewMapper = new Mock<IMapper<Text, TextViewModel>>();
             this.textCreateMapper = new Mock<IMapper<TextCreateModel, Guid, Text>>();
             this.authenticationHelper = new Mock<IAuthenticationHelper>();
 
             this.textController = new TextController(
                 this.textService.Object,
                 this.authenticationHelper.Object,
-                this.textCreateMapper.Object,
-                this.textViewMapper.Object)
+                this.textCreateMapper.Object)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -109,10 +104,9 @@ namespace Lwt.Test.Controllers
             Guid userId = Guid.NewGuid();
             var filter = new TextFilter();
             var paginationQuery = new PaginationQuery();
-            Text[] texts = Array.Empty<Text>();
+            TextViewModel[] texts = Array.Empty<TextViewModel>();
             this.textService.Setup(s => s.GetByUserAsync(userId, filter, paginationQuery)).ReturnsAsync(texts);
             this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.textController.User)).Returns(userId);
-            this.textViewMapper.Setup(m => m.Map(texts)).Returns(new List<TextViewModel>());
 
             // act
             IActionResult actual = await this.textController.GetAllAsync(filter, paginationQuery);
