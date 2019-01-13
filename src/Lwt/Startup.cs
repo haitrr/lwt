@@ -136,7 +136,8 @@ namespace Lwt
             {
                 c.SwaggerDoc("v1", new Info { Title = "Lwt API", Version = "v1" });
 
-                c.AddSecurityDefinition("Bearer",
+                c.AddSecurityDefinition(
+                    "Bearer",
                     new ApiKeyScheme()
                     {
                         Description =
