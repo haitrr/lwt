@@ -136,8 +136,7 @@ namespace Lwt
             {
                 c.SwaggerDoc("v1", new Info { Title = "Lwt API", Version = "v1" });
 
-                c.AddSecurityDefinition(
-                    "Bearer",
+                c.AddSecurityDefinition("Bearer",
                     new ApiKeyScheme()
                     {
                         Description =
@@ -160,10 +159,11 @@ namespace Lwt
         /// <param name="databaseSeeder"> the database seeder.</param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IDatabaseSeeder databaseSeeder)
         {
-            if (env.IsDevelopment())
+            /*if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }
+            }*/
+            app.UseDeveloperExceptionPage();
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             app.UseAuthentication();
