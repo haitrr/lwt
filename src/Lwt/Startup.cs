@@ -53,6 +53,7 @@ namespace Lwt
             services.AddMvc()
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
+            services.AddMetrics();
             services.AddDbContext<IdentityDbContext>(options => options.UseSqlite("Data Source=lwt.db"));
             services.AddTransient<LwtDbContext>();
 
