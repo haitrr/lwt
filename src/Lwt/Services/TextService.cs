@@ -180,6 +180,11 @@ namespace Lwt.Services
             {
                 Term term = await this.termRepository.GetByUserIdAndContentAsync(text.CreatorId, word);
 
+                if (term == null)
+                {
+                    term = new Term { LearningLevel = TermLearningLevel.UnKnow };
+                }
+
                 if (result.ContainsKey(term.LearningLevel))
                 {
                     result[term.LearningLevel] += 1;
