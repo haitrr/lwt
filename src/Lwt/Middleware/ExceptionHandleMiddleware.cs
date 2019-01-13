@@ -41,6 +41,7 @@ namespace Lwt.Middleware
             catch (Exception e)
             {
                 await HandleExceptionAsync(e, context);
+                throw;
             }
         }
 
@@ -63,8 +64,7 @@ namespace Lwt.Middleware
         private static Task HandleExceptionAsync(Exception e, HttpContext context)
         {
             // todo: uncomment
-            Console.WriteLine(context.ToString());
-            throw e;
+            Console.WriteLine(context.Request.IsHttps);
             /*
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
