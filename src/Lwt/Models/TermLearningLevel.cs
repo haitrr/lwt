@@ -6,6 +6,11 @@ namespace Lwt.Models
     public enum TermLearningLevel
     {
         /// <summary>
+        /// term that is not have meaning in language.
+        /// </summary>
+        Skipped = -1,
+
+        /// <summary>
         /// ignored terms.
         /// </summary>
         Ignored = 0,

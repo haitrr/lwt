@@ -27,6 +27,6 @@ namespace Lwt
         /// <param name="args">args.</param>
         /// <returns>asd.</returns>
         public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args).UseMetrics().UseStartup<Startup>().Build();
+            WebHost.CreateDefaultBuilder(args).UseMetrics().UseMetricsWebTracking().UseStartup<Startup>().Build();
     }
 }

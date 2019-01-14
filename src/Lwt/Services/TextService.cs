@@ -146,9 +146,16 @@ namespace Lwt.Services
             var readModel = new TextReadModel();
             readModel.Title = text.Title;
             var termViewModels = new List<TermReadModel>();
+            ILanguage language = this.languageHelper.GetLanguage(text.Language);
 
             foreach (string word in text.Words)
             {
+                if (language.ShouldSkip(word))
+                {
+                    termViewModels.Add(new TermReadModel { Content = word, LearningLevel = TermLearningLevel.Skipped });
+                    continue;
+                }
+
                 Term term = await this.termRepository.GetByUserIdAndContentAsync(userId, word);
                 TermReadModel viewModel;
 
@@ -175,9 +182,15 @@ namespace Lwt.Services
         private async Task<Dictionary<TermLearningLevel, long>> CountTermByLearningLevel(Text text)
         {
             var result = new Dictionary<TermLearningLevel, long>();
+            ILanguage language = this.languageHelper.GetLanguage(text.Language);
 
             foreach (string word in text.Words)
             {
+                if (language.ShouldSkip(word))
+                {
+                    continue;
+                }
+
                 Term term = await this.termRepository.GetByUserIdAndContentAsync(text.CreatorId, word);
 
                 if (term == null)

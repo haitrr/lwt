@@ -18,6 +18,13 @@ namespace Lwt.Interfaces
         Language Id { get; set; }
 
         /// <summary>
+        /// decide if a term should be skipped.
+        /// </summary>
+        /// <param name="term">the term.</param>
+        /// <returns>should skip the term or not.</returns>
+        bool ShouldSkip(string term);
+
+        /// <summary>
         /// split the text.
         /// </summary>
         /// <param name="text">the text.</param>

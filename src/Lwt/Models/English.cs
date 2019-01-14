@@ -15,6 +15,12 @@ namespace Lwt.Models
         /// <inheritdoc/>
         public Language Id { get; set; } = Language.English;
 
+        /// <inheritdoc />
+        public bool ShouldSkip(string term)
+        {
+            return Regex.IsMatch(term, @"([^a-zA-Z0-9\'])");
+        }
+
         /// <inheritdoc/>
         public string[] SplitText(string text)
         {
