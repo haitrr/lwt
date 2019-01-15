@@ -14,11 +14,6 @@ namespace Lwt.Models
         public Guid CreatorId { get; set; }
 
         /// <summary>
-        /// Gets or sets creator.
-        /// </summary>
-        public User Creator { get; set; }
-
-        /// <summary>
         /// Gets or sets Title.
         /// </summary>
         public string Title { get; set; }

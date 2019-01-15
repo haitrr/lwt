@@ -139,7 +139,7 @@ namespace Lwt
 
                 c.AddSecurityDefinition(
                     "Bearer",
-                    new ApiKeyScheme()
+                    new ApiKeyScheme
                     {
                         Description =
                             "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -159,7 +159,12 @@ namespace Lwt
         /// <param name="app">app.</param>
         /// <param name="env">env.</param>
         /// <param name="databaseSeeder"> the database seeder.</param>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IDatabaseSeeder databaseSeeder)
+        /// <param name="indexCreator">the database indexes creator.</param>
+        public void Configure(
+            IApplicationBuilder app,
+            IHostingEnvironment env,
+            IDatabaseSeeder databaseSeeder,
+            IIndexCreator indexCreator)
         {
             /*if (env.IsDevelopment())
             {
@@ -173,7 +178,8 @@ namespace Lwt
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
-            databaseSeeder.SeedData().Wait();
+            databaseSeeder.SeedData().GetAwaiter().GetResult();
+            indexCreator.CreateIndexesAsync().GetAwaiter().GetResult();
         }
     }
 }

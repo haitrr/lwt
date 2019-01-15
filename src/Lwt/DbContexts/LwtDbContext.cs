@@ -1,11 +1,10 @@
 namespace Lwt.DbContexts
 {
     using System;
-
+    using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using Lwt.Models;
-
     using Microsoft.Extensions.Options;
-
     using MongoDB.Driver;
 
     /// <summary>
@@ -32,31 +31,22 @@ namespace Lwt.DbContexts
         public IMongoCollection<Text> Texts => this.database.GetCollection<Text>("texts");
 
         /// <summary>
+        /// Gets term collection.
+        /// </summary>
+        public IMongoCollection<Term> Terms => this.database.GetCollection<Term>("terms");
+
+        /// <summary>
         /// get the collection base on type.
         /// </summary>
         /// <typeparam name="T">type of the collection.</typeparam>
         /// <returns>the collection.</returns>
         /// <exception cref="NotSupportedException">the type is not supported.</exception>
+        [SuppressMessage("StyleCop", "CA1308", Justification = "The collection name should be lower case.")]
         public IMongoCollection<T> GetCollection<T>()
         {
             Type type = typeof(T);
 
-            if (type == typeof(Text))
-            {
-                return this.database.GetCollection<T>("texts");
-            }
-
-            if (type == typeof(Term))
-            {
-                return this.database.GetCollection<T>("terms");
-            }
-
-            if (type == typeof(Language))
-            {
-                return this.database.GetCollection<T>("languages");
-            }
-
-            throw new NotSupportedException(type.Name);
+            return this.database.GetCollection<T>(type.Name.ToLower(CultureInfo.InvariantCulture));
         }
     }
 }
