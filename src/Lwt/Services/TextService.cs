@@ -73,10 +73,7 @@ namespace Lwt.Services
             TextFilter textFilter,
             PaginationQuery paginationQuery)
         {
-            IEnumerable<Text> texts = await this.textRepository.GetByUserAsync(
-                userId,
-                textFilter,
-                paginationQuery);
+            IEnumerable<Text> texts = await this.textRepository.GetByUserAsync(userId, textFilter, paginationQuery);
             var viewModels = new List<TextViewModel>();
 
             foreach (Text text in texts)
@@ -187,6 +184,7 @@ namespace Lwt.Services
         {
             var result = new Dictionary<TermLearningLevel, long>();
             ILanguage language = this.languageHelper.GetLanguage(text.Language);
+            result[TermLearningLevel.UnKnow] = 0;
 
             foreach (string word in text.Words)
             {
@@ -200,7 +198,6 @@ namespace Lwt.Services
                     language.Id,
                     word);
 
-                result[TermLearningLevel.UnKnow] = 0;
                 if (term == null)
                 {
                     result[TermLearningLevel.UnKnow] += 1;
