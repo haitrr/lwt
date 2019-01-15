@@ -114,7 +114,7 @@ The long and the short of it; it is meaningless to talk about who is poor or who
             {
                 await this.termService.CreateAsync(new Term()
                 {
-                    Content = knownTerm,
+                    Content = knownTerm.ToUpperInvariant(),
                     CreatorId = hai.Id,
                     Id = default,
                     Language = Language.English,
