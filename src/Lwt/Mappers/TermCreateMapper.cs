@@ -16,6 +16,7 @@ namespace Lwt.Mappers
             term.Content = createModel.Content.ToUpperInvariant();
             term.Meaning = createModel.Meaning;
             term.LearningLevel = createModel.LearningLevel;
+            term.Language = createModel.Language;
             term.CreatorId = userId;
 
             return term;

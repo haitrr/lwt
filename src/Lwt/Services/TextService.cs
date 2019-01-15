@@ -73,7 +73,10 @@ namespace Lwt.Services
             TextFilter textFilter,
             PaginationQuery paginationQuery)
         {
-            IEnumerable<Text> texts = await this.textRepository.GetByUserAsync(userId, textFilter, paginationQuery);
+            IEnumerable<Text> texts = await this.textRepository.GetByUserAsync(
+                userId,
+                textFilter,
+                paginationQuery);
             var viewModels = new List<TextViewModel>();
 
             foreach (Text text in texts)
@@ -145,6 +148,7 @@ namespace Lwt.Services
 
             var readModel = new TextReadModel();
             readModel.Title = text.Title;
+            readModel.Language = text.Language;
             var termViewModels = new List<TermReadModel>();
             ILanguage language = this.languageHelper.GetLanguage(text.Language);
 
@@ -156,7 +160,7 @@ namespace Lwt.Services
                     continue;
                 }
 
-                Term term = await this.termRepository.GetByUserIdAndContentAsync(userId, word);
+                Term term = await this.termRepository.GetByUserAndLanguageAndContentAsync(userId, language.Id, word);
                 TermReadModel viewModel;
 
                 if (term == null)
@@ -191,11 +195,16 @@ namespace Lwt.Services
                     continue;
                 }
 
-                Term term = await this.termRepository.GetByUserIdAndContentAsync(text.CreatorId, word);
+                Term term = await this.termRepository.GetByUserAndLanguageAndContentAsync(
+                    text.CreatorId,
+                    language.Id,
+                    word);
 
+                result[TermLearningLevel.UnKnow] = 0;
                 if (term == null)
                 {
-                    term = new Term { LearningLevel = TermLearningLevel.UnKnow };
+                    result[TermLearningLevel.UnKnow] += 1;
+                    continue;
                 }
 
                 if (result.ContainsKey(term.LearningLevel))

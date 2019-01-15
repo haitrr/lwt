@@ -16,5 +16,10 @@ namespace Lwt.Models
         /// Gets or sets the terms of the text.
         /// </summary>
         public IEnumerable<TermReadModel> Terms { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text's language.
+        /// </summary>
+        public Language Language { get; set; }
     }
 }

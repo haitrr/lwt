@@ -2,11 +2,9 @@ namespace Lwt.Repositories
 {
     using System;
     using System.Threading.Tasks;
-
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
-
     using MongoDB.Driver;
 
     /// <summary>
@@ -23,14 +21,8 @@ namespace Lwt.Repositories
         {
         }
 
-        /// <inheritdoc/>
-        public Task<Term> GetByContentAsync(string content)
-        {
-            return this.Collection.Find(term => term.Content == content.ToUpperInvariant()).SingleOrDefaultAsync();
-        }
-
         /// <inheritdoc />
-        public Task<Term> GetByUserIdAndContentAsync(Guid userId, string word)
+        public Task<Term> GetByUserAndLanguageAndContentAsync(Guid userId, Language language, string word)
         {
             return this.Collection.Find(term => term.Content == word.ToUpperInvariant() && term.CreatorId == userId)
                 .SingleOrDefaultAsync();

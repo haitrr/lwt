@@ -13,6 +13,11 @@ namespace Lwt.Models
         public string Content { get; set; }
 
         /// <summary>
+        /// Gets or sets the term's language.
+        /// </summary>
+        public Language Language { get; set; }
+
+        /// <summary>
         /// Gets or sets the meaning.
         /// </summary>
         public string Meaning { get; set; }
