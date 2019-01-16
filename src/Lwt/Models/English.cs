@@ -1,7 +1,9 @@
+using System;
+using System.Linq;
+
 namespace Lwt.Models
 {
     using System.Text.RegularExpressions;
-
     using Lwt.Interfaces;
 
     /// <summary>
@@ -24,7 +26,9 @@ namespace Lwt.Models
         /// <inheritdoc/>
         public string[] SplitText(string text)
         {
-            return Regex.Split(text, @"([^a-zA-Z0-9\’\'])");
+            return Regex.Split(text, @"([^a-zA-Z0-9\’\'])")
+                .Where(word => !string.IsNullOrEmpty(word))
+                .ToArray();
         }
     }
 }
