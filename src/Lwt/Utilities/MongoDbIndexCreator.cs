@@ -29,7 +29,7 @@ namespace Lwt.Utilities
 
         private async Task CreateTermIndexesAsync()
         {
-            IMongoCollection<Term> collection = this.lwtDbContext.Terms;
+            IMongoCollection<Term> collection = this.lwtDbContext.GetCollection<Term>();
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
                 Builders<Term>.IndexKeys.Ascending(term => term.Content)));
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
@@ -40,7 +40,7 @@ namespace Lwt.Utilities
 
         private async Task CreateTextIndexesAsync()
         {
-            IMongoCollection<Text> collection = this.lwtDbContext.Texts;
+            IMongoCollection<Text> collection = this.lwtDbContext.GetCollection<Text>();
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Text>(
                 Builders<Text>.IndexKeys.Ascending(text => text.Language)));
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Text>(

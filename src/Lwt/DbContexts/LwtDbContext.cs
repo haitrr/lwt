@@ -26,16 +26,6 @@ namespace Lwt.DbContexts
         }
 
         /// <summary>
-        /// Gets text collection.
-        /// </summary>
-        public IMongoCollection<Text> Texts => this.database.GetCollection<Text>("texts");
-
-        /// <summary>
-        /// Gets term collection.
-        /// </summary>
-        public IMongoCollection<Term> Terms => this.database.GetCollection<Term>("terms");
-
-        /// <summary>
         /// get the collection base on type.
         /// </summary>
         /// <typeparam name="T">type of the collection.</typeparam>
