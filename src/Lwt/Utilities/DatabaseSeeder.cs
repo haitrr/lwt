@@ -1,11 +1,13 @@
 namespace Lwt.Utilities
 {
     using System;
+    using System.IO;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+    using Newtonsoft.Json.Linq;
 
     /// <inheritdoc />
     public class DatabaseSeeder : IDatabaseSeeder
@@ -89,38 +91,16 @@ The long and the short of it; it is meaningless to talk about who is poor or who
             };
             await this.textService.CreateAsync(text);
 
-            string[] knowedTerms = new[]
-            {
-                "the", "of", "to", "and", "a", "in", "is", "it", "you", "that", "he", "was", "for", "on", "are",
-                "with", "as", "I", "his", "they", "be", "at", "one", "have", "this", "from", "or", "had", "by",
-                "hot", "word", "but", "what", "some", "we", "can", "out", "other", "were", "all", "there", "when",
-                "up", "use", "your", "how", "said", "an", "each", "she", "which", "do", "their", "time", "if",
-                "will", "way", "about", "many", "then", "them", "write", "would", "like", "so", "these", "her",
-                "long", "make", "thing", "see", "him", "two", "has", "look", "more", "day", "could", "go", "come",
-                "did", "number", "sound", "no", "most", "people", "my", "over", "know", "water", "than", "call",
-                "first", "who", "may", "down", "side", "been", "now", "find", "any", "new", "work", "part", "take",
-                "get", "place", "made", "live", "where", "after", "back", "little", "only", "round", "man", "year",
-                "came", "show", "every", "good", "me", "give", "our", "under", "name", "very", "through", "just",
-                "form", "sentence", "great", "think", "say", "help", "low", "line", "differ", "turn", "cause",
-                "much", "mean", "before", "move", "right", "boy", "old", "too", "same", "tell", "does", "set",
-                "three", "want", "air", "well", "also", "play", "small", "end", "put", "home", "read", "hand",
-                "port", "large", "spell", "add", "even", "land", "here", "must", "big", "high", "such", "follow",
-                "act", "why", "ask", "men", "change", "went", "light", "kind", "off", "need", "house", "picture",
-                "try", "us", "again", "animal", "point", "mother", "world", "near", "build", "self", "earth",
-                "father",
-            };
+            JArray terms = JArray.Parse(File.ReadAllText("./term.json"));
 
-            foreach (string knownTerm in knowedTerms)
+            foreach (JToken item in terms)
             {
-                await this.termService.CreateAsync(new Term()
-                {
-                    Content = knownTerm.ToUpperInvariant(),
-                    CreatorId = hai.Id,
-                    Id = default,
-                    Language = Language.English,
-                    LearningLevel = TermLearningLevel.WellKnow,
-                    Meaning = null,
-                });
+                var term = item.ToObject<Term>();
+                term.Id = Guid.NewGuid();
+                term.CreatorId = hai.Id;
+                term.Content = term.Content.ToUpperInvariant();
+                term.Language = Language.English;
+                await this.termService.CreateAsync(term);
             }
         }
     }
