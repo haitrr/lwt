@@ -1,8 +1,6 @@
-using System;
-using System.Linq;
-
 namespace Lwt.Models
 {
+    using System.Linq;
     using System.Text.RegularExpressions;
     using Lwt.Interfaces;
 
