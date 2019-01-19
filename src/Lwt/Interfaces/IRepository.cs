@@ -17,7 +17,7 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="entity">entity.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<bool> AddAsync(T entity);
+        Task AddAsync(T entity);
 
         /// <summary>
         /// delete an entity by id.

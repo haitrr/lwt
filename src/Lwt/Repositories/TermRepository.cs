@@ -24,8 +24,18 @@ namespace Lwt.Repositories
         /// <inheritdoc />
         public Task<Term> GetByUserAndLanguageAndContentAsync(Guid userId, Language language, string word)
         {
-            return this.Collection.Find(term => term.Content == word.ToUpperInvariant() && term.CreatorId == userId)
+            return this.Collection
+                .Find(term =>
+                    term.Content == word.ToUpperInvariant() && term.Language == language && term.CreatorId == userId)
                 .SingleOrDefaultAsync();
+        }
+
+        /// <inheritdoc />
+        public override Task AddAsync(Term term)
+        {
+            // normalize the term's content before insert.
+            term.Content = term.Content.ToUpperInvariant();
+            return base.AddAsync(term);
         }
     }
 }

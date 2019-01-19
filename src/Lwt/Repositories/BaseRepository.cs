@@ -37,18 +37,9 @@ namespace Lwt.Repositories
         protected IMongoCollection<T> Collection { get; }
 
         /// <inheritdoc/>
-        public async Task<bool> AddAsync(T entity)
+        public virtual async Task AddAsync(T entity)
         {
-            try
-            {
                 await this.Collection.InsertOneAsync(entity);
-
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
         }
 
         /// <inheritdoc/>
