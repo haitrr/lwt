@@ -18,7 +18,7 @@ namespace Lwt.Utilities
         private readonly IdentityDbContext lwtDbContext;
         private readonly ITextService textService;
         private readonly ITermService termService;
-        private readonly TextRepository textRepository;
+        private readonly ITextRepository textRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseSeeder"/> class.
