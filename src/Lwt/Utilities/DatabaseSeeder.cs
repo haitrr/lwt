@@ -33,7 +33,7 @@ namespace Lwt.Utilities
             IdentityDbContext lwtDbContext,
             ITextService textService,
             ITermService termService,
-            TextRepository textRepository)
+            ITextRepository textRepository)
         {
             this.userRepository = userRepository;
             this.lwtDbContext = lwtDbContext;
