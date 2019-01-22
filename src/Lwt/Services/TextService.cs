@@ -162,15 +162,15 @@ namespace Lwt.Services
                     continue;
                 }
 
-                Term term = termDict[language.Normalize(word)];
                 TermReadModel viewModel;
 
-                if (term == null)
+                if (!termDict.ContainsKey(word))
                 {
                     viewModel = new TermReadModel { Content = word, LearningLevel = TermLearningLevel.UnKnow };
                 }
                 else
                 {
+                    Term term = termDict[language.Normalize(word)];
                     viewModel = new TermReadModel
                     {
                         Id = term.Id, Content = word, LearningLevel = term.LearningLevel, Meaning = term.Meaning,
