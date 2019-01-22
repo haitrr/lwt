@@ -36,6 +36,12 @@ namespace Lwt.Utilities
                 Builders<Term>.IndexKeys.Ascending(term => term.CreatorId)));
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
                 Builders<Term>.IndexKeys.Ascending(term => term.Language)));
+            await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
+                Builders<Term>.IndexKeys.Combine(
+                    Builders<Term>.IndexKeys.Ascending(t => t.CreatorId),
+                    Builders<Term>.IndexKeys.Ascending(t => t.Language),
+                    Builders<Term>.IndexKeys.Ascending(t => t.Content)),
+                new CreateIndexOptions { Unique = true }));
         }
 
         private async Task CreateTextIndexesAsync()

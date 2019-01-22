@@ -54,6 +54,10 @@ namespace Lwt.Utilities
                 hai = new User { Id = new Guid("9E18BB68-66D2-4711-A27B-1A54AC2E8077"), UserName = "hai" };
                 await this.userRepository.CreateAsync(hai, "q");
             }
+            else
+            {
+                return;
+            }
 
             var text = new Text
             {

@@ -179,8 +179,8 @@ namespace Lwt
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
-            databaseSeeder.SeedData().GetAwaiter().GetResult();
             indexCreator.CreateIndexesAsync().GetAwaiter().GetResult();
+            databaseSeeder.SeedData().GetAwaiter().GetResult();
         }
     }
 }
