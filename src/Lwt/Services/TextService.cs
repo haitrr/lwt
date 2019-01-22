@@ -163,14 +163,15 @@ namespace Lwt.Services
                 }
 
                 TermReadModel viewModel;
+                string normalizedWord = language.Normalize(word);
 
-                if (!termDict.ContainsKey(word))
+                if (!termDict.ContainsKey(normalizedWord))
                 {
                     viewModel = new TermReadModel { Content = word, LearningLevel = TermLearningLevel.UnKnow };
                 }
                 else
                 {
-                    Term term = termDict[language.Normalize(word)];
+                    Term term = termDict[normalizedWord];
                     viewModel = new TermReadModel
                     {
                         Id = term.Id, Content = word, LearningLevel = term.LearningLevel, Meaning = term.Meaning,
