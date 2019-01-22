@@ -7,7 +7,6 @@ namespace Lwt.Utilities
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
-    using Lwt.Repositories;
     using Newtonsoft.Json.Linq;
 
     /// <inheritdoc />

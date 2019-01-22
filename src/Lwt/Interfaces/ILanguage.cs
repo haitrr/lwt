@@ -30,5 +30,12 @@ namespace Lwt.Interfaces
         /// <param name="text">the text.</param>
         /// <returns>the segmented words.</returns>
         string[] SplitText(string text);
+
+        /// <summary>
+        /// normalize a string into language.
+        /// </summary>
+        /// <param name="word">the word.</param>
+        /// <returns>normalized word.</returns>
+        string Normalize(string word);
     }
 }

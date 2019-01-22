@@ -191,7 +191,8 @@ namespace Lwt.Services
                 result[termLearningLevel] = 0;
             }
 
-            IEnumerable<string> notSkippedTerms = text.Words.Where(word => !language.ShouldSkip(word));
+            IEnumerable<string> notSkippedTerms =
+                text.Words.Where(word => !language.ShouldSkip(word)).Select(t => language.Normalize(t));
             var termDict = new Dictionary<string, long>();
 
             foreach (string term in notSkippedTerms)
@@ -207,10 +208,7 @@ namespace Lwt.Services
             }
 
             Dictionary<string, TermLearningLevel> countDict =
-                await this.termRepository.GetLearningLevelAsync(
-                    text.CreatorId,
-                    language.Id,
-                    termDict.Keys.ToHashSet());
+                await this.termRepository.GetLearningLevelAsync(text.CreatorId, language.Id, termDict.Keys.ToHashSet());
 
             foreach (string word in termDict.Keys)
             {

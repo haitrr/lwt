@@ -28,5 +28,11 @@ namespace Lwt.Models
                 .Where(word => !string.IsNullOrEmpty(word))
                 .ToArray();
         }
+
+        /// <inheritdoc />
+        public string Normalize(string word)
+        {
+            return word.ToUpperInvariant();
+        }
     }
 }

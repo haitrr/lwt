@@ -40,8 +40,8 @@ namespace Lwt.Repositories
         {
             var list = await this.Collection
                 .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.Language == language)
-                .Project(t => new { t.Content, TermLearningLevel = t.LearningLevel }).ToListAsync();
-            return list.ToDictionary(t => t.Content, t => t.TermLearningLevel);
+                .Project(t => new { t.Content, t.LearningLevel }).ToListAsync();
+            return list.ToDictionary(t => t.Content, t => t.LearningLevel);
         }
 
         /// <inheritdoc />
