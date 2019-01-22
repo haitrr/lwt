@@ -2,11 +2,9 @@ namespace Lwt.Repositories
 {
     using System;
     using System.Threading.Tasks;
-
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
-
     using MongoDB.Driver;
 
     /// <summary>
@@ -39,7 +37,7 @@ namespace Lwt.Repositories
         /// <inheritdoc/>
         public virtual async Task AddAsync(T entity)
         {
-                await this.Collection.InsertOneAsync(entity);
+            await this.Collection.InsertOneAsync(entity);
         }
 
         /// <inheritdoc/>
@@ -78,6 +76,12 @@ namespace Lwt.Repositories
         public Task<bool> IsExistAsync(Guid id)
         {
             return this.Collection.Find(e => e.Id == id).AnyAsync();
+        }
+
+        /// <inheritdoc />
+        public Task<long> CountAsync()
+        {
+            return this.Collection.CountDocumentsAsync(_ => true);
         }
     }
 }

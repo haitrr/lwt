@@ -7,6 +7,7 @@ namespace Lwt.Utilities
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+    using Lwt.Repositories;
     using Newtonsoft.Json.Linq;
 
     /// <inheritdoc />
@@ -17,6 +18,7 @@ namespace Lwt.Utilities
         private readonly IdentityDbContext lwtDbContext;
         private readonly ITextService textService;
         private readonly ITermService termService;
+        private readonly TextRepository textRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseSeeder"/> class.
@@ -25,16 +27,19 @@ namespace Lwt.Utilities
         /// <param name="lwtDbContext">the db context.</param>
         /// <param name="textService">the text service.</param>
         /// <param name="termService">the term service.</param>
+        /// <param name="textRepository">the text repository.</param>
         public DatabaseSeeder(
             IUserRepository userRepository,
             IdentityDbContext lwtDbContext,
             ITextService textService,
-            ITermService termService)
+            ITermService termService,
+            TextRepository textRepository)
         {
             this.userRepository = userRepository;
             this.lwtDbContext = lwtDbContext;
             this.textService = textService;
             this.termService = termService;
+            this.textRepository = textRepository;
         }
 
         /// <inheritdoc />
@@ -55,6 +60,12 @@ namespace Lwt.Utilities
                 await this.userRepository.CreateAsync(hai, "q");
             }
             else
+            {
+                return;
+            }
+
+            // already seeded
+            if (await this.textRepository.CountAsync() > 0)
             {
                 return;
             }

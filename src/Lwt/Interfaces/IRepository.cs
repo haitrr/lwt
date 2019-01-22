@@ -46,5 +46,11 @@ namespace Lwt.Interfaces
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<bool> IsExistAsync(Guid id);
+
+        /// <summary>
+        /// count all document in the collection.
+        /// </summary>
+        /// <returns>the count.</returns>
+        Task<long> CountAsync();
     }
 }
