@@ -30,5 +30,14 @@ namespace Lwt.Interfaces
             Guid creatorId,
             Language language,
             ISet<string> terms);
+
+        /// <summary>
+        /// get many terms by contents.
+        /// </summary>
+        /// <param name="creatorId">the creator of term.</param>
+        /// <param name="language">the language.</param>
+        /// <param name="terms">the terms to find.</param>
+        /// <returns>dictionary of term by content.</returns>
+        Task<IDictionary<string, Term>> GetManyAsync(Guid creatorId, Language language, HashSet<string> terms);
     }
 }

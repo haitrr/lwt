@@ -45,6 +45,14 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
+        public async Task<IDictionary<string, Term>> GetManyAsync(Guid creatorId, Language language, HashSet<string> terms)
+        {
+            List<Term> list = await this.Collection.Find(t =>
+                terms.Contains(t.Content) && t.CreatorId == creatorId && t.Language == language).ToListAsync();
+            return list.ToDictionary(t => t.Content, t => t);
+        }
+
+        /// <inheritdoc />
         public override Task AddAsync(Term term)
         {
             // normalize the term's content before insert.

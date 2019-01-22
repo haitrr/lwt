@@ -149,6 +149,10 @@ namespace Lwt.Services
             readModel.Language = text.Language;
             var termViewModels = new List<TermReadModel>();
             ILanguage language = this.languageHelper.GetLanguage(text.Language);
+            IEnumerable<string> notSkippedTerms =
+                text.Words.Where(word => !language.ShouldSkip(word)).Select(t => language.Normalize(t));
+            IDictionary<string, Term> termDict =
+                await this.termRepository.GetManyAsync(userId, language.Id, notSkippedTerms.ToHashSet());
 
             foreach (string word in text.Words)
             {
@@ -158,16 +162,16 @@ namespace Lwt.Services
                     continue;
                 }
 
-                Term term = await this.termRepository.GetByUserAndLanguageAndContentAsync(userId, language.Id, word);
+                Term term = termDict[language.Normalize(word)];
                 TermReadModel viewModel;
 
                 if (term == null)
                 {
-                    viewModel = new TermReadModel() { Content = word, LearningLevel = TermLearningLevel.UnKnow };
+                    viewModel = new TermReadModel { Content = word, LearningLevel = TermLearningLevel.UnKnow };
                 }
                 else
                 {
-                    viewModel = new TermReadModel()
+                    viewModel = new TermReadModel
                     {
                         Id = term.Id, Content = word, LearningLevel = term.LearningLevel, Meaning = term.Meaning,
                     };
