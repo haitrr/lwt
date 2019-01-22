@@ -1,6 +1,7 @@
 namespace Lwt.Interfaces
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Models;
 
@@ -17,5 +18,17 @@ namespace Lwt.Interfaces
         /// <param name="word">the content.</param>
         /// <returns>the term.</returns>
         Task<Term> GetByUserAndLanguageAndContentAsync(Guid userId, Language language, string word);
+
+        /// <summary>
+        /// get learning level of the terms with content.
+        /// </summary>
+        /// <param name="creatorId">the creator of term.</param>
+        /// <param name="language">the language.</param>
+        /// <param name="terms">the terms to find.</param>
+        /// <returns>dictionary of term learning level.</returns>
+        Task<Dictionary<string, TermLearningLevel>> GetLearningLevelAsync(
+            Guid creatorId,
+            Language language,
+            ISet<string> terms);
     }
 }

@@ -1,6 +1,8 @@
 namespace Lwt.Repositories
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
     using Lwt.Interfaces;
@@ -28,6 +30,18 @@ namespace Lwt.Repositories
                 .Find(term =>
                     term.Content == word.ToUpperInvariant() && term.Language == language && term.CreatorId == userId)
                 .SingleOrDefaultAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<Dictionary<string, TermLearningLevel>> GetLearningLevelAsync(
+            Guid creatorId,
+            Language language,
+            ISet<string> terms)
+        {
+            var list = await this.Collection
+                .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.Language == language)
+                .Project(t => new { t.Content, TermLearningLevel = t.LearningLevel }).ToListAsync();
+            return list.ToDictionary(t => t.Content, t => t.TermLearningLevel);
         }
 
         /// <inheritdoc />

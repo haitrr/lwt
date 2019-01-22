@@ -79,8 +79,9 @@ namespace Lwt.Services
             foreach (Text text in texts)
             {
                 TextViewModel viewModel = this.textViewMapper.Map(text);
+                Dictionary<TermLearningLevel, long> termCountDict = await this.CountTermByLearningLevel(text);
 
-                foreach (KeyValuePair<TermLearningLevel, long> keyValuePair in await this.CountTermByLearningLevel(text))
+                foreach (KeyValuePair<TermLearningLevel, long> keyValuePair in termCountDict)
                 {
                     viewModel.Counts.Add(keyValuePair.Key, keyValuePair.Value);
                 }
@@ -184,7 +185,12 @@ namespace Lwt.Services
         {
             var result = new Dictionary<TermLearningLevel, long>();
             ILanguage language = this.languageHelper.GetLanguage(text.Language);
-            result[TermLearningLevel.UnKnow] = 0;
+
+            foreach (TermLearningLevel termLearningLevel in Enum.GetValues(typeof(TermLearningLevel)))
+            {
+                result[termLearningLevel] = 0;
+            }
+
             IEnumerable<string> notSkippedTerms = text.Words.Where(word => !language.ShouldSkip(word));
             var termDict = new Dictionary<string, long>();
 
@@ -200,27 +206,21 @@ namespace Lwt.Services
                 }
             }
 
-            foreach (string word in termDict.Keys)
-            {
-                Term term = await this.termRepository.GetByUserAndLanguageAndContentAsync(
+            Dictionary<string, TermLearningLevel> countDict =
+                await this.termRepository.GetLearningLevelAsync(
                     text.CreatorId,
                     language.Id,
-                    word);
+                    termDict.Keys.ToHashSet());
 
-                if (term == null)
+            foreach (string word in termDict.Keys)
+            {
+                if (!countDict.ContainsKey(word))
                 {
                     result[TermLearningLevel.UnKnow] += termDict[word];
                     continue;
                 }
 
-                if (result.ContainsKey(term.LearningLevel))
-                {
-                    result[term.LearningLevel] += termDict[word];
-                }
-                else
-                {
-                    result[term.LearningLevel] = termDict[word];
-                }
+                result[countDict[word]] += termDict[word];
             }
 
             return result;
