@@ -185,14 +185,23 @@ namespace Lwt.Services
             var result = new Dictionary<TermLearningLevel, long>();
             ILanguage language = this.languageHelper.GetLanguage(text.Language);
             result[TermLearningLevel.UnKnow] = 0;
+            IEnumerable<string> notSkippedTerms = text.Words.Where(word => !language.ShouldSkip(word));
+            var termDict = new Dictionary<string, long>();
 
-            foreach (string word in text.Words)
+            foreach (string term in notSkippedTerms)
             {
-                if (language.ShouldSkip(word))
+                if (termDict.ContainsKey(term))
                 {
-                    continue;
+                    termDict[term] += 1;
                 }
+                else
+                {
+                    termDict[term] = 1;
+                }
+            }
 
+            foreach (string word in termDict.Keys)
+            {
                 Term term = await this.termRepository.GetByUserAndLanguageAndContentAsync(
                     text.CreatorId,
                     language.Id,
@@ -200,17 +209,17 @@ namespace Lwt.Services
 
                 if (term == null)
                 {
-                    result[TermLearningLevel.UnKnow] += 1;
+                    result[TermLearningLevel.UnKnow] += termDict[word];
                     continue;
                 }
 
                 if (result.ContainsKey(term.LearningLevel))
                 {
-                    result[term.LearningLevel] += 1;
+                    result[term.LearningLevel] += termDict[word];
                 }
                 else
                 {
-                    result[term.LearningLevel] = 1;
+                    result[term.LearningLevel] = termDict[word];
                 }
             }
 
