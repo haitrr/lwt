@@ -3,11 +3,9 @@ namespace Lwt.Repositories
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
-
     using MongoDB.Driver;
 
     /// <summary>
@@ -32,7 +30,12 @@ namespace Lwt.Repositories
         {
             int skip = paginationQuery.ItemPerPage * (paginationQuery.Page - 1);
 
-            return await this.Filter(userId, textFilter).Skip(skip).Limit(paginationQuery.ItemPerPage).ToListAsync();
+            // sort by created time by default
+            return await this.Filter(userId, textFilter)
+                .Sort(Builders<Text>.Sort.Descending(text => text.CreatedDate))
+                .Skip(skip)
+                .Limit(paginationQuery.ItemPerPage)
+                .ToListAsync();
         }
 
         /// <inheritdoc/>

@@ -13,5 +13,15 @@
         /// </summary>
         [Key]
         public Guid Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets when did the entity created.
+        /// </summary>
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Gets or sets when did the entity last modified.
+        /// </summary>
+        public DateTime LastModifiedDate { get; set; } = DateTime.UtcNow;
     }
 }
