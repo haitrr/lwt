@@ -9,5 +9,10 @@ namespace Lwt.Models
         /// English.
         /// </summary>
         English = 1,
+
+        /// <summary>
+        /// Chinese.
+        /// </summary>
+        Chinese = 2,
     }
 }
