@@ -1,7 +1,5 @@
-namespace Lwt.Models
+namespace Lwt.Interfaces
 {
-    using Lwt.Interfaces;
-
     /// <summary>
     /// the chinese text splitter.
     /// </summary>

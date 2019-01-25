@@ -1,9 +1,8 @@
-using Lwt.Interfaces;
-
-namespace Lwt.Models
+namespace Lwt.Utilities
 {
     using System.Collections.Generic;
     using JiebaNet.Segmenter;
+    using Lwt.Interfaces;
 
     /// <inheritdoc />
     public class ChineseTextSplitter : IChineseTextSplitter
