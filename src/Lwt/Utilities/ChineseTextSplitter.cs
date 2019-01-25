@@ -1,3 +1,5 @@
+using Lwt.Interfaces;
+
 namespace Lwt.Models
 {
     using System.Collections.Generic;
