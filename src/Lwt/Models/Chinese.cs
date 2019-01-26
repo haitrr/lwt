@@ -20,10 +20,13 @@ namespace Lwt.Models
         }
 
         /// <inheritdoc />
-        public string Name { get; set; } = "Chinese";
+        public string Name => "Chinese";
 
         /// <inheritdoc />
-        public Language Id { get; set; } = Language.Chinese;
+        public string Code => "zh";
+
+        /// <inheritdoc />
+        public Language Id => Language.Chinese;
 
         /// <inheritdoc />
         public bool ShouldSkip(string term)

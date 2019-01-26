@@ -10,10 +10,13 @@ namespace Lwt.Models
     public class English : ILanguage
     {
         /// <inheritdoc/>
-        public string Name { get; set; } = "English";
+        public string Name => "English";
+
+        /// <inheritdoc />
+        public string Code => "eng";
 
         /// <inheritdoc/>
-        public Language Id { get; set; } = Language.English;
+        public Language Id => Language.English;
 
         /// <inheritdoc />
         public bool ShouldSkip(string term)
@@ -24,9 +27,7 @@ namespace Lwt.Models
         /// <inheritdoc/>
         public string[] SplitText(string text)
         {
-            return Regex.Split(text, @"([^a-zA-Z\’\'])")
-                .Where(word => !string.IsNullOrEmpty(word))
-                .ToArray();
+            return Regex.Split(text, @"([^a-zA-Z\’\'])").Where(word => !string.IsNullOrEmpty(word)).ToArray();
         }
 
         /// <inheritdoc />

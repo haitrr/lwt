@@ -8,14 +8,19 @@ namespace Lwt.Interfaces
     public interface ILanguage
     {
         /// <summary>
-        /// Gets or sets the language's name.
+        /// Gets the language's name.
         /// </summary>
-        string Name { get; set; }
+        string Name { get; }
 
         /// <summary>
-        /// Gets or sets the enum.
+        /// Gets the language code.
         /// </summary>
-        Language Id { get; set; }
+        string Code { get; }
+
+        /// <summary>
+        /// Gets the enum.
+        /// </summary>
+        Language Id { get; }
 
         /// <summary>
         /// decide if a term should be skipped.

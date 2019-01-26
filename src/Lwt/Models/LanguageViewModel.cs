@@ -14,5 +14,10 @@ namespace Lwt.Models
         /// Gets or sets language id.
         /// </summary>
         public Language Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the language's code.
+        /// </summary>
+        public string Code { get; set; }
     }
 }
