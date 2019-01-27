@@ -15,6 +15,7 @@ namespace Lwt.Mappers
             viewModel.Name = language.Name;
             viewModel.Id = language.Id;
             viewModel.Code = language.Code;
+            viewModel.SpeakCode = language.SpeakCode;
 
             return viewModel;
         }

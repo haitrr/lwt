@@ -13,6 +13,11 @@ namespace Lwt.Interfaces
         string Name { get; }
 
         /// <summary>
+        /// Gets the language's speak code.
+        /// </summary>
+        string SpeakCode { get; }
+
+        /// <summary>
         /// Gets the language code.
         /// </summary>
         string Code { get; }

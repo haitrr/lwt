@@ -13,6 +13,9 @@ namespace Lwt.Models
         public string Name => "English";
 
         /// <inheritdoc />
+        public string SpeakCode => "en-US";
+
+        /// <inheritdoc />
         public string Code => "eng";
 
         /// <inheritdoc/>

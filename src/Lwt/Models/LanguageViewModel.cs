@@ -19,5 +19,10 @@ namespace Lwt.Models
         /// Gets or sets the language's code.
         /// </summary>
         public string Code { get; set; }
+
+        /// <summary>
+        /// Gets or sets the language's speak code.
+        /// </summary>
+        public string SpeakCode { get; set; }
     }
 }
