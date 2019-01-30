@@ -133,6 +133,9 @@ namespace Lwt
             // middleware
             services.AddSingleton<ExceptionHandleMiddleware>();
 
+            // add compression service
+            services.AddResponseCompression();
+
             // swagger
             services.AddSwaggerGen(c =>
             {
@@ -171,6 +174,9 @@ namespace Lwt
             {
                 app.UseDeveloperExceptionPage();
             }*/
+
+            // compress response
+            app.UseResponseCompression();
             app.UseDeveloperExceptionPage();
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
