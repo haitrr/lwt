@@ -15,12 +15,14 @@ namespace Lwt.Utilities
         public ChineseTextSplitter()
         {
             this.segmenter = new JiebaSegmenter();
+            this.segmenter.LoadUserDict("dicts/dict.txt.big");
+            this.segmenter.LoadUserDict("dicts/idf.txt.big");
         }
 
         /// <inheritdoc />
         public IEnumerable<string> Split(string text)
         {
-            return this.segmenter.Cut(text);
+            return this.segmenter.Cut(text, false, false);
         }
     }
 }

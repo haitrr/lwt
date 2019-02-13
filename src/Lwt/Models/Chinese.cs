@@ -34,7 +34,7 @@ namespace Lwt.Models
         /// <inheritdoc />
         public bool ShouldSkip(string term)
         {
-            return !term.Any(c => (uint)c >= 0x4E00 && (uint)c <= 0x2FA1F);
+            return !term.Any(c => (uint)c >= 0x4E00 && (uint)c <= 0x2FA1F) || term == "，";
         }
 
         /// <inheritdoc />
