@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Lwt.Models
 {
     using System.Linq;
@@ -34,7 +36,7 @@ namespace Lwt.Models
         /// <inheritdoc />
         public bool ShouldSkip(string term)
         {
-            return !term.Any(c => (uint)c >= 0x4E00 && (uint)c <= 0x2FA1F) || term == "，";
+            return !Regex.IsMatch(term, "^\\p{Lo}+$");
         }
 
         /// <inheritdoc />
