@@ -35,6 +35,10 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
         <PackageReference Include="SwashBuckle.AspNetCore.MicrosoftExtensions" Version="0.5.0" />
         <PackageReference Include="Text.Analyzers" Version="2.6.2" />
-        <PackageReference Include="Vroyibg.JiebaNet.Segmenter" Version="1.0.0" />
+        <PackageReference Include="Vroyibg.Jieba.Net.Core" Version="1.1.0" />
+    </ItemGroup>
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="JiebaResources\prob_emit.json" />
+      <_ContentIncludedByDefault Remove="JiebaResources\prob_trans.json" />
     </ItemGroup>
 </Project>
