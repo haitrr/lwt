@@ -37,8 +37,4 @@
         <PackageReference Include="Text.Analyzers" Version="2.6.2" />
         <PackageReference Include="Vroyibg.Jieba.Net.Core" Version="1.1.0" />
     </ItemGroup>
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="JiebaResources\prob_emit.json" />
-      <_ContentIncludedByDefault Remove="JiebaResources\prob_trans.json" />
-    </ItemGroup>
 </Project>
