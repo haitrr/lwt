@@ -3,7 +3,7 @@ WORKDIR /app
 
 # Copy csproj and restore as distinct layers
 COPY *.csproj ./
-COPY Packages ./
+COPY Packages ./Packages
 RUN dotnet restore
 
 # Copy everything else and build
