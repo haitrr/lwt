@@ -1,17 +1,22 @@
 namespace Lwt.Models
 {
     /// <summary>
-    /// z.
+    /// language edit model.
     /// </summary>
     public class TextEditModel
     {
         /// <summary>
-        /// Gets or sets d.
+        /// Gets or sets text language.
+        /// </summary>
+        public Language Language { get; set; }
+
+        /// <summary>
+        /// Gets or sets title.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Gets or sets s.
+        /// Gets or sets content.
         /// </summary>
         public string Content { get; set; }
     }

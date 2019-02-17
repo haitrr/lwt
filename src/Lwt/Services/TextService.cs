@@ -124,6 +124,7 @@ namespace Lwt.Services
             if (text.CreatorId == userId)
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
+                editedText.Words = this.languageHelper.GetLanguage(editedText.Language).SplitText(editedText.Content);
                 await this.textRepository.UpdateAsync(editedText);
             }
             else
