@@ -1,10 +1,17 @@
 namespace Lwt.Models
 {
+    using System;
+
     /// <summary>
     /// edit detail dto.
     /// </summary>
     public class TextEditDetailModel
     {
+        /// <summary>
+        /// Gets or sets text id.
+        /// </summary>
+        public Guid Id { get; set; }
+
         /// <summary>
         /// Gets or sets the text's title.
         /// </summary>

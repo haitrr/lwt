@@ -11,6 +11,7 @@ namespace Lwt.Mappers
         /// <inheritdoc />
         public override TextEditDetailModel Map(Text text, TextEditDetailModel editDetailModel)
         {
+            editDetailModel.Id = text.Id;
             editDetailModel.Language = text.Language;
             editDetailModel.Title = text.Title;
             editDetailModel.Content = text.Content;
