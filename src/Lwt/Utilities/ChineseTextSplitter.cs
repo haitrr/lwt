@@ -15,8 +15,6 @@ namespace Lwt.Utilities
         public ChineseTextSplitter()
         {
             this.segmenter = new JiebaSegmenter();
-            this.segmenter.LoadUserDict("dicts/dict.txt.big");
-            this.segmenter.LoadUserDict("dicts/idf.txt.big");
         }
 
         /// <inheritdoc />
