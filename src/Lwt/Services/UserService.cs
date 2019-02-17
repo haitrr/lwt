@@ -1,13 +1,12 @@
 namespace Lwt.Services
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
-
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
-
     using Microsoft.AspNetCore.Identity;
 
     /// <summary>
@@ -55,6 +54,27 @@ namespace Lwt.Services
             }
 
             throw new BadRequestException("Username or password is incorrect.");
+        }
+
+        /// <inheritdoc />
+        public async Task ChangePasswordAsync(Guid userId, UserChangePasswordModel changePasswordModel)
+        {
+            User user = await this.userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            IdentityResult result = await this.userManager.ChangePasswordAsync(
+                user,
+                changePasswordModel.CurrentPassword,
+                changePasswordModel.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                throw new BadRequestException("Current password not correct.");
+            }
         }
     }
 }

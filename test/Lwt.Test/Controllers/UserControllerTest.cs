@@ -2,16 +2,13 @@ namespace Lwt.Test.Controllers
 {
     using System;
     using System.Threading.Tasks;
-
     using Lwt.Controllers;
+    using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Lwt.ViewModels.User;
-
     using Microsoft.AspNetCore.Mvc;
-
     using Moq;
-
     using Xunit;
 
     /// <inheritdoc />
@@ -21,6 +18,7 @@ namespace Lwt.Test.Controllers
     public class UserControllerTest : System.IDisposable
     {
         private readonly Mock<IUserService> userService;
+        private readonly Mock<IAuthenticationHelper> authenticationHelper;
 
         private readonly UserController userController;
 
@@ -30,7 +28,8 @@ namespace Lwt.Test.Controllers
         public UserControllerTest()
         {
             this.userService = new Mock<IUserService>();
-            this.userController = new UserController(this.userService.Object);
+            this.authenticationHelper = new Mock<IAuthenticationHelper>();
+            this.userController = new UserController(this.userService.Object, this.authenticationHelper.Object);
         }
 
         /// <summary>
@@ -44,11 +43,7 @@ namespace Lwt.Test.Controllers
             var userName = "hai";
             var passWord = "123";
 
-            var signUpViewModel = new SignUpViewModel
-            {
-                UserName = userName,
-                Password = passWord,
-            };
+            var signUpViewModel = new SignUpViewModel { UserName = userName, Password = passWord, };
 
             // act
             IActionResult result = await this.userController.SignUpAsync(signUpViewModel);

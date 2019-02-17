@@ -1,11 +1,12 @@
 namespace Lwt.Controllers
 {
+    using System;
     using System.Threading.Tasks;
-
+    using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Lwt.ViewModels.User;
-
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     /// <inheritdoc />
@@ -16,14 +17,17 @@ namespace Lwt.Controllers
     public class UserController : Controller
     {
         private readonly IUserService service;
+        private readonly IAuthenticationHelper authenticationHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserController"/> class.
         /// </summary>
         /// <param name="service">service.</param>
-        public UserController(IUserService service)
+        /// <param name="authenticationHelper">authentication helper.</param>
+        public UserController(IUserService service, IAuthenticationHelper authenticationHelper)
         {
             this.service = service;
+            this.authenticationHelper = authenticationHelper;
         }
 
         /// <summary>
@@ -55,6 +59,20 @@ namespace Lwt.Controllers
             string token = await this.service.LoginAsync(viewModel.UserName, viewModel.Password);
 
             return this.Ok(new LoginResult { Token = token });
+        }
+
+        /// <summary>
+        /// change user password.
+        /// </summary>
+        /// <param name="changePasswordModel">change password model.</param>
+        /// <returns>status.</returns>
+        [HttpPut("password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePasswordAsync([FromBody] UserChangePasswordModel changePasswordModel)
+        {
+            Guid loggedInUserid = this.authenticationHelper.GetLoggedInUser(this.User);
+            await this.service.ChangePasswordAsync(loggedInUserid, changePasswordModel);
+            return this.Ok();
         }
     }
 }
