@@ -116,6 +116,11 @@ namespace Lwt.Services
         {
             Text text = await this.textRepository.GetByIdAsync(textId);
 
+            if (text == null)
+            {
+                throw new NotFoundException("Text not found");
+            }
+
             if (text.CreatorId == userId)
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
