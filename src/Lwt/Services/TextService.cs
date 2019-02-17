@@ -27,6 +27,7 @@ namespace Lwt.Services
         private readonly ITermRepository termRepository;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
+        private readonly IMapper<Text, TextEditDetailModel> textEditDetailMapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextService"/> class.
@@ -37,13 +38,15 @@ namespace Lwt.Services
         /// <param name="textValidator">textValidator.</param>
         /// <param name="languageHelper">the language helper.</param>
         /// <param name="termRepository">the term repository.</param>
+        /// <param name="textEditDetailMapper">text edit detail mapper.</param>
         public TextService(
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
             IValidator<Text> textValidator,
             ILanguageHelper languageHelper,
             ITermRepository termRepository,
-            IMapper<Text, TextViewModel> textViewMapper)
+            IMapper<Text, TextViewModel> textViewMapper,
+            IMapper<Text, TextEditDetailModel> textEditDetailMapper)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
@@ -51,6 +54,7 @@ namespace Lwt.Services
             this.languageHelper = languageHelper;
             this.termRepository = termRepository;
             this.textViewMapper = textViewMapper;
+            this.textEditDetailMapper = textEditDetailMapper;
         }
 
         /// <inheritdoc/>
@@ -184,6 +188,24 @@ namespace Lwt.Services
             readModel.Terms = termViewModels;
 
             return readModel;
+        }
+
+        /// <inheritdoc />
+        public async Task<TextEditDetailModel> GetEditDetailAsync(Guid id, Guid userId)
+        {
+            Text text = await this.textRepository.GetByIdAsync(id);
+
+            if (text == null)
+            {
+                throw new NotFoundException("Text not found.");
+            }
+
+            if (text.CreatorId != userId)
+            {
+                throw new ForbiddenException("You don't have permission to access this text.");
+            }
+
+            return this.textEditDetailMapper.Map(text);
         }
 
         private async Task<Dictionary<TermLearningLevel, long>> CountTermByLearningLevel(Text text)

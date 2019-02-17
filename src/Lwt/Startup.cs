@@ -97,6 +97,7 @@ namespace Lwt
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
             services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
             services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
+            services.AddTransient<IMapper<Text, TextEditDetailModel>, TextEditDetailMapper>();
             services.AddTransient<IMapper<ILanguage, LanguageViewModel>, LanguageViewMapper>();
             services.AddTransient<IMapper<TermEditModel, Term>, TermEditMapper>();
             services.AddTransient<IMapper<TermCreateModel, Guid, Term>, TermCreateMapper>();

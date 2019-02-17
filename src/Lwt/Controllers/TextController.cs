@@ -122,5 +122,20 @@ namespace Lwt.Controllers
 
             return this.Ok();
         }
+
+        /// <summary>
+        /// get text detail for edit.
+        /// </summary>
+        /// <param name="id">the text id.</param>
+        /// <returns>edit details.</returns>
+        [HttpGet("edit-detail/{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetEditDetailAsync([FromRoute] Guid id)
+        {
+            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            TextEditDetailModel editDetail = await this.textService.GetEditDetailAsync(id, userId);
+
+            return this.Ok(editDetail);
+        }
     }
 }

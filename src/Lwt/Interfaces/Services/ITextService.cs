@@ -62,5 +62,13 @@ namespace Lwt.Interfaces.Services
         /// <param name="userId">the user id.</param>
         /// <returns>the text read model.</returns>
         Task<TextReadModel> ReadAsync(Guid id, Guid userId);
+
+        /// <summary>
+        /// get edit detail of a text.
+        /// </summary>
+        /// <param name="id">the text's id.</param>
+        /// <param name="userId">the request user.</param>
+        /// <returns>the text edit detail.</returns>
+        Task<TextEditDetailModel> GetEditDetailAsync(Guid id, Guid userId);
     }
 }
