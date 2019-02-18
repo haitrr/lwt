@@ -158,6 +158,7 @@ namespace Lwt.Services
             readModel.Title = text.Title;
             readModel.Language = text.Language;
             readModel.BookMark = text.BookMark;
+            readModel.Id = text.Id;
             var termViewModels = new List<TermReadModel>();
             ILanguage language = this.languageHelper.GetLanguage(text.Language);
             IEnumerable<string> notSkippedTerms =

@@ -1,5 +1,6 @@
 namespace Lwt.Models
 {
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -26,5 +27,10 @@ namespace Lwt.Models
         /// Gets or sets user bookmark.
         /// </summary>
         public ulong? BookMark { get; set; }
+
+        /// <summary>
+        /// Gets or sets text id.
+        /// </summary>
+        public Guid Id { get; set; }
     }
 }
