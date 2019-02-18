@@ -70,5 +70,14 @@ namespace Lwt.Interfaces.Services
         /// <param name="userId">the request user.</param>
         /// <returns>the text edit detail.</returns>
         Task<TextEditDetailModel> GetEditDetailAsync(Guid id, Guid userId);
+
+        /// <summary>
+        /// set user index in a text.
+        /// </summary>
+        /// <param name="id">the text id.</param>
+        /// <param name="userId">user id.</param>
+        /// <param name="setBookMarkModel">set bookmark model.</param>
+        /// <returns>nothing.</returns>
+        Task SetBookMarkAsync(Guid id, Guid userId, SetBookMarkModel setBookMarkModel);
     }
 }

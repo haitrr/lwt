@@ -21,5 +21,10 @@ namespace Lwt.Models
         /// Gets or sets the text's language.
         /// </summary>
         public Language Language { get; set; }
+
+        /// <summary>
+        /// Gets or sets user bookmark.
+        /// </summary>
+        public ulong? BookMark { get; set; }
     }
 }

@@ -14,6 +14,11 @@ namespace Lwt.Models
         public Guid CreatorId { get; set; }
 
         /// <summary>
+        /// Gets or sets bookmark by user.
+        /// </summary>
+        public ulong? BookMark { get; set; }
+
+        /// <summary>
         /// Gets or sets Title.
         /// </summary>
         public string Title { get; set; }

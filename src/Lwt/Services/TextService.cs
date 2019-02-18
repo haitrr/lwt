@@ -157,6 +157,7 @@ namespace Lwt.Services
             var readModel = new TextReadModel();
             readModel.Title = text.Title;
             readModel.Language = text.Language;
+            readModel.BookMark = text.BookMark;
             var termViewModels = new List<TermReadModel>();
             ILanguage language = this.languageHelper.GetLanguage(text.Language);
             IEnumerable<string> notSkippedTerms =
@@ -212,6 +213,34 @@ namespace Lwt.Services
             }
 
             return this.textEditDetailMapper.Map(text);
+        }
+
+        /// <inheritdoc />
+        public async Task SetBookMarkAsync(Guid id, Guid userId, SetBookMarkModel setBookMarkModel)
+        {
+            Text text = await this.textRepository.GetByIdAsync(id);
+
+            if (text == null)
+            {
+                throw new NotFoundException("Text not found.");
+            }
+
+            if (text.CreatorId != userId)
+            {
+                throw new ForbiddenException("You don't have permission to access this text.");
+            }
+
+            if (setBookMarkModel.TermIndex >= (ulong)text.Words.Count)
+            {
+                throw new BadRequestException("Invalid bookmark index.");
+            }
+
+            text.BookMark = setBookMarkModel.TermIndex;
+
+            if (!await this.textRepository.UpdateAsync(text))
+            {
+                throw new BadRequestException("Can not set bookmark.");
+            }
         }
 
         private async Task<Dictionary<TermLearningLevel, long>> CountTermByLearningLevel(Text text)
