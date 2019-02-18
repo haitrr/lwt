@@ -26,7 +26,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets user bookmark.
         /// </summary>
-        public ulong? BookMark { get; set; }
+        public ulong? Bookmark { get; set; }
 
         /// <summary>
         /// Gets or sets text id.

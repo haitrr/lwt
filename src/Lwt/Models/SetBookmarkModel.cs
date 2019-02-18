@@ -3,7 +3,7 @@ namespace Lwt.Models
     /// <summary>
     /// set bookmark model.
     /// </summary>
-    public class SetBookMarkModel
+    public class SetBookmarkModel
     {
         /// <summary>
         /// Gets or sets the term index.

@@ -157,7 +157,7 @@ namespace Lwt.Services
             var readModel = new TextReadModel();
             readModel.Title = text.Title;
             readModel.Language = text.Language;
-            readModel.BookMark = text.BookMark;
+            readModel.Bookmark = text.Bookmark;
             readModel.Id = text.Id;
             var termViewModels = new List<TermReadModel>();
             ILanguage language = this.languageHelper.GetLanguage(text.Language);
@@ -217,7 +217,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc />
-        public async Task SetBookMarkAsync(Guid id, Guid userId, SetBookMarkModel setBookMarkModel)
+        public async Task SetBookmarkAsync(Guid id, Guid userId, SetBookmarkModel setBookmarkModel)
         {
             Text text = await this.textRepository.GetByIdAsync(id);
 
@@ -231,12 +231,12 @@ namespace Lwt.Services
                 throw new ForbiddenException("You don't have permission to access this text.");
             }
 
-            if (setBookMarkModel.TermIndex >= (ulong)text.Words.Count)
+            if (setBookmarkModel.TermIndex >= (ulong)text.Words.Count)
             {
                 throw new BadRequestException("Invalid bookmark index.");
             }
 
-            text.BookMark = setBookMarkModel.TermIndex;
+            text.Bookmark = setBookmarkModel.TermIndex;
 
             if (!await this.textRepository.UpdateAsync(text))
             {

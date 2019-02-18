@@ -142,16 +142,16 @@ namespace Lwt.Controllers
         /// set text bookmark.
         /// </summary>
         /// <param name="id">text id.</param>
-        /// <param name="setBookMarkModel">set bookmark model.</param>
+        /// <param name="setBookmarkModel">set bookmark model.</param>
         /// <returns>Status.</returns>
         [HttpPatch("{id}/bookmark")]
         [Authorize]
-        public async Task<IActionResult> SetBookMarkAsync(
+        public async Task<IActionResult> SetBookmarkAsync(
             [FromRoute] Guid id,
-            [FromBody] SetBookMarkModel setBookMarkModel)
+            [FromBody] SetBookmarkModel setBookmarkModel)
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            await this.textService.SetBookMarkAsync(id, userId, setBookMarkModel);
+            await this.textService.SetBookmarkAsync(id, userId, setBookmarkModel);
             return this.Ok();
         }
     }

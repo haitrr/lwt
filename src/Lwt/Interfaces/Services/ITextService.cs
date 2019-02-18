@@ -76,8 +76,8 @@ namespace Lwt.Interfaces.Services
         /// </summary>
         /// <param name="id">the text id.</param>
         /// <param name="userId">user id.</param>
-        /// <param name="setBookMarkModel">set bookmark model.</param>
+        /// <param name="setBookmarkModel">set bookmark model.</param>
         /// <returns>nothing.</returns>
-        Task SetBookMarkAsync(Guid id, Guid userId, SetBookMarkModel setBookMarkModel);
+        Task SetBookmarkAsync(Guid id, Guid userId, SetBookmarkModel setBookmarkModel);
     }
 }
