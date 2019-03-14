@@ -44,6 +44,7 @@ namespace Lwt.Utilities
             {
                 new English(),
                 new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>()),
+                new Japanese(this.serviceProvider.GetService<JapaneseTextSplitter>()),
             };
         }
     }
