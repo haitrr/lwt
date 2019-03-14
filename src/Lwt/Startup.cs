@@ -102,6 +102,7 @@ namespace Lwt
             services.AddTransient<IMapper<TermEditModel, Term>, TermEditMapper>();
             services.AddTransient<IMapper<TermCreateModel, Guid, Term>, TermCreateMapper>();
             services.AddTransient<IMapper<Term, TermViewModel>, TermViewMapper>();
+            services.AddTransient<IJapaneseTextSplitter, JapaneseTextSplitter>();
             services.AddSingleton<IChineseTextSplitter, ChineseTextSplitter>();
 
             // user

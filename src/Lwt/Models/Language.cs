@@ -14,5 +14,10 @@ namespace Lwt.Models
         /// Chinese.
         /// </summary>
         Chinese = 2,
+
+        /// <summary>
+        /// Japanese
+        /// </summary>
+        Japanese = 3,
     }
 }
