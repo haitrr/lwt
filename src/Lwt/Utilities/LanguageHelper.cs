@@ -30,6 +30,8 @@ namespace Lwt.Utilities
                     return new English();
                 case Language.Chinese:
                     return new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>());
+                case Language.Japanese:
+                    return new Japanese(this.serviceProvider.GetService<JapaneseTextSplitter>());
             }
 
             throw new NotSupportedException($"Language {language.ToString()} is not supported.");
