@@ -35,7 +35,9 @@ namespace Lwt.Models
         /// <inheritdoc />
         public bool ShouldSkip(string term)
         {
-            return !Regex.IsMatch(term, "^\\p{Lo}+$");
+            return !Regex.IsMatch(
+                term,
+                @"^[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]+$");
         }
 
         /// <inheritdoc />
