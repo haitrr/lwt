@@ -23,7 +23,7 @@ namespace Lwt.Repositories
         /// Initializes a new instance of the <see cref="BaseRepository{T}"/> class.
         /// </summary>
         /// <param name="lwtDbContext">a.</param>
-        public BaseRepository(LwtDbContext lwtDbContext)
+        protected BaseRepository(LwtDbContext lwtDbContext)
         {
             this.lwtDbContext = lwtDbContext;
             this.Collection = this.lwtDbContext.GetCollection<T>();

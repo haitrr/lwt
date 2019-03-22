@@ -13,21 +13,21 @@ namespace Lwt.Transactions
     public class Transaction<T> : ITransaction
         where T : DbContext
     {
-        private readonly T dbContext;
+        private readonly T databaseContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Transaction{T}"/> class.
         /// </summary>
-        /// <param name="dbContext">dbContext.</param>
-        public Transaction(T dbContext)
+        /// <param name="databaseContext">dbContext.</param>
+        public Transaction(T databaseContext)
         {
-            this.dbContext = dbContext;
+            this.databaseContext = databaseContext;
         }
 
         /// <inheritdoc/>
         public async Task Commit()
         {
-            await this.dbContext.SaveChangesAsync();
+            await this.databaseContext.SaveChangesAsync();
         }
     }
 }

@@ -166,11 +166,13 @@ namespace Lwt
         /// <param name="env">env.</param>
         /// <param name="databaseSeeder"> the database seeder.</param>
         /// <param name="indexCreator">the database indexes creator.</param>
+#pragma warning disable CA1822
         public void Configure(
             IApplicationBuilder app,
             IHostingEnvironment env,
             IDatabaseSeeder databaseSeeder,
             IIndexCreator indexCreator)
+#pragma warning disable CA1822
         {
             /*if (env.IsDevelopment())
             {
