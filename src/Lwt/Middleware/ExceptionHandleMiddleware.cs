@@ -63,18 +63,12 @@ namespace Lwt.Middleware
 
         private static Task HandleExceptionAsync(Exception e, HttpContext context)
         {
-            // todo: uncomment
-            Console.WriteLine(context.Request.IsHttps);
-            Console.WriteLine(e.HResult);
-            return Task.CompletedTask;
-            /*
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             Console.WriteLine(e.Message);
             Console.WriteLine(e.StackTrace);
 
             return context.Response.WriteAsync(new ErrorDetails("Internal Server Error.").ToString());
-            */
         }
 
         private static Task HandleBadRequestException(HttpContext context, Exception exception)
