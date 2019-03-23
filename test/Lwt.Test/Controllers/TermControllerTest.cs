@@ -55,7 +55,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task CreateAsync_ShouldReturnOkTermId()
+        public async Task CreateAsyncShouldReturnOkTermId()
         {
             // arrange
             Guid termId = Guid.NewGuid();
@@ -75,7 +75,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task CreateAsync_ShouldCallService()
+        public async Task CreateAsyncShouldCallService()
         {
             // arrange
             Guid userId = Guid.NewGuid();

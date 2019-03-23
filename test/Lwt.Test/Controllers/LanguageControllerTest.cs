@@ -2,15 +2,11 @@ namespace Lwt.Test.Controllers
 {
     using System;
     using System.Collections.Generic;
-
     using Lwt.Controllers;
     using Lwt.Interfaces;
     using Lwt.Models;
-
     using Microsoft.AspNetCore.Mvc;
-
     using Moq;
-
     using Xunit;
 
     /// <inheritdoc />
@@ -55,7 +51,7 @@ namespace Lwt.Test.Controllers
         /// make sure get async work.
         /// </summary>
         [Fact]
-        public void GetAsync_ShouldWork()
+        public void GetAsyncShouldWork()
         {
             // arrange
             Guid userId = Guid.NewGuid();

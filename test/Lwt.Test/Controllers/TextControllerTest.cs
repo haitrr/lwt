@@ -58,7 +58,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task CreateAsync_ShouldCallService()
+        public async Task CreateAsyncShouldCallService()
         {
             // arrange
             this.textService.Reset();
@@ -81,7 +81,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task CreateAsync_ShouldReturnOk_IfSuccess()
+        public async Task CreateAsyncShouldReturnOkIfSuccess()
         {
             // arrange
             this.textService.Setup(m => m.CreateAsync(It.IsAny<Text>())).Returns(Task.CompletedTask);
@@ -98,7 +98,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task GetAllAsync_ShouldReturnOk_IfSuccess()
+        public async Task GetAllAsyncShouldReturnOkIfSuccess()
         {
             // arrange
             Guid userId = Guid.NewGuid();
@@ -120,7 +120,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task DeleteAsync_ShouldCallService()
+        public async Task DeleteAsyncShouldCallService()
         {
             // arrange
             Guid id = Guid.NewGuid();
@@ -139,7 +139,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task DeleteAsync_ShouldReturnOk()
+        public async Task DeleteAsyncShouldReturnOk()
         {
             // arrange
             Guid id = Guid.NewGuid();
@@ -158,7 +158,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task EditAsync_ShouldReturnOk()
+        public async Task EditAsyncShouldReturnOk()
         {
             // arrange
             Guid id = Guid.NewGuid();
@@ -176,7 +176,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task EditAsync_ShouldCallService()
+        public async Task EditAsyncShouldCallService()
         {
             // arrange
             Guid textId = Guid.NewGuid();

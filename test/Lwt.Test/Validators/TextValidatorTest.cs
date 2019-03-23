@@ -49,7 +49,7 @@ namespace Lwt.Test.Validators
         /// a.
         /// </summary>
         [Fact]
-        public void Validate_ShouldReturnInValid_IfUserIdEmpty()
+        public void ValidateShouldReturnInValidIfUserIdEmpty()
         {
             // arrange
             Guid userId = Guid.Empty;
@@ -67,7 +67,7 @@ namespace Lwt.Test.Validators
         /// a.
         /// </summary>
         [Fact]
-        public void Validate_ShouldReturnInValid_IfTitleEmpty()
+        public void ValidateShouldReturnInValidIfTitleEmpty()
         {
             // arrange
             var text = new Text { CreatorId = Guid.NewGuid(), Content = "valid", Title = string.Empty };
@@ -86,7 +86,7 @@ namespace Lwt.Test.Validators
         /// a.
         /// </summary>
         [Fact]
-        public void Validate_ShouldReturnInValid_IfContentEmpty()
+        public void ValidateShouldReturnInValidIfContentEmpty()
         {
             // arrange
             var text = new Text { CreatorId = Guid.NewGuid(), Content = string.Empty, Title = "yolo" };
@@ -105,7 +105,7 @@ namespace Lwt.Test.Validators
         /// a.
         /// </summary>
         [Fact]
-        public void Validate_ShouldReturnInValid_IfUserNotExist()
+        public void ValidateShouldReturnInValidIfUserNotExist()
         {
             // arrange
             var text = new Text { CreatorId = Guid.NewGuid(), Content = "yolo", Title = "yolo" };

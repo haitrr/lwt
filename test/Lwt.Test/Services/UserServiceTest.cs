@@ -53,7 +53,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task LoginAsync_ShouldThrowBadRequest_IfUserNotExist()
+        public async Task LoginAsyncShouldThrowBadRequestIfUserNotExist()
         {
             // arrange
             var userName = "userName";
@@ -71,7 +71,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task LoginAsync_ShouldThrowBadRequest_IfWrongPassword()
+        public async Task LoginAsyncShouldThrowBadRequestIfWrongPassword()
         {
             // arrange
             var userName = "userName";
@@ -89,7 +89,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task LoginAsync_ShouldReturnToken_IfSuccess()
+        public async Task LoginAsyncShouldReturnTokenIfSuccess()
         {
             // arrange
             var userName = "user";
@@ -112,7 +112,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task SignUp_ShouldCallUserManageCreate_Once()
+        public async Task SignUpShouldCallUserManageCreateOnce()
         {
             // arrange
             this.userManager.Reset();
@@ -130,7 +130,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task SignUp_ShouldReturnNotThrow_IfCreateUserSuccess()
+        public async Task SignUpShouldReturnNotThrowIfCreateUserSuccess()
         {
             // arrange
             this.userManager.Reset();
@@ -149,7 +149,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task SignUp_ShouldThrowException_IfFailToCreateUser()
+        public async Task SignUpShouldThrowExceptionIfFailToCreateUser()
         {
             // arrange
             this.userManager.Reset();

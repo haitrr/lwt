@@ -6,6 +6,7 @@ namespace Lwt.Test.Services
     using FluentValidation.Results;
     using Lwt.Exceptions;
     using Lwt.Interfaces;
+    using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Lwt.Services;
     using Lwt.ViewModels;
@@ -56,11 +57,21 @@ namespace Lwt.Test.Services
         }
 
         /// <summary>
+        /// dependency injection should work.
+        /// </summary>
+        [Fact]
+        public void ShouldGetSolved()
+        {
+            var helper = new DependencyResolverHelper();
+            helper.GetService<ITextService>();
+        }
+
+        /// <summary>
         /// test.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task CreateAsync_ShouldThrowException_IfTextNotValid()
+        public async Task CreateAsyncShouldThrowExceptionIfTextNotValid()
         {
             // arrange
             var text = new Text();
@@ -80,7 +91,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task DeleteAsync_ShouldThrowException_IfNotCreator()
+        public async Task DeleteAsyncShouldThrowExceptionIfNotCreator()
         {
             // arrange
             Guid creatorId = Guid.NewGuid();
@@ -98,7 +109,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task DeleteAsync_ShouldCallRepository_IfHasPermission()
+        public async Task DeleteAsyncShouldCallRepositoryIfHasPermission()
         {
             // arrange
             Guid creatorId = Guid.NewGuid();
@@ -118,7 +129,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task DeleteAsync_ShouldThrowException_IfNotHavePermission()
+        public async Task DeleteAsyncShouldThrowExceptionIfNotHavePermission()
         {
             // arrange
             Guid creatorId = Guid.NewGuid();

@@ -37,7 +37,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task SignUp_ShouldReturnOk_IfSignUpSuccess()
+        public async Task SignUpShouldReturnOkIfSignUpSuccess()
         {
             // arrange
             var userName = "hai";
@@ -57,7 +57,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task Login_ShouldReturnBadRequest_IfSignUpFail()
+        public async Task LoginShouldReturnBadRequestIfSignUpFail()
         {
             // arrange
             var viewModel = new LoginViewModel();
@@ -75,7 +75,7 @@ namespace Lwt.Test.Controllers
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task Login_ShouldReturnOk_IfLoginSuccessful()
+        public async Task LoginShouldReturnOkIfLoginSuccessful()
         {
             // arrange
             var viewModel = new LoginViewModel();
