@@ -124,7 +124,7 @@ namespace Lwt.Services
             if (text.CreatorId == userId)
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
-                editedText.Words = this.languageHelper.GetLanguage(editedText.Language).SplitText(editedText.Content);
+                this.SplitText(editedText);
                 await this.textRepository.UpdateAsync(editedText);
             }
             else
@@ -285,6 +285,12 @@ namespace Lwt.Services
             }
 
             return result;
+        }
+
+        private void SplitText(Text text)
+        {
+            ILanguage language = this.languageHelper.GetLanguage(text.Language);
+            text.Words = language.SplitText(text.Content);
         }
     }
 }

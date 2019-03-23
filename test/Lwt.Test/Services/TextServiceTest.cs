@@ -129,7 +129,7 @@ namespace Lwt.Test.Services
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task DeleteAsyncShouldThrowExceptionIfNotHavePermission()
+        public async Task EditAsyncShouldThrowExceptionIfNotHavePermission()
         {
             // arrange
             Guid creatorId = Guid.NewGuid();
@@ -141,6 +141,61 @@ namespace Lwt.Test.Services
 
             // assert
             await Assert.ThrowsAsync<ForbiddenException>(() => this.textService.EditAsync(textId, userId, editModel));
+        }
+
+        /// <summary>
+        /// should throw not found exception if text not found.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task EditAsyncShouldThrowNotFoundExceptionIfTextNotFound()
+        {
+            // arrange
+            Guid userId = Guid.NewGuid();
+            Guid textId = Guid.NewGuid();
+            var editModel = new TextEditModel();
+            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync((Text)null);
+
+            // assert
+            await Assert.ThrowsAsync<NotFoundException>(() => this.textService.EditAsync(textId, userId, editModel));
+        }
+
+        /// <summary>
+        /// should throw forbidden exception if user edit text is not the creator of the text.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task EditAsyncShouldThrowForbiddenExceptionIfNotCreator()
+        {
+            // arrange
+            Guid userId = Guid.NewGuid();
+            Guid textId = Guid.NewGuid();
+            var editModel = new TextEditModel();
+            var text = new Text { CreatorId = Guid.NewGuid() };
+            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
+
+            // assert
+            await Assert.ThrowsAsync<ForbiddenException>(() => this.textService.EditAsync(textId, userId, editModel));
+        }
+
+        /// <summary>
+        /// the service should call the repository for update the text.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task EditAsyncShouldWorkIfHappyCase()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid textId = Guid.NewGuid();
+            var editModel = new TextEditModel();
+            var text = new Text { CreatorId = userId };
+            var editedText = new Text();
+            var language = new Mock<ILanguage>();
+            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
+            this.textEditMapper.Setup(t => t.Map(editModel, text)).Returns(editedText);
+            this.languageHelper.Setup(t => t.GetLanguage(text.Language)).Returns(language.Object);
+            await this.textService.EditAsync(textId, userId, editModel);
+            this.textRepository.Verify(r => r.UpdateAsync(editedText), Times.Once);
         }
     }
 }
