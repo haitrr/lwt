@@ -3,18 +3,14 @@ namespace Lwt.Test.Controllers
     using System;
     using System.Security.Claims;
     using System.Threading.Tasks;
-
     using Lwt.Controllers;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Lwt.ViewModels;
-
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
-
     using Moq;
-
     using Xunit;
 
     /// <inheritdoc />
@@ -41,16 +37,14 @@ namespace Lwt.Test.Controllers
             this.textCreateMapper = new Mock<IMapper<TextCreateModel, Guid, Text>>();
             this.authenticationHelper = new Mock<IAuthenticationHelper>();
 
-            this.textController = new TextController(
-                this.textService.Object,
-                this.authenticationHelper.Object,
-                this.textCreateMapper.Object)
-            {
-                ControllerContext = new ControllerContext
+            this.textController =
+                new TextController(
+                    this.textService.Object,
+                    this.authenticationHelper.Object,
+                    this.textCreateMapper.Object)
                 {
-                    HttpContext = new DefaultHttpContext(),
-                },
-            };
+                    ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext(), },
+                };
         }
 
         /// <summary>
@@ -189,6 +183,27 @@ namespace Lwt.Test.Controllers
 
             // assert
             this.textService.Verify(s => s.EditAsync(textId, userId, editModel), Times.Once);
+        }
+
+        /// <summary>
+        /// count api should work as expected.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetAsyncShouldReturnCorrectCount()
+        {
+            Guid userId = Guid.NewGuid();
+            var filter = new TextFilter();
+            var pagingQuery = new PaginationQuery();
+            int count = new Random().Next(0, 10000);
+            this.textService.Setup(t => t.CountAsync(userId, filter)).ReturnsAsync(count);
+            this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.textController.User)).Returns(userId);
+
+            IActionResult actual = await this.textController.GetAllAsync(filter, pagingQuery);
+
+            var result = Assert.IsType<OkObjectResult>(actual);
+            var obj = Assert.IsType<TextList>(result.Value);
+            Assert.Equal(count, obj.Total);
         }
 
         /// <inheritdoc/>
