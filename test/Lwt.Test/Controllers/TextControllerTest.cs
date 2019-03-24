@@ -206,6 +206,28 @@ namespace Lwt.Test.Controllers
             Assert.Equal(count, obj.Total);
         }
 
+        /// <summary>
+        ///  read async should return right text read model.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ReadAsyncShouldReturnRightText()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid id = Guid.NewGuid();
+            var textReadModel = new TextReadModel();
+            this.textService
+                .Setup(t => t.ReadAsync(id, userId))
+                .ReturnsAsync(textReadModel);
+            this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.textController.User)).Returns(userId);
+
+            IActionResult actual = await this.textController.ReadAsync(id);
+
+            var result = Assert.IsType<OkObjectResult>(actual);
+            var obj = Assert.IsType<TextReadModel>(result.Value);
+            Assert.Equal(textReadModel, obj);
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
