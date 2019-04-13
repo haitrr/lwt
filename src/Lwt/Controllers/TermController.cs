@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Lwt.Controllers
 {
     using System;
@@ -80,6 +82,22 @@ namespace Lwt.Controllers
             await this.termService.EditAsync(termEditModel, id, userId);
 
             return this.Ok(new { });
+        }
+
+        /// <summary>
+        /// get all terms match filter.
+        /// </summary>
+        /// <param name="termFilter">the filter.</param>
+        /// <param name="paginationQuery">the pagination query.</param>
+        /// <returns>the terms list.</returns>
+        [Authorize]
+        public async Task<IActionResult> SearchAsync(TermFilter termFilter, PaginationQuery paginationQuery)
+        {
+            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            ulong total = await this.termService.CountAsync(userId, termFilter);
+            IEnumerable<TermViewModel> termViewModels =
+                await this.termService.SearchAsync(userId, termFilter, paginationQuery);
+            return this.Ok(new TermList { Total = total, Items = termViewModels });
         }
     }
 }

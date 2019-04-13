@@ -1,6 +1,7 @@
 namespace Lwt.Services
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
     using Lwt.Interfaces;
@@ -70,6 +71,21 @@ namespace Lwt.Services
             }
 
             return this.termViewMapper.Map(term);
+        }
+
+        /// <inheritdoc />
+        public Task<ulong> CountAsync(Guid userId, TermFilter termFilter)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Task<IEnumerable<TermViewModel>> SearchAsync(
+            Guid userId,
+            TermFilter termFilter,
+            PaginationQuery paginationQuery)
+        {
+            throw new NotImplementedException();
         }
     }
 }

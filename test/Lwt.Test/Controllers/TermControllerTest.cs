@@ -1,16 +1,13 @@
 namespace Lwt.Test.Controllers
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
-
     using Lwt.Controllers;
     using Lwt.Interfaces;
     using Lwt.Models;
-
     using Microsoft.AspNetCore.Mvc;
-
     using Moq;
-
     using Xunit;
 
     /// <inheritdoc />
@@ -90,6 +87,48 @@ namespace Lwt.Test.Controllers
 
             // assert
             this.termService.Verify(s => s.CreateAsync(term), Times.Once);
+        }
+
+        /// <summary>
+        /// test search async return count.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetSearchAsyncShouldReturnCount()
+        {
+            var count = (ulong)new Random().Next(1, 100000);
+            var termFilter = new TermFilter();
+            Guid userId = Guid.NewGuid();
+            var paginationQuery = new PaginationQuery();
+            this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.termController.User)).Returns(userId);
+            this.termService.Setup(s => s.CountAsync(userId, termFilter)).ReturnsAsync(count);
+
+            IActionResult rs = await this.termController.SearchAsync(termFilter, paginationQuery);
+            var objectResult = Assert.IsType<OkObjectResult>(rs);
+            var termList = Assert.IsType<TermList>(objectResult.Value);
+            Assert.Equal(count, termList.Total);
+        }
+
+        /// <summary>
+        /// test search async return count.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetSearchAsyncShouldReturnTermViewModels()
+        {
+            var termViewModels = new List<TermViewModel>();
+            termViewModels.Add(new TermViewModel());
+            var termFilter = new TermFilter();
+            Guid userId = Guid.NewGuid();
+            var paginationQuery = new PaginationQuery();
+            this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.termController.User)).Returns(userId);
+            this.termService.Setup(s => s.SearchAsync(userId, termFilter, paginationQuery))
+                .ReturnsAsync(termViewModels);
+
+            IActionResult rs = await this.termController.SearchAsync(termFilter, paginationQuery);
+            var objectResult = Assert.IsType<OkObjectResult>(rs);
+            var termList = Assert.IsType<TermList>(objectResult.Value);
+            Assert.Equal(termViewModels, termList.Items);
         }
 
         /// <inheritdoc/>
