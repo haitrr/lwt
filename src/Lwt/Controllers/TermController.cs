@@ -1,8 +1,7 @@
-using System.Collections.Generic;
-
 namespace Lwt.Controllers
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Interfaces;
     using Lwt.Models;
