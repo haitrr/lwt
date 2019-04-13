@@ -1,6 +1,7 @@
 namespace Lwt.Repositories
 {
     using System;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
     using Lwt.Interfaces;
@@ -80,9 +81,9 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
-        public Task<long> CountAsync()
+        public async Task<ulong> CountAsync(Expression<Func<T, bool>> filter = null)
         {
-            return this.Collection.CountDocumentsAsync(_ => true);
+            return (ulong)await this.Collection.CountDocumentsAsync(filter ?? (_ => true));
         }
     }
 }

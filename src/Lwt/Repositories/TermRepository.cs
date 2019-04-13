@@ -27,9 +27,9 @@ namespace Lwt.Repositories
         public Task<Term> GetByUserAndLanguageAndContentAsync(Guid userId, Language language, string word)
         {
             return this.Collection
-                .Find(term =>
-                    term.Content == word.ToUpperInvariant() && term.Language == language && term.CreatorId == userId)
-                .SingleOrDefaultAsync();
+                .Find(
+                    term => term.Content == word.ToUpperInvariant() && term.Language == language &&
+                            term.CreatorId == userId).SingleOrDefaultAsync();
         }
 
         /// <inheritdoc />
@@ -45,10 +45,14 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<IDictionary<string, Term>> GetManyAsync(Guid creatorId, Language language, HashSet<string> terms)
+        public async Task<IDictionary<string, Term>> GetManyAsync(
+            Guid creatorId,
+            Language language,
+            HashSet<string> terms)
         {
-            List<Term> list = await this.Collection.Find(t =>
-                terms.Contains(t.Content) && t.CreatorId == creatorId && t.Language == language).ToListAsync();
+            List<Term> list = await this.Collection
+                .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.Language == language)
+                .ToListAsync();
             return list.ToDictionary(t => t.Content, t => t);
         }
 

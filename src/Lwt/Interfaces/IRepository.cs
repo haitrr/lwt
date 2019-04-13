@@ -1,8 +1,8 @@
 namespace Lwt.Interfaces
 {
     using System;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
-
     using Lwt.Models;
 
     /// <summary>
@@ -50,7 +50,8 @@ namespace Lwt.Interfaces
         /// <summary>
         /// count all document in the collection.
         /// </summary>
+        /// <param name="filter"> the filter.</param>
         /// <returns>the count.</returns>
-        Task<long> CountAsync();
+        Task<ulong> CountAsync(Expression<Func<T, bool>> filter = null);
     }
 }

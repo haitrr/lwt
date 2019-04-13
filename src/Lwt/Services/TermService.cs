@@ -2,6 +2,7 @@ namespace Lwt.Services
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
     using Lwt.Interfaces;
@@ -76,7 +77,11 @@ namespace Lwt.Services
         /// <inheritdoc />
         public Task<ulong> CountAsync(Guid userId, TermFilter termFilter)
         {
-            throw new NotImplementedException();
+            Expression<Func<Term, bool>> filter = term => term.CreatorId == userId;
+            filter = Expression.Lambda<Func<Term, bool>>(
+                Expression.AndAlso(filter.Body, termFilter.ToExpression().Body),
+                filter.Parameters[0]);
+            return this.termRepository.CountAsync(filter);
         }
 
         /// <inheritdoc />
