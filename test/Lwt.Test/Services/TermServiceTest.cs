@@ -1,6 +1,7 @@
 namespace Lwt.Test.Services
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Interfaces;
@@ -102,6 +103,29 @@ namespace Lwt.Test.Services
 
             actualCompiled = actual.Compile();
             Assert.False(actualCompiled(ownTerm));
+        }
+
+        /// <summary>
+        /// test search async.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task SearchAsyncShouldReturnListResults()
+        {
+            var terms = new List<Term>();
+            var termViewModels = new List<TermViewModel>();
+            var termFilter = new TermFilter();
+            this.termRepository.Setup(
+                    r => r.SearchAsync(It.IsAny<Expression<Func<Term, bool>>>(), It.IsAny<PaginationQuery>()))
+                .ReturnsAsync(terms);
+            this.termViewMapper.Setup(m => m.Map(terms)).Returns(termViewModels);
+
+            IEnumerable<TermViewModel> actual = await this.termService.SearchAsync(
+                It.IsAny<Guid>(),
+                termFilter,
+                It.IsAny<PaginationQuery>());
+
+            Assert.Equal(termViewModels, actual);
         }
     }
 }

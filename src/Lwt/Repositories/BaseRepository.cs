@@ -1,6 +1,7 @@
 namespace Lwt.Repositories
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
@@ -52,6 +53,13 @@ namespace Lwt.Repositories
             }
 
             return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<T>> SearchAsync(Expression<Func<T, bool>> filter, PaginationQuery paginationQuery)
+        {
+            return await this.Collection.Find(filter).Skip((paginationQuery.Page - 1) * paginationQuery.ItemPerPage)
+                .Limit(paginationQuery.ItemPerPage).ToListAsync();
         }
 
         /// <inheritdoc/>

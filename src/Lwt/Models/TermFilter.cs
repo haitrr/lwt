@@ -1,9 +1,8 @@
-using System;
-using System.Linq.Expressions;
-using Lucene.Net.Analysis;
-
 namespace Lwt.Models
 {
+    using System;
+    using System.Linq.Expressions;
+
     /// <summary>
     /// term's filters.
     /// </summary>

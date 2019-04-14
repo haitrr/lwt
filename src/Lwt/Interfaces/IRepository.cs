@@ -1,6 +1,7 @@
 namespace Lwt.Interfaces
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Models;
@@ -25,6 +26,14 @@ namespace Lwt.Interfaces
         /// <param name="entity">entity.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task<bool> DeleteByIdAsync(T entity);
+
+        /// <summary>
+        /// Search for entities.
+        /// </summary>
+        /// <param name="filter">the filter.</param>
+        /// <param name="paginationQuery">pagination query.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task<IEnumerable<T>> SearchAsync(Expression<Func<T, bool>> filter, PaginationQuery paginationQuery);
 
         /// <summary>
         /// update an entity.

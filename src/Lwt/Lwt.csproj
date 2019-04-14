@@ -13,7 +13,6 @@
         <DocumentationFile>bin\Lwt.xml</DocumentationFile>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Extensions" />
         <Folder Include="wwwroot\" />
         <Content Include="dicts\*.*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -5,6 +5,7 @@ namespace Lwt.Services
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
+    using Lwt.Extensions;
     using Lwt.Interfaces;
     using Lwt.Models;
 
@@ -78,19 +79,20 @@ namespace Lwt.Services
         public Task<ulong> CountAsync(Guid userId, TermFilter termFilter)
         {
             Expression<Func<Term, bool>> filter = term => term.CreatorId == userId;
-            filter = Expression.Lambda<Func<Term, bool>>(
-                Expression.AndAlso(filter.Body, termFilter.ToExpression().Body),
-                filter.Parameters[0]);
+            filter = filter.And(termFilter.ToExpression());
             return this.termRepository.CountAsync(filter);
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<TermViewModel>> SearchAsync(
+        public async Task<IEnumerable<TermViewModel>> SearchAsync(
             Guid userId,
             TermFilter termFilter,
             PaginationQuery paginationQuery)
         {
-            throw new NotImplementedException();
+            Expression<Func<Term, bool>> filter = term => term.CreatorId == userId;
+            filter = filter.And(termFilter.ToExpression());
+            IEnumerable<Term> terms = await this.termRepository.SearchAsync(filter, paginationQuery);
+            return this.termViewMapper.Map(terms);
         }
     }
 }
