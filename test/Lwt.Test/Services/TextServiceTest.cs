@@ -26,6 +26,7 @@ namespace Lwt.Test.Services
 
         private readonly Mock<IMapper<TextEditModel, Text>> textEditMapper;
         private readonly Mock<IMapper<Text, TextViewModel>> textViewMapper;
+        private readonly Mock<IMapper<Term, TermViewModel>> termViewMapper;
         private readonly Mock<IMapper<Text, TextEditDetailModel>> textEditDetailMapper;
 
         private readonly Mock<IValidator<Text>> textValidator;
@@ -40,6 +41,7 @@ namespace Lwt.Test.Services
         {
             this.textEditMapper = new Mock<IMapper<TextEditModel, Text>>();
             this.textViewMapper = new Mock<IMapper<Text, TextViewModel>>();
+            this.termViewMapper = new Mock<IMapper<Term, TermViewModel>>();
             this.textEditDetailMapper = new Mock<IMapper<Text, TextEditDetailModel>>();
             this.textRepository = new Mock<ITextRepository>();
             this.textValidator = new Mock<IValidator<Text>>();
@@ -53,7 +55,8 @@ namespace Lwt.Test.Services
                 this.languageHelper.Object,
                 this.termRepository.Object,
                 this.textViewMapper.Object,
-                this.textEditDetailMapper.Object);
+                this.textEditDetailMapper.Object,
+                this.termViewMapper.Object);
         }
 
         /// <summary>

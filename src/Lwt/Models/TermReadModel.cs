@@ -18,11 +18,6 @@ namespace Lwt.Models
         public string Content { get; set; }
 
         /// <summary>
-        /// Gets or sets the term's meaning.
-        /// </summary>
-        public string Meaning { get; set; }
-
-        /// <summary>
         /// Gets or sets the term's learning level.
         /// </summary>
         public TermLearningLevel LearningLevel { get; set; }
