@@ -24,7 +24,6 @@ namespace Lwt.Services
         private readonly IValidator<Text> textValidator;
 
         private readonly IMapper<Text, TextViewModel> textViewMapper;
-        private readonly IMapper<Term, TermViewModel> termViewMapper;
         private readonly ITermRepository termRepository;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
@@ -40,7 +39,6 @@ namespace Lwt.Services
         /// <param name="languageHelper">the language helper.</param>
         /// <param name="termRepository">the term repository.</param>
         /// <param name="textEditDetailMapper">text edit detail mapper.</param>
-        /// <param name="termViewMapper">term view mapper.</param>
         public TextService(
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
@@ -48,8 +46,7 @@ namespace Lwt.Services
             ILanguageHelper languageHelper,
             ITermRepository termRepository,
             IMapper<Text, TextViewModel> textViewMapper,
-            IMapper<Text, TextEditDetailModel> textEditDetailMapper,
-            IMapper<Term, TermViewModel> termViewMapper)
+            IMapper<Text, TextEditDetailModel> textEditDetailMapper)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
@@ -58,7 +55,6 @@ namespace Lwt.Services
             this.termRepository = termRepository;
             this.textViewMapper = textViewMapper;
             this.textEditDetailMapper = textEditDetailMapper;
-            this.termViewMapper = termViewMapper;
         }
 
         /// <inheritdoc/>
@@ -167,12 +163,8 @@ namespace Lwt.Services
             ILanguage language = this.languageHelper.GetLanguage(text.Language);
             IEnumerable<string> notSkippedTerms =
                 text.Words.Where(word => !language.ShouldSkip(word)).Select(t => language.Normalize(t));
-            IDictionary<string, Term> termDict = await this.termRepository.GetManyAsync(
-                userId,
-                language.Id,
-                notSkippedTerms.ToHashSet());
-
-            readModel.TermsInformation = termDict.Values.ToDictionary(v => v.Id, v => this.termViewMapper.Map(v));
+            IDictionary<string, Term> termDict =
+                await this.termRepository.GetManyAsync(userId, language.Id, notSkippedTerms.ToHashSet());
 
             foreach (string word in text.Words)
             {
@@ -192,7 +184,10 @@ namespace Lwt.Services
                 else
                 {
                     Term term = termDict[normalizedWord];
-                    viewModel = new TermReadModel { Id = term.Id, Content = word, LearningLevel = term.LearningLevel };
+                    viewModel = new TermReadModel
+                    {
+                        Id = term.Id, Content = word, LearningLevel = term.LearningLevel, Meaning = term.Meaning,
+                    };
                 }
 
                 termViewModels.Add(viewModel);
@@ -275,10 +270,8 @@ namespace Lwt.Services
                 }
             }
 
-            Dictionary<string, TermLearningLevel> countDict = await this.termRepository.GetLearningLevelAsync(
-                text.CreatorId,
-                language.Id,
-                termDict.Keys.ToHashSet());
+            Dictionary<string, TermLearningLevel> countDict =
+                await this.termRepository.GetLearningLevelAsync(text.CreatorId, language.Id, termDict.Keys.ToHashSet());
 
             foreach (string word in termDict.Keys)
             {

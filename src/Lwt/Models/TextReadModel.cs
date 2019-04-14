@@ -19,11 +19,6 @@ namespace Lwt.Models
         public IEnumerable<TermReadModel> Terms { get; set; }
 
         /// <summary>
-        /// Gets or sets terms information.
-        /// </summary>
-        public IDictionary<Guid, TermViewModel> TermsInformation { get; set; }
-
-        /// <summary>
         /// Gets or sets the text's language.
         /// </summary>
         public Language Language { get; set; }
