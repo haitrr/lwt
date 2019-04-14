@@ -2,6 +2,7 @@ namespace Lwt
 {
     using System;
     using System.Collections.Generic;
+    using System.IO.Compression;
     using System.Text;
     using FluentValidation.AspNetCore;
     using Lwt.DbContexts;
@@ -19,6 +20,7 @@ namespace Lwt
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.ResponseCompression;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -137,6 +139,10 @@ namespace Lwt
 
             // add compression service
             services.AddResponseCompression();
+            services.Configure<GzipCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Optimal;
+            });
 
             // swagger
             services.AddSwaggerGen(c =>
