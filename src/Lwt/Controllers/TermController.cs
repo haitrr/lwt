@@ -90,6 +90,7 @@ namespace Lwt.Controllers
         /// <param name="paginationQuery">the pagination query.</param>
         /// <returns>the terms list.</returns>
         [Authorize]
+        [HttpGet]
         public async Task<IActionResult> SearchAsync(TermFilter termFilter, PaginationQuery paginationQuery)
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
