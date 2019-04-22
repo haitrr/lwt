@@ -94,7 +94,7 @@ namespace Lwt.Controllers
         public async Task<IActionResult> SearchAsync(TermFilter termFilter, PaginationQuery paginationQuery)
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            ulong total = await this.termService.CountAsync(userId, termFilter);
+            long total = await this.termService.CountAsync(userId, termFilter);
             IEnumerable<TermViewModel> termViewModels =
                 await this.termService.SearchAsync(userId, termFilter, paginationQuery);
             return this.Ok(new TermList { Total = total, Items = termViewModels });

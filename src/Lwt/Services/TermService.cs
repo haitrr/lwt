@@ -2,12 +2,11 @@ namespace Lwt.Services
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
-    using Lwt.Extensions;
     using Lwt.Interfaces;
     using Lwt.Models;
+    using MongoDB.Driver;
 
     /// <summary>
     /// term service.
@@ -76,10 +75,11 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc />
-        public Task<ulong> CountAsync(Guid userId, TermFilter termFilter)
+        public Task<long> CountAsync(Guid userId, TermFilter termFilter)
         {
-            Expression<Func<Term, bool>> filter = term => term.CreatorId == userId;
-            filter = filter.And(termFilter.ToExpression());
+            FilterDefinitionBuilder<Term> filterBuilders = Builders<Term>.Filter;
+            FilterDefinition<Term> filter = filterBuilders.Eq(term => term.CreatorId, userId);
+            filter = filterBuilders.And(termFilter.ToFilterDefinition(), filter);
             return this.termRepository.CountAsync(filter);
         }
 
@@ -89,8 +89,9 @@ namespace Lwt.Services
             TermFilter termFilter,
             PaginationQuery paginationQuery)
         {
-            Expression<Func<Term, bool>> filter = term => term.CreatorId == userId;
-            filter = filter.And(termFilter.ToExpression());
+            FilterDefinitionBuilder<Term> filterBuilders = Builders<Term>.Filter;
+            FilterDefinition<Term> filter = filterBuilders.Eq(term => term.CreatorId, userId);
+            filter = filterBuilders.And(termFilter.ToFilterDefinition(), filter);
             IEnumerable<Term> terms = await this.termRepository.SearchAsync(filter, paginationQuery);
             return this.termViewMapper.Map(terms);
         }

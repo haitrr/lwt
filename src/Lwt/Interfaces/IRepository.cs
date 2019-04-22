@@ -5,6 +5,7 @@ namespace Lwt.Interfaces
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Models;
+    using MongoDB.Driver;
 
     /// <summary>
     /// a.
@@ -36,6 +37,14 @@ namespace Lwt.Interfaces
         Task<IEnumerable<T>> SearchAsync(Expression<Func<T, bool>> filter, PaginationQuery paginationQuery);
 
         /// <summary>
+        /// Search for entities.
+        /// </summary>
+        /// <param name="filter">the filter.</param>
+        /// <param name="paginationQuery">pagination query.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task<IEnumerable<T>> SearchAsync(FilterDefinition<T> filter, PaginationQuery paginationQuery);
+
+        /// <summary>
         /// update an entity.
         /// </summary>
         /// <param name="entity">entity.</param>
@@ -61,6 +70,13 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="filter"> the filter.</param>
         /// <returns>the count.</returns>
-        Task<ulong> CountAsync(Expression<Func<T, bool>> filter = null);
+        Task<long> CountAsync(Expression<Func<T, bool>> filter = null);
+
+        /// <summary>
+        /// count all document in the collection.
+        /// </summary>
+        /// <param name="filter"> the filter.</param>
+        /// <returns>the count.</returns>
+        Task<long> CountAsync(FilterDefinition<T> filter);
     }
 }

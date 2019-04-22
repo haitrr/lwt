@@ -96,7 +96,7 @@ namespace Lwt.Test.Controllers
         [Fact]
         public async Task GetSearchAsyncShouldReturnCount()
         {
-            var count = (ulong)new Random().Next(1, 100000);
+            long count = new Random().Next(1, 100000);
             var termFilter = new TermFilter();
             Guid userId = Guid.NewGuid();
             var paginationQuery = new PaginationQuery();

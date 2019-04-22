@@ -10,7 +10,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets total results.
         /// </summary>
-        public ulong Total { get; set; }
+        public long Total { get; set; }
 
         /// <summary>
         /// Gets or sets items list.

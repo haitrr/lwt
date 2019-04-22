@@ -1,6 +1,8 @@
 namespace Lwt.Models
 {
     using System;
+    using MongoDB.Bson;
+    using MongoDB.Bson.Serialization.Attributes;
 
     /// <summary>
     /// the term.
@@ -15,6 +17,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the term's language.
         /// </summary>
+        [BsonRepresentation(BsonType.Int32)]
         public Language Language { get; set; }
 
         /// <summary>

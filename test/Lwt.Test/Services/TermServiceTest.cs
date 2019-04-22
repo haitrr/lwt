@@ -42,11 +42,11 @@ namespace Lwt.Test.Services
         public async Task CountAsyncShouldReturnCount()
         {
             Guid userId = Guid.NewGuid();
-            var count = (ulong)new Random().Next(1, 23132);
+            long count = new Random().Next(1, 23132);
             var termFilter = new TermFilter();
             this.termRepository.Setup(r => r.CountAsync(It.IsAny<Expression<Func<Term, bool>>>())).ReturnsAsync(count);
 
-            ulong actual = await this.termService.CountAsync(userId, termFilter);
+            long actual = await this.termService.CountAsync(userId, termFilter);
 
             Assert.Equal(count, actual);
         }
@@ -59,7 +59,7 @@ namespace Lwt.Test.Services
         public async Task CountAsyncShouldFilterUserId()
         {
             Guid userId = Guid.NewGuid();
-            var count = (ulong)new Random().Next(1, 23132);
+            long count = new Random().Next(1, 23132);
             var ownTerm = new Term { CreatorId = userId };
             var otherTerm = new Term { CreatorId = Guid.NewGuid() };
             var termFilter = new Mock<TermFilter>();
@@ -84,7 +84,7 @@ namespace Lwt.Test.Services
         public async Task CountAsyncShouldUseFilter()
         {
             Guid userId = Guid.NewGuid();
-            var count = (ulong)new Random().Next(1, 23132);
+            long count = new Random().Next(1, 23132);
             var ownTerm = new Term { CreatorId = userId };
             var termFilter = new Mock<TermFilter>();
             Expression<Func<Term, bool>> actual = null;

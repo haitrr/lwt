@@ -8,6 +8,7 @@ namespace Lwt.Repositories
     using Lwt.Interfaces;
     using Lwt.Models;
     using MongoDB.Driver;
+    using MongoDB.Driver.Linq;
 
     /// <summary>
     /// the base repository.
@@ -62,6 +63,13 @@ namespace Lwt.Repositories
                 .Limit(paginationQuery.ItemPerPage).ToListAsync();
         }
 
+        /// <inheritdoc />
+        public async Task<IEnumerable<T>> SearchAsync(FilterDefinition<T> filter, PaginationQuery paginationQuery)
+        {
+            return await this.Collection.Find(filter).Skip((paginationQuery.Page - 1) * paginationQuery.ItemPerPage)
+                .Limit(paginationQuery.ItemPerPage).ToListAsync();
+        }
+
         /// <inheritdoc/>
         public async Task<bool> UpdateAsync(T entity)
         {
@@ -89,9 +97,15 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<ulong> CountAsync(Expression<Func<T, bool>> filter = null)
+        public async Task<long> CountAsync(Expression<Func<T, bool>> filter = null)
         {
-            return (ulong)await this.Collection.CountDocumentsAsync(filter ?? (_ => true));
+            return await this.Collection.AsQueryable().Where(filter ?? (_ => true)).LongCountAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<long> CountAsync(FilterDefinition<T> filter)
+        {
+            return await this.Collection.CountDocumentsAsync(filter ?? Builders<T>.Filter.Empty);
         }
     }
 }

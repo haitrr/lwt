@@ -40,7 +40,7 @@ namespace Lwt.Interfaces
         /// <param name="userId">the user.</param>
         /// <param name="termFilter">the filter.</param>
         /// <returns>count.</returns>
-        Task<ulong> CountAsync(Guid userId, TermFilter termFilter);
+        Task<long> CountAsync(Guid userId, TermFilter termFilter);
 
         /// <summary>
         /// return terms that match filter with pagination.
