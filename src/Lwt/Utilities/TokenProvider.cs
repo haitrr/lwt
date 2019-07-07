@@ -40,7 +40,7 @@ namespace Lwt.Utilities
                         new Claim(Constants.UserIdClaimType, user.Id.ToString()),
                         new Claim("userName", user.UserName),
                     }),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddMonths(3),
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature),
