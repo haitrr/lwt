@@ -68,32 +68,35 @@ namespace Lwt
 
             byte[] key = Encoding.ASCII.GetBytes(appSettings.Secret);
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-
-                options.TokenValidationParameters = new TokenValidationParameters
+            services.AddAuthentication(
+                options =>
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                };
-            });
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(
+                options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequiredLength = 1;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredUniqueChars = 0;
-                options.Password.RequireNonAlphanumeric = false;
-            });
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                    };
+                });
+
+            services.Configure<IdentityOptions>(
+                options =>
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequiredLength = 1;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequiredUniqueChars = 0;
+                    options.Password.RequireNonAlphanumeric = false;
+                });
 
             // mapper
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
@@ -106,6 +109,8 @@ namespace Lwt
             services.AddTransient<IMapper<Term, TermViewModel>, TermViewMapper>();
             services.AddTransient<IJapaneseTextSplitter, JapaneseTextSplitter>();
             services.AddSingleton<IChineseTextSplitter, ChineseTextSplitter>();
+            services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
+            services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
 
             // user
             services.AddScoped<IUserService, UserService>();
@@ -120,6 +125,7 @@ namespace Lwt
 
             // repos
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserSettingRepository, UserSettingRepository>();
             services.AddScoped<ITermRepository, TermRepository>();
 
             // transaction
@@ -139,30 +145,29 @@ namespace Lwt
 
             // add compression service
             services.AddResponseCompression();
-            services.Configure<GzipCompressionProviderOptions>(options =>
-            {
-                options.Level = CompressionLevel.Optimal;
-            });
+            services.Configure<GzipCompressionProviderOptions>(
+                options => { options.Level = CompressionLevel.Optimal; });
 
             // swagger
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "Lwt API", Version = "v1" });
+            services.AddSwaggerGen(
+                c =>
+                {
+                    c.SwaggerDoc("v1", new Info { Title = "Lwt API", Version = "v1" });
 
-                c.AddSecurityDefinition(
-                    "Bearer",
-                    new ApiKeyScheme
-                    {
-                        Description =
-                            "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                        Name = "Authorization",
-                        In = "header",
-                        Type = "apiKey",
-                    });
+                    c.AddSecurityDefinition(
+                        "Bearer",
+                        new ApiKeyScheme
+                        {
+                            Description =
+                                "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                            Name = "Authorization",
+                            In = "header",
+                            Type = "apiKey",
+                        });
 
-                c.AddSecurityRequirement(
-                    new Dictionary<string, IEnumerable<string>> { { "Bearer", Array.Empty<string>() }, });
-            });
+                    c.AddSecurityRequirement(
+                        new Dictionary<string, IEnumerable<string>> { { "Bearer", Array.Empty<string>() }, });
+                });
         }
 
         /// <summary>

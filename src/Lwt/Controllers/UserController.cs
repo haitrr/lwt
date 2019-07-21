@@ -30,6 +30,30 @@ namespace Lwt.Controllers
             this.authenticationHelper = authenticationHelper;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAsync()
+        {
+            Guid loggedInUserid = this.authenticationHelper.GetLoggedInUser(this.User);
+            UserView user = await this.service.GetAsync(loggedInUserid);
+            return this.Ok(user);
+        }
+
+        [HttpGet("setting")]
+        public async Task<IActionResult> GetSettingAsync()
+        {
+            Guid loggedInUserid = this.authenticationHelper.GetLoggedInUser(this.User);
+            UserSettingView userSetting = await this.service.GetSettingAsync(loggedInUserid);
+            return this.Ok(userSetting);
+        }
+
+        [HttpPut("setting")]
+        public async Task<IActionResult> GetSettingAsync([FromBody] UserSettingUpdate userSettingUpdate)
+        {
+            Guid loggedInUserid = this.authenticationHelper.GetLoggedInUser(this.User);
+            await this.service.PutSettingAsync(loggedInUserid, userSettingUpdate);
+            return this.Ok();
+        }
+
         /// <summary>
         /// a.
         /// </summary>

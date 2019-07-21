@@ -32,5 +32,9 @@ namespace Lwt.Interfaces.Services
         /// <param name="changePasswordModel">change password model.</param>
         /// <returns>nothing.</returns>
         Task ChangePasswordAsync(Guid userId, UserChangePasswordModel changePasswordModel);
+
+        Task<UserView> GetAsync(Guid loggedInUserid);
+        Task<UserSettingView> GetSettingAsync(Guid loggedInUserid);
+        Task PutSettingAsync(Guid loggedInUserid, UserSettingUpdate userSettingUpdate);
     }
 }

@@ -2,16 +2,12 @@ namespace Lwt.Test.Services
 {
     using System;
     using System.Threading.Tasks;
-
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Services;
-
     using Microsoft.AspNetCore.Identity;
-
     using Moq;
-
     using Xunit;
 
     /// <summary>
@@ -22,6 +18,10 @@ namespace Lwt.Test.Services
         private readonly UserService userService;
 
         private readonly Mock<UserManager<User>> userManager;
+        private readonly Mock<IUserSettingRepository> userSettingRepository;
+        private readonly Mock<IMapper<UserSetting, UserSettingView>> userSettingViewMapper;
+        private readonly Mock<IMapper<User, UserView>> userViewMapper;
+        private readonly Mock<IMapper<UserSettingUpdate, UserSetting>> userSettingUpdateMapper;
 
         private readonly Mock<ITokenProvider> tokenProvider;
 
@@ -33,6 +33,10 @@ namespace Lwt.Test.Services
         {
             var userStore = new Mock<IUserStore<User>>();
 
+            this.userViewMapper = new Mock<IMapper<User, UserView>>();
+            this.userSettingRepository = new Mock<IUserSettingRepository>();
+            this.userSettingViewMapper = new Mock<IMapper<UserSetting, UserSettingView>>();
+            this.userSettingUpdateMapper = new Mock<IMapper<UserSettingUpdate, UserSetting>>();
             this.userManager = new Mock<UserManager<User>>(
                 userStore.Object,
                 null,
@@ -45,7 +49,13 @@ namespace Lwt.Test.Services
                 null);
 
             this.tokenProvider = new Mock<ITokenProvider>();
-            this.userService = new UserService(this.userManager.Object, this.tokenProvider.Object);
+            this.userService = new UserService(
+                this.userManager.Object,
+                this.tokenProvider.Object,
+                this.userViewMapper.Object,
+                this.userSettingRepository.Object,
+                this.userSettingViewMapper.Object,
+                this.userSettingUpdateMapper.Object);
         }
 
         /// <summary>
