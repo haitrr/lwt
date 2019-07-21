@@ -111,6 +111,7 @@ namespace Lwt
             services.AddSingleton<IChineseTextSplitter, ChineseTextSplitter>();
             services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
             services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
+            services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
 
             // user
             services.AddScoped<IUserService, UserService>();
