@@ -119,7 +119,16 @@ namespace Lwt.Services
         public async Task PutSettingAsync(Guid loggedInUserid, UserSettingUpdate userSettingUpdate)
         {
             UserSetting userSetting = await this.userSettingRepository.GetByUserIdAsync(loggedInUserid);
-            var updatedUserSetting = this.userSettingUpdateMapper.Map(userSettingUpdate, userSetting);
+
+            if (userSetting == null)
+            {
+                UserSetting newUserSetting = this.userSettingUpdateMapper.Map(userSettingUpdate);
+                newUserSetting.UserId = loggedInUserid;
+                await this.userSettingRepository.AddAsync(newUserSetting);
+                return;
+            }
+
+            UserSetting updatedUserSetting = this.userSettingUpdateMapper.Map(userSettingUpdate, userSetting);
             await this.userSettingRepository.UpdateAsync(updatedUserSetting);
         }
     }
