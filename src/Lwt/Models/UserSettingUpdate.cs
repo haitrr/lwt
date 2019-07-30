@@ -4,6 +4,6 @@ namespace Lwt.Models
 
     public class UserSettingUpdate
     {
-        public ICollection<LanguageSetting> LanguageSettings { get; set; }
+        public IDictionary<string,LanguageSetting> LanguageSettings { get; set; }
     }
 }

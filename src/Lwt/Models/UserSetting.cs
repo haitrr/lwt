@@ -7,6 +7,6 @@ namespace Lwt.Models
     {
         public Guid UserId { get; set; }
 
-        public ICollection<LanguageSetting> LanguageSettings { get; set; }
+        public IDictionary<string, LanguageSetting> LanguageSettings { get; set; }
     }
 }
