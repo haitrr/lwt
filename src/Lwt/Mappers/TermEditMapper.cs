@@ -9,12 +9,12 @@ namespace Lwt.Mappers
     public class TermEditMapper : BaseMapper<TermEditModel, Term>
     {
         /// <inheritdoc/>
-        public override Term Map(TermEditModel editModel, Term term)
+        public override Term Map(TermEditModel from, Term result)
         {
-            term.Meaning = editModel.Meaning;
-            term.LearningLevel = editModel.LearningLevel;
+            result.Meaning = from.Meaning;
+            result.LearningLevel = from.LearningLevel;
 
-            return term;
+            return result;
         }
     }
 }

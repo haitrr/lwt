@@ -1,14 +1,16 @@
 namespace Lwt.Mappers
 {
-    using Models;
-    using Services;
+    using Lwt.Models;
+    using Lwt.Services;
 
+    /// <inheritdoc/>
     public class UserSettingUpdateMapper : BaseMapper<UserSettingUpdate, UserSetting>
     {
-        public override UserSetting Map(UserSettingUpdate userSettingUpdate, UserSetting userSetting)
+        /// <inheritdoc/>
+        public override UserSetting Map(UserSettingUpdate from, UserSetting result)
         {
-            userSetting.LanguageSettings = userSettingUpdate.LanguageSettings;
-            return userSetting;
+            result.LanguageSettings = from.LanguageSettings;
+            return result;
         }
     }
 }

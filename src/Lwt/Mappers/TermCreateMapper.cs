@@ -11,15 +11,15 @@ namespace Lwt.Mappers
     public class TermCreateMapper : BaseMapper<TermCreateModel, Guid, Term>
     {
         /// <inheritdoc/>
-        public override Term Map(TermCreateModel createModel, Guid userId, Term term)
+        public override Term Map(TermCreateModel from1, Guid from2, Term result)
         {
-            term.Content = createModel.Content.ToUpperInvariant();
-            term.Meaning = createModel.Meaning;
-            term.LearningLevel = createModel.LearningLevel;
-            term.Language = createModel.Language;
-            term.CreatorId = userId;
+            result.Content = from1.Content.ToUpperInvariant();
+            result.Meaning = from1.Meaning;
+            result.LearningLevel = from1.LearningLevel;
+            result.Language = from1.Language;
+            result.CreatorId = from2;
 
-            return term;
+            return result;
         }
     }
 }

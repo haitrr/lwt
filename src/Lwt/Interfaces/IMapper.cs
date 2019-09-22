@@ -17,13 +17,13 @@ namespace Lwt.Interfaces
         /// <returns>a.</returns>
         TTo Map(TFrom from);
 
-        /// <summary>
-        /// a.
-        /// </summary>
-        /// <param name="from">from.</param>
-        /// <param name="t">editedText.</param>
-        /// <returns>asd.</returns>
-        TTo Map(TFrom from, TTo t);
+    /// <summary>
+    /// a.
+    /// </summary>
+    /// <param name="from">from.</param>
+    /// <param name="result">result.</param>
+    /// <returns>asd.</returns>
+        TTo Map(TFrom from, TTo result);
 
         /// <summary>
         /// asd.
@@ -54,9 +54,9 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="from">from.</param>
         /// <param name="from2">from2.</param>
-        /// <param name="t">to.</param>
+        /// <param name="result">to.</param>
         /// <returns>zx.</returns>
-        TTo Map(TFrom1 from, TFrom2 from2, TTo t);
+        TTo Map(TFrom1 from, TFrom2 from2, TTo result);
 
         /// <summary>
         /// d.
@@ -85,15 +85,15 @@ namespace Lwt.Interfaces
         /// <returns>c.</returns>
         TTo Map(TFrom1 from1, TFrom2 from2, TFrom3 from3);
 
-        /// <summary>
-        /// a.
-        /// </summary>
-        /// <param name="from">from.</param>
-        /// <param name="from2">from2.</param>
-        /// <param name="from3">from3.</param>
-        /// <param name="t">to.</param>
-        /// <returns>d.</returns>
-        TTo Map(TFrom1 from, TFrom2 from2, TFrom3 from3, TTo t);
+    /// <summary>
+    /// a.
+    /// </summary>
+    /// <param name="from">from.</param>
+    /// <param name="from2">from2.</param>
+    /// <param name="from3">from3.</param>
+    /// <param name="result">result.</param>
+    /// <returns>d.</returns>
+        TTo Map(TFrom1 from, TFrom2 from2, TFrom3 from3, TTo result);
 
         /// <summary>
         /// a.

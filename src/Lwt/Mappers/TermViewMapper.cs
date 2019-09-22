@@ -9,13 +9,13 @@ namespace Lwt.Mappers
     public class TermViewMapper : BaseMapper<Term, TermViewModel>
     {
         /// <inheritdoc />
-        public override TermViewModel Map(Term term, TermViewModel termViewModel)
+        public override TermViewModel Map(Term from, TermViewModel result)
         {
-            termViewModel.Id = term.Id;
-            termViewModel.Content = term.Content;
-            termViewModel.Meaning = term.Meaning;
-            termViewModel.LearningLevel = term.LearningLevel;
-            return termViewModel;
+            result.Id = from.Id;
+            result.Content = from.Content;
+            result.Meaning = from.Meaning;
+            result.LearningLevel = from.LearningLevel;
+            return result;
         }
     }
 }

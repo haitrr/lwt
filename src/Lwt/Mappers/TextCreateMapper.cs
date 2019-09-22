@@ -12,14 +12,14 @@ namespace Lwt.Mappers
     public class TextCreateMapper : BaseMapper<TextCreateModel, Guid, Text>
     {
         /// <inheritdoc/>
-        public override Text Map(TextCreateModel createModel, Guid creatorId, Text text)
+        public override Text Map(TextCreateModel from1, Guid from2, Text result)
         {
-            text.Title = createModel.Title;
-            text.Content = createModel.Content;
-            text.CreatorId = creatorId;
-            text.Language = createModel.Language;
+            result.Title = from1.Title;
+            result.Content = from1.Content;
+            result.CreatorId = from2;
+            result.Language = from1.Language;
 
-            return text;
+            return result;
         }
     }
 }

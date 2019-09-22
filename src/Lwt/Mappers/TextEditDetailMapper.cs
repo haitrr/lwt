@@ -9,13 +9,13 @@ namespace Lwt.Mappers
     public class TextEditDetailMapper : BaseMapper<Text, TextEditDetailModel>
     {
         /// <inheritdoc />
-        public override TextEditDetailModel Map(Text text, TextEditDetailModel editDetailModel)
+        public override TextEditDetailModel Map(Text from, TextEditDetailModel result)
         {
-            editDetailModel.Id = text.Id;
-            editDetailModel.Language = text.Language;
-            editDetailModel.Title = text.Title;
-            editDetailModel.Content = text.Content;
-            return editDetailModel;
+            result.Id = from.Id;
+            result.Language = from.Language;
+            result.Title = from.Title;
+            result.Content = from.Content;
+            return result;
         }
     }
 }

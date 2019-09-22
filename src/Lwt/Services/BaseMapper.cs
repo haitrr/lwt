@@ -42,6 +42,6 @@
         }
 
         /// <inheritdoc/>
-        public abstract TTo Map(TFrom from, TTo t);
+        public abstract TTo Map(TFrom from, TTo result);
     }
 }

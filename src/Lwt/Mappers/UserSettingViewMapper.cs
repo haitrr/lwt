@@ -1,15 +1,17 @@
 namespace Lwt.Mappers
 {
-    using Models;
-    using Services;
+    using Lwt.Models;
+    using Lwt.Services;
 
+    /// <inheritdoc/>
     public class UserSettingViewMapper : BaseMapper<UserSetting, UserSettingView>
     {
-        public override UserSettingView Map(UserSetting userSetting, UserSettingView userSettingView)
+        /// <inheritdoc/>
+        public override UserSettingView Map(UserSetting from, UserSettingView result)
         {
-            userSettingView.UserId = userSetting.UserId;
-            userSettingView.LanguageSettings = userSetting.LanguageSettings;
-            return userSettingView;
+            result.UserId = from.UserId;
+            result.LanguageSettings = from.LanguageSettings;
+            return result;
         }
     }
 }

@@ -10,13 +10,13 @@ namespace Lwt.Mappers
     public class TextViewMapper : BaseMapper<Text, TextViewModel>
     {
         /// <inheritdoc/>
-        public override TextViewModel Map(Text text, TextViewModel viewModel)
+        public override TextViewModel Map(Text from, TextViewModel result)
         {
-            viewModel.Title = text.Title;
-            viewModel.Language = text.Language;
-            viewModel.Id = text.Id;
+            result.Title = from.Title;
+            result.Language = from.Language;
+            result.Id = from.Id;
 
-            return viewModel;
+            return result;
         }
     }
 }

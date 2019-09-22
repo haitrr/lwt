@@ -10,14 +10,14 @@ namespace Lwt.Mappers
     public class LanguageViewMapper : BaseMapper<ILanguage, LanguageViewModel>
     {
         /// <inheritdoc/>
-        public override LanguageViewModel Map(ILanguage language, LanguageViewModel viewModel)
+        public override LanguageViewModel Map(ILanguage from, LanguageViewModel result)
         {
-            viewModel.Name = language.Name;
-            viewModel.Id = language.Id;
-            viewModel.Code = language.Code;
-            viewModel.SpeakCode = language.SpeakCode;
+            result.Name = from.Name;
+            result.Id = from.Id;
+            result.Code = from.Code;
+            result.SpeakCode = from.SpeakCode;
 
-            return viewModel;
+            return result;
         }
     }
 }
