@@ -43,5 +43,6 @@
         <PackageReference Include="SwashBuckle.AspNetCore.MicrosoftExtensions" Version="0.5.0" />
         <PackageReference Include="Text.Analyzers" Version="2.6.2" />
         <PackageReference Include="Vroyibg.Jieba.Net.Core" Version="1.1.0" />
+        <PackageReference Include="Menees.Analyzers.2017" Version="2.0.3" />
     </ItemGroup>
 </Project>

@@ -24,7 +24,10 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
-        public Task<Term> GetByUserAndLanguageAndContentAsync(Guid userId, Language language, string word)
+        public Task<Term> GetByUserAndLanguageAndContentAsync(
+          Guid userId,
+          Language language,
+          string word)
         {
             return this.Collection
                 .Find(
@@ -57,11 +60,11 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
-        public override Task AddAsync(Term term)
+        public override Task AddAsync(Term entity)
         {
             // normalize the term's content before insert.
-            term.Content = term.Content.ToUpperInvariant();
-            return base.AddAsync(term);
+            entity.Content = entity.Content.ToUpperInvariant();
+            return base.AddAsync(entity);
         }
     }
 }

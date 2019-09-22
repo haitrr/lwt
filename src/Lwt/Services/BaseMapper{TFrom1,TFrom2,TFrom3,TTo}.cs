@@ -52,6 +52,6 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public abstract TTo Map(TFrom1 from1, TFrom2 from2, TFrom3 from3, TTo result);
+        public abstract TTo Map(TFrom1 from, TFrom2 from2, TFrom3 from3, TTo result);
     }
 }
