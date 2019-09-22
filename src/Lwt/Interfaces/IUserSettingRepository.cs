@@ -2,10 +2,16 @@ namespace Lwt.Interfaces
 {
     using System;
     using System.Threading.Tasks;
-    using Models;
+    using Lwt.Models;
 
+    /// <inheritdoc/>
     public interface IUserSettingRepository : IRepository<UserSetting>
     {
-        Task<UserSetting> GetByUserIdAsync(Guid userId);
+    /// <summary>
+    /// get a user by it's id.
+    /// </summary>
+    /// <param name="userId">user's id.</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+    Task<UserSetting> GetByUserIdAsync(Guid userId);
     }
 }

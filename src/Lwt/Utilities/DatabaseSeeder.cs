@@ -72,6 +72,7 @@ namespace Lwt.Utilities
             var text = new Text
             {
                 Title = @"Why do people never get rich by working as an employee?",
+#pragma warning disable MEN002
                 Content = @"First things first, what is “rich” and what is “poor”?
 
 There are 2 types of people all around the world, if you divide them by financially: The richests and the remainings (poors).
@@ -99,6 +100,7 @@ I can add many other ways how we are adding power to their power but they are no
 If you think that in a macro plan (wars, international conflicts, terrorist organisations, inflations, deflations, economic crisis, depressions, etc.), you can see the power of the richests and you can see how they are using all humanity to empower them. It is very difficult to explain in a few Quora lines because the plan is 5,000 years old at least and it is continuing.
 
 The long and the short of it; it is meaningless to talk about who is poor or who is rich. The exact question must be “what did we do wrong?”",
+#pragma warning disable MEN002
                 Language = Language.English,
                 CreatorId = hai.Id,
                 Id = default,

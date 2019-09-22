@@ -1,30 +1,40 @@
 namespace Lwt.Models
 {
-    using Lwt.Interfaces;
+  using Lwt.Interfaces;
 
-    public class Vietnamese : ILanguage
+  /// <summary>
+  /// Vietnamese language.
+  /// </summary>
+  public class Vietnamese : ILanguage
+  {
+    /// <inheritdoc/>
+    public string Name => "Vietnamese";
+
+    /// <inheritdoc/>
+    public string SpeakCode => "vi_VN";
+
+    /// <inheritdoc/>
+    public string Code => "vi";
+
+    /// <inheritdoc/>
+    public Language Id => Language.Vietnamese;
+
+    /// <inheritdoc/>
+    public bool ShouldSkip(string term)
     {
-        public string Name => "Vietnamese";
-
-        public string SpeakCode => "vi_VN";
-
-        public string Code => "vi";
-
-        public Language Id => Language.Vietnamese;
-
-        public bool ShouldSkip(string term)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public string[] SplitText(string text)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public string Normalize(string word)
-        {
-            throw new System.NotImplementedException();
-        }
+      throw new System.NotSupportedException();
     }
+
+    /// <inheritdoc/>
+    public string[] SplitText(string text)
+    {
+      throw new System.NotSupportedException();
+    }
+
+    /// <inheritdoc/>
+    public string Normalize(string word)
+    {
+      throw new System.NotSupportedException();
+    }
+  }
 }

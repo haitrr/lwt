@@ -73,7 +73,7 @@ namespace Lwt.Repositories
         /// <inheritdoc/>
         public async Task<bool> UpdateAsync(T entity)
         {
-            entity.LastModifiedDate = DateTime.Now;
+            entity.LastModifiedDate = DateTime.UtcNow;
             ReplaceOneResult result = await this.Collection.ReplaceOneAsync(e => e.Id == entity.Id, entity);
 
             if (result.ModifiedCount == 0)
