@@ -24,7 +24,7 @@ namespace Lwt
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
-    using Swashbuckle.AspNetCore.Swagger;
+    using Microsoft.OpenApi.Models;
 
     /// <summary>
     /// statup.
@@ -51,8 +51,8 @@ namespace Lwt
         /// <param name="services">services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(options => options.EnableEndpointRouting = false)
-                .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
+            services.AddMvc(options => options.EnableEndpointRouting = false).AddFluentValidation(
+                config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
             services.AddMetrics();
             services.AddDbContext<IdentityDbContext>(options => options.UseSqlite("Data Source=lwt.db"));
@@ -152,21 +152,19 @@ namespace Lwt
             services.AddSwaggerGen(
                 c =>
                 {
-                    c.SwaggerDoc("v1", new Info { Title = "Lwt API", Version = "v1" });
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lwt API", Version = "v1", });
 
-                    c.AddSecurityDefinition(
-                        "Bearer",
-                        new ApiKeyScheme
-                        {
-                            Description =
-                                "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                            Name = "Authorization",
-                            In = "header",
-                            Type = "apiKey",
-                        });
+                    var scheme = new OpenApiSecurityScheme
+                    {
+                        Description =
+                            "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.ApiKey,
+                    };
+                    c.AddSecurityDefinition("Bearer", scheme);
 
-                    c.AddSecurityRequirement(
-                        new Dictionary<string, IEnumerable<string>> { { "Bearer", Array.Empty<string>() }, });
+                    c.AddSecurityRequirement(new OpenApiSecurityRequirement() { { scheme, new List<string>() } });
                 });
         }
 
@@ -177,10 +175,7 @@ namespace Lwt
         /// <param name="databaseSeeder"> the database seeder.</param>
         /// <param name="indexCreator">the database indexes creator.</param>
 #pragma warning disable CA1822
-        public void Configure(
-            IApplicationBuilder app,
-            IDatabaseSeeder databaseSeeder,
-            IIndexCreator indexCreator)
+        public void Configure(IApplicationBuilder app, IDatabaseSeeder databaseSeeder, IIndexCreator indexCreator)
 #pragma warning disable CA1822
         {
             /*if (env.IsDevelopment())
