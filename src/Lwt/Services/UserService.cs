@@ -1,7 +1,6 @@
 namespace Lwt.Services
 {
   using System;
-  using System.Collections;
   using System.Linq;
   using System.Threading.Tasks;
   using Lwt.Exceptions;

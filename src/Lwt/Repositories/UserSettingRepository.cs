@@ -8,7 +8,9 @@ namespace Lwt.Repositories
     using MongoDB.Driver;
     using MongoDB.Driver.Linq;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// user setting repository.
+    /// </summary>
     public class UserSettingRepository : BaseRepository<UserSetting>, IUserSettingRepository
     {
     /// <summary>

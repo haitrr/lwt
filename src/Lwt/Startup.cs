@@ -52,7 +52,7 @@ namespace Lwt
         /// <param name="services">services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
+            services.AddMvc(options => options.EnableEndpointRouting = false)
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
             services.AddMetrics();
@@ -175,13 +175,11 @@ namespace Lwt
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
         /// <param name="app">app.</param>
-        /// <param name="env">env.</param>
         /// <param name="databaseSeeder"> the database seeder.</param>
         /// <param name="indexCreator">the database indexes creator.</param>
 #pragma warning disable CA1822
         public void Configure(
             IApplicationBuilder app,
-            IHostingEnvironment env,
             IDatabaseSeeder databaseSeeder,
             IIndexCreator indexCreator)
 #pragma warning disable CA1822

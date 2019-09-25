@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <CodeAnalysisRuleSet>../../style.ruleset</CodeAnalysisRuleSet>
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
@@ -25,7 +25,6 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" />
     <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.6.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="Moq" Version="4.10.1" />
