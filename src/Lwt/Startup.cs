@@ -51,7 +51,9 @@ namespace Lwt
         /// <param name="services">services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(options => options.EnableEndpointRouting = false).AddFluentValidation(
+            services.AddMvc(options => options.EnableEndpointRouting = false)
+                .AddNewtonsoftJson()
+                .AddFluentValidation(
                 config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
             services.AddMetrics();
