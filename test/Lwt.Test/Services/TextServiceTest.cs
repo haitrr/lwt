@@ -67,6 +67,40 @@ namespace Lwt.Test.Services
         }
 
         /// <summary>
+        /// Delete should throw forbidden exception
+        /// if the user calling is not owner of the text.
+        /// </summary>
+        [Fact]
+        public void DeleteAsyncShouldThrowExceptionIfNotOwner()
+        {
+            Guid textId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
+            var text = new Text { CreatorId = Guid.NewGuid() };
+            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
+            Assert.ThrowsAsync<ForbiddenException>(() => this.textService.DeleteAsync(textId, userId));
+        }
+
+        /// <summary>
+        /// Delete should call repository to delete the text.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task DeleteAsyncShouldCallRepository()
+        {
+             Guid textId = Guid.NewGuid();
+             Guid userId = Guid.NewGuid();
+             var text = new Text { CreatorId = userId };
+             this.textRepository.Reset();
+             this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
+
+             await this.textService.DeleteAsync(textId, userId);
+
+             this.textRepository.Verify(
+                 r => r.DeleteByIdAsync(text),
+                 Times.Once);
+        }
+
+        /// <summary>
         /// test.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>

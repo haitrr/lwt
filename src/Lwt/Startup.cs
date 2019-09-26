@@ -142,56 +142,7 @@ namespace Lwt
                 options => { options.Level = CompressionLevel.Optimal; });
 
             // swagger
-            services.AddSwaggerGen(
-                c =>
-                {
-                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lwt API", Version = "v1", });
-
-                    var scheme = new OpenApiSecurityScheme
-                    {
-                        Description =
-                            "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                        Name = "Authorization",
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.ApiKey,
-                    };
-                    c.AddSecurityDefinition("Bearer", scheme);
-
-                    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-                    {
-                        {
-                            new OpenApiSecurityScheme
-                                {
-                                    Reference = new OpenApiReference
-                                        {
-                                            Type = ReferenceType.SecurityScheme,
-                                            Id = "Bearer",
-                                        },
-                                    Scheme = "oauth2",
-                                    Name = "Bearer",
-                                    In = ParameterLocation.Header,
-                                },
-                            new List<string>()
-                        },
-                    });
-                });
-        }
-
-        private static void RegisterMappers(IServiceCollection services)
-        {
-            services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
-            services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
-            services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
-            services.AddTransient<IMapper<Text, TextEditDetailModel>, TextEditDetailMapper>();
-            services.AddTransient<IMapper<ILanguage, LanguageViewModel>, LanguageViewMapper>();
-            services.AddTransient<IMapper<TermEditModel, Term>, TermEditMapper>();
-            services.AddTransient<IMapper<TermCreateModel, Guid, Term>, TermCreateMapper>();
-            services.AddTransient<IMapper<Term, TermViewModel>, TermViewMapper>();
-            services.AddTransient<IJapaneseTextSplitter, JapaneseTextSplitter>();
-            services.AddSingleton<IChineseTextSplitter, ChineseTextSplitter>();
-            services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
-            services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
-            services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
+            RegisterSwaggerGen(services);
         }
 
         /// <summary>
@@ -221,6 +172,60 @@ namespace Lwt
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
             indexCreator.CreateIndexesAsync().GetAwaiter().GetResult();
             databaseSeeder.SeedData().GetAwaiter().GetResult();
+        }
+
+        private static void RegisterSwaggerGen(IServiceCollection services)
+        {
+            services.AddSwaggerGen(
+                c =>
+                {
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Lwt API", Version = "v1", });
+
+                    var scheme = new OpenApiSecurityScheme
+                    {
+                        Description =
+                            "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.ApiKey,
+                    };
+                    c.AddSecurityDefinition("Bearer", scheme);
+
+                    c.AddSecurityRequirement(
+                        new OpenApiSecurityRequirement()
+                        {
+                            {
+                                new OpenApiSecurityScheme
+                                {
+                                    Reference = new OpenApiReference
+                                    {
+                                        Type = ReferenceType.SecurityScheme, Id = "Bearer",
+                                    },
+                                    Scheme = "oauth2",
+                                    Name = "Bearer",
+                                    In = ParameterLocation.Header,
+                                },
+                                new List<string>()
+                            },
+                        });
+                });
+        }
+
+        private static void RegisterMappers(IServiceCollection services)
+        {
+            services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
+            services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
+            services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
+            services.AddTransient<IMapper<Text, TextEditDetailModel>, TextEditDetailMapper>();
+            services.AddTransient<IMapper<ILanguage, LanguageViewModel>, LanguageViewMapper>();
+            services.AddTransient<IMapper<TermEditModel, Term>, TermEditMapper>();
+            services.AddTransient<IMapper<TermCreateModel, Guid, Term>, TermCreateMapper>();
+            services.AddTransient<IMapper<Term, TermViewModel>, TermViewMapper>();
+            services.AddTransient<IJapaneseTextSplitter, JapaneseTextSplitter>();
+            services.AddSingleton<IChineseTextSplitter, ChineseTextSplitter>();
+            services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
+            services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
+            services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
         }
     }
 }
