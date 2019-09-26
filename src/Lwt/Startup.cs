@@ -46,7 +46,8 @@ namespace Lwt
         public IConfiguration Configuration { get; }
 
         /// <summary>
-        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// This method gets called by the runtime.
+        /// Use this method to add services to the container.
         /// </summary>
         /// <param name="services">services.</param>
         public void ConfigureServices(IServiceCollection services)
@@ -55,6 +56,8 @@ namespace Lwt
                 .AddNewtonsoftJson()
                 .AddFluentValidation(
                 config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
+
+            services.AddControllers().AddNewtonsoftJson();
 
             services.AddMetrics();
             services.AddDbContext<IdentityDbContext>(options => options.UseSqlite("Data Source=lwt.db"));
@@ -100,19 +103,7 @@ namespace Lwt
                 });
 
             // mapper
-            services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
-            services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
-            services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
-            services.AddTransient<IMapper<Text, TextEditDetailModel>, TextEditDetailMapper>();
-            services.AddTransient<IMapper<ILanguage, LanguageViewModel>, LanguageViewMapper>();
-            services.AddTransient<IMapper<TermEditModel, Term>, TermEditMapper>();
-            services.AddTransient<IMapper<TermCreateModel, Guid, Term>, TermCreateMapper>();
-            services.AddTransient<IMapper<Term, TermViewModel>, TermViewMapper>();
-            services.AddTransient<IJapaneseTextSplitter, JapaneseTextSplitter>();
-            services.AddSingleton<IChineseTextSplitter, ChineseTextSplitter>();
-            services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
-            services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
-            services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
+            RegisterMappers(services);
 
             // user
             services.AddScoped<IUserService, UserService>();
@@ -166,8 +157,41 @@ namespace Lwt
                     };
                     c.AddSecurityDefinition("Bearer", scheme);
 
-                    c.AddSecurityRequirement(new OpenApiSecurityRequirement() { { scheme, new List<string>() } });
+                    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                                {
+                                    Reference = new OpenApiReference
+                                        {
+                                            Type = ReferenceType.SecurityScheme,
+                                            Id = "Bearer",
+                                        },
+                                    Scheme = "oauth2",
+                                    Name = "Bearer",
+                                    In = ParameterLocation.Header,
+                                },
+                            new List<string>()
+                        },
+                    });
                 });
+        }
+
+        private static void RegisterMappers(IServiceCollection services)
+        {
+            services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
+            services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
+            services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
+            services.AddTransient<IMapper<Text, TextEditDetailModel>, TextEditDetailMapper>();
+            services.AddTransient<IMapper<ILanguage, LanguageViewModel>, LanguageViewMapper>();
+            services.AddTransient<IMapper<TermEditModel, Term>, TermEditMapper>();
+            services.AddTransient<IMapper<TermCreateModel, Guid, Term>, TermCreateMapper>();
+            services.AddTransient<IMapper<Term, TermViewModel>, TermViewMapper>();
+            services.AddTransient<IJapaneseTextSplitter, JapaneseTextSplitter>();
+            services.AddSingleton<IChineseTextSplitter, ChineseTextSplitter>();
+            services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
+            services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
+            services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
         }
 
         /// <summary>
