@@ -1,7 +1,6 @@
 namespace Lwt.Test.Utilities
 {
     using System;
-    using System.Threading.Tasks;
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Utilities;
