@@ -2,8 +2,7 @@ namespace Lwt.Test.Services
 {
     using System;
     using System.Threading.Tasks;
-    using FluentValidation;
-    using FluentValidation.Results;
+    using Lwt.Creators;
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
@@ -28,7 +27,7 @@ namespace Lwt.Test.Services
         private readonly Mock<IMapper<Text, TextViewModel>> textViewMapper;
         private readonly Mock<IMapper<Text, TextEditDetailModel>> textEditDetailMapper;
 
-        private readonly Mock<IValidator<Text>> textValidator;
+        private readonly Mock<ITextCreator> textCreator;
 
         private readonly Mock<ITermRepository> termRepository;
 
@@ -42,18 +41,18 @@ namespace Lwt.Test.Services
             this.textViewMapper = new Mock<IMapper<Text, TextViewModel>>();
             this.textEditDetailMapper = new Mock<IMapper<Text, TextEditDetailModel>>();
             this.textRepository = new Mock<ITextRepository>();
-            this.textValidator = new Mock<IValidator<Text>>();
             this.languageHelper = new Mock<ILanguageHelper>();
             this.termRepository = new Mock<ITermRepository>();
+            this.textCreator = new Mock<ITextCreator>();
 
             this.textService = new TextService(
                 this.textRepository.Object,
                 this.textEditMapper.Object,
-                this.textValidator.Object,
                 this.languageHelper.Object,
                 this.termRepository.Object,
                 this.textViewMapper.Object,
-                this.textEditDetailMapper.Object);
+                this.textEditDetailMapper.Object,
+                this.textCreator.Object);
         }
 
         /// <summary>
@@ -98,26 +97,6 @@ namespace Lwt.Test.Services
              this.textRepository.Verify(
                  r => r.DeleteByIdAsync(text),
                  Times.Once);
-        }
-
-        /// <summary>
-        /// test.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task CreateAsyncShouldThrowExceptionIfTextNotValid()
-        {
-            // arrange
-            var text = new Text();
-            var validationResult = new Mock<ValidationResult>();
-            this.textValidator.Setup(v => v.Validate(text)).Returns(validationResult.Object);
-
-            // add an error
-            validationResult.Object.Errors.Add(new ValidationFailure("p", "e"));
-            validationResult.Setup(r => r.IsValid).Returns(false);
-
-            // assert
-            await Assert.ThrowsAsync<BadRequestException>(() => this.textService.CreateAsync(text));
         }
 
         /// <summary>

@@ -4,8 +4,7 @@ namespace Lwt.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using FluentValidation;
-    using FluentValidation.Results;
+    using Lwt.Creators;
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
@@ -20,10 +19,8 @@ namespace Lwt.Services
         private readonly ITextRepository textRepository;
 
         private readonly ILanguageHelper languageHelper;
-
-        private readonly IValidator<Text> textValidator;
-
         private readonly IMapper<Text, TextViewModel> textViewMapper;
+        private readonly ITextCreator textCreator;
         private readonly ITermRepository termRepository;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
@@ -35,40 +32,32 @@ namespace Lwt.Services
         /// <param name="textRepository">textRepository.</param>
         /// <param name="textViewMapper">text view mapper.</param>
         /// <param name="textEditMapper">textEditMapper.</param>
-        /// <param name="textValidator">textValidator.</param>
         /// <param name="languageHelper">the language helper.</param>
         /// <param name="termRepository">the term repository.</param>
         /// <param name="textEditDetailMapper">text edit detail mapper.</param>
+        /// <param name="textCreator">the text creator.</param>
         public TextService(
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
-            IValidator<Text> textValidator,
             ILanguageHelper languageHelper,
             ITermRepository termRepository,
             IMapper<Text, TextViewModel> textViewMapper,
-            IMapper<Text, TextEditDetailModel> textEditDetailMapper)
+            IMapper<Text, TextEditDetailModel> textEditDetailMapper,
+            ITextCreator textCreator)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
-            this.textValidator = textValidator;
             this.languageHelper = languageHelper;
             this.termRepository = termRepository;
             this.textViewMapper = textViewMapper;
             this.textEditDetailMapper = textEditDetailMapper;
+            this.textCreator = textCreator;
         }
 
         /// <inheritdoc/>
-        public async Task CreateAsync(Text text)
+        public Task CreateAsync(Text text)
         {
-            ValidationResult validationResult = this.textValidator.Validate(text);
-
-            if (!validationResult.IsValid)
-            {
-                throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
-            }
-
-            text.Words = this.languageHelper.GetLanguage(text.Language).SplitText(text.Content);
-            await this.textRepository.AddAsync(text);
+            return this.textCreator.CreateAsync(text);
         }
 
         /// <inheritdoc/>

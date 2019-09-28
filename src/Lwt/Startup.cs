@@ -5,6 +5,7 @@ namespace Lwt
     using System.IO.Compression;
     using System.Text;
     using FluentValidation.AspNetCore;
+    using Lwt.Creators;
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
@@ -132,6 +133,7 @@ namespace Lwt
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
             services.AddScoped<ILanguageHelper, LanguageHelper>();
             services.AddScoped<ITokenProvider, TokenProvider>();
+            services.AddScoped<ITextSeparator, TextSeparator>();
 
             // middleware
             services.AddSingleton<ExceptionHandleMiddleware>();
@@ -143,6 +145,9 @@ namespace Lwt
 
             // swagger
             RegisterSwaggerGen(services);
+
+            // creators
+            RegisterCreators(services);
         }
 
         /// <summary>
@@ -209,6 +214,11 @@ namespace Lwt
                             },
                         });
                 });
+        }
+
+        private static void RegisterCreators(IServiceCollection services)
+        {
+            services.AddScoped<ITextCreator, TextCreator>();
         }
 
         private static void RegisterMappers(IServiceCollection services)
