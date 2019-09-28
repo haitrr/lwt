@@ -1,6 +1,8 @@
 namespace Lwt.Test.Services
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Lwt.Creators;
     using Lwt.Exceptions;
@@ -30,6 +32,7 @@ namespace Lwt.Test.Services
         private readonly Mock<ITextCreator> textCreator;
 
         private readonly Mock<ITermRepository> termRepository;
+        private readonly Mock<ITermCounter> termCounterMock;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextServiceTest"/> class.
@@ -44,6 +47,7 @@ namespace Lwt.Test.Services
             this.languageHelper = new Mock<ILanguageHelper>();
             this.termRepository = new Mock<ITermRepository>();
             this.textCreator = new Mock<ITextCreator>();
+            this.termCounterMock = new Mock<ITermCounter>();
 
             this.textService = new TextService(
                 this.textRepository.Object,
@@ -52,7 +56,8 @@ namespace Lwt.Test.Services
                 this.termRepository.Object,
                 this.textViewMapper.Object,
                 this.textEditDetailMapper.Object,
-                this.textCreator.Object);
+                this.textCreator.Object,
+                this.termCounterMock.Object);
         }
 
         /// <summary>
@@ -209,6 +214,45 @@ namespace Lwt.Test.Services
             this.languageHelper.Setup(t => t.GetLanguage(text.Language)).Returns(language.Object);
             await this.textService.EditAsync(textId, userId, editModel);
             this.textRepository.Verify(r => r.UpdateAsync(editedText), Times.Once);
+        }
+
+        /// <summary>
+        /// get by user async should work.
+        /// </summary>
+        /// <param name="textNumber">number of text.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [InlineData(1)]
+        [InlineData(3)]
+        [InlineData(2)]
+        [Theory]
+        public async Task GetByUserAsyncShouldWork(int textNumber)
+        {
+            Guid userId = Guid.NewGuid();
+            var textFilter = new TextFilter();
+            var paginationQuery = new PaginationQuery();
+            var texts = new List<Text>();
+            var countDict = new Dictionary<TermLearningLevel, long>
+            {
+                { TermLearningLevel.Learning1, 321 },
+                { TermLearningLevel.UnKnow, 21 },
+            };
+
+            for (var i = 0; i < textNumber; i++)
+            {
+                texts.Add(new Text());
+            }
+
+            this.textViewMapper.Setup(m => m.Map(It.IsAny<Text>())).Returns(() => new TextViewModel());
+            this.textRepository.Setup(r => r.GetByUserAsync(userId, textFilter, paginationQuery)).ReturnsAsync(texts);
+            this.termCounterMock.Setup(
+                    c => c.CountByLearningLevelAsync(
+                        It.IsAny<IEnumerable<string>>(),
+                        It.IsAny<Language>(),
+                        It.IsAny<Guid>()))
+                .ReturnsAsync(countDict);
+
+            IEnumerable<TextViewModel> viewModels = await this.textService.GetByUserAsync(userId, textFilter, paginationQuery);
+            Assert.Equal(viewModels.Count(), texts.Count());
         }
     }
 }

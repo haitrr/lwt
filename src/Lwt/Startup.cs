@@ -134,6 +134,9 @@ namespace Lwt
             services.AddScoped<ILanguageHelper, LanguageHelper>();
             services.AddScoped<ITokenProvider, TokenProvider>();
             services.AddScoped<ITextSeparator, TextSeparator>();
+            services.AddScoped<ITermCounter, TermCounter>();
+            services.AddScoped<ITextNormalizer, TextNormalizer>();
+            services.AddScoped<ISkippedWordRemover, SkippedWordRemover>();
 
             // middleware
             services.AddSingleton<ExceptionHandleMiddleware>();

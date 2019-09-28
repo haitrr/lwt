@@ -25,6 +25,7 @@ namespace Lwt.Services
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
         private readonly IMapper<Text, TextEditDetailModel> textEditDetailMapper;
+        private readonly ITermCounter termCounter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextService"/> class.
@@ -36,6 +37,7 @@ namespace Lwt.Services
         /// <param name="termRepository">the term repository.</param>
         /// <param name="textEditDetailMapper">text edit detail mapper.</param>
         /// <param name="textCreator">the text creator.</param>
+        /// <param name="termCounter">the term counter.</param>
         public TextService(
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
@@ -43,7 +45,8 @@ namespace Lwt.Services
             ITermRepository termRepository,
             IMapper<Text, TextViewModel> textViewMapper,
             IMapper<Text, TextEditDetailModel> textEditDetailMapper,
-            ITextCreator textCreator)
+            ITextCreator textCreator,
+            ITermCounter termCounter)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
@@ -52,6 +55,7 @@ namespace Lwt.Services
             this.textViewMapper = textViewMapper;
             this.textEditDetailMapper = textEditDetailMapper;
             this.textCreator = textCreator;
+            this.termCounter = termCounter;
         }
 
         /// <inheritdoc/>
@@ -72,7 +76,8 @@ namespace Lwt.Services
             foreach (Text text in texts)
             {
                 TextViewModel viewModel = this.textViewMapper.Map(text);
-                Dictionary<TermLearningLevel, long> termCountDict = await this.CountTermByLearningLevel(text);
+                Dictionary<TermLearningLevel, long> termCountDict =
+                    await this.termCounter.CountByLearningLevelAsync(text.Words, text.Language, text.CreatorId);
 
                 foreach (KeyValuePair<TermLearningLevel, long> keyValuePair in termCountDict)
                 {
@@ -231,49 +236,6 @@ namespace Lwt.Services
             {
                 throw new BadRequestException("Can not set bookmark.");
             }
-        }
-
-        private async Task<Dictionary<TermLearningLevel, long>> CountTermByLearningLevel(Text text)
-        {
-            var result = new Dictionary<TermLearningLevel, long>();
-            ILanguage language = this.languageHelper.GetLanguage(text.Language);
-
-            foreach (TermLearningLevel termLearningLevel in Enum.GetValues(typeof(TermLearningLevel)))
-            {
-                result[termLearningLevel] = 0;
-            }
-
-            IEnumerable<string> notSkippedTerms =
-                text.Words.Where(word => !language.ShouldSkip(word)).Select(t => language.Normalize(t));
-            var termDict = new Dictionary<string, long>();
-
-            foreach (string term in notSkippedTerms)
-            {
-                if (termDict.ContainsKey(term))
-                {
-                    termDict[term] += 1;
-                }
-                else
-                {
-                    termDict[term] = 1;
-                }
-            }
-
-            Dictionary<string, TermLearningLevel> countDict =
-                await this.termRepository.GetLearningLevelAsync(text.CreatorId, language.Id, termDict.Keys.ToHashSet());
-
-            foreach (string word in termDict.Keys)
-            {
-                if (!countDict.ContainsKey(word))
-                {
-                    result[TermLearningLevel.UnKnow] += termDict[word];
-                    continue;
-                }
-
-                result[countDict[word]] += termDict[word];
-            }
-
-            return result;
         }
 
         private void SplitText(Text text)
