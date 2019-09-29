@@ -254,5 +254,51 @@ namespace Lwt.Test.Services
             IEnumerable<TextViewModel> viewModels = await this.textService.GetByUserAsync(userId, textFilter, paginationQuery);
             Assert.Equal(viewModels.Count(), texts.Count());
         }
+
+        /// <summary>
+        /// should throw not found exception if text not found.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public Task GetEditDetailShouldThrowNotFoundIfTextNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid textId = Guid.NewGuid();
+            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync((Text)null);
+            return Assert.ThrowsAsync<NotFoundException>(() => this.textService.GetEditDetailAsync(textId, userId));
+        }
+
+        /// <summary>
+        /// should throw forbidden exception if user is not owner of the text.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public Task GetEditDetailShouldThrowForbiddenIfUserIsNotOwner()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid textId = Guid.NewGuid();
+            Guid onwerId = Guid.NewGuid();
+            var text = new Text { CreatorId = onwerId };
+            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
+            return Assert.ThrowsAsync<ForbiddenException>(() => this.textService.GetEditDetailAsync(textId, userId));
+        }
+
+        /// <summary>
+        /// get edit detail should work in happy case.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetEditDetailShouldWork()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid textId = Guid.NewGuid();
+            var detailModel = new TextEditDetailModel();
+            var text = new Text { CreatorId = userId };
+            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
+            this.textEditDetailMapper.Setup(r => r.Map(text)).Returns(detailModel);
+
+            TextEditDetailModel result = await this.textService.GetEditDetailAsync(textId, userId);
+            Assert.Equal(detailModel, result);
+        }
     }
 }
