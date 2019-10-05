@@ -8,7 +8,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets meaning.
         /// </summary>
-        public string Meaning { get; set; }
+        public string Meaning { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the learning level.

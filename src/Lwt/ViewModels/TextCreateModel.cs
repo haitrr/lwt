@@ -10,12 +10,12 @@ namespace Lwt.ViewModels
         /// <summary>
         /// Gets or sets z.
         /// </summary>
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets x.
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the language.

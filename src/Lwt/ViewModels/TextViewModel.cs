@@ -20,7 +20,7 @@ namespace Lwt.ViewModels
         /// <summary>
         /// Gets or sets x.
         /// </summary>
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets language.

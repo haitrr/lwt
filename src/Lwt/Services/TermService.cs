@@ -59,7 +59,7 @@ namespace Lwt.Services
         /// <inheritdoc />
         public async Task<TermViewModel> GetAsync(Guid userId, Guid termId)
         {
-            Term term = await this.termRepository.GetByIdAsync(termId);
+            Term? term = await this.termRepository.TryGetByIdAsync(termId);
 
             if (term == null)
             {

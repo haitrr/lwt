@@ -4,7 +4,8 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <CodeAnalysisRuleSet>../../style.ruleset</CodeAnalysisRuleSet>
     <IsPackable>false</IsPackable>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -25,7 +26,9 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.9.4" />
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.9.6"><IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+<PrivateAssets>all</PrivateAssets>
+</PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
     <PackageReference Include="Moq" Version="4.13.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">

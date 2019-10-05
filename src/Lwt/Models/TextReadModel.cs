@@ -11,12 +11,12 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the text title.
         /// </summary>
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the terms of the text.
         /// </summary>
-        public IEnumerable<TermReadModel> Terms { get; set; }
+        public IEnumerable<TermReadModel> Terms { get; set; } = new TermReadModel[] { };
 
         /// <summary>
         /// Gets or sets the text's language.

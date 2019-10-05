@@ -74,7 +74,7 @@ namespace Lwt.Controllers
             IEnumerable<TextViewModel> viewModels =
                 await this.textService.GetByUserAsync(userId, filters, paginationQuery);
 
-            return this.Ok(new TextList { Total = count, Items = viewModels });
+            return this.Ok(new TextList(count, viewModels));
         }
 
         /// <summary>

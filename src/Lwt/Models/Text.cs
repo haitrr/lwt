@@ -21,12 +21,12 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets Title.
         /// </summary>
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets Content.
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets language.
@@ -36,6 +36,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the words.
         /// </summary>
-        public ICollection<string> Words { get; set; }
+        public ICollection<string> Words { get; set; } = new List<string>();
     }
 }

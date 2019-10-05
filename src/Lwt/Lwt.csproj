@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
     <PropertyGroup>
         <TargetFramework>netcoreapp3.0</TargetFramework>
-        <LangVersion>latest</LangVersion>
+        <LangVersion>8</LangVersion>
+        <Nullable>enable</Nullable>
         <RestoreSources>$(RestoreSources);./Packages;https://api.nuget.org/v3/index.json</RestoreSources>
         <CodeAnalysisRuleSet>../../style.ruleset</CodeAnalysisRuleSet>
     </PropertyGroup>
@@ -19,21 +20,18 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="App.Metrics.AspNetCore.Mvc" Version="3.0.0" />
-        <PackageReference Include="App.Metrics.AspNetCore.Tracking" Version="3.0.0" />
+        <PackageReference Include="App.Metrics.AspNetCore.Mvc" Version="3.1.0" />
+        <PackageReference Include="App.Metrics.AspNetCore.Tracking" Version="3.1.0" />
         <PackageReference Include="FluentValidation" Version="8.5.0" />
         <PackageReference Include="FluentValidation.AspNetCore" Version="8.5.0" />
         <PackageReference Include="Lucene.Net.Analysis.Kuromoji" Version="4.8.0-beta00005" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
-        <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.9.4" />
+        <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.9.6" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.0" />
-        <PackageReference Include="MongoDB.Driver" Version="2.9.1" />
-        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-        </PackageReference>
+        <PackageReference Include="MongoDB.Driver" Version="2.9.2" />
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc3" />
         <PackageReference Include="Text.Analyzers" Version="2.6.4" />
         <PackageReference Include="Vroyibg.Jieba.Net.Core" Version="1.1.0" />

@@ -13,11 +13,11 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets title.
         /// </summary>
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets content.
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
     }
 }

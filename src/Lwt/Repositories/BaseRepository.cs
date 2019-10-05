@@ -5,6 +5,7 @@ namespace Lwt.Repositories
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
+    using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
     using MongoDB.Driver;
@@ -85,9 +86,24 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public Task<T> GetByIdAsync(Guid id)
+        public Task<T?> TryGetByIdAsync(Guid id)
         {
+            #nullable disable
             return this.Collection.Find(e => e.Id == id).SingleOrDefaultAsync();
+            #nullable enable
+        }
+
+        /// <inheritdoc/>
+        public async Task<T> GetByIdAsync(Guid id)
+        {
+            T? text = await this.TryGetByIdAsync(id);
+
+            if (text == null)
+            {
+                throw new NotFoundException($"{nameof(T)} not found");
+            }
+
+            return text;
         }
 
         /// <inheritdoc/>
@@ -97,7 +113,7 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<long> CountAsync(Expression<Func<T, bool>> filter = null)
+        public async Task<long> CountAsync(Expression<Func<T, bool>>? filter = null)
         {
             return await this.Collection.AsQueryable().Where(filter ?? (_ => true)).LongCountAsync();
         }

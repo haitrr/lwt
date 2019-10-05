@@ -8,6 +8,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets authentication token.
         /// </summary>
-        public string Token { get; set; }
+        public string Token { get; set; } = string.Empty;
     }
 }

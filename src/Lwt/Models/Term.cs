@@ -12,7 +12,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the content.
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the term's language.
@@ -23,7 +23,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the meaning.
         /// </summary>
-        public string Meaning { get; set; }
+        public string Meaning { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the creator's id.

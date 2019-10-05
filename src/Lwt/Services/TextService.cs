@@ -9,6 +9,7 @@ namespace Lwt.Services
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+    using Lwt.Utilities;
     using Lwt.ViewModels;
 
     /// <summary>
@@ -26,6 +27,7 @@ namespace Lwt.Services
         private readonly IMapper<TextEditModel, Text> textEditMapper;
         private readonly IMapper<Text, TextEditDetailModel> textEditDetailMapper;
         private readonly ITermCounter termCounter;
+        private readonly IUserTextGetter userTextGetter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextService"/> class.
@@ -38,6 +40,7 @@ namespace Lwt.Services
         /// <param name="textEditDetailMapper">text edit detail mapper.</param>
         /// <param name="textCreator">the text creator.</param>
         /// <param name="termCounter">the term counter.</param>
+        /// <param name="userTextGetter">user text getter.</param>
         public TextService(
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
@@ -46,7 +49,8 @@ namespace Lwt.Services
             IMapper<Text, TextViewModel> textViewMapper,
             IMapper<Text, TextEditDetailModel> textEditDetailMapper,
             ITextCreator textCreator,
-            ITermCounter termCounter)
+            ITermCounter termCounter,
+            IUserTextGetter userTextGetter)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
@@ -56,6 +60,7 @@ namespace Lwt.Services
             this.textEditDetailMapper = textEditDetailMapper;
             this.textCreator = textCreator;
             this.termCounter = termCounter;
+            this.userTextGetter = userTextGetter;
         }
 
         /// <inheritdoc/>
@@ -108,7 +113,7 @@ namespace Lwt.Services
         /// <inheritdoc/>
         public async Task EditAsync(Guid textId, Guid userId, TextEditModel editModel)
         {
-            Text text = await this.textRepository.GetByIdAsync(textId);
+            Text? text = await this.textRepository.TryGetByIdAsync(textId);
 
             if (text == null)
             {
@@ -136,7 +141,7 @@ namespace Lwt.Services
         /// <inheritdoc />
         public async Task<TextReadModel> ReadAsync(Guid id, Guid userId)
         {
-            Text text = await this.textRepository.GetByIdAsync(id);
+            Text? text = await this.textRepository.TryGetByIdAsync(id);
 
             if (text == null)
             {
@@ -195,7 +200,7 @@ namespace Lwt.Services
         /// <inheritdoc />
         public async Task<TextEditDetailModel> GetEditDetailAsync(Guid id, Guid userId)
         {
-            Text text = await this.textRepository.GetByIdAsync(id);
+            Text? text = await this.textRepository.TryGetByIdAsync(id);
 
             if (text == null)
             {
@@ -213,17 +218,7 @@ namespace Lwt.Services
         /// <inheritdoc />
         public async Task SetBookmarkAsync(Guid id, Guid userId, SetBookmarkModel setBookmarkModel)
         {
-            Text text = await this.textRepository.GetByIdAsync(id);
-
-            if (text == null)
-            {
-                throw new NotFoundException("Text not found.");
-            }
-
-            if (text.CreatorId != userId)
-            {
-                throw new ForbiddenException("You don't have permission to access this text.");
-            }
+            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
 
             if (setBookmarkModel.TermIndex >= (ulong)text.Words.Count)
             {
@@ -232,10 +227,7 @@ namespace Lwt.Services
 
             text.Bookmark = setBookmarkModel.TermIndex;
 
-            if (!await this.textRepository.UpdateAsync(text))
-            {
-                throw new BadRequestException("Can not set bookmark.");
-            }
+            await this.textRepository.UpdateAsync(text);
         }
 
         private void SplitText(Text text)

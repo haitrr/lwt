@@ -52,7 +52,14 @@ namespace Lwt.Interfaces
         Task<bool> UpdateAsync(T entity);
 
         /// <summary>
-        /// get an entity by id.
+        /// get an entity by id if not found return null.
+        /// </summary>
+        /// <param name="id">id.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        Task<T?> TryGetByIdAsync(Guid id);
+
+        /// <summary>
+        /// get an entity by id if not found throw not found exception.
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
@@ -70,7 +77,7 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="filter"> the filter.</param>
         /// <returns>the count.</returns>
-        Task<long> CountAsync(Expression<Func<T, bool>> filter = null);
+        Task<long> CountAsync(Expression<Func<T, bool>>? filter = null);
 
         /// <summary>
         /// count all document in the collection.

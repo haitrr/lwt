@@ -15,12 +15,12 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the text's title.
         /// </summary>
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets text's content.
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets text's language.

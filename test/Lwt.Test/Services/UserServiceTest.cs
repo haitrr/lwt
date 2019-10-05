@@ -68,7 +68,9 @@ namespace Lwt.Test.Services
             // arrange
             var userName = "userName";
             var password = "password";
+            #nullable disable
             this.userManager.Setup(m => m.FindByNameAsync(userName)).ReturnsAsync((User)null);
+            #nullable disable
 
             // act
 

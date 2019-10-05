@@ -8,6 +8,6 @@ namespace Lwt.Models
         /// <summary>
         ///  Gets or sets dictionary language.
         /// </summary>
-        public string DictionaryLanguage { get; set; }
+        public string DictionaryLanguage { get; set; } = string.Empty;
     }
 }

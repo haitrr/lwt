@@ -15,12 +15,12 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the term content.
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the term's meaning.
         /// </summary>
-        public string Meaning { get; set; }
+        public string Meaning { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the term's learning level.

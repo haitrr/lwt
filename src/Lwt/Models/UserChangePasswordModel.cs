@@ -8,11 +8,11 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets current password.
         /// </summary>
-        public string CurrentPassword { get; set; }
+        public string CurrentPassword { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets new password.
         /// </summary>
-        public string NewPassword { get; set; }
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

@@ -8,7 +8,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets language name.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets language id.
@@ -18,11 +18,11 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the language's code.
         /// </summary>
-        public string Code { get; set; }
+        public string Code { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the language's speak code.
         /// </summary>
-        public string SpeakCode { get; set; }
+        public string SpeakCode { get; set; } = string.Empty;
     }
 }
