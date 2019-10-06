@@ -304,5 +304,44 @@ namespace Lwt.Test.Services
             TextEditDetailModel result = await this.textService.GetEditDetailAsync(textId, userId);
             Assert.Equal(detailModel, result);
         }
+
+        /// <summary>
+        /// set bookmark async should throw bad request exception if term index is not valid.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task SetBookmarkAsyncShouldThrowBadRequestIfTermIndexIsInvalid()
+        {
+            ulong termIndex = 2;
+            var setBookmarkModel = new SetBookmarkModel { TermIndex = termIndex };
+            var textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var text = new Text();
+            text.Words = new List<string> { "hello", "unitest" };
+            this.userTextGetterMock.Setup(r => r.GetUserTextAsync(textId, userId)).ReturnsAsync(text);
+
+            await Assert.ThrowsAsync<BadRequestException>(() => this.textService.SetBookmarkAsync(textId, userId,  setBookmarkModel));
+        }
+
+        /// <summary>
+        /// should set text bookmark.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Fact]
+        public async Task SetBookmarkAsyncShouldUpdateTheText()
+        {
+            ulong termIndex = 2;
+            var setBookmarkModel = new SetBookmarkModel { TermIndex = termIndex };
+            var textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var text = new Text();
+            text.Words = new List<string> { "hello", "vscode", "unitest" };
+            this.userTextGetterMock.Setup(r => r.GetUserTextAsync(textId, userId)).ReturnsAsync(text);
+
+            await this.textService.SetBookmarkAsync(textId, userId, setBookmarkModel);
+
+            Assert.Equal(termIndex, text.Bookmark);
+            this.textRepository.Verify(r => r.UpdateAsync(text), Times.Once);
+        }
     }
 }
