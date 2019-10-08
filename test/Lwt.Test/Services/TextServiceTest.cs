@@ -8,6 +8,7 @@ namespace Lwt.Test.Services
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
+    using Lwt.Mappers;
     using Lwt.Models;
     using Lwt.Services;
     using Lwt.Utilities;
@@ -29,6 +30,7 @@ namespace Lwt.Test.Services
         private readonly Mock<IMapper<TextEditModel, Text>> textEditMapper;
         private readonly Mock<IMapper<Text, TextViewModel>> textViewMapper;
         private readonly Mock<IMapper<Text, TextEditDetailModel>> textEditDetailMapper;
+        private readonly Mock<IAsyncMapper<Text, TextReadModel>> textReadMapper;
 
         private readonly Mock<ITextCreator> textCreator;
 
@@ -51,6 +53,7 @@ namespace Lwt.Test.Services
             this.textCreator = new Mock<ITextCreator>();
             this.termCounterMock = new Mock<ITermCounter>();
             this.userTextGetterMock = new Mock<IUserTextGetter>();
+            this.textReadMapper = new Mock<IAsyncMapper<Text, TextReadModel>>();
 
             this.textService = new TextService(
                 this.textRepository.Object,
@@ -61,7 +64,8 @@ namespace Lwt.Test.Services
                 this.textEditDetailMapper.Object,
                 this.textCreator.Object,
                 this.termCounterMock.Object,
-                this.userTextGetterMock.Object);
+                this.userTextGetterMock.Object,
+                this.textReadMapper.Object);
         }
 
         /// <summary>

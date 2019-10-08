@@ -8,6 +8,7 @@ namespace Lwt.Services
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
+    using Lwt.Mappers;
     using Lwt.Models;
     using Lwt.Utilities;
     using Lwt.ViewModels;
@@ -26,6 +27,7 @@ namespace Lwt.Services
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
         private readonly IMapper<Text, TextEditDetailModel> textEditDetailMapper;
+        private readonly IAsyncMapper<Text, TextReadModel> textReadMapper;
         private readonly ITermCounter termCounter;
         private readonly IUserTextGetter userTextGetter;
 
@@ -50,7 +52,8 @@ namespace Lwt.Services
             IMapper<Text, TextEditDetailModel> textEditDetailMapper,
             ITextCreator textCreator,
             ITermCounter termCounter,
-            IUserTextGetter userTextGetter)
+            IUserTextGetter userTextGetter,
+            IAsyncMapper<Text, TextReadModel> textReadMapper)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
@@ -61,6 +64,7 @@ namespace Lwt.Services
             this.textCreator = textCreator;
             this.termCounter = termCounter;
             this.userTextGetter = userTextGetter;
+            this.textReadMapper = textReadMapper;
         }
 
         /// <inheritdoc/>
@@ -141,60 +145,9 @@ namespace Lwt.Services
         /// <inheritdoc />
         public async Task<TextReadModel> ReadAsync(Guid id, Guid userId)
         {
-            Text? text = await this.textRepository.TryGetByIdAsync(id);
+            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
 
-            if (text == null)
-            {
-                throw new BadRequestException("Text does not exist.");
-            }
-
-            if (text.CreatorId != userId)
-            {
-                throw new ForbiddenException("You don't have permission to access this text.");
-            }
-
-            var readModel = new TextReadModel();
-            readModel.Title = text.Title;
-            readModel.Language = text.Language;
-            readModel.Bookmark = text.Bookmark;
-            readModel.Id = text.Id;
-            var termViewModels = new List<TermReadModel>();
-            ILanguage language = this.languageHelper.GetLanguage(text.Language);
-            IEnumerable<string> notSkippedTerms =
-                text.Words.Where(word => !language.ShouldSkip(word)).Select(t => language.Normalize(t));
-            IDictionary<string, Term> termDict =
-                await this.termRepository.GetManyAsync(userId, language.Id, notSkippedTerms.ToHashSet());
-
-            foreach (string word in text.Words)
-            {
-                if (language.ShouldSkip(word))
-                {
-                    termViewModels.Add(new TermReadModel { Content = word, LearningLevel = TermLearningLevel.Skipped });
-                    continue;
-                }
-
-                TermReadModel viewModel;
-                string normalizedWord = language.Normalize(word);
-
-                if (!termDict.ContainsKey(normalizedWord))
-                {
-                    viewModel = new TermReadModel { Content = word, LearningLevel = TermLearningLevel.UnKnow };
-                }
-                else
-                {
-                    Term term = termDict[normalizedWord];
-                    viewModel = new TermReadModel
-                    {
-                        Id = term.Id, Content = word, LearningLevel = term.LearningLevel, Meaning = term.Meaning,
-                    };
-                }
-
-                termViewModels.Add(viewModel);
-            }
-
-            readModel.Terms = termViewModels;
-
-            return readModel;
+            return await this.textReadMapper.MapAsync(text);
         }
 
         /// <inheritdoc />
