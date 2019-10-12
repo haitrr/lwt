@@ -68,9 +68,9 @@ namespace Lwt.Test.Services
             // arrange
             var userName = "userName";
             var password = "password";
-            #nullable disable
+#nullable disable
             this.userManager.Setup(m => m.FindByNameAsync(userName)).ReturnsAsync((User)null);
-            #nullable disable
+#nullable disable
 
             // act
 
@@ -175,6 +175,36 @@ namespace Lwt.Test.Services
 
             // assert
             await Assert.ThrowsAsync<BadRequestException>(() => this.userService.SignUpAsync(userName, password));
+        }
+
+        /// <summary>
+        /// test user not found.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetAsyncShouldThrowNotFoundIfUserNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+            this.userManager.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User)null);
+
+            await Assert.ThrowsAsync<NotFoundException>(() => this.userService.GetAsync(userId));
+        }
+
+        /// <summary>
+        /// user should be mapped before return.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetAsyncShouldMapUser()
+        {
+            Guid userId = Guid.NewGuid();
+            var user = new User();
+            var userViewModel = new UserView();
+            this.userManager.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
+            this.userViewMapper.Setup(m => m.Map(user)).Returns(userViewModel);
+
+            UserView result = await this.userService.GetAsync(userId);
+            Assert.Equal(userViewModel, result);
         }
     }
 }

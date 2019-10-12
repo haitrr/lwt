@@ -98,7 +98,7 @@ namespace Lwt.Services
     /// <inheritdoc/>
     public async Task<UserView> GetAsync(Guid loggedInUserid)
     {
-      User user = await this.userManager.FindByIdAsync(loggedInUserid.ToString());
+      User? user = await this.userManager.FindByIdAsync(loggedInUserid.ToString());
 
       if (user == null)
       {
