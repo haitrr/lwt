@@ -34,7 +34,6 @@ namespace Lwt.Test.Services
 
         private readonly Mock<ITextCreator> textCreator;
 
-        private readonly Mock<ITermRepository> termRepository;
         private readonly Mock<IUserTextGetter> userTextGetterMock;
         private readonly Mock<ITermCounter> termCounterMock;
 
@@ -49,7 +48,6 @@ namespace Lwt.Test.Services
             this.textEditDetailMapper = new Mock<IMapper<Text, TextEditDetailModel>>();
             this.textRepository = new Mock<ITextRepository>();
             this.languageHelper = new Mock<ILanguageHelper>();
-            this.termRepository = new Mock<ITermRepository>();
             this.textCreator = new Mock<ITextCreator>();
             this.termCounterMock = new Mock<ITermCounter>();
             this.userTextGetterMock = new Mock<IUserTextGetter>();
@@ -59,7 +57,6 @@ namespace Lwt.Test.Services
                 this.textRepository.Object,
                 this.textEditMapper.Object,
                 this.languageHelper.Object,
-                this.termRepository.Object,
                 this.textViewMapper.Object,
                 this.textEditDetailMapper.Object,
                 this.textCreator.Object,
@@ -101,7 +98,7 @@ namespace Lwt.Test.Services
         {
              Guid textId = Guid.NewGuid();
              Guid userId = Guid.NewGuid();
-             Text text = new Text { CreatorId = userId };
+             var text = new Text { CreatorId = userId };
              this.textRepository.Reset();
              this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
 
@@ -318,8 +315,8 @@ namespace Lwt.Test.Services
         {
             ulong termIndex = 2;
             var setBookmarkModel = new SetBookmarkModel { TermIndex = termIndex };
-            var textId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
+            Guid textId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
             var text = new Text();
             text.Words = new List<string> { "hello", "unitest" };
             this.userTextGetterMock.Setup(r => r.GetUserTextAsync(textId, userId)).ReturnsAsync(text);
@@ -336,8 +333,8 @@ namespace Lwt.Test.Services
         {
             ulong termIndex = 2;
             var setBookmarkModel = new SetBookmarkModel { TermIndex = termIndex };
-            var textId = Guid.NewGuid();
-            var userId = Guid.NewGuid();
+            Guid textId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
             var text = new Text();
             text.Words = new List<string> { "hello", "vscode", "unitest" };
             this.userTextGetterMock.Setup(r => r.GetUserTextAsync(textId, userId)).ReturnsAsync(text);

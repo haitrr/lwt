@@ -60,7 +60,7 @@ namespace Lwt.Utilities
                     termDict.Keys.ToHashSet());
 
             var result = new Dictionary<TermLearningLevel, long>();
-            var enums = Enum.GetValues(typeof(TermLearningLevel)).Cast<TermLearningLevel>();
+            IEnumerable<TermLearningLevel> enums = Enum.GetValues(typeof(TermLearningLevel)).Cast<TermLearningLevel>();
             foreach (TermLearningLevel termLearningLevel in enums)
             {
                 result[termLearningLevel] = 0;

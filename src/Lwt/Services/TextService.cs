@@ -2,7 +2,6 @@ namespace Lwt.Services
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Lwt.Creators;
     using Lwt.Exceptions;
@@ -23,7 +22,6 @@ namespace Lwt.Services
         private readonly ILanguageHelper languageHelper;
         private readonly IMapper<Text, TextViewModel> textViewMapper;
         private readonly ITextCreator textCreator;
-        private readonly ITermRepository termRepository;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
         private readonly IMapper<Text, TextEditDetailModel> textEditDetailMapper;
@@ -38,7 +36,6 @@ namespace Lwt.Services
         /// <param name="textViewMapper">text view mapper.</param>
         /// <param name="textEditMapper">textEditMapper.</param>
         /// <param name="languageHelper">the language helper.</param>
-        /// <param name="termRepository">the term repository.</param>
         /// <param name="textEditDetailMapper">text edit detail mapper.</param>
         /// <param name="textCreator">the text creator.</param>
         /// <param name="termCounter">the term counter.</param>
@@ -48,7 +45,6 @@ namespace Lwt.Services
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
             ILanguageHelper languageHelper,
-            ITermRepository termRepository,
             IMapper<Text, TextViewModel> textViewMapper,
             IMapper<Text, TextEditDetailModel> textEditDetailMapper,
             ITextCreator textCreator,
@@ -59,7 +55,6 @@ namespace Lwt.Services
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
             this.languageHelper = languageHelper;
-            this.termRepository = termRepository;
             this.textViewMapper = textViewMapper;
             this.textEditDetailMapper = textEditDetailMapper;
             this.textCreator = textCreator;
