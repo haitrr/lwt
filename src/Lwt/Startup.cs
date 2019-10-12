@@ -241,6 +241,7 @@ namespace Lwt
             services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
             services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
             services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
+            services.AddTransient<IAsyncMapper<Text,TextReadModel>, TextReadMapper>();
         }
     }
 }
