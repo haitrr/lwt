@@ -43,6 +43,7 @@ namespace Lwt.Services
         /// <param name="textCreator">the text creator.</param>
         /// <param name="termCounter">the term counter.</param>
         /// <param name="userTextGetter">user text getter.</param>
+        /// <param name="textReadMapper">text read mapper.</param>
         public TextService(
             ITextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,

@@ -1,4 +1,5 @@
-namespace Lwt.Mappers {
+namespace Lwt.Mappers
+{
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace Lwt.Mappers {
         public TextReadMapper(
             ISkippedWordRemover skippedWordRemover,
             ILanguageHelper languageHelper,
-            ITermRepository termRepository) {
+            ITermRepository termRepository)
+        {
             this.skippedWordRemover = skippedWordRemover;
             this.languageHelper = languageHelper;
             this.termRepository = termRepository;

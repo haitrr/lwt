@@ -1,3 +1,4 @@
+#pragma warning disable
 namespace Lwt
 {
     using System;
