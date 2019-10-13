@@ -12,6 +12,6 @@ namespace Lwt.Interfaces
     /// </summary>
     /// <param name="userId">user's id.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-    Task<UserSetting> GetByUserIdAsync(Guid userId);
+    Task<UserSetting?> GetByUserIdAsync(Guid userId);
     }
 }

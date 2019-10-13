@@ -206,5 +206,35 @@ namespace Lwt.Test.Services
             UserView result = await this.userService.GetAsync(userId);
             Assert.Equal(userViewModel, result);
         }
+
+        /// <summary>
+        /// test user setting not found.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetSettingAsyncShouldThrowNotFoundIfUserNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+            this.userSettingRepository.Setup(r => r.GetByUserIdAsync(userId)).ReturnsAsync((UserSetting?)null);
+
+            await Assert.ThrowsAsync<NotFoundException>(() => this.userService.GetSettingAsync(userId));
+        }
+
+        /// <summary>
+        /// user should be mapped before return.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetSettingAsyncShouldMap()
+        {
+            Guid userId = Guid.NewGuid();
+            var userSettingView = new UserSettingView();
+            var userSetting = new UserSetting();
+            this.userSettingRepository.Setup(r => r.GetByUserIdAsync(userId)).ReturnsAsync(userSetting);
+            this.userSettingViewMapper.Setup(m => m.Map(userSetting)).Returns(userSettingView);
+
+            UserSettingView result = await this.userService.GetSettingAsync(userId);
+            Assert.Equal(userSettingView, result);
+        }
     }
 }

@@ -23,7 +23,7 @@ namespace Lwt.Repositories
         }
 
     /// <inheritdoc/>
-    public Task<UserSetting> GetByUserIdAsync(Guid userId)
+    public Task<UserSetting?> GetByUserIdAsync(Guid userId)
         {
             return this.Collection.AsQueryable().Where(u => u.UserId == userId).SingleOrDefaultAsync();
         }
