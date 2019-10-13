@@ -91,5 +91,24 @@ namespace Lwt.Test.Services
             await this.termService.EditAsync(termEdit, termId, userId);
             this.termRepositoryMock.Verify(r => r.UpdateAsync(current));
         }
+
+        /// <summary>
+        /// count async should return count from repository.
+        /// </summary>
+        /// <param name="count">the count.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Theory]
+        [InlineData(42)]
+        [InlineData(4432)]
+        [InlineData(2)]
+        [InlineData(6)]
+        public async Task CountAsyncShouldReturnCountFromRepository(long count)
+        {
+            this.termRepositoryMock.Setup(r => r.CountAsync(It.IsAny<Expression<Func<Term, bool>>>()))
+                .ReturnsAsync(count);
+
+            long rs = await this.termService.CountAsync(Guid.NewGuid(), new TermFilter());
+            Assert.Equal(count, rs);
+        }
     }
 }

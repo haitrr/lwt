@@ -2,8 +2,10 @@ namespace Lwt.Services
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
+    using Lwt.Extensions;
     using Lwt.Interfaces;
     using Lwt.Models;
     using MongoDB.Driver;
@@ -72,9 +74,8 @@ namespace Lwt.Services
         /// <inheritdoc />
         public Task<long> CountAsync(Guid userId, TermFilter termFilter)
         {
-            FilterDefinitionBuilder<Term> filterBuilders = Builders<Term>.Filter;
-            FilterDefinition<Term> filter = filterBuilders.Eq(term => term.CreatorId, userId);
-            filter = filterBuilders.And(termFilter.ToFilterDefinition(), filter);
+            Expression<Func<Term, bool>> filter = termFilter.ToExpression();
+            filter = filter.And(term => term.CreatorId == userId);
             return this.termRepository.CountAsync(filter);
         }
 
