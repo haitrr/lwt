@@ -221,7 +221,7 @@ namespace Lwt.Test.Services
         public async Task GetSettingAsyncShouldThrowNotFoundIfUserNotFound()
         {
             Guid userId = Guid.NewGuid();
-            this.userSettingRepository.Setup(r => r.GetByUserIdAsync(userId)).ReturnsAsync((UserSetting?)null);
+            this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync((UserSetting?)null);
 
             await Assert.ThrowsAsync<NotFoundException>(() => this.userService.GetSettingAsync(userId));
         }
@@ -236,7 +236,7 @@ namespace Lwt.Test.Services
             Guid userId = Guid.NewGuid();
             var userSettingView = new UserSettingView();
             var userSetting = new UserSetting();
-            this.userSettingRepository.Setup(r => r.GetByUserIdAsync(userId)).ReturnsAsync(userSetting);
+            this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync(userSetting);
             this.userSettingViewMapper.Setup(m => m.Map(userSetting)).Returns(userSettingView);
 
             UserSettingView result = await this.userService.GetSettingAsync(userId);
@@ -253,7 +253,8 @@ namespace Lwt.Test.Services
             Guid userId = Guid.NewGuid();
             this.userManager.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User?)null);
 
-            await Assert.ThrowsAsync<NotFoundException>(() => this.userService.ChangePasswordAsync(userId, It.IsAny<UserChangePasswordModel>()));
+            await Assert.ThrowsAsync<NotFoundException>(
+                () => this.userService.ChangePasswordAsync(userId, It.IsAny<UserChangePasswordModel>()));
         }
 
         /// <summary>
@@ -263,17 +264,48 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task ChangePasswordAsyncShouldThrowBadRequestIfFailToChangePassword()
         {
-            this.userPasswordChangerMock.Setup(c => c.ChangePasswordAsync(
-                It.IsAny<Guid>(),
-                It.IsAny<string>(),
-                It.IsAny<string>()))
+            this.userPasswordChangerMock
+                .Setup(c => c.ChangePasswordAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(false);
             this.userRepositoryMock.Setup(r => r.IsExistAsync(It.IsAny<Guid>())).ReturnsAsync(true);
 
             await Assert.ThrowsAsync<BadRequestException>(
-                () => this.userService.ChangePasswordAsync(
-                    Guid.NewGuid(),
-                    new UserChangePasswordModel()));
+                () => this.userService.ChangePasswordAsync(Guid.NewGuid(), new UserChangePasswordModel()));
+        }
+
+        /// <summary>
+        /// should create new user setting if not existed.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task PutSettingAsyncShouldCreateSettingIfNotExisted()
+        {
+            Guid userId = Guid.NewGuid();
+            this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync((UserSetting?)null);
+            this.userSettingUpdateMapper.Setup(m => m.Map(It.IsAny<UserSettingUpdate>())).Returns(new UserSetting());
+
+            await this.userService.PutSettingAsync(userId, new UserSettingUpdate());
+
+            this.userSettingRepository.Verify(r => r.AddAsync(It.Is<UserSetting>(s => s.UserId == userId)));
+        }
+
+        /// <summary>
+        /// put setting async should update user setting.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task PutSettingAsyncShouldUpdateUserSetting()
+        {
+            Guid userId = Guid.NewGuid();
+            var setting = new UserSetting();
+            this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync(new UserSetting());
+            this.userSettingUpdateMapper
+                .Setup(m => m.Map(It.IsAny<UserSettingUpdate>(), It.IsAny<UserSetting>()))
+                .Returns(setting);
+
+            await this.userService.PutSettingAsync(userId, new UserSettingUpdate());
+
+            this.userSettingRepository.Verify(r => r.UpdateAsync(setting));
         }
     }
 }

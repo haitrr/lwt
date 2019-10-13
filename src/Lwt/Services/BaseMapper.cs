@@ -13,7 +13,7 @@
         where TTo : class, new()
     {
         /// <inheritdoc/>
-        public TTo Map(TFrom from)
+        public virtual TTo Map(TFrom from)
         {
             var to = new TTo();
 
@@ -21,7 +21,7 @@
         }
 
         /// <inheritdoc/>
-        public ICollection<TTo> Map(IEnumerable<TFrom> froms)
+        public virtual ICollection<TTo> Map(IEnumerable<TFrom> froms)
         {
             var objectCollection = new List<TTo>();
 

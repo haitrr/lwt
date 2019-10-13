@@ -119,7 +119,7 @@ namespace Lwt.Services
     /// <inheritdoc/>
     public async Task<UserSettingView> GetSettingAsync(Guid loggedInUserid)
     {
-      UserSetting userSetting = await this.userSettingRepository.GetByUserIdAsync(loggedInUserid);
+      UserSetting userSetting = await this.userSettingRepository.TryGetByUserIdAsync(loggedInUserid);
 
       if (userSetting == null)
       {
@@ -132,7 +132,7 @@ namespace Lwt.Services
     /// <inheritdoc/>
     public async Task PutSettingAsync(Guid loggedInUserid, UserSettingUpdate userSettingUpdate)
     {
-      UserSetting userSetting = await this.userSettingRepository.GetByUserIdAsync(loggedInUserid);
+      UserSetting? userSetting = await this.userSettingRepository.TryGetByUserIdAsync(loggedInUserid);
 
       if (userSetting == null)
       {
