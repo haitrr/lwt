@@ -139,6 +139,7 @@ namespace Lwt
             services.AddScoped<ITextNormalizer, TextNormalizer>();
             services.AddScoped<ISkippedWordRemover, SkippedWordRemover>();
             services.AddScoped<IUserTextGetter, UserTextGetter>();
+            services.AddScoped<IUserPasswordChanger, UserPasswordChanger>();
 
             // middleware
             services.AddSingleton<ExceptionHandleMiddleware>();

@@ -31,7 +31,7 @@
         <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="2.9.6" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.0" />
         <PackageReference Include="MongoDB.Driver" Version="2.9.2" />
-        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118"/>
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc3" />
         <PackageReference Include="Text.Analyzers" Version="2.6.4" />
         <PackageReference Include="Vroyibg.Jieba.Net.Core" Version="1.1.0" />

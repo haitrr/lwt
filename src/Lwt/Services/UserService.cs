@@ -17,10 +17,12 @@ namespace Lwt.Services
     private readonly UserManager<User> userManager;
 
     private readonly ITokenProvider tokenProvider;
+    private readonly IUserRepository userRepository;
     private readonly IMapper<User, UserView> userViewMapper;
     private readonly IUserSettingRepository userSettingRepository;
     private readonly IMapper<UserSetting, UserSettingView> userSettingViewMapper;
     private readonly IMapper<UserSettingUpdate, UserSetting> userSettingUpdateMapper;
+    private readonly IUserPasswordChanger userPasswordChanger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserService"/> class.
@@ -31,13 +33,17 @@ namespace Lwt.Services
     /// <param name="userSettingRepository">user setting repository.</param>
     /// <param name="userSettingViewMapper">user setting view mapper.</param>
     /// <param name="userSettingUpdateMapper">user setting update mapper.</param>
+    /// <param name="userPasswordChanger">user password changer.</param>
+    /// <param name="userRepository">user repository.</param>
     public UserService(
             UserManager<User> userManager,
             ITokenProvider tokenProvider,
             IMapper<User, UserView> userViewMapper,
             IUserSettingRepository userSettingRepository,
             IMapper<UserSetting, UserSettingView> userSettingViewMapper,
-            IMapper<UserSettingUpdate, UserSetting> userSettingUpdateMapper)
+            IMapper<UserSettingUpdate, UserSetting> userSettingUpdateMapper,
+            IUserPasswordChanger userPasswordChanger,
+            IUserRepository userRepository)
     {
       this.userManager = userManager;
       this.tokenProvider = tokenProvider;
@@ -45,6 +51,8 @@ namespace Lwt.Services
       this.userSettingRepository = userSettingRepository;
       this.userSettingViewMapper = userSettingViewMapper;
       this.userSettingUpdateMapper = userSettingUpdateMapper;
+      this.userPasswordChanger = userPasswordChanger;
+      this.userRepository = userRepository;
     }
 
     /// <inheritdoc/>
@@ -77,21 +85,21 @@ namespace Lwt.Services
     /// <inheritdoc />
     public async Task ChangePasswordAsync(Guid userId, UserChangePasswordModel changePasswordModel)
     {
-      User user = await this.userManager.FindByIdAsync(userId.ToString());
+      bool exist = await this.userRepository.IsExistAsync(userId);
 
-      if (user == null)
+      if (!exist)
       {
-        throw new NotFoundException("User not found");
+          throw new NotFoundException("User not found.");
       }
 
-      IdentityResult result = await this.userManager.ChangePasswordAsync(
-          user,
+      bool result = await this.userPasswordChanger.ChangePasswordAsync(
+          userId,
           changePasswordModel.CurrentPassword,
           changePasswordModel.NewPassword);
 
-      if (!result.Succeeded)
+      if (!result)
       {
-        throw new BadRequestException("Current password not correct.");
+        throw new BadRequestException("Current password is not correct.");
       }
     }
 

@@ -2,7 +2,7 @@ namespace Lwt.Repositories
 {
     using System;
     using System.Threading.Tasks;
-
+    using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
 
@@ -35,15 +35,35 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public Task<User> GetByIdAsync(Guid userId)
+        public Task<User?> TryGetByIdAsync(Guid userId)
         {
             return this.userManager.FindByIdAsync(userId.ToString());
+        }
+
+        /// <inheritdoc />
+        public async Task<User> GetByIdAsync(Guid userId)
+        {
+            User? user = await this.TryGetByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            return user;
         }
 
         /// <inheritdoc/>
         public Task<User> GetByUserNameAsync(string userName)
         {
             return this.userManager.FindByNameAsync(userName);
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> ChangePasswordAsync(User user, string currentPassword, string newPassword)
+        {
+            IdentityResult result = await this.userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            return result.Succeeded;
         }
     }
 }

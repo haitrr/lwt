@@ -18,6 +18,8 @@ namespace Lwt.Test.Services
         private readonly UserService userService;
 
         private readonly Mock<UserManager<User>> userManager;
+        private readonly Mock<IUserPasswordChanger> userPasswordChangerMock;
+        private readonly Mock<IUserRepository> userRepositoryMock;
         private readonly Mock<IUserSettingRepository> userSettingRepository;
         private readonly Mock<IMapper<UserSetting, UserSettingView>> userSettingViewMapper;
         private readonly Mock<IMapper<User, UserView>> userViewMapper;
@@ -33,10 +35,12 @@ namespace Lwt.Test.Services
         {
             var userStore = new Mock<IUserStore<User>>();
 
+            this.userRepositoryMock = new Mock<IUserRepository>();
             this.userViewMapper = new Mock<IMapper<User, UserView>>();
             this.userSettingRepository = new Mock<IUserSettingRepository>();
             this.userSettingViewMapper = new Mock<IMapper<UserSetting, UserSettingView>>();
             this.userSettingUpdateMapper = new Mock<IMapper<UserSettingUpdate, UserSetting>>();
+            this.userPasswordChangerMock = new Mock<IUserPasswordChanger>();
             this.userManager = new Mock<UserManager<User>>(
                 userStore.Object,
                 null,
@@ -55,7 +59,9 @@ namespace Lwt.Test.Services
                 this.userViewMapper.Object,
                 this.userSettingRepository.Object,
                 this.userSettingViewMapper.Object,
-                this.userSettingUpdateMapper.Object);
+                this.userSettingUpdateMapper.Object,
+                this.userPasswordChangerMock.Object,
+                this.userRepositoryMock.Object);
         }
 
         /// <summary>
@@ -235,6 +241,39 @@ namespace Lwt.Test.Services
 
             UserSettingView result = await this.userService.GetSettingAsync(userId);
             Assert.Equal(userSettingView, result);
+        }
+
+        /// <summary>
+        /// if the user that changing password is not exist throw not found exception.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ChangePasswordAsyncShouldThrowNotFoundIfUserNotFound()
+        {
+            Guid userId = Guid.NewGuid();
+            this.userManager.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User?)null);
+
+            await Assert.ThrowsAsync<NotFoundException>(() => this.userService.ChangePasswordAsync(userId, It.IsAny<UserChangePasswordModel>()));
+        }
+
+        /// <summary>
+        /// if fail to change password throw bad request exception.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ChangePasswordAsyncShouldThrowBadRequestIfFailToChangePassword()
+        {
+            this.userPasswordChangerMock.Setup(c => c.ChangePasswordAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<string>(),
+                It.IsAny<string>()))
+                .ReturnsAsync(false);
+            this.userRepositoryMock.Setup(r => r.IsExistAsync(It.IsAny<Guid>())).ReturnsAsync(true);
+
+            await Assert.ThrowsAsync<BadRequestException>(
+                () => this.userService.ChangePasswordAsync(
+                    Guid.NewGuid(),
+                    new UserChangePasswordModel()));
         }
     }
 }
