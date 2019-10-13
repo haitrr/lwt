@@ -15,9 +15,9 @@ namespace Lwt.Test.Services
     /// </summary>
     public class TermServiceTest
     {
-        private Mock<ITermRepository> termRepository;
-        private Mock<IMapper<TermEditModel, Term>> termEditMapper;
-        private Mock<IMapper<Term, TermViewModel>> termViewMapper;
+        private Mock<ITermRepository> termRepositoryMock;
+        private Mock<IMapper<TermEditModel, Term>> termEditMapperMock;
+        private Mock<IMapper<Term, TermViewModel>> termViewMapperMock;
         private TermService termService;
 
         /// <summary>
@@ -25,13 +25,13 @@ namespace Lwt.Test.Services
         /// </summary>
         public TermServiceTest()
         {
-            this.termEditMapper = new Mock<IMapper<TermEditModel, Term>>();
-            this.termViewMapper = new Mock<IMapper<Term, TermViewModel>>();
-            this.termRepository = new Mock<ITermRepository>();
+            this.termEditMapperMock = new Mock<IMapper<TermEditModel, Term>>();
+            this.termViewMapperMock = new Mock<IMapper<Term, TermViewModel>>();
+            this.termRepositoryMock = new Mock<ITermRepository>();
             this.termService = new TermService(
-                this.termRepository.Object,
-                this.termEditMapper.Object,
-                this.termViewMapper.Object);
+                this.termRepositoryMock.Object,
+                this.termEditMapperMock.Object,
+                this.termViewMapperMock.Object);
         }
 
         /// <summary>
@@ -44,10 +44,10 @@ namespace Lwt.Test.Services
             var terms = new List<Term>();
             var termViewModels = new List<TermViewModel>();
             var termFilter = new TermFilter();
-            this.termRepository.Setup(
+            this.termRepositoryMock.Setup(
                     r => r.SearchAsync(It.IsAny<Expression<Func<Term, bool>>>(), It.IsAny<PaginationQuery>()))
                 .ReturnsAsync(terms);
-            this.termViewMapper.Setup(m => m.Map(terms)).Returns(termViewModels);
+            this.termViewMapperMock.Setup(m => m.Map(terms)).Returns(termViewModels);
 
             IEnumerable<TermViewModel> actual = await this.termService.SearchAsync(
                 It.IsAny<Guid>(),
@@ -55,6 +55,20 @@ namespace Lwt.Test.Services
                 It.IsAny<PaginationQuery>());
 
             Assert.Equal(termViewModels, actual);
+        }
+
+        /// <summary>
+        /// create async should return the new term id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task CreateAsyncShouldReturnTermId()
+        {
+            var term = new Term();
+
+            Guid result = await this.termService.CreateAsync(term);
+
+            Assert.Equal(term.Id, result);
         }
     }
 }
