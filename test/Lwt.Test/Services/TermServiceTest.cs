@@ -47,7 +47,8 @@ namespace Lwt.Test.Services
             this.termRepositoryMock.Setup(
                     r => r.SearchAsync(It.IsAny<Expression<Func<Term, bool>>>(), It.IsAny<PaginationQuery>()))
                 .ReturnsAsync(terms);
-            this.termViewMapperMock.Setup(m => m.Map(terms)).Returns(termViewModels);
+            this.termViewMapperMock.Setup(m => m.Map(terms))
+                .Returns(termViewModels);
 
             IEnumerable<TermViewModel> actual = await this.termService.SearchAsync(
                 It.IsAny<Guid>(),
@@ -69,6 +70,26 @@ namespace Lwt.Test.Services
             Guid result = await this.termService.CreateAsync(term);
 
             Assert.Equal(term.Id, result);
+        }
+
+        /// <summary>
+        /// term edit should update mapped term.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task EditAsyncShouldUpdateMappedTerm()
+        {
+            Guid userId = Guid.NewGuid();
+            Guid termId = Guid.NewGuid();
+            var termEdit = new TermEditModel();
+            var current = new Term();
+            this.termRepositoryMock.Setup(r => r.GetUserTermAsync(termId, userId))
+                .ReturnsAsync(current);
+            this.termEditMapperMock.Setup(m => m.Map(termEdit, current))
+                .Returns(current);
+
+            await this.termService.EditAsync(termEdit, termId, userId);
+            this.termRepositoryMock.Verify(r => r.UpdateAsync(current));
         }
     }
 }

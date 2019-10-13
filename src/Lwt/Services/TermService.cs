@@ -45,12 +45,7 @@ namespace Lwt.Services
         /// <inheritdoc/>
         public async Task EditAsync(TermEditModel termEditModel, Guid termId, Guid userId)
         {
-            Term current = await this.termRepository.GetByIdAsync(termId);
-
-            if (current.CreatorId != userId)
-            {
-                throw new ForbiddenException("You don't have permission to edit this term.");
-            }
+            Term current = await this.termRepository.GetUserTermAsync(termId, userId);
 
             Term edited = this.termEditMapper.Map(termEditModel, current);
             await this.termRepository.UpdateAsync(edited);

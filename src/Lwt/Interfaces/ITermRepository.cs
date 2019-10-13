@@ -39,5 +39,13 @@ namespace Lwt.Interfaces
         /// <param name="terms">the terms to find.</param>
         /// <returns>dictionary of term by content.</returns>
         Task<IDictionary<string, Term>> GetManyAsync(Guid creatorId, Language language, HashSet<string> terms);
+
+        /// <summary>
+        /// get term of the user.
+        /// </summary>
+        /// <param name="termId">term id.</param>
+        /// <param name="userId">user id.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task<Term> GetUserTermAsync(Guid termId, Guid userId);
     }
 }

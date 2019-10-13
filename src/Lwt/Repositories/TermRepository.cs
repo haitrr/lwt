@@ -5,6 +5,7 @@ namespace Lwt.Repositories
     using System.Linq;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
+    using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
     using MongoDB.Driver;
@@ -57,6 +58,21 @@ namespace Lwt.Repositories
                 .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.Language == language)
                 .ToListAsync();
             return list.ToDictionary(t => t.Content, t => t);
+        }
+
+        /// <inheritdoc/>
+        public async Task<Term> GetUserTermAsync(Guid termId, Guid userId)
+        {
+            Term? term = await this.Collection
+                .Find(t => t.Id == termId && t.CreatorId == userId)
+                .SingleOrDefaultAsync();
+
+            if (term == null)
+            {
+                throw new NotFoundException("Term not found");
+            }
+
+            return term;
         }
 
         /// <inheritdoc />
