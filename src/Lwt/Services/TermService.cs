@@ -4,7 +4,6 @@ namespace Lwt.Services
     using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using Lwt.Exceptions;
     using Lwt.Extensions;
     using Lwt.Interfaces;
     using Lwt.Models;
@@ -56,17 +55,7 @@ namespace Lwt.Services
         /// <inheritdoc />
         public async Task<TermViewModel> GetAsync(Guid userId, Guid termId)
         {
-            Term? term = await this.termRepository.TryGetByIdAsync(termId);
-
-            if (term == null)
-            {
-                throw new NotFoundException("Term not found.");
-            }
-
-            if (term.CreatorId != userId)
-            {
-                throw new ForbiddenException("You don't have permission to access this term.");
-            }
+            Term term = await this.termRepository.GetUserTermAsync(termId, userId);
 
             return this.termViewMapper.Map(term);
         }

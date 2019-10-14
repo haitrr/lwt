@@ -110,5 +110,26 @@ namespace Lwt.Test.Services
             long rs = await this.termService.CountAsync(Guid.NewGuid(), new TermFilter());
             Assert.Equal(count, rs);
         }
+
+        /// <summary>
+        /// get async should return mapped result.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task GetAsyncShouldReturnMappedTerm()
+        {
+            var term = new Term();
+            var termViewModel = new TermViewModel();
+            Guid userId = Guid.NewGuid();
+            Guid termId = Guid.NewGuid();
+            this.termRepositoryMock.Setup(r => r.GetUserTermAsync(termId, userId))
+                .ReturnsAsync(term);
+            this.termViewMapperMock.Setup(m => m.Map(term))
+                .Returns(termViewModel);
+
+            TermViewModel result = await this.termService.GetAsync(userId, termId);
+
+            Assert.Equal(termViewModel, result);
+        }
     }
 }
