@@ -71,6 +71,7 @@ namespace Lwt
             IConfigurationSection appSettingsSection = this.Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
             var appSettings = appSettingsSection.Get<AppSettings>();
+            services.AddSingleton(appSettings);
 
             byte[] key = Encoding.ASCII.GetBytes(appSettings.Secret);
 

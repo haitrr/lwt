@@ -20,9 +20,9 @@ namespace Lwt.Utilities
         /// Initializes a new instance of the <see cref="TokenProvider"/> class.
         /// </summary>
         /// <param name="appSettings">the application settings.</param>
-        public TokenProvider(IOptions<AppSettings> appSettings)
+        public TokenProvider(AppSettings appSettings)
         {
-            this.appSettings = appSettings.Value;
+            this.appSettings = appSettings;
         }
 
         /// <inheritdoc />
