@@ -40,7 +40,7 @@ namespace Lwt.Utilities
         /// <inheritdoc/>
         public ICollection<ILanguage> GetAllLanguages()
         {
-            return new List<ILanguage>()
+            return new List<ILanguage>
             {
                 new English(),
                 new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>()),
