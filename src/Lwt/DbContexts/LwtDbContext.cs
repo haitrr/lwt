@@ -4,7 +4,6 @@ namespace Lwt.DbContexts
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using Lwt.Models;
-    using Microsoft.Extensions.Options;
     using MongoDB.Driver;
 
     /// <summary>
@@ -18,11 +17,11 @@ namespace Lwt.DbContexts
         /// Initializes a new instance of the <see cref="LwtDbContext"/> class.
         /// </summary>
         /// <param name="settings"> app settings.</param>
-        public LwtDbContext(IOptions<AppSettings> settings)
+        public LwtDbContext(AppSettings settings)
         {
-            var client = new MongoClient(settings.Value.MongoConnectionString);
+            var client = new MongoClient(settings.MongoConnectionString);
 
-            this.database = client.GetDatabase(settings.Value.MongoDatabase);
+            this.database = client.GetDatabase(settings.MongoDatabase);
         }
 
         /// <summary>

@@ -11,6 +11,7 @@
         <Rule Id="CA2227" Action="None"/>
         <Rule Id="IDE0003" Action="None"/>
         <Rule Id="CA1725" Action="Info" />
+        <Rule Id="CA2234" Action="Info" />
         <Rule Id="CA1062" Action="None" /> <!-- C# 8 -->
     </Rules>
 </RuleSet>

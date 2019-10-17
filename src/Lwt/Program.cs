@@ -8,25 +8,28 @@ namespace Lwt
     using Microsoft.AspNetCore.Hosting;
 
     /// <summary>
-    /// a.
+    /// Application.
     /// </summary>
-    public class Program
+    public static class Program
     {
         /// <summary>
-        /// a.
+        /// application entry point.
         /// </summary>
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            CreateWebHostBuilder(args).Build().Run();
         }
 
         /// <summary>
-        /// a.
+        /// create the web host builder.
         /// </summary>
-        /// <param name="args">args.</param>
-        /// <returns>asd.</returns>
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args).UseMetrics().UseMetricsWebTracking().UseStartup<Startup>().Build();
+        /// <param name="args">arguments.</param>
+        /// <returns></returns>
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .UseMetrics()
+                .UseMetricsWebTracking()
+                .UseStartup<Startup>();
     }
 }

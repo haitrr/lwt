@@ -134,7 +134,7 @@ namespace Lwt
             // utilities
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
             services.AddScoped<ILanguageHelper, LanguageHelper>();
-            services.AddScoped<ITokenProvider, TokenProvider>();
+            services.AddTransient<ITokenProvider, TokenProvider>();
             services.AddScoped<ITextSeparator, TextSeparator>();
             services.AddScoped<ITermCounter, TermCounter>();
             services.AddScoped<ITextNormalizer, TextNormalizer>();
