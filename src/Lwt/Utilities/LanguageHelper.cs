@@ -25,6 +25,8 @@ namespace Lwt.Utilities
         {
             switch (language)
             {
+                case Language.Vietnamese:
+                    return new Vietnamese();
                 case Language.English:
 
                     return new English();

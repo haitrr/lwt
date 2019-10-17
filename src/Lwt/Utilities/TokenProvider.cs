@@ -8,7 +8,6 @@ namespace Lwt.Utilities
     using Lwt.Interfaces;
     using Lwt.Models;
 
-    using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
 
     /// <inheritdoc />

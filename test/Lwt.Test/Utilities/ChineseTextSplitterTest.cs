@@ -27,7 +27,7 @@ namespace Lwt.Test.Utilities
         [Theory]
         [InlineData("你在干什么", new[] { "你", "在", "干什么" })]
         [InlineData("上海浦东开发与建设同步", new[] { "上海", "浦东", "开发", "与", "建设", "同步" })]
-        public async void SplitShouldWork(string input, IEnumerable<string> output)
+        public void SplitShouldWork(string input, IEnumerable<string> output)
         {
             IEnumerable<string> result = this.chineseTextSplitter.Split(input);
             Assert.Equal(output, result);
