@@ -38,9 +38,9 @@ namespace Lwt.Controllers
         }
 
         /// <summary>
-        /// a.
+        /// create a term.
         /// </summary>
-        /// <param name="termCreateModel">asdasd.</param>
+        /// <param name="termCreateModel">create model.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         [HttpPost]
         [Authorize]
@@ -75,7 +75,7 @@ namespace Lwt.Controllers
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> CreateAsync([FromBody] TermEditModel termEditModel, [FromRoute] Guid id)
+        public async Task<IActionResult> EditAsync([FromBody] TermEditModel termEditModel, [FromRoute] Guid id)
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
             await this.termService.EditAsync(termEditModel, id, userId);
