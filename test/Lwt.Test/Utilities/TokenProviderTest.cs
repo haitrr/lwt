@@ -20,7 +20,7 @@ namespace Lwt.Test.Utilities
         /// </summary>
         public TokenProviderTest()
         {
-            this.tokenProvider = new TokenProvider(new AppSettings() { Secret = "this secret is a secret must be longer than 128 bits." });
+            this.tokenProvider = new TokenProvider(new AppSettings { Secret = "this secret is a secret must be longer than 128 bits." });
         }
 
         /// <summary>

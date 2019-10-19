@@ -53,7 +53,7 @@ namespace Lwt.Test.Utilities
             var words = new List<string> { "hello", "yolo", "hello", "kk" };
             var language = Language.English;
             Guid userId = Guid.NewGuid();
-            var learningLevelDict = new Dictionary<string, TermLearningLevel>()
+            var learningLevelDict = new Dictionary<string, TermLearningLevel>
             {
                 { "hello", TermLearningLevel.Learning1 },
                 { "yolo", TermLearningLevel.Learning3 },

@@ -10,7 +10,6 @@ namespace Lwt.Test.IntegrationTests
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
-    using Lwt.Utilities;
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Driver;
     using Newtonsoft.Json;
@@ -135,7 +134,7 @@ namespace Lwt.Test.IntegrationTests
                 dbContext.SaveChanges();
             }
 
-            var termCreateModel = new TermCreateModel()
+            var termCreateModel = new TermCreateModel
             {
                 Language = Language.English,
                 Content = "test",
@@ -180,10 +179,10 @@ namespace Lwt.Test.IntegrationTests
                 dbContext.SaveChanges();
             }
 
-            var existingTerm = new Term() {CreatorId = user.Id};
+            var existingTerm = new Term { CreatorId = user.Id };
             await this.lwtDbContext.GetCollection<Term>().InsertOneAsync(existingTerm);
 
-            var termEditModel = new TermEditModel()
+            var termEditModel = new TermEditModel
             {
                 LearningLevel = TermLearningLevel.Learning1,
                 Meaning = "yolo",

@@ -71,7 +71,7 @@ namespace Lwt.Test
                         MongoDbRunner runner = MongoDbRunner.Start();
                         services.AddSingleton(runner);
                         services.AddSingleton(
-                            new AppSettings()
+                            new AppSettings
                             {
                                 MongoDatabase = appSetting.MongoDatabase,
                                 Secret = appSetting.Secret,

@@ -204,7 +204,7 @@ namespace Lwt
                     c.AddSecurityDefinition("Bearer", scheme);
 
                     c.AddSecurityRequirement(
-                        new OpenApiSecurityRequirement()
+                        new OpenApiSecurityRequirement
                         {
                             {
                                 new OpenApiSecurityScheme
