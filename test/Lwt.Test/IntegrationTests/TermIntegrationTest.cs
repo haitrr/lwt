@@ -10,6 +10,7 @@ namespace Lwt.Test.IntegrationTests
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
+    using Lwt.Utilities;
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Driver;
     using Newtonsoft.Json;
@@ -158,6 +159,49 @@ namespace Lwt.Test.IntegrationTests
             Assert.Equal("TEST", term.Content);
             Assert.Equal(termCreateModel.Meaning, term.Meaning);
             Assert.Equal(termCreateModel.LearningLevel, term.LearningLevel);
+        }
+
+        /// <summary>
+        /// should able to edit term.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task EditTermShouldWork()
+        {
+            var user = new User { UserName = "test" };
+            await this.lwtDbContext.GetCollection<Term>()
+                .FindOneAndDeleteAsync(_ => true);
+
+            using (IServiceScope scope = this.factory.Services.CreateScope())
+            {
+                IServiceProvider services = scope.ServiceProvider;
+                var dbContext = services.GetRequiredService<IdentityDbContext>();
+                dbContext.Users.Add(user);
+                dbContext.SaveChanges();
+            }
+
+            var existingTerm = new Term() {CreatorId = user.Id};
+            await this.lwtDbContext.GetCollection<Term>().InsertOneAsync(existingTerm);
+
+            var termEditModel = new TermEditModel()
+            {
+                LearningLevel = TermLearningLevel.Learning1,
+                Meaning = "yolo",
+            };
+
+            string token = this.tokenProvider.GenerateUserToken(user);
+            this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            await this.client.PutAsync(
+                $"api/term/{existingTerm.Id}",
+                new StringContent(JsonConvert.SerializeObject(termEditModel), Encoding.UTF8, "application/json"));
+
+            List<Term> terms = await this.lwtDbContext.GetCollection<Term>()
+                .Find(_ => true)
+                .ToListAsync();
+            Term term = Assert.Single(terms);
+            Assert.NotNull(term);
+            Assert.Equal(termEditModel.Meaning, term.Meaning);
+            Assert.Equal(termEditModel.LearningLevel, term.LearningLevel);
         }
     }
 }
