@@ -3,9 +3,11 @@ namespace Lwt.Test.IntegrationTests
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
+    using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.ViewModels.User;
     using Microsoft.AspNetCore.Identity;
@@ -20,6 +22,7 @@ namespace Lwt.Test.IntegrationTests
     public class UserIntegrationTest : IClassFixture<CustomWebApplicationFactory<Startup>>
     {
         private readonly HttpClient client;
+        private readonly ITokenProvider tokenProvider;
         private readonly CustomWebApplicationFactory<Startup> factory;
 
         /// <summary>
@@ -29,6 +32,7 @@ namespace Lwt.Test.IntegrationTests
         public UserIntegrationTest(CustomWebApplicationFactory<Startup> factory)
         {
             this.factory = factory;
+            this.tokenProvider = this.factory.Services.GetService<ITokenProvider>();
             this.client = this.factory.CreateClient();
         }
 
@@ -85,6 +89,31 @@ namespace Lwt.Test.IntegrationTests
                 .GetValue("token")
                 .Value<string>();
             Assert.NotNull(token);
+        }
+
+        /// <summary>
+        /// should be able to get user profile.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ShouldAbleToGetProfile()
+        {
+            using (IServiceScope scope = this.factory.Services.CreateScope())
+            {
+                var user = new User() { UserName = "test", Email = "test@yopmail.com" };
+                var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                identityDbContext.Users.RemoveRange(identityDbContext.Users);
+                await identityDbContext.SaveChangesAsync();
+                identityDbContext.Users.Add(user);
+                await identityDbContext.SaveChangesAsync();
+                string token = this.tokenProvider.GenerateUserToken(user);
+                this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+                HttpResponseMessage response = await this.client.GetAsync("/api/user");
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                JToken data = JToken.Parse(await response.Content.ReadAsStringAsync());
+                Assert.Equal(user.UserName, data.Value<string>("userName"));
+                Assert.Equal(user.Email, data.Value<string>("email"));
+            }
         }
     }
 }
