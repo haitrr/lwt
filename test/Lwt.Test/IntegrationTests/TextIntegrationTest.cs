@@ -128,8 +128,41 @@ namespace Lwt.Test.IntegrationTests
             HttpResponseMessage responseMessage = await this.client.DeleteAsync($"api/text/{text.Id}");
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
             Text deletedText = await this.lwtDbContext.GetCollection<Text>()
-                .Find(_ => true).SingleOrDefaultAsync();
+                .Find(_ => true)
+                .SingleOrDefaultAsync();
             Assert.Null(deletedText);
+        }
+
+        /// <summary>
+        /// should be able to read my text.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ShouldBeAbleToReadText()
+        {
+            await this.lwtDbContext.GetCollection<Text>()
+                .DeleteManyAsync(_ => true);
+            var text = new Text
+            {
+                Title = "test",
+                Content = "this is a test text",
+                Language = Language.English,
+                CreatorId = this.user.Id,
+            };
+            await this.lwtDbContext.GetCollection<Text>()
+                .InsertOneAsync(text);
+
+            HttpResponseMessage responseMessage = await this.client.GetAsync($"api/text/{text.Id}");
+            Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
+            JToken content = JToken.Parse(await responseMessage.Content.ReadAsStringAsync());
+            Assert.Equal(text.Title, content.Value<string>("title"));
+            Assert.Equal(
+                text.Id.ToString()
+                    .ToLower(),
+                content.Value<string>("id")
+                    .ToLower());
+            Assert.Equal((int)text.Language, content.Value<int>("language"));
+            Assert.NotNull(content.Value<JArray>("terms"));
         }
     }
 }
