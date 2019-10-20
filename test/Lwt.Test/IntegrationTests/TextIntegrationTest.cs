@@ -57,7 +57,7 @@ namespace Lwt.Test.IntegrationTests
         public async Task ShouldAbleToCreateText()
         {
             await this.lwtDbContext.GetCollection<Text>()
-                .FindOneAndDeleteAsync(_ => true);
+                .DeleteManyAsync(_ => true);
             var body = new { title = "test text", content = "this is a test text", language = 1 };
             string content = JsonConvert.SerializeObject(body);
             HttpResponseMessage responseMessage = await this.client.PostAsync(
@@ -82,7 +82,7 @@ namespace Lwt.Test.IntegrationTests
         public async Task ShouldAbleToGetListOfTexts()
         {
             await this.lwtDbContext.GetCollection<Text>()
-                .FindOneAndDeleteAsync(_ => true);
+                .DeleteManyAsync(_ => true);
 
             for (var i = 0; i < 20; i++)
             {
