@@ -12,6 +12,7 @@ namespace Lwt.Test.IntegrationTests
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Driver;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using Xunit;
 
     /// <summary>
@@ -71,6 +72,41 @@ namespace Lwt.Test.IntegrationTests
             Assert.Equal(body.content, text.Content);
             Assert.Equal(body.language, (int)text.Language);
             Assert.Equal(this.user.Id, text.CreatorId);
+        }
+
+        /// <summary>
+        /// should be able test get text list.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ShouldAbleToGetListOfTexts()
+        {
+            await this.lwtDbContext.GetCollection<Text>()
+                .FindOneAndDeleteAsync(_ => true);
+
+            for (var i = 0; i < 20; i++)
+            {
+                await this.lwtDbContext.GetCollection<Text>()
+                    .InsertOneAsync(
+                        new Text()
+                        {
+                            Title = "test", Content = "test", Language = Language.English, CreatorId = this.user.Id,
+                        });
+            }
+
+            HttpResponseMessage responseMessage = await this.client.GetAsync("api/text?page=1&itemPerPage=7");
+            Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
+            JToken rs = JToken.Parse(await responseMessage.Content.ReadAsStringAsync());
+            var data = rs.Value<JArray>("items");
+            Assert.Equal(20, rs.Value<int>("total"));
+            Assert.Equal(7, data.Count);
+
+            foreach (JToken item in data)
+            {
+                Assert.Equal("test", item.Value<string>("title"));
+                Assert.Equal((int)Language.English, item.Value<int>("language"));
+                Assert.NotNull(item.SelectToken("counts"));
+            }
         }
     }
 }
