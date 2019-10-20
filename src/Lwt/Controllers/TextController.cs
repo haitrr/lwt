@@ -128,7 +128,7 @@ namespace Lwt.Controllers
         /// </summary>
         /// <param name="id">the text id.</param>
         /// <returns>edit details.</returns>
-        [HttpGet("edit-detail/{id}")]
+        [HttpGet("{id}/edit-details")]
         [Authorize]
         public async Task<IActionResult> GetEditDetailAsync([FromRoute] Guid id)
         {

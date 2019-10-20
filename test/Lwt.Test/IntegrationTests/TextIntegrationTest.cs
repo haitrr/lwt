@@ -1,5 +1,6 @@
 namespace Lwt.Test.IntegrationTests
 {
+    using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
@@ -199,6 +200,80 @@ namespace Lwt.Test.IntegrationTests
             Assert.Equal(editContent.title, editedText.Title);
             Assert.Equal(editContent.language, (int)editedText.Language);
             Assert.Equal(editContent.content, editedText.Content);
+        }
+
+        /// <summary>
+        /// should be able to read my text.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ShouldBeAbleToGetEditDetails()
+        {
+            await this.lwtDbContext.GetCollection<Text>()
+                .DeleteManyAsync(_ => true);
+            var text = new Text
+            {
+                Title = "test",
+                Content = "this is a test text",
+                Language = Language.English,
+                CreatorId = this.user.Id,
+            };
+            await this.lwtDbContext.GetCollection<Text>()
+                .InsertOneAsync(text);
+
+            HttpResponseMessage responseMessage = await this.client.GetAsync($"api/text/{text.Id}/edit-details");
+            Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
+            JToken content = JToken.Parse(await responseMessage.Content.ReadAsStringAsync());
+            Assert.Equal(text.Title, content.Value<string>("title"));
+            Assert.Equal(
+                text.Id.ToString()
+                    .ToLower(),
+                content.Value<string>("id")
+                    .ToLower());
+            Assert.Equal((int)text.Language, content.Value<int>("language"));
+            Assert.Equal(text.Content, content.Value<string>("content"));
+        }
+
+        /// <summary>
+        /// should be able to edit my text.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ShouldBeAbleToSetBookmark()
+        {
+            await this.lwtDbContext.GetCollection<Text>()
+                .DeleteManyAsync(_ => true);
+            var text = new Text
+            {
+                Title = "test",
+                Content = "this is a test text",
+                Language = Language.English,
+                CreatorId = this.user.Id,
+                Words = new List<string>
+                {
+                    "what",
+                    "does",
+                    "the",
+                    "fox",
+                    "say",
+                },
+            };
+            await this.lwtDbContext.GetCollection<Text>()
+                .InsertOneAsync(text);
+
+            var bookMarkContent = new { termIndex = 2UL };
+
+            HttpResponseMessage responseMessage = await this.client.PatchAsync(
+                $"api/text/{text.Id}/bookmark",
+                new StringContent(
+                    JsonConvert.SerializeObject(bookMarkContent),
+                    Encoding.UTF8,
+                    MediaTypeNames.Application.Json));
+            Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
+            Text editedText = await this.lwtDbContext.GetCollection<Text>()
+                .Find(t => t.Id == text.Id)
+                .SingleAsync();
+            Assert.Equal(bookMarkContent.termIndex, editedText.Bookmark);
         }
     }
 }
