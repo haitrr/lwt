@@ -108,5 +108,28 @@ namespace Lwt.Test.IntegrationTests
                 Assert.NotNull(item.SelectToken("counts"));
             }
         }
+
+        /// <summary>
+        /// should be able to delete my text.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ShouldBeAbleToDeleteText()
+        {
+            await this.lwtDbContext.GetCollection<Text>()
+                .DeleteManyAsync(_ => true);
+            var text = new Text
+            {
+                Title = "test", Content = "test", Language = Language.English, CreatorId = this.user.Id,
+            };
+            await this.lwtDbContext.GetCollection<Text>()
+                .InsertOneAsync(text);
+
+            HttpResponseMessage responseMessage = await this.client.DeleteAsync($"api/text/{text.Id}");
+            Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
+            Text deletedText = await this.lwtDbContext.GetCollection<Text>()
+                .Find(_ => true).SingleOrDefaultAsync();
+            Assert.Null(deletedText);
+        }
     }
 }
