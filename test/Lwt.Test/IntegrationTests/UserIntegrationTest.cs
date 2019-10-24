@@ -1,5 +1,6 @@
 namespace Lwt.Test.IntegrationTests
 {
+    using System;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
@@ -19,45 +20,35 @@ namespace Lwt.Test.IntegrationTests
     /// <summary>
     /// test user apis integration.
     /// </summary>
-    public class UserIntegrationTest : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public class UserIntegrationTest : IDisposable
     {
         private readonly HttpClient client;
+        private readonly LwtTestWebApplicationFactory factory;
         private readonly ITokenProvider tokenProvider;
-        private readonly CustomWebApplicationFactory<Startup> factory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserIntegrationTest"/> class.
         /// </summary>
-        /// <param name="factory">the web host factory.</param>
-        public UserIntegrationTest(CustomWebApplicationFactory<Startup> factory)
+        public UserIntegrationTest()
         {
-            this.factory = factory;
+            this.factory = new LwtTestWebApplicationFactory();
             this.tokenProvider = this.factory.Services.GetService<ITokenProvider>();
             this.client = this.factory.CreateClient();
         }
 
         /// <summary>
-        /// should be able to sign up.
+        /// Finalizes an instance of the <see cref="UserIntegrationTest"/> class.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task SignUpShouldWork()
+        ~UserIntegrationTest()
         {
-            using (IServiceScope scope = this.factory.Services.CreateScope())
-            {
-                var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
-                identityDbContext.Users.RemoveRange(identityDbContext.Users);
-                await identityDbContext.SaveChangesAsync();
-                var registerModel = new SignUpViewModel { Password = "haiyolo", UserName = "test" };
-                HttpResponseMessage responseMessage = await this.client.PostAsync(
-                    "/api/user",
-                    new StringContent(JsonConvert.SerializeObject(registerModel), Encoding.UTF8, "application/json"));
+            this.Dispose(false);
+        }
 
-                Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-
-                User user = identityDbContext.Users.SingleOrDefault(u => u.UserName == "test");
-                Assert.NotNull(user);
-            }
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -113,6 +104,43 @@ namespace Lwt.Test.IntegrationTests
                 JToken data = JToken.Parse(await response.Content.ReadAsStringAsync());
                 Assert.Equal(user.UserName, data.Value<string>("userName"));
                 Assert.Equal(user.Email, data.Value<string>("email"));
+            }
+        }
+
+        /// <summary>
+        /// should be able to sign up.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task SignUpShouldWork()
+        {
+            using (IServiceScope scope = this.factory.Services.CreateScope())
+            {
+                var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                identityDbContext.Users.RemoveRange(identityDbContext.Users);
+                await identityDbContext.SaveChangesAsync();
+                var registerModel = new SignUpViewModel { Password = "haiyolo", UserName = "test" };
+                HttpResponseMessage responseMessage = await this.client.PostAsync(
+                    "/api/user",
+                    new StringContent(JsonConvert.SerializeObject(registerModel), Encoding.UTF8, "application/json"));
+
+                Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
+
+                User user = identityDbContext.Users.SingleOrDefault(u => u.UserName == "test");
+                Assert.NotNull(user);
+            }
+        }
+
+        /// <summary>
+        /// dispose.
+        /// </summary>
+        /// <param name="disposing">disposing.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.client.Dispose();
+                this.factory.Dispose();
             }
         }
     }

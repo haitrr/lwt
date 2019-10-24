@@ -1,5 +1,6 @@
 namespace Lwt.Test.IntegrationTests
 {
+    using System;
     using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
@@ -19,21 +20,20 @@ namespace Lwt.Test.IntegrationTests
     /// <summary>
     /// test text apis integration.
     /// </summary>
-    public class TextIntegrationTest : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public sealed class TextIntegrationTest : IDisposable
     {
         private readonly HttpClient client;
-        private readonly ITokenProvider tokenProvider;
+        private readonly LwtTestWebApplicationFactory factory;
         private readonly LwtDbContext lwtDbContext;
-        private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly ITokenProvider tokenProvider;
         private readonly User user;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextIntegrationTest"/> class.
         /// </summary>
-        /// <param name="factory">the web host factory.</param>
-        public TextIntegrationTest(CustomWebApplicationFactory<Startup> factory)
+        public TextIntegrationTest()
         {
-            this.factory = factory;
+            this.factory = new LwtTestWebApplicationFactory();
             this.tokenProvider = this.factory.Services.GetService<ITokenProvider>();
             this.lwtDbContext = this.factory.Services.GetService<LwtDbContext>();
             this.user = new User() { UserName = "test" };
@@ -48,6 +48,13 @@ namespace Lwt.Test.IntegrationTests
             string token = this.tokenProvider.GenerateUserToken(this.user);
             this.client = this.factory.CreateClient();
             this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this.client.Dispose();
+            this.factory.Dispose();
         }
 
         /// <summary>
@@ -135,38 +142,6 @@ namespace Lwt.Test.IntegrationTests
         }
 
         /// <summary>
-        /// should be able to read my text.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task ShouldBeAbleToReadText()
-        {
-            await this.lwtDbContext.GetCollection<Text>()
-                .DeleteManyAsync(_ => true);
-            var text = new Text
-            {
-                Title = "test",
-                Content = "this is a test text",
-                Language = Language.English,
-                CreatorId = this.user.Id,
-            };
-            await this.lwtDbContext.GetCollection<Text>()
-                .InsertOneAsync(text);
-
-            HttpResponseMessage responseMessage = await this.client.GetAsync($"api/text/{text.Id}");
-            Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-            JToken content = JToken.Parse(await responseMessage.Content.ReadAsStringAsync());
-            Assert.Equal(text.Title, content.Value<string>("title"));
-            Assert.Equal(
-                text.Id.ToString()
-                    .ToLower(),
-                content.Value<string>("id")
-                    .ToLower());
-            Assert.Equal((int)text.Language, content.Value<int>("language"));
-            Assert.NotNull(content.Value<JArray>("terms"));
-        }
-
-        /// <summary>
         /// should be able to edit my text.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
@@ -232,6 +207,38 @@ namespace Lwt.Test.IntegrationTests
                     .ToLower());
             Assert.Equal((int)text.Language, content.Value<int>("language"));
             Assert.Equal(text.Content, content.Value<string>("content"));
+        }
+
+        /// <summary>
+        /// should be able to read my text.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ShouldBeAbleToReadText()
+        {
+            await this.lwtDbContext.GetCollection<Text>()
+                .DeleteManyAsync(_ => true);
+            var text = new Text
+            {
+                Title = "test",
+                Content = "this is a test text",
+                Language = Language.English,
+                CreatorId = this.user.Id,
+            };
+            await this.lwtDbContext.GetCollection<Text>()
+                .InsertOneAsync(text);
+
+            HttpResponseMessage responseMessage = await this.client.GetAsync($"api/text/{text.Id}");
+            Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
+            JToken content = JToken.Parse(await responseMessage.Content.ReadAsStringAsync());
+            Assert.Equal(text.Title, content.Value<string>("title"));
+            Assert.Equal(
+                text.Id.ToString()
+                    .ToLower(),
+                content.Value<string>("id")
+                    .ToLower());
+            Assert.Equal((int)text.Language, content.Value<int>("language"));
+            Assert.NotNull(content.Value<JArray>("terms"));
         }
 
         /// <summary>

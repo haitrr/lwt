@@ -19,21 +19,20 @@ namespace Lwt.Test.IntegrationTests
     /// integration testing term api.
     /// </summary>
 #pragma warning disable CA1001
-    public class TermIntegrationTest : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public class TermIntegrationTest
 #pragma warning restore CA1001
     {
         private readonly HttpClient client;
-        private readonly CustomWebApplicationFactory<Startup> factory;
+        private readonly LwtTestWebApplicationFactory factory;
         private readonly LwtDbContext lwtDbContext;
         private readonly ITokenProvider tokenProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TermIntegrationTest"/> class.
         /// </summary>
-        /// <param name="factory">the web host factory.</param>
-        public TermIntegrationTest(CustomWebApplicationFactory<Startup> factory)
+        public TermIntegrationTest()
         {
-            this.factory = factory;
+            this.factory = new LwtTestWebApplicationFactory();
             this.tokenProvider = this.factory.Services.GetService<ITokenProvider>();
             this.lwtDbContext = this.factory.Services.GetService<LwtDbContext>();
             this.client = this.factory.CreateClient();

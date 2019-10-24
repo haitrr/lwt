@@ -16,10 +16,18 @@ namespace Lwt.Test
     /// <summary>
     /// custom web application factory for lwt for testing.
     /// </summary>
-    /// <typeparam name="TStartup">the startup.</typeparam>
-    public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup>
-        where TStartup : class
+    public class LwtTestWebApplicationFactory : WebApplicationFactory<Startup>
     {
+        private readonly MongoDbRunner mongoDbRunner;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LwtTestWebApplicationFactory"/> class.
+        /// </summary>
+        public LwtTestWebApplicationFactory()
+        {
+            this.mongoDbRunner = MongoDbRunner.Start();
+        }
+
         /// <inheritdoc />
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -68,17 +76,26 @@ namespace Lwt.Test
                     {
                         var appSetting = (AppSettings)appSettingDescriptor.ImplementationInstance;
                         services.Remove(appSettingDescriptor);
-                        MongoDbRunner runner = MongoDbRunner.Start();
-                        services.AddSingleton(runner);
                         services.AddSingleton(
                             new AppSettings
                             {
                                 MongoDatabase = appSetting.MongoDatabase,
                                 Secret = appSetting.Secret,
-                                MongoConnectionString = runner.ConnectionString,
+                                MongoConnectionString = this.mongoDbRunner.ConnectionString,
                             });
                     }
                 });
+        }
+
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.mongoDbRunner.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
