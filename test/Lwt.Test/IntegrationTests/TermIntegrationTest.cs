@@ -18,9 +18,7 @@ namespace Lwt.Test.IntegrationTests
     /// <summary>
     /// integration testing term api.
     /// </summary>
-#pragma warning disable CA1001
-    public class TermIntegrationTest
-#pragma warning restore CA1001
+    public sealed class TermIntegrationTest : IDisposable
     {
         private readonly HttpClient client;
         private readonly LwtTestWebApplicationFactory factory;
@@ -36,6 +34,101 @@ namespace Lwt.Test.IntegrationTests
             this.tokenProvider = this.factory.Services.GetService<ITokenProvider>();
             this.lwtDbContext = this.factory.Services.GetService<LwtDbContext>();
             this.client = this.factory.CreateClient();
+        }
+
+        /// <summary>
+        /// test create term.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task CreateTermAsyncShouldCreateTerm()
+        {
+            var user = new User { UserName = "test" };
+            await this.lwtDbContext.GetCollection<Term>()
+                .FindOneAndDeleteAsync(_ => true);
+
+            using (IServiceScope scope = this.factory.Services.CreateScope())
+            {
+                IServiceProvider services = scope.ServiceProvider;
+                var dbContext = services.GetRequiredService<IdentityDbContext>();
+                dbContext.Users.Add(user);
+                dbContext.SaveChanges();
+            }
+
+            var termCreateModel = new TermCreateModel
+            {
+                Language = Language.English,
+                Content = "test",
+                LearningLevel = TermLearningLevel.Learning1,
+                Meaning = "yolo",
+            };
+
+            string token = this.tokenProvider.GenerateUserToken(user);
+            this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            await this.client.PostAsync(
+                "api/term",
+                new StringContent(JsonConvert.SerializeObject(termCreateModel), Encoding.UTF8, "application/json"));
+
+            List<Term> terms = await this.lwtDbContext.GetCollection<Term>()
+                .Find(_ => true)
+                .ToListAsync();
+            Term term = Assert.Single(terms);
+            Assert.NotNull(term);
+            Assert.Equal(user.Id, term.CreatorId);
+            Assert.Equal(termCreateModel.Language, term.Language);
+            Assert.Equal("TEST", term.Content);
+            Assert.Equal(termCreateModel.Meaning, term.Meaning);
+            Assert.Equal(termCreateModel.LearningLevel, term.LearningLevel);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this.client.Dispose();
+            this.factory.Dispose();
+        }
+
+        /// <summary>
+        /// should able to edit term.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task EditTermShouldWork()
+        {
+            var user = new User { UserName = "test" };
+            await this.lwtDbContext.GetCollection<Term>()
+                .FindOneAndDeleteAsync(_ => true);
+
+            using (IServiceScope scope = this.factory.Services.CreateScope())
+            {
+                IServiceProvider services = scope.ServiceProvider;
+                var dbContext = services.GetRequiredService<IdentityDbContext>();
+                dbContext.Users.Add(user);
+                dbContext.SaveChanges();
+            }
+
+            var existingTerm = new Term { CreatorId = user.Id };
+            await this.lwtDbContext.GetCollection<Term>().InsertOneAsync(existingTerm);
+
+            var termEditModel = new TermEditModel
+            {
+                LearningLevel = TermLearningLevel.Learning1,
+                Meaning = "yolo",
+            };
+
+            string token = this.tokenProvider.GenerateUserToken(user);
+            this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            await this.client.PutAsync(
+                $"api/term/{existingTerm.Id}",
+                new StringContent(JsonConvert.SerializeObject(termEditModel), Encoding.UTF8, "application/json"));
+
+            List<Term> terms = await this.lwtDbContext.GetCollection<Term>()
+                .Find(_ => true)
+                .ToListAsync();
+            Term term = Assert.Single(terms);
+            Assert.NotNull(term);
+            Assert.Equal(termEditModel.Meaning, term.Meaning);
+            Assert.Equal(termEditModel.LearningLevel, term.LearningLevel);
         }
 
         /// <summary>
@@ -112,94 +205,6 @@ namespace Lwt.Test.IntegrationTests
                 await response.Content.ReadAsStringAsync());
             Assert.Equal(termViewModel.Content, term.Content);
             Assert.Equal(termViewModel.Id, term.Id);
-        }
-
-        /// <summary>
-        /// test create term.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task CreateTermAsyncShouldCreateTerm()
-        {
-            var user = new User { UserName = "test" };
-            await this.lwtDbContext.GetCollection<Term>()
-                .FindOneAndDeleteAsync(_ => true);
-
-            using (IServiceScope scope = this.factory.Services.CreateScope())
-            {
-                IServiceProvider services = scope.ServiceProvider;
-                var dbContext = services.GetRequiredService<IdentityDbContext>();
-                dbContext.Users.Add(user);
-                dbContext.SaveChanges();
-            }
-
-            var termCreateModel = new TermCreateModel
-            {
-                Language = Language.English,
-                Content = "test",
-                LearningLevel = TermLearningLevel.Learning1,
-                Meaning = "yolo",
-            };
-
-            string token = this.tokenProvider.GenerateUserToken(user);
-            this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            await this.client.PostAsync(
-                "api/term",
-                new StringContent(JsonConvert.SerializeObject(termCreateModel), Encoding.UTF8, "application/json"));
-
-            List<Term> terms = await this.lwtDbContext.GetCollection<Term>()
-                .Find(_ => true)
-                .ToListAsync();
-            Term term = Assert.Single(terms);
-            Assert.NotNull(term);
-            Assert.Equal(user.Id, term.CreatorId);
-            Assert.Equal(termCreateModel.Language, term.Language);
-            Assert.Equal("TEST", term.Content);
-            Assert.Equal(termCreateModel.Meaning, term.Meaning);
-            Assert.Equal(termCreateModel.LearningLevel, term.LearningLevel);
-        }
-
-        /// <summary>
-        /// should able to edit term.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task EditTermShouldWork()
-        {
-            var user = new User { UserName = "test" };
-            await this.lwtDbContext.GetCollection<Term>()
-                .FindOneAndDeleteAsync(_ => true);
-
-            using (IServiceScope scope = this.factory.Services.CreateScope())
-            {
-                IServiceProvider services = scope.ServiceProvider;
-                var dbContext = services.GetRequiredService<IdentityDbContext>();
-                dbContext.Users.Add(user);
-                dbContext.SaveChanges();
-            }
-
-            var existingTerm = new Term { CreatorId = user.Id };
-            await this.lwtDbContext.GetCollection<Term>().InsertOneAsync(existingTerm);
-
-            var termEditModel = new TermEditModel
-            {
-                LearningLevel = TermLearningLevel.Learning1,
-                Meaning = "yolo",
-            };
-
-            string token = this.tokenProvider.GenerateUserToken(user);
-            this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            await this.client.PutAsync(
-                $"api/term/{existingTerm.Id}",
-                new StringContent(JsonConvert.SerializeObject(termEditModel), Encoding.UTF8, "application/json"));
-
-            List<Term> terms = await this.lwtDbContext.GetCollection<Term>()
-                .Find(_ => true)
-                .ToListAsync();
-            Term term = Assert.Single(terms);
-            Assert.NotNull(term);
-            Assert.Equal(termEditModel.Meaning, term.Meaning);
-            Assert.Equal(termEditModel.LearningLevel, term.LearningLevel);
         }
     }
 }
