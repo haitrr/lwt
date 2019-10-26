@@ -6,10 +6,13 @@ namespace Lwt.Test
     using Lwt.Interfaces;
     using Lwt.Models;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Authorization;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.AspNetCore.TestHost;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
     using Mongo2Go;
     using Moq;
 
@@ -26,6 +29,30 @@ namespace Lwt.Test
         public LwtTestWebApplicationFactory()
         {
             this.mongoDbRunner = MongoDbRunner.Start();
+        }
+
+        /// <summary>
+        /// return a new factory with fake user to test secured apis.
+        /// </summary>
+        /// <param name="user">the fake user.</param>
+        /// <returns>the new factory.</returns>
+        public WebApplicationFactory<Startup> ApplyFakeUser(User? user = null)
+        {
+            return this.WithWebHostBuilder(
+                builder => builder.ConfigureTestServices(
+                    services =>
+                    {
+                        var mockOptions = new Mock<IConfigureOptions<MvcOptions>>();
+                        mockOptions.Setup(c => c.Configure(It.IsAny<MvcOptions>()))
+                            .Callback<MvcOptions>(
+                                options =>
+                                {
+                                    options.Filters.Add(new AllowAnonymousFilter());
+
+                                    options.Filters.Add(user != null ? new FakeUserFilter(user) : new FakeUserFilter());
+                                });
+                        services.AddSingleton(mockOptions.Object);
+                    }));
         }
 
         /// <inheritdoc />

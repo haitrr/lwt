@@ -1,6 +1,7 @@
 namespace Lwt.Test.IntegrationTests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
@@ -12,6 +13,7 @@ namespace Lwt.Test.IntegrationTests
     using Lwt.Models;
     using Lwt.ViewModels.User;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -128,6 +130,67 @@ namespace Lwt.Test.IntegrationTests
 
                 User user = identityDbContext.Users.SingleOrDefault(u => u.UserName == "test");
                 Assert.NotNull(user);
+            }
+        }
+
+        /// <summary>
+        /// should be able to get setting of the user.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ShouldBeAbleToGetSetting()
+        {
+            var user = new User() { UserName = "test", Id = Guid.NewGuid() };
+
+            using (WebApplicationFactory<Startup> autheticatedFactory = this.factory.ApplyFakeUser(user))
+            using (HttpClient authenticatedClient = autheticatedFactory.CreateClient())
+            using (IServiceScope scope = autheticatedFactory.Services.CreateScope())
+            {
+                var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                await identityDbContext.Users.AddAsync(user);
+                await identityDbContext.SaveChangesAsync();
+                var lwtDbContext = scope.ServiceProvider.GetService<LwtDbContext>();
+                var userSetting = new UserSetting()
+                {
+                    UserId = user.Id,
+                    LanguageSettings = new Dictionary<string, LanguageSetting>()
+                    {
+                        { "en", new LanguageSetting { DictionaryLanguage = "vi" } },
+                    },
+                };
+                await lwtDbContext.GetCollection<UserSetting>()
+                    .InsertOneAsync(userSetting);
+                HttpResponseMessage responseMessage = await authenticatedClient.GetAsync("/api/user/setting");
+
+                Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
+                var content =
+                    JsonConvert.DeserializeObject<UserSettingView>(await responseMessage.Content.ReadAsStringAsync());
+                Assert.Equal(content.UserId, user.Id);
+                Assert.Equal(
+                    JsonConvert.SerializeObject(content.LanguageSettings),
+                    JsonConvert.SerializeObject(userSetting.LanguageSettings));
+            }
+        }
+
+        /// <summary>
+        /// should not be able to get setting of the user if not exist.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ShouldNotBeAbleToGetSettingIfNotExist()
+        {
+            var user = new User() { UserName = "test", Id = Guid.NewGuid() };
+
+            using (WebApplicationFactory<Startup> autheticatedFactory = this.factory.ApplyFakeUser(user))
+            using (HttpClient authenticatedClient = autheticatedFactory.CreateClient())
+            using (IServiceScope scope = autheticatedFactory.Services.CreateScope())
+            {
+                var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                await identityDbContext.Users.AddAsync(user);
+                await identityDbContext.SaveChangesAsync();
+                HttpResponseMessage responseMessage = await authenticatedClient.GetAsync("/api/user/setting");
+
+                Assert.Equal(HttpStatusCode.NotFound, responseMessage.StatusCode);
             }
         }
 
