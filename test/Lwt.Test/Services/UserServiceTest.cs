@@ -221,7 +221,7 @@ namespace Lwt.Test.Services
         public async Task GetSettingAsyncShouldThrowNotFoundIfUserNotFound()
         {
             Guid userId = Guid.NewGuid();
-            this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync((UserSetting?)null);
+            this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync((UserSetting)null);
 
             await Assert.ThrowsAsync<NotFoundException>(() => this.userService.GetSettingAsync(userId));
         }
@@ -251,7 +251,7 @@ namespace Lwt.Test.Services
         public async Task ChangePasswordAsyncShouldThrowNotFoundIfUserNotFound()
         {
             Guid userId = Guid.NewGuid();
-            this.userManager.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User?)null);
+            this.userManager.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User)null);
 
             await Assert.ThrowsAsync<NotFoundException>(
                 () => this.userService.ChangePasswordAsync(userId, It.IsAny<UserChangePasswordModel>()));
@@ -281,7 +281,7 @@ namespace Lwt.Test.Services
         public async Task PutSettingAsyncShouldCreateSettingIfNotExisted()
         {
             Guid userId = Guid.NewGuid();
-            this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync((UserSetting?)null);
+            this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync((UserSetting)null);
             this.userSettingUpdateMapper.Setup(m => m.Map(It.IsAny<UserSettingUpdate>())).Returns(new UserSetting());
 
             await this.userService.PutSettingAsync(userId, new UserSettingUpdate());
