@@ -7,6 +7,7 @@ namespace Lwt.Utilities
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
 
     /// <inheritdoc />
@@ -18,6 +19,7 @@ namespace Lwt.Utilities
         private readonly ITextService textService;
         private readonly ITermService termService;
         private readonly ITextRepository textRepository;
+        private readonly ILogger<DatabaseSeeder> logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseSeeder"/> class.
@@ -27,47 +29,38 @@ namespace Lwt.Utilities
         /// <param name="textService">the text service.</param>
         /// <param name="termService">the term service.</param>
         /// <param name="textRepository">the text repository.</param>
+        /// <param name="logger">the logger.</param>
         public DatabaseSeeder(
             IUserRepository userRepository,
             IdentityDbContext lwtDbContext,
             ITextService textService,
             ITermService termService,
-            ITextRepository textRepository)
+            ITextRepository textRepository,
+            ILogger<DatabaseSeeder> logger)
         {
             this.userRepository = userRepository;
             this.lwtDbContext = lwtDbContext;
             this.textService = textService;
             this.termService = termService;
             this.textRepository = textRepository;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
         public async Task SeedData()
         {
             bool notSeeded = this.lwtDbContext.Database.EnsureCreated();
-
-            if (!notSeeded)
-            {
-                return;
-            }
-
             User hai = await this.userRepository.GetByUserNameAsync("hai");
-
-            if (hai == null)
+            if (!notSeeded || await this.textRepository.CountAsync() > 0 || hai != null)
             {
-                hai = new User { Id = new Guid("9E18BB68-66D2-4711-A27B-1A54AC2E8077"), UserName = "hai" };
-                await this.userRepository.CreateAsync(hai, "q");
-            }
-            else
-            {
+                this.logger.LogInformation("Database has already seeded.");
                 return;
             }
 
-            // already seeded
-            if (await this.textRepository.CountAsync() > 0)
-            {
-                return;
-            }
+            this.logger.LogInformation("Seeding database.");
+
+            hai = new User { Id = new Guid("9E18BB68-66D2-4711-A27B-1A54AC2E8077"), UserName = "hai" };
+            await this.userRepository.CreateAsync(hai, "q");
 
             var text = new Text
             {
@@ -118,6 +111,8 @@ The long and the short of it; it is meaningless to talk about who is poor or who
                 term.Language = Language.English;
                 await this.termService.CreateAsync(term);
             }
+
+            this.logger.LogInformation("Done seeding database.");
         }
     }
 }
