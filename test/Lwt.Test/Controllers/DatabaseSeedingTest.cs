@@ -1,6 +1,8 @@
 namespace Lwt.Test.Controllers
 {
     using System.Linq;
+    using System.Net;
+    using System.Net.Http;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
     using Lwt.Models;
@@ -65,11 +67,15 @@ namespace Lwt.Test.Controllers
                             }
                         });
                 }))
+            using (HttpClient client = seedEnabledFactory.CreateClient())
             {
                 var dbContext = seedEnabledFactory.Services.GetRequiredService<LwtDbContext>();
                 Assert.Equal(
                     1,
                     await dbContext.GetCollection<Text>().Find(_ => true).CountDocumentsAsync());
+
+                HttpResponseMessage httpResponseMessage = await client.GetAsync("/api/language");
+                Assert.Equal(HttpStatusCode.OK, httpResponseMessage.StatusCode);
 
                 using (IServiceScope scope = seedEnabledFactory.Services.CreateScope())
                 using (var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>())
