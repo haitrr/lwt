@@ -49,6 +49,7 @@ namespace Lwt.Utilities
         /// <inheritdoc />
         public async Task SeedData()
         {
+            await this.lwtDbContext.Database.EnsureCreatedAsync();
             User hai = await this.userRepository.GetByUserNameAsync("hai");
 
             if (hai != null)
@@ -61,8 +62,6 @@ namespace Lwt.Utilities
                 hai = new User { Id = new Guid("9E18BB68-66D2-4711-A27B-1A54AC2E8077"), UserName = "hai" };
                 await this.userRepository.CreateAsync(hai, "q");
             }
-
-            this.lwtDbContext.Database.EnsureCreated();
 
             if (await this.textRepository.CountAsync() > 0)
             {
