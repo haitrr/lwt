@@ -61,7 +61,6 @@ namespace Lwt
 
             services.AddControllers().AddNewtonsoftJson();
 
-            services.AddMetrics();
             services.AddDbContext<IdentityDbContext>(options => options.UseSqlite("Data Source=lwt.db"));
             services.AddTransient<LwtDbContext>();
 
