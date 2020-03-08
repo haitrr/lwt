@@ -43,10 +43,11 @@ namespace Lwt.Mappers
             var termViewModels = new List<TermReadModel>();
             ILanguage language = this.languageHelper.GetLanguage(source.Language);
             IEnumerable<string> notSkippedTerms = this.skippedWordRemover.RemoveSkippedWords(source.Words, source.Language);
+            IEnumerable<string> normalizedTerms = notSkippedTerms.Select(t => language.Normalize(t));
             IDictionary<string, Term> termDict = await this.termRepository.GetManyAsync(
                 source.CreatorId,
                 language.Id,
-                notSkippedTerms.ToHashSet());
+                normalizedTerms.ToHashSet());
 
             foreach (string word in source.Words)
             {
