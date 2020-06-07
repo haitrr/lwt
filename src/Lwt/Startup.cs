@@ -20,11 +20,13 @@ namespace Lwt
     using Lwt.ViewModels;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.ResponseCompression;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.OpenApi.Models;
 
@@ -54,18 +56,18 @@ namespace Lwt
         /// <param name="services">services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc(options => options.EnableEndpointRouting = false)
+            services.AddControllers()
                 .AddNewtonsoftJson()
-                .AddFluentValidation(
-                config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
-
-            services.AddControllers().AddNewtonsoftJson();
+                .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
+            ;
 
             services.AddDbContext<IdentityDbContext>(options => options.UseSqlite("Data Source=lwt.db"));
             services.AddTransient<LwtDbContext>();
 
             // identity
-            services.AddIdentity<User, Role>().AddEntityFrameworkStores<IdentityDbContext>().AddDefaultTokenProviders();
+            services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<IdentityDbContext>()
+                .AddDefaultTokenProviders();
 
             IConfigurationSection appSettingsSection = this.Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
@@ -163,26 +165,38 @@ namespace Lwt
         /// <param name="databaseSeeder"> the database seeder.</param>
         /// <param name="indexCreator">the database indexes creator.</param>
 #pragma warning disable CA1822
-        public void Configure(IApplicationBuilder app, IDatabaseSeeder databaseSeeder, IIndexCreator indexCreator)
+        public void Configure(
+            IApplicationBuilder app,
+            IDatabaseSeeder databaseSeeder,
+            IIndexCreator indexCreator,
+            IWebHostEnvironment env)
 #pragma warning disable CA1822
         {
-            /*if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }*/
-
             // compress response
             app.UseResponseCompression();
-            app.UseDeveloperExceptionPage();
+
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             app.UseAuthentication();
             app.UseMiddleware<ExceptionHandleMiddleware>();
-            app.UseMvc();
-            app.UseSwagger();
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
-            indexCreator.CreateIndexesAsync().GetAwaiter().GetResult();
-            databaseSeeder.SeedData().GetAwaiter().GetResult();
+            app.UseRouting();
+            app.UseAuthorization();
+            app.UseEndpoints(b => { b.MapControllers(); });
+            if (env.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
+            }
+            indexCreator.CreateIndexesAsync()
+                .GetAwaiter()
+                .GetResult();
+            databaseSeeder.SeedData()
+                .GetAwaiter()
+                .GetResult();
         }
 
         private static void RegisterSwaggerGen(IServiceCollection services)
@@ -242,7 +256,7 @@ namespace Lwt
             services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
             services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
             services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
-            services.AddTransient<IAsyncMapper<Text,TextReadModel>, TextReadMapper>();
+            services.AddTransient<IAsyncMapper<Text, TextReadModel>, TextReadMapper>();
         }
     }
 }
