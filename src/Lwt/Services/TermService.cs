@@ -7,6 +7,7 @@ namespace Lwt.Services
     using Lwt.Extensions;
     using Lwt.Interfaces;
     using Lwt.Models;
+    using Lwt.ViewModels;
     using MongoDB.Driver;
 
     /// <summary>
@@ -18,6 +19,7 @@ namespace Lwt.Services
 
         private readonly IMapper<TermEditModel, Term> termEditMapper;
         private readonly IMapper<Term, TermViewModel> termViewMapper;
+        private readonly IMapper<Term, TermMeaningDto> termMeaningMapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TermService"/> class.
@@ -25,14 +27,17 @@ namespace Lwt.Services
         /// <param name="termRepository">the term repository.</param>
         /// <param name="termEditMapper">the term edit mapper.</param>
         /// <param name="termViewMapper">term view mapper.</param>
+        /// <param name="termMeaningMapper">term meaning mapper.</param>
         public TermService(
             ITermRepository termRepository,
             IMapper<TermEditModel, Term> termEditMapper,
-            IMapper<Term, TermViewModel> termViewMapper)
+            IMapper<Term, TermViewModel> termViewMapper,
+            IMapper<Term, TermMeaningDto> termMeaningMapper)
         {
             this.termRepository = termRepository;
             this.termEditMapper = termEditMapper;
             this.termViewMapper = termViewMapper;
+            this.termMeaningMapper = termMeaningMapper;
         }
 
         /// <inheritdoc/>
@@ -79,6 +84,14 @@ namespace Lwt.Services
             filter = filterBuilders.And(termFilter.ToFilterDefinition(), filter);
             IEnumerable<Term> terms = await this.termRepository.SearchAsync(filter, paginationQuery);
             return this.termViewMapper.Map(terms);
+        }
+
+        /// <inheritdoc />
+        public async Task<TermMeaningDto> GetMeaningAsync(Guid userId, Guid termId)
+        {
+            Term term = await this.termRepository.GetUserTermAsync(termId, userId);
+
+            return this.termMeaningMapper.Map(term);
         }
     }
 }

@@ -5,6 +5,7 @@ namespace Lwt.Controllers
     using System.Threading.Tasks;
     using Lwt.Interfaces;
     using Lwt.Models;
+    using Lwt.ViewModels;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
@@ -98,6 +99,20 @@ namespace Lwt.Controllers
             IEnumerable<TermViewModel> termViewModels =
                 await this.termService.SearchAsync(userId, termFilter, paginationQuery);
             return this.Ok(new TermList { Total = total, Items = termViewModels });
+        }
+
+        /// <summary>
+        /// get a term.
+        /// </summary>
+        /// <param name="termId">the term's id.</param>
+        /// <returns>the term meaning.</returns>
+        [HttpGet("{termId}/meaning")]
+        [Authorize]
+        public async Task<IActionResult> GetMeaningAsync([FromRoute] Guid termId)
+        {
+            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            TermMeaningDto termMeaningDto = await this.termService.GetMeaningAsync(userId, termId);
+            return this.Ok(termMeaningDto);
         }
     }
 }

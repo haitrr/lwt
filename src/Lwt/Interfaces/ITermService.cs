@@ -3,7 +3,9 @@ namespace Lwt.Interfaces
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Lwt.Controllers;
     using Lwt.Models;
+    using Lwt.ViewModels;
 
     /// <summary>
     /// a.
@@ -53,5 +55,13 @@ namespace Lwt.Interfaces
             Guid userId,
             TermFilter termFilter,
             PaginationQuery paginationQuery);
+
+        /// <summary>
+        /// get meaning of a user's term.
+        /// </summary>
+        /// <param name="userId"> user id.</param>
+        /// <param name="termId">term id.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        Task<TermMeaningDto> GetMeaningAsync(Guid userId, Guid termId);
     }
 }

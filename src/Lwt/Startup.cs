@@ -6,6 +6,7 @@ namespace Lwt
     using System.IO.Compression;
     using System.Text;
     using FluentValidation.AspNetCore;
+    using Lwt.Controllers;
     using Lwt.Creators;
     using Lwt.DbContexts;
     using Lwt.Interfaces;
@@ -58,10 +59,11 @@ namespace Lwt
         {
             services.AddControllers()
                 .AddNewtonsoftJson()
-                .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
-            ;
+                .AddFluentValidation(config => 
+                    config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
-            services.AddDbContext<IdentityDbContext>(options => options.UseSqlite("Data Source=lwt.db"));
+            services.AddDbContext<IdentityDbContext>(options => 
+                options.UseSqlite("Data Source=lwt.db"));
             services.AddTransient<LwtDbContext>();
 
             // identity
@@ -257,6 +259,7 @@ namespace Lwt
             services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
             services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
             services.AddTransient<IAsyncMapper<Text, TextReadModel>, TextReadMapper>();
+            services.AddTransient<IMapper<Term, TermMeaningDto>, TermMeaningMapper>();
         }
     }
 }

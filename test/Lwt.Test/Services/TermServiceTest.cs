@@ -7,6 +7,7 @@ namespace Lwt.Test.Services
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Services;
+    using Lwt.ViewModels;
     using Moq;
     using Xunit;
 
@@ -18,6 +19,7 @@ namespace Lwt.Test.Services
         private Mock<ITermRepository> termRepositoryMock;
         private Mock<IMapper<TermEditModel, Term>> termEditMapperMock;
         private Mock<IMapper<Term, TermViewModel>> termViewMapperMock;
+        private Mock<IMapper<Term, TermMeaningDto>> termMeaningMapper;
         private TermService termService;
 
         /// <summary>
@@ -28,10 +30,12 @@ namespace Lwt.Test.Services
             this.termEditMapperMock = new Mock<IMapper<TermEditModel, Term>>();
             this.termViewMapperMock = new Mock<IMapper<Term, TermViewModel>>();
             this.termRepositoryMock = new Mock<ITermRepository>();
+            this.termMeaningMapper = new Mock<IMapper<Term, TermMeaningDto>>();
             this.termService = new TermService(
                 this.termRepositoryMock.Object,
                 this.termEditMapperMock.Object,
-                this.termViewMapperMock.Object);
+                this.termViewMapperMock.Object,
+                this.termMeaningMapper.Object);
         }
 
         /// <summary>
@@ -79,8 +83,8 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task EditAsyncShouldUpdateMappedTerm()
         {
-            Guid userId = Guid.NewGuid();
-            Guid termId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var termId = Guid.NewGuid();
             var termEdit = new TermEditModel();
             var current = new Term();
             this.termRepositoryMock.Setup(r => r.GetUserTermAsync(termId, userId))
@@ -120,8 +124,8 @@ namespace Lwt.Test.Services
         {
             var term = new Term();
             var termViewModel = new TermViewModel();
-            Guid userId = Guid.NewGuid();
-            Guid termId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var termId = Guid.NewGuid();
             this.termRepositoryMock.Setup(r => r.GetUserTermAsync(termId, userId))
                 .ReturnsAsync(term);
             this.termViewMapperMock.Setup(m => m.Map(term))
