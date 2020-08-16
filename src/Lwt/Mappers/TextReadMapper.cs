@@ -72,7 +72,6 @@ namespace Lwt.Mappers
                         Id = term.Id,
                         Content = word,
                         LearningLevel = term.LearningLevel,
-                        Meaning = term.Meaning,
                     };
                 }
 
