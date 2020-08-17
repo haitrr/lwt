@@ -25,6 +25,7 @@ namespace Lwt.Middleware
             try
             {
                 await next(context);
+                Console.WriteLine(context.Response.StatusCode);
             }
             catch (BadRequestException exception)
             {

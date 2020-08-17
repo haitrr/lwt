@@ -6,7 +6,6 @@ namespace Lwt
     using System.IO.Compression;
     using System.Text;
     using FluentValidation.AspNetCore;
-    using Lwt.Controllers;
     using Lwt.Creators;
     using Lwt.DbContexts;
     using Lwt.Interfaces;

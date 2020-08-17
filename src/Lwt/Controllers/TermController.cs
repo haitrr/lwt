@@ -106,8 +106,9 @@ namespace Lwt.Controllers
         /// </summary>
         /// <param name="termId">the term's id.</param>
         /// <returns>the term meaning.</returns>
-        [HttpGet("{termId}/meaning")]
+        [ETagFilter(200)]
         [Authorize]
+        [HttpGet("{termId}/meaning")]
         public async Task<IActionResult> GetMeaningAsync([FromRoute] Guid termId)
         {
             Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
