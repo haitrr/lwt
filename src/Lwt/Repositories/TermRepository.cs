@@ -25,23 +25,15 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
-        public Task<Term> GetByUserAndLanguageAndContentAsync(Guid userId, LanguageCode languageCode, string word)
-        {
-            return this.Collection
-                .Find(
-                    term => term.Content == word.ToUpperInvariant() && term.LanguageCode == languageCode &&
-                            term.CreatorId == userId).SingleOrDefaultAsync();
-        }
-
-        /// <inheritdoc />
-        public async Task<Dictionary<string, TermLearningLevel>> GetLearningLevelAsync(
+        public async Task<Dictionary<string, LearningLevel>> GetLearningLevelAsync(
             Guid creatorId,
             LanguageCode languageCode,
             ISet<string> terms)
         {
-            var list = await this.Collection
-                .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.LanguageCode == languageCode)
-                .Project(t => new { t.Content, t.LearningLevel }).ToListAsync();
+            var list = await this.Collection.Find(
+                    t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.LanguageCode == languageCode)
+                .Project(t => new { t.Content, t.LearningLevel })
+                .ToListAsync();
             return list.ToDictionary(t => t.Content, t => t.LearningLevel);
         }
 
@@ -51,8 +43,8 @@ namespace Lwt.Repositories
             LanguageCode languageCode,
             HashSet<string> terms)
         {
-            List<Term> list = await this.Collection
-                .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.LanguageCode == languageCode)
+            List<Term> list = await this.Collection.Find(
+                    t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.LanguageCode == languageCode)
                 .ToListAsync();
             return list.ToDictionary(t => t.Content, t => t);
         }
@@ -60,8 +52,7 @@ namespace Lwt.Repositories
         /// <inheritdoc/>
         public async Task<Term> GetUserTermAsync(Guid termId, Guid userId)
         {
-            Term? term = await this.Collection
-                .Find(t => t.Id == termId && t.CreatorId == userId)
+            Term? term = await this.Collection.Find(t => t.Id == termId && t.CreatorId == userId)
                 .SingleOrDefaultAsync();
 
             if (term == null)

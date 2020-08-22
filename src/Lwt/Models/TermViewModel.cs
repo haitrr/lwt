@@ -20,7 +20,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets learning level.
         /// </summary>
-        public TermLearningLevel LearningLevel { get; set; }
+        public LearningLevel LearningLevel { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets language code.

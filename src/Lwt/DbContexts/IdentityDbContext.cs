@@ -32,6 +32,13 @@ namespace Lwt.DbContexts
                 .ToTable(Term.TableName)
                 .Property(t => t.LanguageCode)
                 .HasConversion(converter);
+
+            var learningLevelConverter = new ValueConverter<LearningLevel, string>(
+                learningLevel => learningLevel.Value,
+                learningLevel => LearningLevel.GetFromString(learningLevel));
+            builder.Entity<Term>()
+                .Property(t => t.LearningLevel)
+                .HasConversion(learningLevelConverter);
             base.OnModelCreating(builder);
         }
     }

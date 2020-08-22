@@ -18,11 +18,11 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets term learning level.
         /// </summary>
-        public TermLearningLevel LearningLevel { get; set; }
+        public LearningLevel LearningLevel { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets term's language.
         /// </summary>
-        public LanguageCode LanguageCode { get; set; }
+        public LanguageCode LanguageCode { get; set; } = null!;
     }
 }

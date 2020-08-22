@@ -31,7 +31,7 @@ namespace Lwt.Utilities
         }
 
         /// <inheritdoc/>
-        public async Task<Dictionary<TermLearningLevel, long>> CountByLearningLevelAsync(
+        public async Task<Dictionary<LearningLevel, long>> CountByLearningLevelAsync(
             IEnumerable<string> words,
             LanguageCode languageCode,
             Guid userId)
@@ -53,15 +53,15 @@ namespace Lwt.Utilities
                 }
             }
 
-            Dictionary<string, TermLearningLevel> countDict =
+            Dictionary<string, LearningLevel> countDict =
                 await this.termRepository.GetLearningLevelAsync(
                     userId,
                     languageCode,
                     termDict.Keys.ToHashSet());
 
-            var result = new Dictionary<TermLearningLevel, long>();
-            IEnumerable<TermLearningLevel> enums = Enum.GetValues(typeof(TermLearningLevel)).Cast<TermLearningLevel>();
-            foreach (TermLearningLevel termLearningLevel in enums)
+            var result = new Dictionary<LearningLevel, long>();
+            IEnumerable<LearningLevel> learningLevels = LearningLevel.GetAll();
+            foreach (LearningLevel termLearningLevel in learningLevels)
             {
                 result[termLearningLevel] = 0;
             }
@@ -70,7 +70,7 @@ namespace Lwt.Utilities
             {
                 if (!countDict.ContainsKey(word))
                 {
-                    result[TermLearningLevel.UnKnow] += termDict[word];
+                    result[LearningLevel.Unknown] += termDict[word];
                     continue;
                 }
 

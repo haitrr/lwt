@@ -2,6 +2,7 @@ namespace Lwt.Test.IntegrationTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
@@ -10,6 +11,7 @@ namespace Lwt.Test.IntegrationTests
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Driver;
     using Newtonsoft.Json;
@@ -59,26 +61,33 @@ namespace Lwt.Test.IntegrationTests
             {
                 LanguageCode = LanguageCode.ENGLISH,
                 Content = "test",
-                LearningLevel = TermLearningLevel.Learning1,
+                LearningLevel = LearningLevel.Learning1,
                 Meaning = "yolo",
             };
 
             string token = this.tokenProvider.GenerateUserToken(user);
             this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            await this.client.PostAsync(
+            HttpResponseMessage? result = await this.client.PostAsync(
                 "api/term",
                 new StringContent(JsonConvert.SerializeObject(termCreateModel), Encoding.UTF8, "application/json"));
+            Assert.Equal(HttpStatusCode.OK, result.StatusCode);
 
-            List<Term> terms = await this.lwtDbContext.GetCollection<Term>()
-                .Find(_ => true)
-                .ToListAsync();
-            Term term = Assert.Single(terms);
-            Assert.NotNull(term);
-            Assert.Equal(user.Id, term.CreatorId);
-            Assert.Equal(termCreateModel.LanguageCode, term.LanguageCode);
-            Assert.Equal("TEST", term.Content);
-            Assert.Equal(termCreateModel.Meaning, term.Meaning);
-            Assert.Equal(termCreateModel.LearningLevel, term.LearningLevel);
+            using (IServiceScope scope = this.factory.Services.CreateScope())
+            {
+                var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                List<Term> terms = await identityDbContext.Set<Term>()
+                    .Where(_ => true)
+                    .ToListAsync();
+                Term? term = Assert.Single(terms);
+                Assert.NotNull(term);
+
+                // ReSharper disable once PossibleNullReferenceException
+                Assert.Equal(user.Id, term.CreatorId);
+                Assert.Equal(termCreateModel.LanguageCode, term.LanguageCode);
+                Assert.Equal("TEST", term.Content);
+                Assert.Equal(termCreateModel.Meaning, term.Meaning);
+                Assert.Equal(termCreateModel.LearningLevel, term.LearningLevel);
+            }
         }
 
         /// <inheritdoc />
@@ -108,13 +117,10 @@ namespace Lwt.Test.IntegrationTests
             }
 
             var existingTerm = new Term { CreatorId = user.Id };
-            await this.lwtDbContext.GetCollection<Term>().InsertOneAsync(existingTerm);
+            await this.lwtDbContext.GetCollection<Term>()
+                .InsertOneAsync(existingTerm);
 
-            var termEditModel = new TermEditModel
-            {
-                LearningLevel = TermLearningLevel.Learning1,
-                Meaning = "yolo",
-            };
+            var termEditModel = new TermEditModel { LearningLevel = LearningLevel.Learning1, Meaning = "yolo", };
 
             string token = this.tokenProvider.GenerateUserToken(user);
             this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -125,8 +131,10 @@ namespace Lwt.Test.IntegrationTests
             List<Term> terms = await this.lwtDbContext.GetCollection<Term>()
                 .Find(_ => true)
                 .ToListAsync();
-            Term term = Assert.Single(terms);
+            Term? term = Assert.Single(terms);
             Assert.NotNull(term);
+
+            // ReSharper disable once PossibleNullReferenceException
             Assert.Equal(termEditModel.Meaning, term.Meaning);
             Assert.Equal(termEditModel.LearningLevel, term.LearningLevel);
         }

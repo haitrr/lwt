@@ -14,10 +14,10 @@ namespace Lwt.Interfaces
         /// get learning level of the terms with content.
         /// </summary>
         /// <param name="creatorId">the creator of term.</param>
-        /// <param name="languageCode"></param>
+        /// <param name="languageCode">language code.</param>
         /// <param name="terms">the terms to find.</param>
         /// <returns>dictionary of term learning level.</returns>
-        Task<Dictionary<string, TermLearningLevel>> GetLearningLevelAsync(
+        Task<Dictionary<string, LearningLevel>> GetLearningLevelAsync(
             Guid creatorId,
             LanguageCode languageCode,
             ISet<string> terms);
@@ -26,7 +26,7 @@ namespace Lwt.Interfaces
         /// get many terms by contents.
         /// </summary>
         /// <param name="creatorId">the creator of term.</param>
-        /// <param name="language">the language.</param>
+        /// <param name="languageCode">the language.</param>
         /// <param name="terms">the terms to find.</param>
         /// <returns>dictionary of term by content.</returns>
         Task<IDictionary<string, Term>> GetManyAsync(Guid creatorId, LanguageCode languageCode, HashSet<string> terms);

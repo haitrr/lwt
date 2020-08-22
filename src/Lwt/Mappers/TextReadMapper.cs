@@ -53,7 +53,7 @@ namespace Lwt.Mappers
             {
                 if (language.ShouldSkip(word))
                 {
-                    termViewModels.Add(new TermReadModel { Content = word, LearningLevel = TermLearningLevel.Skipped });
+                    termViewModels.Add(new TermReadModel { Content = word, LearningLevel = LearningLevel.Skipped });
                     continue;
                 }
 
@@ -62,7 +62,7 @@ namespace Lwt.Mappers
 
                 if (!termDict.ContainsKey(normalizedWord))
                 {
-                    viewModel = new TermReadModel { Content = word, LearningLevel = TermLearningLevel.UnKnow };
+                    viewModel = new TermReadModel { Content = word, LearningLevel = LearningLevel.Unknown };
                 }
                 else
                 {

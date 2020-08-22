@@ -1,6 +1,7 @@
 namespace Lwt.Models
 {
     using System;
+    using System.Collections.Generic;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -99,6 +100,18 @@ namespace Lwt.Models
                 default:
                     throw new NotSupportedException();
             }
+        }
+
+        /// <summary>
+        ///  get all learning levels.
+        /// </summary>
+        /// <returns>all learning levels.</returns>
+        public static IEnumerable<LearningLevel> GetAll()
+        {
+            return new[]
+            {
+                Skipped, Ignored, Unknown, Learning1, Learning2, Learning3, Learning4, Learning5, WellKnown,
+            };
         }
 
         /// <inheritdoc />

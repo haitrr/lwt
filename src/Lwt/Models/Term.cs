@@ -1,8 +1,6 @@
 namespace Lwt.Models
 {
     using System;
-    using MongoDB.Bson;
-    using MongoDB.Bson.Serialization.Attributes;
 
     /// <summary>
     /// the term.
@@ -37,6 +35,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the current learning level.
         /// </summary>
-        public TermLearningLevel LearningLevel { get; set; }
+        public LearningLevel LearningLevel { get; set; }
     }
 }

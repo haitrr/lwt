@@ -12,9 +12,11 @@ namespace Lwt.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="TextViewModel"/> class.
         /// </summary>
+#pragma warning disable 8618
         public TextViewModel()
+#pragma warning restore 8618
         {
-            this.Counts = new Dictionary<TermLearningLevel, long>();
+            this.Counts = new Dictionary<LearningLevel, long>();
         }
 
         /// <summary>
@@ -33,8 +35,9 @@ namespace Lwt.ViewModels
         public Guid Id { get; set; }
 
         /// <summary>
-        /// Gets term counts by learning levels.
+        /// Gets or sets term counts by learning levels.
         /// </summary>
-        public Dictionary<TermLearningLevel, long> Counts { get; }
+        // ReSharper disable once CollectionNeverQueried.Global
+        public Dictionary<LearningLevel, long> Counts { get; set; }
     }
 }

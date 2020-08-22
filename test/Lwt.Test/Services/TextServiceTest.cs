@@ -82,10 +82,11 @@ namespace Lwt.Test.Services
         [Fact]
         public void DeleteAsyncShouldThrowExceptionIfNotOwner()
         {
-            Guid textId = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
             var text = new Text { CreatorId = Guid.NewGuid() };
-            this.textRepository.Setup(r => r.TryGetByIdAsync(textId)).ReturnsAsync(text);
+            this.textRepository.Setup(r => r.TryGetByIdAsync(textId))
+                .ReturnsAsync(text);
             Assert.ThrowsAsync<ForbiddenException>(() => this.textService.DeleteAsync(textId, userId));
         }
 
@@ -96,17 +97,16 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task DeleteAsyncShouldCallRepository()
         {
-             Guid textId = Guid.NewGuid();
-             Guid userId = Guid.NewGuid();
-             var text = new Text { CreatorId = userId };
-             this.textRepository.Reset();
-             this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
+            var textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var text = new Text { CreatorId = userId };
+            this.textRepository.Reset();
+            this.textRepository.Setup(r => r.GetByIdAsync(textId))
+                .ReturnsAsync(text);
 
-             await this.textService.DeleteAsync(textId, userId);
+            await this.textService.DeleteAsync(textId, userId);
 
-             this.textRepository.Verify(
-                 r => r.DeleteByIdAsync(text),
-                 Times.Once);
+            this.textRepository.Verify(r => r.DeleteByIdAsync(text), Times.Once);
         }
 
         /// <summary>
@@ -117,11 +117,12 @@ namespace Lwt.Test.Services
         public async Task DeleteAsyncShouldThrowExceptionIfNotCreator()
         {
             // arrange
-            Guid creatorId = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
+            var creatorId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
             var text = new Text { CreatorId = creatorId };
-            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
+            this.textRepository.Setup(r => r.GetByIdAsync(textId))
+                .ReturnsAsync(text);
 
             // assert
             await Assert.ThrowsAsync<ForbiddenException>(() => this.textService.DeleteAsync(textId, userId));
@@ -135,10 +136,11 @@ namespace Lwt.Test.Services
         public async Task DeleteAsyncShouldCallRepositoryIfHasPermission()
         {
             // arrange
-            Guid creatorId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
+            var creatorId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
             var text = new Text { CreatorId = creatorId };
-            this.textRepository.Setup(r => r.GetByIdAsync(textId)).ReturnsAsync(text);
+            this.textRepository.Setup(r => r.GetByIdAsync(textId))
+                .ReturnsAsync(text);
 
             // act
             await this.textService.DeleteAsync(textId, creatorId);
@@ -155,12 +157,13 @@ namespace Lwt.Test.Services
         public async Task EditAsyncShouldThrowExceptionIfNotHavePermission()
         {
             // arrange
-            Guid creatorId = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
+            var creatorId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
             var editModel = new TextEditModel();
             var text = new Text { CreatorId = creatorId };
-            this.textRepository.Setup(r => r.TryGetByIdAsync(textId)).ReturnsAsync(text);
+            this.textRepository.Setup(r => r.TryGetByIdAsync(textId))
+                .ReturnsAsync(text);
 
             // assert
             await Assert.ThrowsAsync<ForbiddenException>(() => this.textService.EditAsync(textId, userId, editModel));
@@ -174,10 +177,11 @@ namespace Lwt.Test.Services
         public async Task EditAsyncShouldThrowNotFoundExceptionIfTextNotFound()
         {
             // arrange
-            Guid userId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
             var editModel = new TextEditModel();
-            this.textRepository.Setup(r => r.TryGetByIdAsync(textId)).ReturnsAsync((Text?)null);
+            this.textRepository.Setup(r => r.TryGetByIdAsync(textId))
+                .ReturnsAsync((Text?)null);
 
             // assert
             await Assert.ThrowsAsync<NotFoundException>(() => this.textService.EditAsync(textId, userId, editModel));
@@ -191,11 +195,12 @@ namespace Lwt.Test.Services
         public async Task EditAsyncShouldThrowForbiddenExceptionIfNotCreator()
         {
             // arrange
-            Guid userId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
             var editModel = new TextEditModel();
             var text = new Text { CreatorId = Guid.NewGuid() };
-            this.textRepository.Setup(r => r.TryGetByIdAsync(textId)).ReturnsAsync(text);
+            this.textRepository.Setup(r => r.TryGetByIdAsync(textId))
+                .ReturnsAsync(text);
 
             // assert
             await Assert.ThrowsAsync<ForbiddenException>(() => this.textService.EditAsync(textId, userId, editModel));
@@ -208,15 +213,18 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task EditAsyncShouldWorkIfHappyCase()
         {
-            Guid userId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
             var editModel = new TextEditModel();
             var text = new Text { CreatorId = userId };
             var editedText = new Text();
             var language = new Mock<ILanguage>();
-            this.textRepository.Setup(r => r.TryGetByIdAsync(textId)).ReturnsAsync(text);
-            this.textEditMapper.Setup(t => t.Map(editModel, text)).Returns(editedText);
-            this.languageHelper.Setup(t => t.GetLanguage(text.LanguageCode)).Returns(language.Object);
+            this.textRepository.Setup(r => r.TryGetByIdAsync(textId))
+                .ReturnsAsync(text);
+            this.textEditMapper.Setup(t => t.Map(editModel, text))
+                .Returns(editedText);
+            this.languageHelper.Setup(t => t.GetLanguage(text.LanguageCode))
+                .Returns(language.Object);
             await this.textService.EditAsync(textId, userId, editModel);
             this.textRepository.Verify(r => r.UpdateAsync(editedText), Times.Once);
         }
@@ -232,14 +240,13 @@ namespace Lwt.Test.Services
         [Theory]
         public async Task GetByUserAsyncShouldWork(int textNumber)
         {
-            Guid userId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
             var textFilter = new TextFilter();
             var paginationQuery = new PaginationQuery();
             var texts = new List<Text>();
-            var countDict = new Dictionary<TermLearningLevel, long>
+            var countDict = new Dictionary<LearningLevel, long>
             {
-                { TermLearningLevel.Learning1, 321 },
-                { TermLearningLevel.UnKnow, 21 },
+                { LearningLevel.Learning1, 321 }, { LearningLevel.Unknown, 21 },
             };
 
             for (var i = 0; i < textNumber; i++)
@@ -247,8 +254,10 @@ namespace Lwt.Test.Services
                 texts.Add(new Text());
             }
 
-            this.textViewMapper.Setup(m => m.Map(It.IsAny<Text>())).Returns(() => new TextViewModel());
-            this.textRepository.Setup(r => r.GetByUserAsync(userId, textFilter, paginationQuery)).ReturnsAsync(texts);
+            this.textViewMapper.Setup(m => m.Map(It.IsAny<Text>()))
+                .Returns(() => new TextViewModel());
+            this.textRepository.Setup(r => r.GetByUserAsync(userId, textFilter, paginationQuery))
+                .ReturnsAsync(texts);
             this.termCounterMock.Setup(
                     c => c.CountByLearningLevelAsync(
                         It.IsAny<IEnumerable<string>>(),
@@ -256,7 +265,8 @@ namespace Lwt.Test.Services
                         It.IsAny<Guid>()))
                 .ReturnsAsync(countDict);
 
-            IEnumerable<TextViewModel> viewModels = await this.textService.GetByUserAsync(userId, textFilter, paginationQuery);
+            IEnumerable<TextViewModel> viewModels =
+                await this.textService.GetByUserAsync(userId, textFilter, paginationQuery);
             Assert.Equal(viewModels.Count(), texts.Count());
         }
 
@@ -267,9 +277,10 @@ namespace Lwt.Test.Services
         [Fact]
         public Task GetEditDetailShouldThrowNotFoundIfTextNotFound()
         {
-            Guid userId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
-            this.textRepository.Setup(r => r.TryGetByIdAsync(textId)).ReturnsAsync((Text?)null);
+            var userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
+            this.textRepository.Setup(r => r.TryGetByIdAsync(textId))
+                .ReturnsAsync((Text?)null);
             return Assert.ThrowsAsync<NotFoundException>(() => this.textService.GetEditDetailAsync(textId, userId));
         }
 
@@ -280,11 +291,12 @@ namespace Lwt.Test.Services
         [Fact]
         public Task GetEditDetailShouldThrowForbiddenIfUserIsNotOwner()
         {
-            Guid userId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
-            Guid onwerId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
+            var onwerId = Guid.NewGuid();
             var text = new Text { CreatorId = onwerId };
-            this.textRepository.Setup(r => r.TryGetByIdAsync(textId)).ReturnsAsync(text);
+            this.textRepository.Setup(r => r.TryGetByIdAsync(textId))
+                .ReturnsAsync(text);
             return Assert.ThrowsAsync<ForbiddenException>(() => this.textService.GetEditDetailAsync(textId, userId));
         }
 
@@ -295,12 +307,14 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task GetEditDetailShouldWork()
         {
-            Guid userId = Guid.NewGuid();
-            Guid textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
             var detailModel = new TextEditDetailModel();
             var text = new Text { CreatorId = userId };
-            this.textRepository.Setup(r => r.TryGetByIdAsync(textId)).ReturnsAsync(text);
-            this.textEditDetailMapper.Setup(r => r.Map(text)).Returns(detailModel);
+            this.textRepository.Setup(r => r.TryGetByIdAsync(textId))
+                .ReturnsAsync(text);
+            this.textEditDetailMapper.Setup(r => r.Map(text))
+                .Returns(detailModel);
 
             TextEditDetailModel result = await this.textService.GetEditDetailAsync(textId, userId);
             Assert.Equal(detailModel, result);
@@ -315,13 +329,15 @@ namespace Lwt.Test.Services
         {
             ulong termIndex = 2;
             var setBookmarkModel = new SetBookmarkModel { TermIndex = termIndex };
-            Guid textId = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
             var text = new Text();
             text.Words = new List<string> { "hello", "unitest" };
-            this.userTextGetterMock.Setup(r => r.GetUserTextAsync(textId, userId)).ReturnsAsync(text);
+            this.userTextGetterMock.Setup(r => r.GetUserTextAsync(textId, userId))
+                .ReturnsAsync(text);
 
-            await Assert.ThrowsAsync<BadRequestException>(() => this.textService.SetBookmarkAsync(textId, userId,  setBookmarkModel));
+            await Assert.ThrowsAsync<BadRequestException>(
+                () => this.textService.SetBookmarkAsync(textId, userId, setBookmarkModel));
         }
 
         /// <summary>
@@ -333,11 +349,12 @@ namespace Lwt.Test.Services
         {
             ulong termIndex = 2;
             var setBookmarkModel = new SetBookmarkModel { TermIndex = termIndex };
-            Guid textId = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
+            var textId = Guid.NewGuid();
+            var userId = Guid.NewGuid();
             var text = new Text();
             text.Words = new List<string> { "hello", "vscode", "unitest" };
-            this.userTextGetterMock.Setup(r => r.GetUserTextAsync(textId, userId)).ReturnsAsync(text);
+            this.userTextGetterMock.Setup(r => r.GetUserTextAsync(textId, userId))
+                .ReturnsAsync(text);
 
             await this.textService.SetBookmarkAsync(textId, userId, setBookmarkModel);
 

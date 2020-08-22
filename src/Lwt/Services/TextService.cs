@@ -81,10 +81,10 @@ namespace Lwt.Services
             foreach (Text text in texts)
             {
                 TextViewModel viewModel = this.textViewMapper.Map(text);
-                Dictionary<TermLearningLevel, long> termCountDict =
+                Dictionary<LearningLevel, long> termCountDict =
                     await this.termCounter.CountByLearningLevelAsync(text.Words, text.LanguageCode, text.CreatorId);
 
-                foreach (KeyValuePair<TermLearningLevel, long> keyValuePair in termCountDict)
+                foreach (KeyValuePair<LearningLevel, long> keyValuePair in termCountDict)
                 {
                     viewModel.Counts.Add(keyValuePair.Key, keyValuePair.Value);
                 }
