@@ -1,11 +1,10 @@
 namespace Lwt.DbContexts
 {
     using System;
-
     using Lwt.Models;
-
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
     /// <inheritdoc />
     /// <summary>
@@ -20,6 +19,19 @@ namespace Lwt.DbContexts
         public IdentityDbContext(DbContextOptions<IdentityDbContext> options)
             : base(options)
         {
+        }
+
+        /// <inheritdoc />
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            var converter = new ValueConverter<LanguageCode, string>(
+                languageCode => languageCode.Value,
+                code => LanguageCode.GetFromString(code));
+
+            builder.Entity<Term>()
+                .Property(t => t.LanguageCode)
+                .HasConversion(converter);
+            base.OnModelCreating(builder);
         }
     }
 }

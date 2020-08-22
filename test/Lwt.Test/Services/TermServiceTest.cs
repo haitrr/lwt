@@ -1,7 +1,6 @@
 namespace Lwt.Test.Services
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Interfaces;
@@ -16,11 +15,12 @@ namespace Lwt.Test.Services
     /// </summary>
     public class TermServiceTest
     {
-        private Mock<ITermRepository> termRepositoryMock;
+        private Mock<ISqlTermRepository> termRepositoryMock;
         private Mock<IMapper<TermEditModel, Term>> termEditMapperMock;
         private Mock<IMapper<Term, TermViewModel>> termViewMapperMock;
         private Mock<IMapper<Term, TermMeaningDto>> termMeaningMapper;
         private TermService termService;
+        private Mock<IDbTransaction> dbTransaction;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TermServiceTest"/> class.
@@ -29,37 +29,15 @@ namespace Lwt.Test.Services
         {
             this.termEditMapperMock = new Mock<IMapper<TermEditModel, Term>>();
             this.termViewMapperMock = new Mock<IMapper<Term, TermViewModel>>();
-            this.termRepositoryMock = new Mock<ITermRepository>();
+            this.termRepositoryMock = new Mock<ISqlTermRepository>();
             this.termMeaningMapper = new Mock<IMapper<Term, TermMeaningDto>>();
+            this.dbTransaction = new Mock<IDbTransaction>();
             this.termService = new TermService(
                 this.termRepositoryMock.Object,
                 this.termEditMapperMock.Object,
                 this.termViewMapperMock.Object,
-                this.termMeaningMapper.Object);
-        }
-
-        /// <summary>
-        /// test search async.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task SearchAsyncShouldReturnListResults()
-        {
-            var terms = new List<Term>();
-            var termViewModels = new List<TermViewModel>();
-            var termFilter = new TermFilter();
-            this.termRepositoryMock.Setup(
-                    r => r.SearchAsync(It.IsAny<Expression<Func<Term, bool>>>(), It.IsAny<PaginationQuery>()))
-                .ReturnsAsync(terms);
-            this.termViewMapperMock.Setup(m => m.Map(terms))
-                .Returns(termViewModels);
-
-            IEnumerable<TermViewModel> actual = await this.termService.SearchAsync(
-                It.IsAny<Guid>(),
-                termFilter,
-                It.IsAny<PaginationQuery>());
-
-            Assert.Equal(termViewModels, actual);
+                this.termMeaningMapper.Object,
+                this.dbTransaction.Object);
         }
 
         /// <summary>
@@ -93,7 +71,7 @@ namespace Lwt.Test.Services
                 .Returns(current);
 
             await this.termService.EditAsync(termEdit, termId, userId);
-            this.termRepositoryMock.Verify(r => r.UpdateAsync(current));
+            this.termRepositoryMock.Verify(r => r.Update(current));
         }
 
         /// <summary>
@@ -106,7 +84,7 @@ namespace Lwt.Test.Services
         [InlineData(4432)]
         [InlineData(2)]
         [InlineData(6)]
-        public async Task CountAsyncShouldReturnCountFromRepository(long count)
+        public async Task CountAsyncShouldReturnCountFromRepository(int count)
         {
             this.termRepositoryMock.Setup(r => r.CountAsync(It.IsAny<Expression<Func<Term, bool>>>()))
                 .ReturnsAsync(count);

@@ -50,7 +50,7 @@ namespace Lwt.Utilities
         public async Task SeedData()
         {
             await this.lwtDbContext.Database.EnsureCreatedAsync();
-            User hai = await this.userRepository.GetByUserNameAsync("hai");
+            User? hai = await this.userRepository.GetByUserNameAsync("hai");
 
             if (hai != null)
             {
@@ -115,6 +115,7 @@ The long and the short of it; it is meaningless to talk about who is poor or who
             {
                 var term = item.ToObject<Term>();
                 term.Id = Guid.NewGuid();
+                Console.WriteLine(term.Id);
                 term.CreatorId = hai.Id;
                 term.Content = term.Content.ToUpperInvariant();
                 term.LanguageCode = LanguageCode.ENGLISH;

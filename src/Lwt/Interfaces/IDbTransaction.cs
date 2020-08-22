@@ -3,14 +3,14 @@ namespace Lwt.Interfaces
     using System.Threading.Tasks;
 
     /// <summary>
-    /// a.
+    /// db transaction.
     /// </summary>
-    public interface ITransaction
+    public interface IDbTransaction
     {
         /// <summary>
         /// a.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task Commit();
+        Task CommitAsync();
     }
 }

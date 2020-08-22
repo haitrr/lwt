@@ -44,7 +44,7 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="userName">the user name.</param>
         /// <returns>the user.</returns>
-        Task<User> GetByUserNameAsync(string userName);
+        Task<User?> GetByUserNameAsync(string userName);
 
         /// <summary>
         /// change the password of a user.

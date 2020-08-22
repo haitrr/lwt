@@ -1,9 +1,7 @@
 namespace Lwt.Interfaces
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Lwt.Controllers;
     using Lwt.Models;
     using Lwt.ViewModels;
 
@@ -42,19 +40,7 @@ namespace Lwt.Interfaces
         /// <param name="userId">the user.</param>
         /// <param name="termFilter">the filter.</param>
         /// <returns>count.</returns>
-        Task<long> CountAsync(Guid userId, TermFilter termFilter);
-
-        /// <summary>
-        /// return terms that match filter with pagination.
-        /// </summary>
-        /// <param name="userId">id of request user.</param>
-        /// <param name="termFilter">the filter.</param>
-        /// <param name="paginationQuery">the pagination query.</param>
-        /// <returns>list of term view models that match filter.</returns>
-        Task<IEnumerable<TermViewModel>> SearchAsync(
-            Guid userId,
-            TermFilter termFilter,
-            PaginationQuery paginationQuery);
+        Task<int> CountAsync(Guid userId, TermFilter termFilter);
 
         /// <summary>
         /// get meaning of a user's term.

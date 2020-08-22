@@ -23,6 +23,11 @@ namespace Lwt.Models
         public TermLearningLevel LearningLevel { get; set; }
 
         /// <summary>
+        /// Gets or sets language code.
+        /// </summary>
+        public LanguageCode LanguageCode { get; set; } = null!;
+
+        /// <summary>
         /// Gets or sets term's id.
         /// </summary>
         public Guid Id { get; set; }

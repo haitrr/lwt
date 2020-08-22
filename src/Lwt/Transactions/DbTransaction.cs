@@ -10,22 +10,22 @@ namespace Lwt.Transactions
     /// transaction.
     /// </summary>
     /// <typeparam name="T">type.</typeparam>
-    public class Transaction<T> : ITransaction
+    public class DbTransaction<T> : IDbTransaction
         where T : DbContext
     {
         private readonly T databaseContext;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Transaction{T}"/> class.
+        /// Initializes a new instance of the <see cref="DbTransaction{T}"/> class.
         /// </summary>
         /// <param name="databaseContext">dbContext.</param>
-        public Transaction(T databaseContext)
+        public DbTransaction(T databaseContext)
         {
             this.databaseContext = databaseContext;
         }
 
         /// <inheritdoc/>
-        public async Task Commit()
+        public async Task CommitAsync()
         {
             await this.databaseContext.SaveChangesAsync();
         }

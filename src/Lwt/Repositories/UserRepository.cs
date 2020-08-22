@@ -37,7 +37,7 @@ namespace Lwt.Repositories
         /// <inheritdoc/>
         public Task<User?> TryGetByIdAsync(Guid userId)
         {
-            return this.userManager.FindByIdAsync(userId.ToString());
+            return this.userManager.FindByIdAsync(userId.ToString()) !;
         }
 
         /// <inheritdoc />
@@ -54,9 +54,9 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public Task<User> GetByUserNameAsync(string userName)
+        public Task<User?> GetByUserNameAsync(string userName)
         {
-            return this.userManager.FindByNameAsync(userName);
+            return this.userManager.FindByNameAsync(userName) !;
         }
 
         /// <inheritdoc/>

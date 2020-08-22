@@ -126,9 +126,10 @@ namespace Lwt
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserSettingRepository, UserSettingRepository>();
             services.AddScoped<ITermRepository, TermRepository>();
+            services.AddScoped<ISqlTermRepository, SqlTermRepository>();
 
             // transaction
-            services.AddScoped<ITransaction, Transaction<IdentityDbContext>>();
+            services.AddScoped<IDbTransaction, DbTransaction<IdentityDbContext>>();
 
             // database seeder
             services.AddTransient<IDatabaseSeeder, DatabaseSeeder>();
@@ -197,6 +198,7 @@ namespace Lwt
             indexCreator.CreateIndexesAsync()
                 .GetAwaiter()
                 .GetResult();
+            Console.WriteLine("seeding db");
             databaseSeeder.SeedData()
                 .GetAwaiter()
                 .GetResult();

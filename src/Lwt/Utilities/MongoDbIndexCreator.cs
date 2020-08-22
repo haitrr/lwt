@@ -23,25 +23,7 @@ namespace Lwt.Utilities
         /// <inheritdoc />
         public async Task CreateIndexesAsync()
         {
-            await this.CreateTermIndexesAsync();
             await this.CreateTextIndexesAsync();
-        }
-
-        private async Task CreateTermIndexesAsync()
-        {
-            IMongoCollection<Term> collection = this.lwtDbContext.GetCollection<Term>();
-            await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
-                Builders<Term>.IndexKeys.Ascending(term => term.Content)));
-            await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
-                Builders<Term>.IndexKeys.Ascending(term => term.CreatorId)));
-            await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
-                Builders<Term>.IndexKeys.Ascending(term => term.LanguageCode)));
-            await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
-                Builders<Term>.IndexKeys.Combine(
-                    Builders<Term>.IndexKeys.Ascending(t => t.CreatorId),
-                    Builders<Term>.IndexKeys.Ascending(t => t.LanguageCode),
-                    Builders<Term>.IndexKeys.Ascending(t => t.Content)),
-                new CreateIndexOptions { Unique = true }));
         }
 
         private async Task CreateTextIndexesAsync()
