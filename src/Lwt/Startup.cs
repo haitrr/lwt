@@ -29,6 +29,7 @@ namespace Lwt
     using Microsoft.Extensions.Hosting;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.OpenApi.Models;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// statup.
@@ -173,6 +174,7 @@ namespace Lwt
             IWebHostEnvironment env)
 #pragma warning disable CA1822
         {
+            Console.WriteLine(new { Code = JsonConvert.SerializeObject(LanguageCode.CHINESE) });
             // compress response
             app.UseResponseCompression();
 

@@ -41,7 +41,7 @@ namespace Lwt.Creators
                 throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
             }
 
-            text.Words = this.textSeparator.SeparateText(text.Content, text.Language).ToList();
+            text.Words = this.textSeparator.SeparateText(text.Content, text.LanguageCode).ToList();
             await this.textRepository.AddAsync(text);
         }
     }

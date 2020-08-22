@@ -12,7 +12,7 @@ namespace Lwt.Mappers
         public override TextEditDetailModel Map(Text from, TextEditDetailModel result)
         {
             result.Id = from.Id;
-            result.Language = from.Language;
+            result.LanguageCode = from.LanguageCode;
             result.Title = from.Title;
             result.Content = from.Content;
             return result;

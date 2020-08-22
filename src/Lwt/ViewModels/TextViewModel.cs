@@ -25,7 +25,7 @@ namespace Lwt.ViewModels
         /// <summary>
         /// Gets or sets language.
         /// </summary>
-        public Language Language { get; set; }
+        public LanguageCode LanguageCode { get; set; }
 
         /// <summary>
         /// Gets or sets the id.

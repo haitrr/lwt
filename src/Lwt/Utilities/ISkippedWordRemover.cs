@@ -12,8 +12,8 @@ namespace Lwt.Utilities
         /// remove skipped words of a languages from the words.
         /// </summary>
         /// <param name="words"> the words.</param>
-        /// <param name="language">the language.</param>
+        /// <param name="languageCode"></param>
         /// <returns>none skipped words.</returns>
-        IEnumerable<string> RemoveSkippedWords(IEnumerable<string> words, Language language);
+        IEnumerable<string> RemoveSkippedWords(IEnumerable<string> words, LanguageCode languageCode);
     }
 }

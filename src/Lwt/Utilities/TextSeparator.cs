@@ -20,7 +20,7 @@ namespace Lwt.Utilities
         }
 
         /// <inheritdoc />
-        public IEnumerable<string> SeparateText(string text, Language language)
+        public IEnumerable<string> SeparateText(string text, LanguageCode language)
         {
             try
             {

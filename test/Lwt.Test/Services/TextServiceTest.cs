@@ -216,7 +216,7 @@ namespace Lwt.Test.Services
             var language = new Mock<ILanguage>();
             this.textRepository.Setup(r => r.TryGetByIdAsync(textId)).ReturnsAsync(text);
             this.textEditMapper.Setup(t => t.Map(editModel, text)).Returns(editedText);
-            this.languageHelper.Setup(t => t.GetLanguage(text.Language)).Returns(language.Object);
+            this.languageHelper.Setup(t => t.GetLanguage(text.LanguageCode)).Returns(language.Object);
             await this.textService.EditAsync(textId, userId, editModel);
             this.textRepository.Verify(r => r.UpdateAsync(editedText), Times.Once);
         }
@@ -252,7 +252,7 @@ namespace Lwt.Test.Services
             this.termCounterMock.Setup(
                     c => c.CountByLearningLevelAsync(
                         It.IsAny<IEnumerable<string>>(),
-                        It.IsAny<Language>(),
+                        It.IsAny<LanguageCode>(),
                         It.IsAny<Guid>()))
                 .ReturnsAsync(countDict);
 

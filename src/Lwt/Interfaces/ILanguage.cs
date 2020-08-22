@@ -20,12 +20,7 @@ namespace Lwt.Interfaces
         /// <summary>
         /// Gets the language code.
         /// </summary>
-        string Code { get; }
-
-        /// <summary>
-        /// Gets the enum.
-        /// </summary>
-        Language Id { get; }
+        LanguageCode Code { get; }
 
         /// <summary>
         /// decide if a term should be skipped.

@@ -33,12 +33,12 @@ namespace Lwt.Utilities
         /// <inheritdoc/>
         public async Task<Dictionary<TermLearningLevel, long>> CountByLearningLevelAsync(
             IEnumerable<string> words,
-            Language language,
+            LanguageCode languageCode,
             Guid userId)
         {
-            IEnumerable<string> notSkippedTerms = this.skippedWordRemover.RemoveSkippedWords(words, language);
+            IEnumerable<string> notSkippedTerms = this.skippedWordRemover.RemoveSkippedWords(words, languageCode);
             IEnumerable<string> notSkippedTermsNormalized =
-                this.textNormalizer.Normalize(notSkippedTerms, language);
+                this.textNormalizer.Normalize(notSkippedTerms, languageCode);
             var termDict = new Dictionary<string, long>();
 
             foreach (string term in notSkippedTermsNormalized)
@@ -56,7 +56,7 @@ namespace Lwt.Utilities
             Dictionary<string, TermLearningLevel> countDict =
                 await this.termRepository.GetLearningLevelAsync(
                     userId,
-                    language,
+                    languageCode,
                     termDict.Keys.ToHashSet());
 
             var result = new Dictionary<TermLearningLevel, long>();

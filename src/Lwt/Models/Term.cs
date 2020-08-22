@@ -17,8 +17,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the term's language.
         /// </summary>
-        [BsonRepresentation(BsonType.Int32)]
-        public Language Language { get; set; }
+        public LanguageCode LanguageCode { get; set; }
 
         /// <summary>
         /// Gets or sets the meaning.

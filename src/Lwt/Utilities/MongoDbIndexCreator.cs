@@ -35,11 +35,11 @@ namespace Lwt.Utilities
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
                 Builders<Term>.IndexKeys.Ascending(term => term.CreatorId)));
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
-                Builders<Term>.IndexKeys.Ascending(term => term.Language)));
+                Builders<Term>.IndexKeys.Ascending(term => term.LanguageCode)));
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Term>(
                 Builders<Term>.IndexKeys.Combine(
                     Builders<Term>.IndexKeys.Ascending(t => t.CreatorId),
-                    Builders<Term>.IndexKeys.Ascending(t => t.Language),
+                    Builders<Term>.IndexKeys.Ascending(t => t.LanguageCode),
                     Builders<Term>.IndexKeys.Ascending(t => t.Content)),
                 new CreateIndexOptions { Unique = true }));
         }
@@ -48,7 +48,7 @@ namespace Lwt.Utilities
         {
             IMongoCollection<Text> collection = this.lwtDbContext.GetCollection<Text>();
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Text>(
-                Builders<Text>.IndexKeys.Ascending(text => text.Language)));
+                Builders<Text>.IndexKeys.Ascending(text => text.LanguageCode)));
             await collection.Indexes.CreateOneAsync(new CreateIndexModel<Text>(
                 Builders<Text>.IndexKeys.Ascending(text => text.CreatorId)));
         }

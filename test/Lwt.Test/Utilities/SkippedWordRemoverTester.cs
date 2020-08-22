@@ -43,10 +43,10 @@ namespace Lwt.Test.Utilities
             var words = new List<string> { "sdf", "dsfsd", "dfjk", "sdf" };
             var languageMock = new Mock<ILanguage>();
             languageMock.Setup(l => l.ShouldSkip("sdf")).Returns(true);
-            this.languageHelperMock.Setup(h => h.GetLanguage(It.IsAny<Language>()))
+            this.languageHelperMock.Setup(h => h.GetLanguage(It.IsAny<LanguageCode>()))
                 .Returns(languageMock.Object);
 
-            IEnumerable<string> result = this.skippedWordRemover.RemoveSkippedWords(words, Language.English);
+            IEnumerable<string> result = this.skippedWordRemover.RemoveSkippedWords(words, LanguageCode.ENGLISH);
 
             Assert.DoesNotContain("sdf", result);
             Assert.Contains("dsfsd", result);

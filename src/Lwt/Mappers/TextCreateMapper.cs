@@ -17,7 +17,7 @@ namespace Lwt.Mappers
             result.Title = from.Title;
             result.Content = from.Content;
             result.CreatorId = from2;
-            result.Language = from.Language;
+            result.LanguageCode = from.LanguageCode;
 
             return result;
         }

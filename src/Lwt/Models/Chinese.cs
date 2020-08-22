@@ -27,7 +27,7 @@ namespace Lwt.Models
         public string SpeakCode => "zh-CN";
 
         /// <inheritdoc />
-        public string Code => "zh";
+        public LanguageCode Code => LanguageCode.CHINESE;
 
         /// <inheritdoc />
         public Language Id => Language.Chinese;

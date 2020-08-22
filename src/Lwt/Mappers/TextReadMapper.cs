@@ -36,17 +36,17 @@ namespace Lwt.Mappers
         public override async Task<TextReadModel> MapAsync(Text source, TextReadModel result)
         {
             result.Title = source.Title;
-            result.Language = source.Language;
+            result.LanguageCode = source.LanguageCode;
             result.Bookmark = source.Bookmark;
             result.Id = source.Id;
 
             var termViewModels = new List<TermReadModel>();
-            ILanguage language = this.languageHelper.GetLanguage(source.Language);
-            IEnumerable<string> notSkippedTerms = this.skippedWordRemover.RemoveSkippedWords(source.Words, source.Language);
+            ILanguage language = this.languageHelper.GetLanguage(source.LanguageCode);
+            IEnumerable<string> notSkippedTerms = this.skippedWordRemover.RemoveSkippedWords(source.Words, source.LanguageCode);
             IEnumerable<string> normalizedTerms = notSkippedTerms.Select(t => language.Normalize(t));
             IDictionary<string, Term> termDict = await this.termRepository.GetManyAsync(
                 source.CreatorId,
-                language.Id,
+                language.Code,
                 normalizedTerms.ToHashSet());
 
             foreach (string word in source.Words)

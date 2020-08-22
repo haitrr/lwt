@@ -66,7 +66,7 @@ namespace Lwt.Test.IntegrationTests
         {
             await this.lwtDbContext.GetCollection<Text>()
                 .DeleteManyAsync(_ => true);
-            var body = new { title = "test text", content = "this is a test text", language = 1 };
+            var body = new { title = "test text", content = "this is a test text", languageCode = "en" };
             string content = JsonConvert.SerializeObject(body);
             HttpResponseMessage responseMessage = await this.client.PostAsync(
                 "api/text",
@@ -78,7 +78,7 @@ namespace Lwt.Test.IntegrationTests
             Assert.NotNull(text);
             Assert.Equal(body.title, text.Title);
             Assert.Equal(body.content, text.Content);
-            Assert.Equal(body.language, (int)text.Language);
+            Assert.Equal(body.languageCode, text.LanguageCode.ToString());
             Assert.Equal(this.user.Id, text.CreatorId);
         }
 
@@ -98,7 +98,7 @@ namespace Lwt.Test.IntegrationTests
                     .InsertOneAsync(
                         new Text()
                         {
-                            Title = "test", Content = "test", Language = Language.English, CreatorId = this.user.Id,
+                            Title = "test", Content = "test", LanguageCode = LanguageCode.ENGLISH, CreatorId = this.user.Id,
                         });
             }
 
@@ -112,7 +112,7 @@ namespace Lwt.Test.IntegrationTests
             foreach (JToken item in data)
             {
                 Assert.Equal("test", item.Value<string>("title"));
-                Assert.Equal((int)Language.English, item.Value<int>("language"));
+                Assert.Equal(LanguageCode.ENGLISH, item.Value<LanguageCode>("languageCode"));
                 Assert.NotNull(item.SelectToken("counts"));
             }
         }
@@ -128,7 +128,7 @@ namespace Lwt.Test.IntegrationTests
                 .DeleteManyAsync(_ => true);
             var text = new Text
             {
-                Title = "test", Content = "test", Language = Language.English, CreatorId = this.user.Id,
+                Title = "test", Content = "test", LanguageCode = LanguageCode.ENGLISH, CreatorId = this.user.Id,
             };
             await this.lwtDbContext.GetCollection<Text>()
                 .InsertOneAsync(text);
@@ -154,13 +154,13 @@ namespace Lwt.Test.IntegrationTests
             {
                 Title = "test",
                 Content = "this is a test text",
-                Language = Language.English,
+                LanguageCode = LanguageCode.ENGLISH,
                 CreatorId = this.user.Id,
             };
             await this.lwtDbContext.GetCollection<Text>()
                 .InsertOneAsync(text);
 
-            var editContent = new { language = 3, title = "test edited", content = "edited content" };
+            var editContent = new { languageCode = LanguageCode.JAPANESE, title = "test edited", content = "edited content" };
 
             HttpResponseMessage responseMessage = await this.client.PutAsync(
                 $"api/text/{text.Id}",
@@ -173,7 +173,7 @@ namespace Lwt.Test.IntegrationTests
                 .Find(t => t.Id == text.Id)
                 .SingleAsync();
             Assert.Equal(editContent.title, editedText.Title);
-            Assert.Equal(editContent.language, (int)editedText.Language);
+            Assert.Equal(editContent.languageCode, editedText.LanguageCode);
             Assert.Equal(editContent.content, editedText.Content);
         }
 
@@ -190,7 +190,7 @@ namespace Lwt.Test.IntegrationTests
             {
                 Title = "test",
                 Content = "this is a test text",
-                Language = Language.English,
+                LanguageCode = LanguageCode.ENGLISH,
                 CreatorId = this.user.Id,
             };
             await this.lwtDbContext.GetCollection<Text>()
@@ -205,7 +205,7 @@ namespace Lwt.Test.IntegrationTests
                     .ToLower(),
                 content.Value<string>("id")
                     .ToLower());
-            Assert.Equal((int)text.Language, content.Value<int>("language"));
+            Assert.Equal(text.LanguageCode, content.Value<LanguageCode>("languageCode"));
             Assert.Equal(text.Content, content.Value<string>("content"));
         }
 
@@ -222,7 +222,7 @@ namespace Lwt.Test.IntegrationTests
             {
                 Title = "test",
                 Content = "this is a test text",
-                Language = Language.English,
+                LanguageCode = LanguageCode.ENGLISH,
                 CreatorId = this.user.Id,
             };
             await this.lwtDbContext.GetCollection<Text>()
@@ -237,7 +237,7 @@ namespace Lwt.Test.IntegrationTests
                     .ToLower(),
                 content.Value<string>("id")
                     .ToLower());
-            Assert.Equal((int)text.Language, content.Value<int>("language"));
+            Assert.Equal(text.LanguageCode, content.Value<LanguageCode>("languageCode"));
             Assert.NotNull(content.Value<JArray>("terms"));
         }
 
@@ -254,7 +254,7 @@ namespace Lwt.Test.IntegrationTests
             {
                 Title = "test",
                 Content = "this is a test text",
-                Language = Language.English,
+                LanguageCode = LanguageCode.ENGLISH,
                 CreatorId = this.user.Id,
                 Words = new List<string>
                 {

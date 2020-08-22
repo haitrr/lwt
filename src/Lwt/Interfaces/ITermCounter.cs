@@ -14,12 +14,12 @@ namespace Lwt.Interfaces
         /// count the terms by learning level.
         /// </summary>
         /// <param name="words">the words.</param>
-        /// <param name="language">the languages.</param>
+        /// <param name="languageCode"></param>
         /// <param name="userId">the user id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task<Dictionary<TermLearningLevel, long>> CountByLearningLevelAsync(
             IEnumerable<string> words,
-            Language language,
+            LanguageCode languageCode,
             Guid userId);
     }
 }

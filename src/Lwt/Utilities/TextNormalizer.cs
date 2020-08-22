@@ -20,16 +20,16 @@ namespace Lwt.Utilities
         }
 
         /// <inheritdoc/>
-        public string Normalize(string text, Language language)
+        public string Normalize(string text, LanguageCode languageCode)
         {
-            ILanguage lang = this.languageHelper.GetLanguage(language);
+            ILanguage lang = this.languageHelper.GetLanguage(languageCode);
             return lang.Normalize(text);
         }
 
         /// <inheritdoc/>
-        public IEnumerable<string> Normalize(IEnumerable<string> text, Language language)
+        public IEnumerable<string> Normalize(IEnumerable<string> text, LanguageCode languageCode)
         {
-            return text.Select(t => this.Normalize(t, language));
+            return text.Select(t => this.Normalize(t, (LanguageCode)languageCode));
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Lwt.Mappers
             result.Content = from.Content.ToUpperInvariant();
             result.Meaning = from.Meaning;
             result.LearningLevel = from.LearningLevel;
-            result.Language = from.Language;
+            result.LanguageCode = from.LanguageCode;
             result.CreatorId = from2;
 
             return result;

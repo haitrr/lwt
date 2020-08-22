@@ -57,7 +57,7 @@ namespace Lwt.Test.IntegrationTests
 
             var termCreateModel = new TermCreateModel
             {
-                Language = Language.English,
+                LanguageCode = LanguageCode.ENGLISH,
                 Content = "test",
                 LearningLevel = TermLearningLevel.Learning1,
                 Meaning = "yolo",
@@ -75,7 +75,7 @@ namespace Lwt.Test.IntegrationTests
             Term term = Assert.Single(terms);
             Assert.NotNull(term);
             Assert.Equal(user.Id, term.CreatorId);
-            Assert.Equal(termCreateModel.Language, term.Language);
+            Assert.Equal(termCreateModel.LanguageCode, term.LanguageCode);
             Assert.Equal("TEST", term.Content);
             Assert.Equal(termCreateModel.Meaning, term.Meaning);
             Assert.Equal(termCreateModel.LearningLevel, term.LearningLevel);
@@ -189,7 +189,7 @@ namespace Lwt.Test.IntegrationTests
                 dbContext.SaveChanges();
             }
 
-            var term = new Term { CreatorId = user.Id, Language = Language.English, Content = "test", };
+            var term = new Term { CreatorId = user.Id, LanguageCode = LanguageCode.ENGLISH, Content = "test", };
             this.lwtDbContext.GetCollection<Term>()
                 .InsertOne(term);
 

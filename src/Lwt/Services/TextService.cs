@@ -82,7 +82,7 @@ namespace Lwt.Services
             {
                 TextViewModel viewModel = this.textViewMapper.Map(text);
                 Dictionary<TermLearningLevel, long> termCountDict =
-                    await this.termCounter.CountByLearningLevelAsync(text.Words, text.Language, text.CreatorId);
+                    await this.termCounter.CountByLearningLevelAsync(text.Words, text.LanguageCode, text.CreatorId);
 
                 foreach (KeyValuePair<TermLearningLevel, long> keyValuePair in termCountDict)
                 {
@@ -181,7 +181,7 @@ namespace Lwt.Services
 
         private void SplitText(Text text)
         {
-            ILanguage language = this.languageHelper.GetLanguage(text.Language);
+            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
             text.Words = language.SplitText(text.Content);
         }
     }

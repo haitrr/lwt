@@ -23,6 +23,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets term's language.
         /// </summary>
-        public Language Language { get; set; }
+        public LanguageCode LanguageCode { get; set; }
     }
 }

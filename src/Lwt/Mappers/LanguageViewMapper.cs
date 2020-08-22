@@ -13,7 +13,6 @@ namespace Lwt.Mappers
         public override LanguageViewModel Map(ILanguage from, LanguageViewModel result)
         {
             result.Name = from.Name;
-            result.Id = from.Id;
             result.Code = from.Code;
             result.SpeakCode = from.SpeakCode;
 

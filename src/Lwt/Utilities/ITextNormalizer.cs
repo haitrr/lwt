@@ -12,16 +12,16 @@ namespace Lwt.Utilities
         /// normalize a string base on its language.
         /// </summary>
         /// <param name="text">the text.</param>
-        /// <param name="language">the language.</param>
+        /// <param name="languageCode"></param>
         /// <returns>the normalized text.</returns>
-        string Normalize(string text, Language language);
+        string Normalize(string text, LanguageCode languageCode);
 
         /// <summary>
         /// normalize a strings base on its language.
         /// </summary>
         /// <param name="text">the texts.</param>
-        /// <param name="language">the languages.</param>
+        /// <param name="languageCode"></param>
         /// <returns>normalized texts.</returns>
-        IEnumerable<string> Normalize(IEnumerable<string> text, Language language);
+        IEnumerable<string> Normalize(IEnumerable<string> text, LanguageCode languageCode);
     }
 }

@@ -25,25 +25,22 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
-        public Task<Term> GetByUserAndLanguageAndContentAsync(
-          Guid userId,
-          Language language,
-          string word)
+        public Task<Term> GetByUserAndLanguageAndContentAsync(Guid userId, LanguageCode languageCode, string word)
         {
             return this.Collection
                 .Find(
-                    term => term.Content == word.ToUpperInvariant() && term.Language == language &&
+                    term => term.Content == word.ToUpperInvariant() && term.LanguageCode == languageCode &&
                             term.CreatorId == userId).SingleOrDefaultAsync();
         }
 
         /// <inheritdoc />
         public async Task<Dictionary<string, TermLearningLevel>> GetLearningLevelAsync(
             Guid creatorId,
-            Language language,
+            LanguageCode languageCode,
             ISet<string> terms)
         {
             var list = await this.Collection
-                .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.Language == language)
+                .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.LanguageCode == languageCode)
                 .Project(t => new { t.Content, t.LearningLevel }).ToListAsync();
             return list.ToDictionary(t => t.Content, t => t.LearningLevel);
         }
@@ -51,11 +48,11 @@ namespace Lwt.Repositories
         /// <inheritdoc />
         public async Task<IDictionary<string, Term>> GetManyAsync(
             Guid creatorId,
-            Language language,
+            LanguageCode languageCode,
             HashSet<string> terms)
         {
             List<Term> list = await this.Collection
-                .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.Language == language)
+                .Find(t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.LanguageCode == languageCode)
                 .ToListAsync();
             return list.ToDictionary(t => t.Content, t => t);
         }

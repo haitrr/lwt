@@ -51,7 +51,7 @@ namespace Lwt.Test.Utilities
         public async Task CountByLearningLevelAsyncShouldWork()
         {
             var words = new List<string> { "hello", "yolo", "hello", "kk" };
-            var language = Language.English;
+            var languageCode =LanguageCode.ENGLISH;
             Guid userId = Guid.NewGuid();
             var learningLevelDict = new Dictionary<string, TermLearningLevel>
             {
@@ -59,12 +59,12 @@ namespace Lwt.Test.Utilities
                 { "yolo", TermLearningLevel.Learning3 },
             };
 
-            this.skippedWordRemoverMock.Setup(t => t.RemoveSkippedWords(words, language)).Returns(words);
-            this.textNormalizerMock.Setup(n => n.Normalize(words, language)).Returns(words);
-            this.termRepositoryMock.Setup(r => r.GetLearningLevelAsync(userId, language, It.IsAny<HashSet<string>>()))
+            this.skippedWordRemoverMock.Setup(t => t.RemoveSkippedWords(words, languageCode)).Returns(words);
+            this.textNormalizerMock.Setup(n => n.Normalize(words, languageCode)).Returns(words);
+            this.termRepositoryMock.Setup(r => r.GetLearningLevelAsync(userId, languageCode, It.IsAny<HashSet<string>>()))
                 .ReturnsAsync(learningLevelDict);
 
-            Dictionary<TermLearningLevel, long> result = await this.termCounter.CountByLearningLevelAsync(words, language, userId);
+            Dictionary<TermLearningLevel, long> result = await this.termCounter.CountByLearningLevelAsync(words, languageCode, userId);
             Assert.Equal(Enum.GetValues(typeof(TermLearningLevel)).Length, result.Count);
             Assert.Equal(2, result[TermLearningLevel.Learning1]);
             Assert.Equal(1, result[TermLearningLevel.Learning3]);
