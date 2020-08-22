@@ -29,6 +29,7 @@ namespace Lwt.DbContexts
                 code => LanguageCode.GetFromString(code));
 
             builder.Entity<Term>()
+                .ToTable(Term.TableName)
                 .Property(t => t.LanguageCode)
                 .HasConversion(converter);
             base.OnModelCreating(builder);

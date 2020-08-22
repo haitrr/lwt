@@ -10,6 +10,11 @@ namespace Lwt.Models
     public class Term : Entity
     {
         /// <summary>
+        /// table name.
+        /// </summary>
+        public const string TableName = "terms";
+
+        /// <summary>
         /// Gets or sets the content.
         /// </summary>
         public string Content { get; set; } = string.Empty;
