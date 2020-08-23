@@ -119,7 +119,6 @@ namespace Lwt
 
             // text
             services.AddScoped<ITextService, TextService>();
-            services.AddScoped<ITextRepository, TextRepository>();
             services.AddScoped<ITermService, TermService>();
 
             // repos
