@@ -30,9 +30,6 @@ namespace Lwt.Models
         public LanguageCode Code => LanguageCode.CHINESE;
 
         /// <inheritdoc />
-        public Language Id => Language.Chinese;
-
-        /// <inheritdoc />
         public bool ShouldSkip(string term)
         {
             return !Regex.IsMatch(term, "^\\p{Lo}+$");

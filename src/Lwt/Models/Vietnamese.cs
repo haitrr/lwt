@@ -17,9 +17,6 @@ namespace Lwt.Models
     public LanguageCode Code => LanguageCode.VIETNAMESE;
 
     /// <inheritdoc/>
-    public Language Id => Language.Vietnamese;
-
-    /// <inheritdoc/>
     public bool ShouldSkip(string term)
     {
       throw new System.NotSupportedException();
