@@ -125,7 +125,6 @@ namespace Lwt
             // repos
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserSettingRepository, UserSettingRepository>();
-            services.AddScoped<ITermRepository, TermRepository>();
             services.AddScoped<ISqlTermRepository, SqlTermRepository>();
             services.AddScoped<ISqlTextRepository, SqlTextRepository>();
             services.AddScoped<ITextTermRepository, TextTermRepository>();
