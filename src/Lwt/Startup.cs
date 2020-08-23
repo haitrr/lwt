@@ -173,7 +173,6 @@ namespace Lwt
             IWebHostEnvironment env)
 #pragma warning disable CA1822
         {
-            Console.WriteLine(new { Code = JsonConvert.SerializeObject(LanguageCode.CHINESE) });
             // compress response
             app.UseResponseCompression();
 

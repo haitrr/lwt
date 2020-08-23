@@ -13,11 +13,6 @@ namespace Lwt.Models
         public string Title { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the terms of the text.
-        /// </summary>
-        public IEnumerable<TermReadModel> Terms { get; set; } = new TermReadModel[] { };
-
-        /// <summary>
         /// Gets or sets the text's language.
         /// </summary>
         public LanguageCode LanguageCode { get; set; } = null!;
