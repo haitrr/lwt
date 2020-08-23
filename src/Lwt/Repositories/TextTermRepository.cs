@@ -46,5 +46,16 @@ namespace Lwt.Repositories
             return await query.OrderBy(t => t.Index)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<TextTerm>> GetByUserAndLanguageAndContentAsync(
+            int termCreatorId,
+            LanguageCode termLanguageCode,
+            string termContent)
+        {
+            return await this.DbSet.Where(
+                    t => t.Text.CreatorId == termCreatorId && t.Text.LanguageCode == termLanguageCode &&
+                         t.Content.ToUpper() == termContent.ToUpper())
+                .ToListAsync();
+        }
     }
 }
