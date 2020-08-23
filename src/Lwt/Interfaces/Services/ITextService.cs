@@ -78,5 +78,7 @@ namespace Lwt.Interfaces.Services
         /// <param name="setBookmarkModel">set bookmark model.</param>
         /// <returns>nothing.</returns>
         Task SetBookmarkAsync(int id, int userId, SetBookmarkModel setBookmarkModel);
+
+        Task<Dictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId);
     }
 }

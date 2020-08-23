@@ -28,6 +28,7 @@ namespace Lwt.Services
         private readonly ITextTermRepository textTermRepository;
         private readonly IUserTextGetter userTextGetter;
         private readonly ITextTermProcessor textTermProcessor;
+        private readonly ILanguageHelper languageHelper;
 
         public TextService(
             ISqlTextRepository textRepository,
@@ -39,7 +40,8 @@ namespace Lwt.Services
             IMapper<Text, TextReadModel> textReadMapper,
             IDbTransaction dbTransaction,
             ITextTermRepository textTermRepository,
-            ITextTermProcessor termProcessor)
+            ITextTermProcessor termProcessor,
+            ILanguageHelper languageHelper)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
@@ -51,6 +53,7 @@ namespace Lwt.Services
             this.dbTransaction = dbTransaction;
             this.textTermRepository = textTermRepository;
             this.textTermProcessor = termProcessor;
+            this.languageHelper = languageHelper;
         }
 
         /// <inheritdoc/>
@@ -164,6 +167,40 @@ namespace Lwt.Services
 
             this.textRepository.Update(text);
             await this.dbTransaction.CommitAsync();
+        }
+
+        public async Task<Dictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId)
+        {
+            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
+            var counts = new Dictionary<LearningLevel, int> { { LearningLevel.Unknown, 0 }, };
+            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
+            IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id);
+
+            foreach (var textTerm in textTerms)
+            {
+                if (textTerm.Term == null)
+                {
+                    if (language.ShouldSkip(textTerm.Content))
+                    {
+                        continue;
+                    }
+
+                    counts[LearningLevel.Unknown] += 1;
+                }
+                else
+                {
+                    if (counts.ContainsKey(textTerm.Term.LearningLevel))
+                    {
+                        counts[textTerm.Term.LearningLevel] += 1;
+                    }
+                    else
+                    {
+                        counts[textTerm.Term.LearningLevel] = 1;
+                    }
+                }
+            }
+
+            return counts;
         }
     }
 }

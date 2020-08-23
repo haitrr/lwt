@@ -1,5 +1,6 @@
 namespace Lwt.Repositories
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
@@ -25,6 +26,11 @@ namespace Lwt.Repositories
             {
                 this.DbSet.Remove(textTerm);
             }
+        }
+
+        public async Task<IEnumerable<TextTerm>> GetByTextAsync(int textId)
+        {
+            return await this.DbSet.Where(t => t.TextId == textId).Include(t => t.Term).ToListAsync();
         }
     }
 }

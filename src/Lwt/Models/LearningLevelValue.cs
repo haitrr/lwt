@@ -18,7 +18,7 @@ namespace Lwt.Models
         /// <summary>
         /// Unknown.
         /// </summary>
-        public const string Unknow = "unknow";
+        public const string Unknown = "unknown";
 
         /// <summary>
         /// Learning 1.

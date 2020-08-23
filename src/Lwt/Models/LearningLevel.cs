@@ -23,7 +23,7 @@ namespace Lwt.Models
         /// <summary>
         /// Unknown.
         /// </summary>
-        public static readonly LearningLevel Unknown = new LearningLevel(LearningLevelValue.Unknow);
+        public static readonly LearningLevel Unknown = new LearningLevel(LearningLevelValue.Unknown);
 
         /// <summary>
         /// Learning 1.
@@ -81,7 +81,7 @@ namespace Lwt.Models
             {
                 case LearningLevelValue.Skipped:
                     return Skipped;
-                case LearningLevelValue.Unknow:
+                case LearningLevelValue.Unknown:
                     return Unknown;
                 case LearningLevelValue.Ignored:
                     return Ignored;

@@ -1,5 +1,7 @@
 namespace Lwt.Models
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// the term.
     /// </summary>
@@ -34,5 +36,7 @@ namespace Lwt.Models
         /// Gets or sets the current learning level.
         /// </summary>
         public LearningLevel LearningLevel { get; set; } = null!;
+
+        public List<TextTerm> TextTerms { get; set; } = null!;
     }
 }

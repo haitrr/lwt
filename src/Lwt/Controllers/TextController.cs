@@ -153,5 +153,14 @@ namespace Lwt.Controllers
             await this.textService.SetBookmarkAsync(id, userId, setBookmarkModel);
             return this.Ok();
         }
+
+        [HttpGet("{id}/term-counts")]
+        [Authorize]
+        public async Task<IActionResult> GetTermCounts([FromRoute] int id)
+        {
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            Dictionary<LearningLevel, int> counts = await this.textService.GetTermCountsAsync(id, userId);
+            return this.Ok(new { Id = id, Counts = counts });
+        }
     }
 }

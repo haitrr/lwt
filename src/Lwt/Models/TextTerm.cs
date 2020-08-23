@@ -15,10 +15,14 @@ namespace Lwt.Models
         /// </summary>
         public int TextId { get; set; }
 
+        public Text Text { get; set; } = null!;
+
         /// <summary>
         /// Gets or sets term id.
         /// </summary>
         public int? TermId { get; set; }
+
+        public Term? Term { get; set; }
 
         /// <summary>
         /// Gets or sets content.

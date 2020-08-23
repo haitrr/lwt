@@ -1,6 +1,7 @@
 namespace Lwt.Utilities
 {
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
     using Lwt.Interfaces;
@@ -78,7 +79,7 @@ namespace Lwt.Utilities
         {
             JArray terms = JArray.Parse(File.ReadAllText("./term.json"));
 
-            foreach (JToken item in terms)
+            foreach (JToken item in terms.Take(200))
             {
                 var term = item.ToObject<Term>();
                 term.CreatorId = userId;

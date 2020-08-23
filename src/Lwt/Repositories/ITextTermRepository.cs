@@ -1,5 +1,6 @@
 namespace Lwt.Repositories
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Interfaces;
     using Lwt.Models;
@@ -9,5 +10,7 @@ namespace Lwt.Repositories
         Task<int> CountByTextAsync(int textId);
 
         void DeleteByTextId(int textId);
+
+        Task<IEnumerable<TextTerm>> GetByTextAsync(int textId);
     }
 }

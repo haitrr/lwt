@@ -62,7 +62,7 @@ namespace Lwt.Creators
                     text.LanguageCode,
                     word);
 
-                textTerms.Add(new TextTerm() { TermId = term?.Id, Content = word, Index = i, TextId = text.Id });
+                textTerms.Add(new TextTerm() { TermId = term?.Id, Content = word, Index = i, Text = text });
             }
 
             this.textTermRepository.BulkAdd(textTerms);

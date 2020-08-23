@@ -1,5 +1,7 @@
 namespace Lwt.Models
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// a.
     /// </summary>
@@ -34,5 +36,6 @@ namespace Lwt.Models
         /// Gets or sets language.
         /// </summary>
         public LanguageCode LanguageCode { get; set; } = null!;
+        public List<TextTerm> TextTerms { get; set; } = null!;
     }
 }
