@@ -9,15 +9,5 @@ namespace Lwt.Models
         /// Gets or sets the application secret key.
         /// </summary>
         public string Secret { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets connection string to mongodb server.
-        /// </summary>
-        public string MongoConnectionString { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets application database name.
-        /// </summary>
-        public string MongoDatabase { get; set; } = string.Empty;
     }
 }

@@ -3,7 +3,6 @@ namespace Lwt.Models
     using System;
     using System.Linq.Expressions;
     using Lwt.Extensions;
-    using MongoDB.Driver;
 
     /// <summary>
     /// term's filters.
@@ -29,23 +28,6 @@ namespace Lwt.Models
             }
 
             return expression;
-        }
-
-        /// <summary>
-        /// return filter definition.
-        /// </summary>
-        /// <returns>the filter definition.</returns>
-        public FilterDefinition<Term> ToFilterDefinition()
-        {
-            FilterDefinitionBuilder<Term> filterBuilder = Builders<Term>.Filter;
-            FilterDefinition<Term> filter = filterBuilder.Empty;
-
-            if (this.LanguageCode != null)
-            {
-                filter = filterBuilder.And(filter, filterBuilder.Eq(term => term.LanguageCode, this.LanguageCode));
-            }
-
-            return filter;
         }
     }
 }

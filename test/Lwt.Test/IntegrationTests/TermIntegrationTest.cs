@@ -13,7 +13,6 @@ namespace Lwt.Test.IntegrationTests
     using Lwt.Models;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
-    using MongoDB.Driver;
     using Newtonsoft.Json;
     using Xunit;
 
@@ -103,7 +102,7 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task EditTermShouldWork()
         {
-            var user = new User { UserName = "test"};
+            var user = new User { UserName = "test" };
 
             var existingTerm = new Term
             {
