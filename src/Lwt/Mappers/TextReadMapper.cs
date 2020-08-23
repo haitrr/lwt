@@ -14,7 +14,7 @@ namespace Lwt.Mappers
     {
         private readonly ISkippedWordRemover skippedWordRemover;
         private readonly ILanguageHelper languageHelper;
-        private readonly ITermRepository termRepository;
+        private readonly ISqlTermRepository termRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextReadMapper"/> class.
@@ -25,7 +25,7 @@ namespace Lwt.Mappers
         public TextReadMapper(
             ISkippedWordRemover skippedWordRemover,
             ILanguageHelper languageHelper,
-            ITermRepository termRepository)
+            ISqlTermRepository termRepository)
         {
             this.skippedWordRemover = skippedWordRemover;
             this.languageHelper = languageHelper;
