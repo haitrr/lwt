@@ -61,17 +61,6 @@ namespace Lwt.Test
                         .Returns(Task.CompletedTask);
                     services.AddTransient(resolver => mock.Object);
 
-                    // Replace database seeder.
-                    ServiceDescriptor indexCreatorDescriptor =
-                        services.Single(s => s.ServiceType == typeof(IIndexCreator));
-
-                    services.Remove(indexCreatorDescriptor);
-
-                    var indexCreatorMock = new Mock<IIndexCreator>();
-                    indexCreatorMock.Setup(s => s.CreateIndexesAsync())
-                        .Returns(Task.CompletedTask);
-                    services.AddTransient(resolver => indexCreatorMock.Object);
-
                     // Remove the app's ApplicationDbContext registration.
                     ServiceDescriptor? descriptor = services.SingleOrDefault(
                         d => d.ServiceType == typeof(DbContextOptions<IdentityDbContext>));

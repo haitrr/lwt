@@ -170,7 +170,6 @@ namespace Lwt
         public void Configure(
             IApplicationBuilder app,
             IDatabaseSeeder databaseSeeder,
-            IIndexCreator indexCreator,
             IWebHostEnvironment env)
 #pragma warning disable CA1822
         {
@@ -194,10 +193,6 @@ namespace Lwt
                 app.UseSwagger();
                 app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
             }
-            indexCreator.CreateIndexesAsync()
-                .GetAwaiter()
-                .GetResult();
-            Console.WriteLine("seeding db");
             databaseSeeder.SeedData()
                 .GetAwaiter()
                 .GetResult();
