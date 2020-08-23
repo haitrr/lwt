@@ -16,7 +16,7 @@ namespace Lwt.Test.Utilities
     public class TermCounterTester
     {
         private readonly TermCounter termCounter;
-        private readonly Mock<ITermRepository> termRepositoryMock;
+        private readonly Mock<ISqlTermRepository> termRepositoryMock;
         private readonly Mock<ISkippedWordRemover> skippedWordRemoverMock;
         private readonly Mock<ITextNormalizer> textNormalizerMock;
 
@@ -25,7 +25,7 @@ namespace Lwt.Test.Utilities
         /// </summary>
         public TermCounterTester()
         {
-            this.termRepositoryMock = new Mock<ITermRepository>();
+            this.termRepositoryMock = new Mock<ISqlTermRepository>();
             this.skippedWordRemoverMock = new Mock<ISkippedWordRemover>();
             this.textNormalizerMock = new Mock<ITextNormalizer>();
             this.termCounter = new TermCounter(

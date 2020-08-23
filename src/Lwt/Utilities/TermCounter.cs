@@ -10,7 +10,7 @@ namespace Lwt.Utilities
     /// <inheritdoc />
     public class TermCounter : ITermCounter
     {
-        private readonly ITermRepository termRepository;
+        private readonly ISqlTermRepository termRepository;
         private readonly ISkippedWordRemover skippedWordRemover;
         private readonly ITextNormalizer textNormalizer;
 
@@ -21,7 +21,7 @@ namespace Lwt.Utilities
         /// <param name="skippedWordRemover">skipped words remover.</param>
         /// <param name="textNormalizer">text normalizer.</param>
         public TermCounter(
-            ITermRepository termRepository,
+            ISqlTermRepository termRepository,
             ISkippedWordRemover skippedWordRemover,
             ITextNormalizer textNormalizer)
         {

@@ -11,6 +11,18 @@ namespace Lwt.Interfaces
     public interface ISqlTermRepository : ISqlRepository<Term>
     {
         /// <summary>
+        /// get learning level of the terms with content.
+        /// </summary>
+        /// <param name="creatorId">the creator of term.</param>
+        /// <param name="languageCode">language code.</param>
+        /// <param name="terms">the terms to find.</param>
+        /// <returns>dictionary of term learning level.</returns>
+        Task<Dictionary<string, LearningLevel>> GetLearningLevelAsync(
+            Guid creatorId,
+            LanguageCode languageCode,
+            ISet<string> terms);
+
+        /// <summary>
         /// get many terms by contents.
         /// </summary>
         /// <param name="creatorId">the creator of term.</param>

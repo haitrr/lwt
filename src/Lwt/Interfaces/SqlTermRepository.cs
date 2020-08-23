@@ -20,6 +20,16 @@ namespace Lwt.Interfaces
         {
         }
 
+        /// <inheritdoc/>
+        public async Task<Dictionary<string, LearningLevel>> GetLearningLevelAsync(Guid creatorId, LanguageCode languageCode, ISet<string> terms)
+        {
+            var list = await this.DbSet.Where(
+                    t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.LanguageCode == languageCode)
+                .Select(t => new { t.Content, t.LearningLevel })
+                .ToListAsync();
+            return list.ToDictionary(t => t.Content, t => t.LearningLevel);
+        }
+
         /// <inheritdoc />
         public async Task<IDictionary<string, Term>> GetManyAsync(
             Guid creatorId,
