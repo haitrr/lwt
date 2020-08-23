@@ -17,9 +17,6 @@ namespace Lwt.Mappers
             result.Bookmark = source.Bookmark;
             result.Id = source.Id;
 
-            var termViewModels = new List<TermReadModel>();
-            result.Terms = termViewModels;
-
             return result;
         }
     }
