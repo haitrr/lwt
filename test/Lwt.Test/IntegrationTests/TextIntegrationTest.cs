@@ -1,7 +1,7 @@
 namespace Lwt.Test.IntegrationTests
 {
     using System;
-    using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
@@ -11,8 +11,8 @@ namespace Lwt.Test.IntegrationTests
     using Lwt.DbContexts;
     using Lwt.Interfaces;
     using Lwt.Models;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
-    using MongoDB.Driver;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Xunit;
@@ -24,7 +24,6 @@ namespace Lwt.Test.IntegrationTests
     {
         private readonly HttpClient client;
         private readonly LwtTestWebApplicationFactory factory;
-        private readonly LwtDbContext lwtDbContext;
         private readonly ITokenProvider tokenProvider;
         private readonly User user;
 
@@ -35,7 +34,6 @@ namespace Lwt.Test.IntegrationTests
         {
             this.factory = new LwtTestWebApplicationFactory();
             this.tokenProvider = this.factory.Services.GetService<ITokenProvider>();
-            this.lwtDbContext = this.factory.Services.GetService<LwtDbContext>();
             this.user = new User() { UserName = "test" };
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
@@ -64,22 +62,27 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task ShouldAbleToCreateText()
         {
-            await this.lwtDbContext.GetCollection<Text>()
-                .DeleteManyAsync(_ => true);
+            TestDbHelper.CleanTable<Text>(this.factory.Services);
             var body = new { title = "test text", content = "this is a test text", languageCode = "en" };
             string content = JsonConvert.SerializeObject(body);
             HttpResponseMessage responseMessage = await this.client.PostAsync(
                 "api/text",
                 new StringContent(content, Encoding.UTF8, MediaTypeNames.Application.Json));
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-            Text text = await this.lwtDbContext.GetCollection<Text>()
-                .Find(_ => true)
-                .SingleOrDefaultAsync();
-            Assert.NotNull(text);
-            Assert.Equal(body.title, text.Title);
-            Assert.Equal(body.content, text.Content);
-            Assert.Equal(body.languageCode, text.LanguageCode.ToString());
-            Assert.Equal(this.user.Id, text.CreatorId);
+            var id = (int)JsonConvert.DeserializeObject<dynamic>(await responseMessage.Content.ReadAsStringAsync())
+                .id;
+
+            using (IServiceScope? scope = this.factory.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                Text? text = await dbContext.Set<Text>()
+                    .SingleOrDefaultAsync(t => t.Id == id);
+                Assert.NotNull(text);
+                Assert.Equal(body.title, text.Title);
+                Assert.Equal(body.content, text.Content);
+                Assert.Equal(body.languageCode, text.LanguageCode.ToString());
+                Assert.Equal(this.user.Id, text.CreatorId);
+            }
         }
 
         /// <summary>
@@ -89,17 +92,26 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task ShouldAbleToGetListOfTexts()
         {
-            await this.lwtDbContext.GetCollection<Text>()
-                .DeleteManyAsync(_ => true);
+            TestDbHelper.CleanTable<Text>(this.factory.Services);
 
-            for (var i = 0; i < 20; i++)
+            using (IServiceScope? scope = this.factory.Services.CreateScope())
             {
-                await this.lwtDbContext.GetCollection<Text>()
-                    .InsertOneAsync(
-                        new Text()
-                        {
-                            Title = "test", Content = "test", LanguageCode = LanguageCode.ENGLISH, CreatorId = this.user.Id,
-                        });
+                var dbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+
+                for (var i = 0; i < 20; i++)
+                {
+                    dbContext.Set<Text>()
+                        .Add(
+                            new Text()
+                            {
+                                Title = "test",
+                                Content = "test",
+                                LanguageCode = LanguageCode.ENGLISH,
+                                CreatorId = this.user.Id,
+                            });
+                }
+
+                dbContext.SaveChanges();
             }
 
             HttpResponseMessage responseMessage = await this.client.GetAsync("api/text?page=1&itemPerPage=7");
@@ -112,8 +124,7 @@ namespace Lwt.Test.IntegrationTests
             foreach (JToken item in data)
             {
                 Assert.Equal("test", item.Value<string>("title"));
-                Assert.Equal(LanguageCode.ENGLISH, item.Value<LanguageCode>("languageCode"));
-                Assert.NotNull(item.SelectToken("counts"));
+                Assert.Equal(LanguageCode.ENGLISH, LanguageCode.GetFromString(item.Value<string>("languageCode")));
             }
         }
 
@@ -124,21 +135,30 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task ShouldBeAbleToDeleteText()
         {
-            await this.lwtDbContext.GetCollection<Text>()
-                .DeleteManyAsync(_ => true);
+            TestDbHelper.CleanTable<Text>(this.factory.Services);
             var text = new Text
             {
                 Title = "test", Content = "test", LanguageCode = LanguageCode.ENGLISH, CreatorId = this.user.Id,
             };
-            await this.lwtDbContext.GetCollection<Text>()
-                .InsertOneAsync(text);
+
+            using (IServiceScope? scope = this.factory.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                dbContext.Set<Text>()
+                    .Add(text);
+                dbContext.SaveChanges();
+            }
 
             HttpResponseMessage responseMessage = await this.client.DeleteAsync($"api/text/{text.Id}");
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-            Text deletedText = await this.lwtDbContext.GetCollection<Text>()
-                .Find(_ => true)
-                .SingleOrDefaultAsync();
-            Assert.Null(deletedText);
+
+            using (IServiceScope? scope = this.factory.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                Text deletedText = await dbContext.Set<Text>()
+                    .SingleOrDefaultAsync();
+                Assert.Null(deletedText);
+            }
         }
 
         /// <summary>
@@ -148,8 +168,7 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task ShouldBeAbleToEditText()
         {
-            await this.lwtDbContext.GetCollection<Text>()
-                .DeleteManyAsync(_ => true);
+            TestDbHelper.CleanTable<Text>(this.factory.Services);
             var text = new Text
             {
                 Title = "test",
@@ -157,10 +176,18 @@ namespace Lwt.Test.IntegrationTests
                 LanguageCode = LanguageCode.ENGLISH,
                 CreatorId = this.user.Id,
             };
-            await this.lwtDbContext.GetCollection<Text>()
-                .InsertOneAsync(text);
 
-            var editContent = new { languageCode = LanguageCode.JAPANESE, title = "test edited", content = "edited content" };
+            using (IdentityDbContext dbContext = TestDbHelper.GetDbContext(this.factory))
+            {
+                dbContext.Set<Text>()
+                    .Add(text);
+                dbContext.SaveChanges();
+            }
+
+            var editContent = new
+            {
+                languageCode = LanguageCode.JAPANESE, title = "test edited", content = "edited content",
+            };
 
             HttpResponseMessage responseMessage = await this.client.PutAsync(
                 $"api/text/{text.Id}",
@@ -169,12 +196,16 @@ namespace Lwt.Test.IntegrationTests
                     Encoding.UTF8,
                     MediaTypeNames.Application.Json));
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-            Text editedText = await this.lwtDbContext.GetCollection<Text>()
-                .Find(t => t.Id == text.Id)
-                .SingleAsync();
-            Assert.Equal(editContent.title, editedText.Title);
-            Assert.Equal(editContent.languageCode, editedText.LanguageCode);
-            Assert.Equal(editContent.content, editedText.Content);
+
+            using (IdentityDbContext dc = TestDbHelper.GetDbContext(this.factory))
+            {
+                Text editedText = await dc.Set<Text>()
+                    .Where(t => t.Id == text.Id)
+                    .SingleAsync();
+                Assert.Equal(editContent.title, editedText.Title);
+                Assert.Equal(editContent.languageCode, editedText.LanguageCode);
+                Assert.Equal(editContent.content, editedText.Content);
+            }
         }
 
         /// <summary>
@@ -184,8 +215,7 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task ShouldBeAbleToGetEditDetails()
         {
-            await this.lwtDbContext.GetCollection<Text>()
-                .DeleteManyAsync(_ => true);
+            TestDbHelper.CleanTable<Text>(this.factory.Services);
             var text = new Text
             {
                 Title = "test",
@@ -193,8 +223,13 @@ namespace Lwt.Test.IntegrationTests
                 LanguageCode = LanguageCode.ENGLISH,
                 CreatorId = this.user.Id,
             };
-            await this.lwtDbContext.GetCollection<Text>()
-                .InsertOneAsync(text);
+
+            using (IdentityDbContext dc = TestDbHelper.GetDbContext(this.factory))
+            {
+                dc.Set<Text>()
+                    .Add(text);
+                dc.SaveChanges();
+            }
 
             HttpResponseMessage responseMessage = await this.client.GetAsync($"api/text/{text.Id}/edit-details");
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
@@ -205,7 +240,7 @@ namespace Lwt.Test.IntegrationTests
                     .ToLower(),
                 content.Value<string>("id")
                     .ToLower());
-            Assert.Equal(text.LanguageCode, content.Value<LanguageCode>("languageCode"));
+            Assert.Equal(text.LanguageCode, LanguageCode.GetFromString(content.Value<string>("languageCode")));
             Assert.Equal(text.Content, content.Value<string>("content"));
         }
 
@@ -216,8 +251,7 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task ShouldBeAbleToReadText()
         {
-            await this.lwtDbContext.GetCollection<Text>()
-                .DeleteManyAsync(_ => true);
+            TestDbHelper.CleanTable<Text>(this.factory.Services);
             var text = new Text
             {
                 Title = "test",
@@ -225,8 +259,13 @@ namespace Lwt.Test.IntegrationTests
                 LanguageCode = LanguageCode.ENGLISH,
                 CreatorId = this.user.Id,
             };
-            await this.lwtDbContext.GetCollection<Text>()
-                .InsertOneAsync(text);
+
+            using (IdentityDbContext dc = TestDbHelper.GetDbContext(this.factory))
+            {
+                dc.Set<Text>()
+                    .Add(text);
+                dc.SaveChanges();
+            }
 
             HttpResponseMessage responseMessage = await this.client.GetAsync($"api/text/{text.Id}");
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
@@ -237,7 +276,7 @@ namespace Lwt.Test.IntegrationTests
                     .ToLower(),
                 content.Value<string>("id")
                     .ToLower());
-            Assert.Equal(text.LanguageCode, content.Value<LanguageCode>("languageCode"));
+            Assert.Equal(text.LanguageCode, LanguageCode.GetFromString(content.Value<string>("languageCode")));
             Assert.NotNull(content.Value<JArray>("terms"));
         }
 
@@ -248,39 +287,41 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task ShouldBeAbleToSetBookmark()
         {
-            await this.lwtDbContext.GetCollection<Text>()
-                .DeleteManyAsync(_ => true);
+            TestDbHelper.CleanTable<Text>(this.factory.Services);
             var text = new Text
             {
                 Title = "test",
                 Content = "this is a test text",
                 LanguageCode = LanguageCode.ENGLISH,
                 CreatorId = this.user.Id,
-                Words = new List<string>
-                {
-                    "what",
-                    "does",
-                    "the",
-                    "fox",
-                    "say",
-                },
             };
-            await this.lwtDbContext.GetCollection<Text>()
-                .InsertOneAsync(text);
+
+            var body = new { title = text.Title, content = text.Content, languageCode = text.LanguageCode };
+            string content = JsonConvert.SerializeObject(body);
+            HttpResponseMessage rm = await this.client.PostAsync(
+                "api/text",
+                new StringContent(content, Encoding.UTF8, MediaTypeNames.Application.Json));
+            Assert.Equal(HttpStatusCode.OK, rm.StatusCode);
+            var id = (int)JsonConvert.DeserializeObject<dynamic>(await rm.Content.ReadAsStringAsync())
+                .id;
 
             var bookMarkContent = new { termIndex = 2UL };
 
             HttpResponseMessage responseMessage = await this.client.PatchAsync(
-                $"api/text/{text.Id}/bookmark",
+                $"api/text/{id}/bookmark",
                 new StringContent(
                     JsonConvert.SerializeObject(bookMarkContent),
                     Encoding.UTF8,
                     MediaTypeNames.Application.Json));
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-            Text editedText = await this.lwtDbContext.GetCollection<Text>()
-                .Find(t => t.Id == text.Id)
-                .SingleAsync();
-            Assert.Equal(bookMarkContent.termIndex, editedText.Bookmark);
+
+            using (IdentityDbContext dc = TestDbHelper.GetDbContext(this.factory))
+            {
+                Text editedText = await dc.Set<Text>()
+                    .Where(t => t.Id == id)
+                    .SingleAsync();
+                Assert.Equal(bookMarkContent.termIndex, editedText.Bookmark);
+            }
         }
     }
 }

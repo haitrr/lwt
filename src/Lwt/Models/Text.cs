@@ -1,12 +1,15 @@
 namespace Lwt.Models
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// a.
     /// </summary>
     public class Text : Entity
     {
+        /// <summary>
+        /// table name.
+        /// </summary>
+        public const string TableName = "texts";
+
         /// <summary>
         /// Gets or sets creator id.
         /// </summary>
@@ -30,11 +33,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets language.
         /// </summary>
-        public LanguageCode LanguageCode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the words.
-        /// </summary>
-        public ICollection<string> Words { get; set; } = new List<string>();
+        public LanguageCode LanguageCode { get; set; } = null!;
     }
 }

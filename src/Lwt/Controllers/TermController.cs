@@ -49,7 +49,7 @@ namespace Lwt.Controllers
             Term term = this.termCreateMapper.Map(termCreateModel, userId);
             int id = await this.termService.CreateAsync(term);
 
-            return this.Ok(id);
+            return this.Ok(new { Id = id });
         }
 
         /// <summary>

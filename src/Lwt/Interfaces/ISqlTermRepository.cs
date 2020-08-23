@@ -37,5 +37,14 @@ namespace Lwt.Interfaces
         /// <param name="userId">user id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task<Term> GetUserTermAsync(int termId, int userId);
+
+        /// <summary>
+        /// get the term by the creator id and the content.
+        /// </summary>
+        /// <param name="userId">the creator id.</param>
+        /// <param name="languageCode">language code.</param>
+        /// <param name="word">the content.</param>
+        /// <returns>the term.</returns>
+        Task<Term?> TryGetByUserAndLanguageAndContentAsync(int userId, LanguageCode languageCode, string word);
     }
 }

@@ -50,9 +50,9 @@ namespace Lwt.Controllers
         {
             int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             Text text = this.textCreateMapper.Map(model, userId);
-            await this.textService.CreateAsync(text);
+            int id = await this.textService.CreateAsync(text);
 
-            return this.Ok();
+            return this.Ok(new { Id = id });
         }
 
         /// <summary>

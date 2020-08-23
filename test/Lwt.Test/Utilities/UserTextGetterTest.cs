@@ -2,8 +2,8 @@ namespace Lwt.Test.Utilities
 {
     using System.Threading.Tasks;
     using Lwt.Exceptions;
-    using Lwt.Interfaces;
     using Lwt.Models;
+    using Lwt.Repositories;
     using Lwt.Utilities;
     using Moq;
     using Xunit;
@@ -14,14 +14,14 @@ namespace Lwt.Test.Utilities
     public class UserTextGetterTest
     {
         private readonly UserTextGetter userTextGetter;
-        private readonly Mock<ITextRepository> textRepositoryMock;
+        private readonly Mock<ISqlTextRepository> textRepositoryMock;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserTextGetterTest"/> class.
         /// </summary>
         public UserTextGetterTest()
         {
-            this.textRepositoryMock = new Mock<ITextRepository>();
+            this.textRepositoryMock = new Mock<ISqlTextRepository>();
             this.userTextGetter = new UserTextGetter(this.textRepositoryMock.Object);
         }
 

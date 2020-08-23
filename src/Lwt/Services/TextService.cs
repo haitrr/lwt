@@ -6,8 +6,8 @@ namespace Lwt.Services
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
-    using Lwt.Mappers;
     using Lwt.Models;
+    using Lwt.Repositories;
     using Lwt.Utilities;
     using Lwt.ViewModels;
 
@@ -16,54 +16,45 @@ namespace Lwt.Services
     /// </summary>
     public class TextService : ITextService
     {
-        private readonly ITextRepository textRepository;
+        private readonly ISqlTextRepository textRepository;
 
-        private readonly ILanguageHelper languageHelper;
         private readonly IMapper<Text, TextViewModel> textViewMapper;
         private readonly ITextCreator textCreator;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
         private readonly IMapper<Text, TextEditDetailModel> textEditDetailMapper;
-        private readonly IAsyncMapper<Text, TextReadModel> textReadMapper;
-        private readonly ITermCounter termCounter;
+        private readonly IMapper<Text, TextReadModel> textReadMapper;
+        private readonly IDbTransaction dbTransaction;
+        private readonly ITextTermRepository textTermRepository;
         private readonly IUserTextGetter userTextGetter;
+        private readonly ITextTermProcessor textTermProcessor;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TextService"/> class.
-        /// </summary>
-        /// <param name="textRepository">textRepository.</param>
-        /// <param name="textViewMapper">text view mapper.</param>
-        /// <param name="textEditMapper">textEditMapper.</param>
-        /// <param name="languageHelper">the language helper.</param>
-        /// <param name="textEditDetailMapper">text edit detail mapper.</param>
-        /// <param name="textCreator">the text creator.</param>
-        /// <param name="termCounter">the term counter.</param>
-        /// <param name="userTextGetter">user text getter.</param>
-        /// <param name="textReadMapper">text read mapper.</param>
         public TextService(
-            ITextRepository textRepository,
+            ISqlTextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
-            ILanguageHelper languageHelper,
             IMapper<Text, TextViewModel> textViewMapper,
             IMapper<Text, TextEditDetailModel> textEditDetailMapper,
             ITextCreator textCreator,
-            ITermCounter termCounter,
             IUserTextGetter userTextGetter,
-            IAsyncMapper<Text, TextReadModel> textReadMapper)
+            IMapper<Text, TextReadModel> textReadMapper,
+            IDbTransaction dbTransaction,
+            ITextTermRepository textTermRepository,
+            ITextTermProcessor termProcessor)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
-            this.languageHelper = languageHelper;
             this.textViewMapper = textViewMapper;
             this.textEditDetailMapper = textEditDetailMapper;
             this.textCreator = textCreator;
-            this.termCounter = termCounter;
             this.userTextGetter = userTextGetter;
             this.textReadMapper = textReadMapper;
+            this.dbTransaction = dbTransaction;
+            this.textTermRepository = textTermRepository;
+            this.textTermProcessor = termProcessor;
         }
 
         /// <inheritdoc/>
-        public Task CreateAsync(Text text)
+        public Task<int> CreateAsync(Text text)
         {
             return this.textCreator.CreateAsync(text);
         }
@@ -80,14 +71,6 @@ namespace Lwt.Services
             foreach (Text text in texts)
             {
                 TextViewModel viewModel = this.textViewMapper.Map(text);
-                Dictionary<LearningLevel, long> termCountDict =
-                    await this.termCounter.CountByLearningLevelAsync(text.Words, text.LanguageCode, text.CreatorId);
-
-                foreach (KeyValuePair<LearningLevel, long> keyValuePair in termCountDict)
-                {
-                    viewModel.Counts.Add(keyValuePair.Key, keyValuePair.Value);
-                }
-
                 viewModels.Add(viewModel);
             }
 
@@ -101,7 +84,8 @@ namespace Lwt.Services
 
             if (text.CreatorId == userId)
             {
-                await this.textRepository.DeleteByIdAsync(text);
+                this.textRepository.Delete(text);
+                await this.dbTransaction.CommitAsync();
             }
             else
             {
@@ -122,8 +106,9 @@ namespace Lwt.Services
             if (text.CreatorId == userId)
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
-                this.SplitText(editedText);
-                await this.textRepository.UpdateAsync(editedText);
+                this.textRepository.Update(editedText);
+                await this.textTermProcessor.ProcessTextTermAsync(editedText);
+                await this.dbTransaction.CommitAsync();
             }
             else
             {
@@ -142,7 +127,7 @@ namespace Lwt.Services
         {
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
 
-            return await this.textReadMapper.MapAsync(text);
+            return this.textReadMapper.Map(text);
         }
 
         /// <inheritdoc />
@@ -168,20 +153,17 @@ namespace Lwt.Services
         {
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
 
-            if (setBookmarkModel.TermIndex >= (ulong)text.Words.Count)
+            int textTermCount = await this.textTermRepository.CountByTextAsync(text.Id);
+
+            if (setBookmarkModel.TermIndex >= (ulong)textTermCount)
             {
                 throw new BadRequestException("Invalid bookmark index.");
             }
 
             text.Bookmark = setBookmarkModel.TermIndex;
 
-            await this.textRepository.UpdateAsync(text);
-        }
-
-        private void SplitText(Text text)
-        {
-            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
-            text.Words = language.SplitText(text.Content);
+            this.textRepository.Update(text);
+            await this.dbTransaction.CommitAsync();
         }
     }
 }

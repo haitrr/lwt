@@ -13,6 +13,6 @@ namespace Lwt.Creators
         /// </summary>
         /// <param name="text">the text to create.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task CreateAsync(Text text);
+        Task<int> CreateAsync(Text text);
     }
 }

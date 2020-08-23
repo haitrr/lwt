@@ -71,12 +71,14 @@ namespace Lwt.Test.IntegrationTests
                 "api/term",
                 new StringContent(JsonConvert.SerializeObject(termCreateModel), Encoding.UTF8, "application/json"));
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
+            var id = (int)JsonConvert.DeserializeObject<dynamic>(await result.Content.ReadAsStringAsync())
+                .id;
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
             {
                 var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
                 List<Term> terms = await identityDbContext.Set<Term>()
-                    .Where(_ => true)
+                    .Where(t => t.Id == id)
                     .ToListAsync();
                 Term? term = Assert.Single(terms);
                 Assert.NotNull(term);
@@ -104,11 +106,11 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task EditTermShouldWork()
         {
-            var user = new User { UserName = "test", Id = 1 };
+            var user = new User { UserName = "test"};
 
             var existingTerm = new Term
             {
-                CreatorId = user.Id, LanguageCode = LanguageCode.CHINESE, LearningLevel = LearningLevel.Learning2,
+                LanguageCode = LanguageCode.CHINESE, LearningLevel = LearningLevel.Learning2,
             };
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
@@ -122,10 +124,11 @@ namespace Lwt.Test.IntegrationTests
                         .Remove(t);
                 }
 
+                dbContext.Users.Add(user);
+                dbContext.SaveChanges();
+                existingTerm.CreatorId = user.Id;
                 dbContext.Set<Term>()
                     .Add(existingTerm);
-                dbContext.SaveChanges();
-                dbContext.Users.Add(user);
                 dbContext.SaveChanges();
             }
 

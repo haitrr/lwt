@@ -61,7 +61,7 @@ namespace Lwt.Test.Controllers
             var userId = 1;
             this.textCreateMapper.Setup(m => m.Map(model, userId)).Returns(text);
             this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.textController.User)).Returns(userId);
-            this.textService.Setup(s => s.CreateAsync(text)).Returns(Task.CompletedTask);
+            this.textService.Setup(s => s.CreateAsync(text)).Returns(Task.FromResult(1));
 
             // act
             await this.textController.CreateAsync(model);
@@ -78,7 +78,7 @@ namespace Lwt.Test.Controllers
         public async Task CreateAsyncShouldReturnOkIfSuccess()
         {
             // arrange
-            this.textService.Setup(m => m.CreateAsync(It.IsAny<Text>())).Returns(Task.CompletedTask);
+            this.textService.Setup(m => m.CreateAsync(It.IsAny<Text>())).Returns(Task.FromResult(1));
 
             // act
             IActionResult actual = await this.textController.CreateAsync(new TextCreateModel());

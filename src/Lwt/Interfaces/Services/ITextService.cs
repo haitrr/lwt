@@ -15,7 +15,7 @@ namespace Lwt.Interfaces.Services
         /// </summary>
         /// <param name="text">text.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task CreateAsync(Text text);
+        Task<int> CreateAsync(Text text);
 
         /// <summary>
         /// a.

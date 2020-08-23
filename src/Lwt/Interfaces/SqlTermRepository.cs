@@ -56,5 +56,14 @@ namespace Lwt.Interfaces
 
             throw new NotFoundException("term not found");
         }
+
+        /// <inheritdoc />
+        public Task<Term?> TryGetByUserAndLanguageAndContentAsync(int userId, LanguageCode languageCode, string word)
+        {
+            return this.DbSet.Where(
+                    term => term.Content == word.ToUpperInvariant() && term.LanguageCode == languageCode &&
+                            term.CreatorId == userId)
+                .SingleOrDefaultAsync() !;
+        }
     }
 }

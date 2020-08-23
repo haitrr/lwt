@@ -127,6 +127,9 @@ namespace Lwt
             services.AddScoped<IUserSettingRepository, UserSettingRepository>();
             services.AddScoped<ITermRepository, TermRepository>();
             services.AddScoped<ISqlTermRepository, SqlTermRepository>();
+            services.AddScoped<ISqlTextRepository, SqlTextRepository>();
+            services.AddScoped<ITextTermRepository, TextTermRepository>();
+            services.AddTransient<ITextTermProcessor, TextTermProcessor>();
 
             // transaction
             services.AddScoped<IDbTransaction, DbTransaction<IdentityDbContext>>();
@@ -261,7 +264,7 @@ namespace Lwt
             services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
             services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
             services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
-            services.AddTransient<IAsyncMapper<Text, TextReadModel>, TextReadMapper>();
+            services.AddTransient<IMapper<Text, TextReadModel>, TextReadMapper>();
             services.AddTransient<IMapper<Term, TermMeaningDto>, TermMeaningMapper>();
         }
     }

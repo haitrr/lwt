@@ -20,6 +20,12 @@ namespace Lwt.Interfaces
         void Add(T entity);
 
         /// <summary>
+        /// insert many new entity to database.
+        /// </summary>
+        /// <param name="entities">entity.</param>
+        void BulkAdd(IEnumerable<T> entities);
+
+        /// <summary>
         /// delete an entity by id.
         /// </summary>
         /// <param name="entity">entity.</param>
@@ -44,7 +50,7 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<T> TryGetByIdAsync(int id);
+        Task<T?> TryGetByIdAsync(int id);
 
         /// <summary>
         /// get an entity by id if not found throw not found exception.
@@ -66,5 +72,11 @@ namespace Lwt.Interfaces
         /// <param name="filter"> the filter.</param>
         /// <returns>the count.</returns>
         Task<int> CountAsync(Expression<Func<T, bool>>? filter = null);
+
+        /// <summary>
+        /// delete an entity.
+        /// </summary>
+        /// <param name="entity">entity.</param>
+        void Delete(T entity);
     }
 }

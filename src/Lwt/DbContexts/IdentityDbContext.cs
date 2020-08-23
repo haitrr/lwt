@@ -1,6 +1,7 @@
 namespace Lwt.DbContexts
 {
     using Lwt.Models;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -39,6 +40,27 @@ namespace Lwt.DbContexts
                 .Property(t => t.LearningLevel)
                 .HasConversion(learningLevelConverter);
             base.OnModelCreating(builder);
+
+            builder.Entity<Text>()
+                .ToTable(Text.TableName)
+                .Property(t => t.LanguageCode)
+                .HasConversion(converter);
+            builder.Entity<TextTerm>().ToTable(TextTerm.TableName);
+
+            builder.Entity<User>()
+                .ToTable("users");
+            builder.Entity<Role>()
+                .ToTable("roles");
+
+            builder.Entity<IdentityUserRole<int>>(entity => { entity.ToTable("user_roles"); });
+
+            builder.Entity<IdentityUserClaim<int>>(entity => { entity.ToTable("user_claims"); });
+
+            builder.Entity<IdentityUserLogin<int>>(entity => { entity.ToTable("user_logins"); });
+
+            builder.Entity<IdentityRoleClaim<int>>(entity => { entity.ToTable("role_claims"); });
+
+            builder.Entity<IdentityUserToken<int>>(entity => { entity.ToTable("user_tokens"); });
         }
     }
 }

@@ -7,6 +7,7 @@ namespace Lwt.Test.Creators
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
+    using Lwt.Repositories;
     using Moq;
     using Xunit;
 
@@ -18,7 +19,10 @@ namespace Lwt.Test.Creators
         private readonly TextCreator textCreator;
         private readonly Mock<IValidator<Text>> textValidatorMock;
         private readonly Mock<ITextSeparator> textSeparatorMock;
-        private readonly Mock<ITextRepository> textRepositoryMock;
+        private readonly Mock<ISqlTextRepository> textRepositoryMock;
+        private readonly Mock<ISqlTermRepository> sqlTermRepository;
+        private readonly Mock<ITextTermRepository> textTermRepository;
+        private readonly Mock<IDbTransaction> dbTransaction;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextCreatorTest"/> class.
@@ -27,11 +31,17 @@ namespace Lwt.Test.Creators
         {
             this.textValidatorMock = new Mock<IValidator<Text>>();
             this.textSeparatorMock = new Mock<ITextSeparator>();
-            this.textRepositoryMock = new Mock<ITextRepository>();
+            this.textRepositoryMock = new Mock<ISqlTextRepository>();
+            this.dbTransaction = new Mock<IDbTransaction>();
+            this.sqlTermRepository = new Mock<ISqlTermRepository>();
+            this.textTermRepository = new Mock<ITextTermRepository>();
             this.textCreator = new TextCreator(
                 this.textValidatorMock.Object,
                 this.textSeparatorMock.Object,
-                this.textRepositoryMock.Object);
+                this.textRepositoryMock.Object,
+                this.dbTransaction.Object,
+                this.sqlTermRepository.Object,
+                this.textTermRepository.Object);
         }
 
         /// <summary>
@@ -54,7 +64,8 @@ namespace Lwt.Test.Creators
             var text = new Text();
             var validationResult = new ValidationResult();
             validationResult.Errors.Add(new ValidationFailure("test", "test"));
-            this.textValidatorMock.Setup(m => m.Validate(text)).Returns(validationResult);
+            this.textValidatorMock.Setup(m => m.Validate(text))
+                .Returns(validationResult);
             Assert.ThrowsAsync<BadRequestException>(() => this.textCreator.CreateAsync(text));
         }
 
@@ -68,9 +79,10 @@ namespace Lwt.Test.Creators
         {
             var text = new Text();
             var validationResult = new ValidationResult();
-            this.textValidatorMock.Setup(m => m.Validate(text)).Returns(validationResult);
+            this.textValidatorMock.Setup(m => m.Validate(text))
+                .Returns(validationResult);
             await this.textCreator.CreateAsync(text);
-            this.textRepositoryMock.Verify(r => r.AddAsync(text), Times.Once);
+            this.textRepositoryMock.Verify(r => r.Add(text), Times.Once);
         }
     }
 }

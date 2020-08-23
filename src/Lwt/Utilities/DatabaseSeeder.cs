@@ -6,6 +6,7 @@ namespace Lwt.Utilities
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
     using Lwt.Models;
+    using Lwt.Repositories;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
 
@@ -17,7 +18,7 @@ namespace Lwt.Utilities
         private readonly IdentityDbContext lwtDbContext;
         private readonly ITextService textService;
         private readonly ITermService termService;
-        private readonly ITextRepository textRepository;
+        private readonly ISqlTextRepository textRepository;
         private readonly ILogger<DatabaseSeeder> logger;
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace Lwt.Utilities
             IdentityDbContext lwtDbContext,
             ITextService textService,
             ITermService termService,
-            ITextRepository textRepository,
+            ISqlTextRepository textRepository,
             ILogger<DatabaseSeeder> logger)
         {
             this.userRepository = userRepository;
@@ -69,7 +70,30 @@ namespace Lwt.Utilities
             }
 
             this.logger.LogInformation("Seeding database.");
+            this.SeedTerms(hai.Id);
+            this.SeedTexts(hai.Id);
+        }
 
+        private void SeedTerms(int userId)
+        {
+            JArray terms = JArray.Parse(File.ReadAllText("./term.json"));
+
+            foreach (JToken item in terms)
+            {
+                var term = item.ToObject<Term>();
+                term.CreatorId = userId;
+                term.Content = term.Content.ToUpperInvariant();
+                term.LanguageCode = LanguageCode.ENGLISH;
+                this.termService.CreateAsync(term)
+                    .GetAwaiter()
+                    .GetResult();
+            }
+
+            this.logger.LogInformation("Done seeding database.");
+        }
+
+        private void SeedTexts(int userId)
+        {
             var text = new Text
             {
                 Title = @"Why do people never get rich by working as an employee?",
@@ -103,23 +127,12 @@ If you think that in a macro plan (wars, international conflicts, terrorist orga
 The long and the short of it; it is meaningless to talk about who is poor or who is rich. The exact question must be “what did we do wrong?”",
 #pragma warning disable MEN002
                 LanguageCode = LanguageCode.ENGLISH,
-                CreatorId = hai.Id,
+                CreatorId = userId,
                 Id = default,
             };
-            await this.textService.CreateAsync(text);
-
-            JArray terms = JArray.Parse(File.ReadAllText("./term.json"));
-
-            foreach (JToken item in terms)
-            {
-                var term = item.ToObject<Term>();
-                term.CreatorId = hai.Id;
-                term.Content = term.Content.ToUpperInvariant();
-                term.LanguageCode = LanguageCode.ENGLISH;
-                await this.termService.CreateAsync(term);
-            }
-
-            this.logger.LogInformation("Done seeding database.");
+            this.textService.CreateAsync(text)
+                .GetAwaiter()
+                .GetResult();
         }
     }
 }

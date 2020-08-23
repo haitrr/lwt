@@ -33,6 +33,12 @@ namespace Lwt.Interfaces
             this.DbSet.Add(entity);
         }
 
+        /// <inheritdoc />
+        public void BulkAdd(IEnumerable<T> entities)
+        {
+            this.DbSet.AddRange(entities);
+        }
+
         /// <inheritdoc/>
         public void DeleteById(T entity)
         {
@@ -55,9 +61,9 @@ namespace Lwt.Interfaces
         }
 
         /// <inheritdoc/>
-        public Task<T> TryGetByIdAsync(int id)
+        public Task<T?> TryGetByIdAsync(int id)
         {
-            return this.DbSet.SingleOrDefaultAsync(e => e.Id == id);
+            return this.DbSet.SingleOrDefaultAsync(e => e.Id == id) !;
         }
 
         /// <inheritdoc />
@@ -76,6 +82,12 @@ namespace Lwt.Interfaces
         public Task<int> CountAsync(Expression<Func<T, bool>>? filter = null)
         {
             return this.DbSet.CountAsync();
+        }
+
+        /// <inheritdoc />
+        public void Delete(T entity)
+        {
+            this.DbSet.Remove(entity);
         }
     }
 }
