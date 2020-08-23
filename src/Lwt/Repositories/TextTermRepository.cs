@@ -28,9 +28,23 @@ namespace Lwt.Repositories
             }
         }
 
-        public async Task<IEnumerable<TextTerm>> GetByTextAsync(int textId)
+        public async Task<IEnumerable<TextTerm>> GetByTextAsync(int textId, int? indexFrom, int? indexTo)
         {
-            return await this.DbSet.Where(t => t.TextId == textId).Include(t => t.Term).ToListAsync();
+            IQueryable<TextTerm> query = this.DbSet.Include(t => t.Term)
+                .Where(t => t.TextId == textId);
+
+            if (indexFrom != null)
+            {
+                query = query.Where(t => t.Index >= indexFrom);
+            }
+
+            if (indexTo != null)
+            {
+                query = query.Where(t => t.Index <= indexTo);
+            }
+
+            return await query.OrderBy(t => t.Index)
+                .ToListAsync();
         }
     }
 }

@@ -162,5 +162,15 @@ namespace Lwt.Controllers
             Dictionary<LearningLevel, int> counts = await this.textService.GetTermCountsAsync(id, userId);
             return this.Ok(new { Id = id, Counts = counts });
         }
+
+        [HttpGet("{id}/terms")]
+        [Authorize]
+        public async Task<IActionResult> GetTerms([FromRoute] int id, [FromQuery] int indexFrom, [FromQuery]int indexTo)
+        {
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            IEnumerable<TermReadModel> terms = await this.textService.GetTextTermsAsync(id, userId, indexFrom, indexTo);
+            int totalCount = await this.textService.CountTextTermsAsync(id, userId);
+            return this.Ok(new { Id = id, Terms = terms, TotalCount = totalCount });
+        }
     }
 }

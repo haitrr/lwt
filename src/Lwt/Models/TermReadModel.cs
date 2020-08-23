@@ -19,5 +19,7 @@ namespace Lwt.Models
         /// Gets or sets the term's learning level.
         /// </summary>
         public LearningLevel LearningLevel { get; set; } = null!;
+
+        public int Index { get; set; }
     }
 }

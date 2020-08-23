@@ -6,6 +6,7 @@ namespace Lwt.Interfaces
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
+    using Lwt.Exceptions;
     using Lwt.Models;
     using Microsoft.EntityFrameworkCore;
 
@@ -67,9 +68,16 @@ namespace Lwt.Interfaces
         }
 
         /// <inheritdoc />
-        public Task<T> GetByIdAsync(int id)
+        public async Task<T> GetByIdAsync(int id)
         {
-            return this.DbSet.SingleAsync(e => e.Id == id);
+            try
+            {
+                return await this.DbSet.SingleAsync(e => e.Id == id);
+            }
+            catch
+            {
+                throw new NotFoundException("Entity not found");
+            }
         }
 
         /// <inheritdoc />

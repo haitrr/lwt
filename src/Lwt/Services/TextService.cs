@@ -29,6 +29,7 @@ namespace Lwt.Services
         private readonly IUserTextGetter userTextGetter;
         private readonly ITextTermProcessor textTermProcessor;
         private readonly ILanguageHelper languageHelper;
+        private readonly IMapper<TextTerm, TermReadModel> textTermMapper;
 
         public TextService(
             ISqlTextRepository textRepository,
@@ -41,7 +42,8 @@ namespace Lwt.Services
             IDbTransaction dbTransaction,
             ITextTermRepository textTermRepository,
             ITextTermProcessor termProcessor,
-            ILanguageHelper languageHelper)
+            ILanguageHelper languageHelper,
+            IMapper<TextTerm, TermReadModel> textTermMapper)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
@@ -54,6 +56,7 @@ namespace Lwt.Services
             this.textTermRepository = textTermRepository;
             this.textTermProcessor = termProcessor;
             this.languageHelper = languageHelper;
+            this.textTermMapper = textTermMapper;
         }
 
         /// <inheritdoc/>
@@ -174,7 +177,7 @@ namespace Lwt.Services
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
             var counts = new Dictionary<LearningLevel, int> { { LearningLevel.Unknown, 0 }, };
             ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
-            IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id);
+            IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id, null, null);
 
             foreach (var textTerm in textTerms)
             {
@@ -201,6 +204,19 @@ namespace Lwt.Services
             }
 
             return counts;
+        }
+
+        public async Task<int> CountTextTermsAsync(int id, int userId)
+        {
+            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
+            return await this.textTermRepository.CountByTextAsync(text.Id);
+        }
+
+        public async Task<IEnumerable<TermReadModel>> GetTextTermsAsync(int id, int userId, int indexFrom, int indexTo)
+        {
+            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
+            IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id, indexFrom, indexTo);
+            return this.textTermMapper.Map(textTerms);
         }
     }
 }

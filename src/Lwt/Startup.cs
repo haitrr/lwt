@@ -1,7 +1,6 @@
 #pragma warning disable
 namespace Lwt
 {
-    using System;
     using System.Collections.Generic;
     using System.IO.Compression;
     using System.Text;
@@ -29,7 +28,6 @@ namespace Lwt
     using Microsoft.Extensions.Hosting;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.OpenApi.Models;
-    using Newtonsoft.Json;
 
     /// <summary>
     /// statup.
@@ -256,6 +254,7 @@ namespace Lwt
             services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
             services.AddTransient<IMapper<Text, TextReadModel>, TextReadMapper>();
             services.AddTransient<IMapper<Term, TermMeaningDto>, TermMeaningMapper>();
+            services.AddTransient<IMapper<TextTerm, TermReadModel>, TextTermMapper>();
         }
     }
 }

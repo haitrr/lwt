@@ -11,6 +11,6 @@ namespace Lwt.Repositories
 
         void DeleteByTextId(int textId);
 
-        Task<IEnumerable<TextTerm>> GetByTextAsync(int textId);
+        Task<IEnumerable<TextTerm>> GetByTextAsync(int textId, int? indexFrom, int? indexTo);
     }
 }
