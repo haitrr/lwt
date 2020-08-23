@@ -1,7 +1,5 @@
 namespace Lwt.Models
 {
-    using System.Collections.Generic;
-
     /// <summary>
     /// the text read model.
     /// </summary>

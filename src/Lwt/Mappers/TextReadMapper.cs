@@ -1,6 +1,5 @@
 namespace Lwt.Mappers
 {
-    using System.Collections.Generic;
     using Lwt.Models;
     using Lwt.Services;
 
