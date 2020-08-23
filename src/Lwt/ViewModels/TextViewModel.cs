@@ -1,6 +1,5 @@
 namespace Lwt.ViewModels
 {
-    using System;
     using System.Collections.Generic;
     using Lwt.Models;
 
@@ -32,7 +31,7 @@ namespace Lwt.ViewModels
         /// <summary>
         /// Gets or sets the id.
         /// </summary>
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets term counts by learning levels.

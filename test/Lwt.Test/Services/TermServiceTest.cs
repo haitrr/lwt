@@ -49,7 +49,7 @@ namespace Lwt.Test.Services
         {
             var term = new Term();
 
-            Guid result = await this.termService.CreateAsync(term);
+            int result = await this.termService.CreateAsync(term);
 
             Assert.Equal(term.Id, result);
         }
@@ -61,8 +61,8 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task EditAsyncShouldUpdateMappedTerm()
         {
-            var userId = Guid.NewGuid();
-            var termId = Guid.NewGuid();
+            var userId = 1;
+            var termId = 1;
             var termEdit = new TermEditModel();
             var current = new Term();
             this.termRepositoryMock.Setup(r => r.GetUserTermAsync(termId, userId))
@@ -89,7 +89,7 @@ namespace Lwt.Test.Services
             this.termRepositoryMock.Setup(r => r.CountAsync(It.IsAny<Expression<Func<Term, bool>>>()))
                 .ReturnsAsync(count);
 
-            long rs = await this.termService.CountAsync(Guid.NewGuid(), new TermFilter());
+            long rs = await this.termService.CountAsync(1, new TermFilter());
             Assert.Equal(count, rs);
         }
 
@@ -102,8 +102,8 @@ namespace Lwt.Test.Services
         {
             var term = new Term();
             var termViewModel = new TermViewModel();
-            var userId = Guid.NewGuid();
-            var termId = Guid.NewGuid();
+            var userId = 1;
+            var termId = 1;
             this.termRepositoryMock.Setup(r => r.GetUserTermAsync(termId, userId))
                 .ReturnsAsync(term);
             this.termViewMapperMock.Setup(m => m.Map(term))

@@ -1,6 +1,5 @@
 namespace Lwt.Test.Services
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.Interfaces;
     using Lwt.Models;
@@ -45,13 +44,13 @@ namespace Lwt.Test.Services
         [InlineData(false)]
         public async Task ChangePasswordAsyncShouldReturnResult(bool expected)
         {
-            this.userRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(It.IsNotNull<User>());
+            this.userRepositoryMock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(It.IsNotNull<User>());
             this.userRepositoryMock.Setup(
                     r => r.ChangePasswordAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(expected);
 
             bool result = await this.userPasswordChanger.ChangePasswordAsync(
-                It.IsAny<Guid>(),
+                It.IsAny<int>(),
                 It.IsAny<string>(),
                 It.IsAny<string>());
 

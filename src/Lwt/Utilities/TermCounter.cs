@@ -1,6 +1,5 @@
 namespace Lwt.Utilities
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -34,7 +33,7 @@ namespace Lwt.Utilities
         public async Task<Dictionary<LearningLevel, long>> CountByLearningLevelAsync(
             IEnumerable<string> words,
             LanguageCode languageCode,
-            Guid userId)
+            int userId)
         {
             IEnumerable<string> notSkippedTerms = this.skippedWordRemover.RemoveSkippedWords(words, languageCode);
             IEnumerable<string> notSkippedTermsNormalized =

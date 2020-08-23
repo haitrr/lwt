@@ -1,6 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -21,7 +20,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the text's language.
         /// </summary>
-        public LanguageCode LanguageCode { get; set; }
+        public LanguageCode LanguageCode { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets user bookmark.
@@ -31,6 +30,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets text id.
         /// </summary>
-        public Guid Id { get; set; }
+        public int Id { get; set; }
     }
 }

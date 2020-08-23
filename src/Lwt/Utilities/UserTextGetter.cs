@@ -1,6 +1,5 @@
 namespace Lwt.Utilities
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
     using Lwt.Interfaces;
@@ -21,7 +20,7 @@ namespace Lwt.Utilities
         }
 
         /// <inheritdoc/>
-        public async Task<Text> GetUserTextAsync(Guid textId, Guid userId)
+        public async Task<Text> GetUserTextAsync(int textId, int userId)
         {
             Text text = await this.textRepository.GetByIdAsync(textId);
 

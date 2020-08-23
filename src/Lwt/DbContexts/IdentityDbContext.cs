@@ -1,6 +1,5 @@
 namespace Lwt.DbContexts
 {
-    using System;
     using Lwt.Models;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
@@ -10,7 +9,7 @@ namespace Lwt.DbContexts
     /// <summary>
     /// application identity db context.
     /// </summary>
-    public class IdentityDbContext : IdentityDbContext<User, Role, Guid>
+    public class IdentityDbContext : IdentityDbContext<User, Role, int>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="IdentityDbContext" /> class.

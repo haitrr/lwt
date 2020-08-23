@@ -104,21 +104,30 @@ namespace Lwt.Test.IntegrationTests
         [Fact]
         public async Task EditTermShouldWork()
         {
-            var user = new User { UserName = "test" };
-            await this.lwtDbContext.GetCollection<Term>()
-                .FindOneAndDeleteAsync(_ => true);
+            var user = new User { UserName = "test", Id = 1 };
+
+            var existingTerm = new Term
+            {
+                CreatorId = user.Id, LanguageCode = LanguageCode.CHINESE, LearningLevel = LearningLevel.Learning2,
+            };
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
             {
                 IServiceProvider services = scope.ServiceProvider;
                 var dbContext = services.GetRequiredService<IdentityDbContext>();
+
+                foreach (Term t in dbContext.Set<Term>())
+                {
+                    dbContext.Set<Term>()
+                        .Remove(t);
+                }
+
+                dbContext.Set<Term>()
+                    .Add(existingTerm);
+                dbContext.SaveChanges();
                 dbContext.Users.Add(user);
                 dbContext.SaveChanges();
             }
-
-            var existingTerm = new Term { CreatorId = user.Id };
-            await this.lwtDbContext.GetCollection<Term>()
-                .InsertOneAsync(existingTerm);
 
             var termEditModel = new TermEditModel { LearningLevel = LearningLevel.Learning1, Meaning = "yolo", };
 
@@ -128,15 +137,20 @@ namespace Lwt.Test.IntegrationTests
                 $"api/term/{existingTerm.Id}",
                 new StringContent(JsonConvert.SerializeObject(termEditModel), Encoding.UTF8, "application/json"));
 
-            List<Term> terms = await this.lwtDbContext.GetCollection<Term>()
-                .Find(_ => true)
-                .ToListAsync();
-            Term? term = Assert.Single(terms);
-            Assert.NotNull(term);
+            using (IServiceScope scope = this.factory.Services.CreateScope())
+            {
+                IServiceProvider services = scope.ServiceProvider;
+                var dbContext = services.GetRequiredService<IdentityDbContext>();
+                List<Term> terms = await dbContext.Set<Term>()
+                    .Where(_ => true)
+                    .ToListAsync();
+                Term? term = Assert.Single(terms);
+                Assert.NotNull(term);
 
-            // ReSharper disable once PossibleNullReferenceException
-            Assert.Equal(termEditModel.Meaning, term.Meaning);
-            Assert.Equal(termEditModel.LearningLevel, term.LearningLevel);
+                // ReSharper disable once PossibleNullReferenceException
+                Assert.Equal(termEditModel.Meaning, term.Meaning);
+                Assert.Equal(termEditModel.LearningLevel, term.LearningLevel);
+            }
         }
 
         /// <summary>
@@ -148,7 +162,7 @@ namespace Lwt.Test.IntegrationTests
         {
             var expectedResponse = HttpStatusCode.Unauthorized;
 
-            HttpResponseMessage response = await this.client.GetAsync($"api/term/{Guid.NewGuid().ToString()}");
+            HttpResponseMessage response = await this.client.GetAsync($"api/term/{1.ToString()}");
 
             Assert.Equal(expectedResponse, response.StatusCode);
         }
@@ -175,7 +189,7 @@ namespace Lwt.Test.IntegrationTests
 
             var expectedResponse = HttpStatusCode.NotFound;
 
-            HttpResponseMessage response = await this.client.GetAsync($"api/term/{Guid.NewGuid().ToString()}");
+            HttpResponseMessage response = await this.client.GetAsync("api/term/{1}");
 
             Assert.Equal(expectedResponse, response.StatusCode);
         }
@@ -189,24 +203,31 @@ namespace Lwt.Test.IntegrationTests
         {
             var user = new User { UserName = "test" };
 
+            var term = new Term
+            {
+                CreatorId = user.Id,
+                LanguageCode = LanguageCode.ENGLISH,
+                Content = "test",
+                LearningLevel = LearningLevel.Unknown,
+            };
+
             using (IServiceScope scope = this.factory.Services.CreateScope())
             {
                 IServiceProvider services = scope.ServiceProvider;
                 var dbContext = services.GetRequiredService<IdentityDbContext>();
                 dbContext.Users.Add(user);
+                term.CreatorId = user.Id;
+                dbContext.Set<Term>()
+                    .Add(term);
                 dbContext.SaveChanges();
             }
-
-            var term = new Term { CreatorId = user.Id, LanguageCode = LanguageCode.ENGLISH, Content = "test", };
-            this.lwtDbContext.GetCollection<Term>()
-                .InsertOne(term);
 
             string token = this.tokenProvider.GenerateUserToken(user);
             this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var expectedResponse = HttpStatusCode.OK;
 
-            HttpResponseMessage response = await this.client.GetAsync($"api/term/{term.Id.ToString()}");
+            HttpResponseMessage response = await this.client.GetAsync($"api/term/{term.Id}");
 
             Assert.Equal(expectedResponse, response.StatusCode);
             var termViewModel = JsonConvert.DeserializeObject<TermViewModel>(

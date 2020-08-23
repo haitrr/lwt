@@ -1,6 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -11,7 +10,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets creator id.
         /// </summary>
-        public Guid CreatorId { get; set; }
+        public int CreatorId { get; set; }
 
         /// <summary>
         /// Gets or sets bookmark by user.

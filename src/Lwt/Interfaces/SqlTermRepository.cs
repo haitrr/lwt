@@ -1,10 +1,10 @@
 namespace Lwt.Interfaces
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
+    using Lwt.Exceptions;
     using Lwt.Models;
     using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +21,10 @@ namespace Lwt.Interfaces
         }
 
         /// <inheritdoc/>
-        public async Task<Dictionary<string, LearningLevel>> GetLearningLevelAsync(Guid creatorId, LanguageCode languageCode, ISet<string> terms)
+        public async Task<Dictionary<string, LearningLevel>> GetLearningLevelAsync(
+            int creatorId,
+            LanguageCode languageCode,
+            ISet<string> terms)
         {
             var list = await this.DbSet.Where(
                     t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.LanguageCode == languageCode)
@@ -32,7 +35,7 @@ namespace Lwt.Interfaces
 
         /// <inheritdoc />
         public async Task<IDictionary<string, Term>> GetManyAsync(
-            Guid creatorId,
+            int creatorId,
             LanguageCode languageCode,
             HashSet<string> terms)
         {
@@ -42,9 +45,16 @@ namespace Lwt.Interfaces
         }
 
         /// <inheritdoc />
-        public Task<Term> GetUserTermAsync(Guid termId, Guid userId)
+        public async Task<Term> GetUserTermAsync(int termId, int userId)
         {
-            return this.DbSet.SingleAsync(t => t.CreatorId == userId && t.Id == termId);
+            Term? term = await this.DbSet.SingleOrDefaultAsync(t => t.CreatorId == userId && t.Id == termId);
+
+            if (term != null)
+            {
+                return term;
+            }
+
+            throw new NotFoundException("term not found");
         }
     }
 }

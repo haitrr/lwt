@@ -1,6 +1,5 @@
 namespace Lwt.Interfaces
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Models;
@@ -18,7 +17,7 @@ namespace Lwt.Interfaces
         /// <param name="terms">the terms to find.</param>
         /// <returns>dictionary of term learning level.</returns>
         Task<Dictionary<string, LearningLevel>> GetLearningLevelAsync(
-            Guid creatorId,
+            int creatorId,
             LanguageCode languageCode,
             ISet<string> terms);
 
@@ -29,7 +28,7 @@ namespace Lwt.Interfaces
         /// <param name="languageCode">the language.</param>
         /// <param name="terms">the terms to find.</param>
         /// <returns>dictionary of term by content.</returns>
-        Task<IDictionary<string, Term>> GetManyAsync(Guid creatorId, LanguageCode languageCode, HashSet<string> terms);
+        Task<IDictionary<string, Term>> GetManyAsync(int creatorId, LanguageCode languageCode, HashSet<string> terms);
 
         /// <summary>
         /// get term of the user.
@@ -37,6 +36,6 @@ namespace Lwt.Interfaces
         /// <param name="termId">term id.</param>
         /// <param name="userId">user id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<Term> GetUserTermAsync(Guid termId, Guid userId);
+        Task<Term> GetUserTermAsync(int termId, int userId);
     }
 }

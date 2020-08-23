@@ -1,6 +1,5 @@
 namespace Lwt.Repositories
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
@@ -24,7 +23,7 @@ namespace Lwt.Repositories
 
         /// <inheritdoc/>
         public async Task<IEnumerable<Text>> GetByUserAsync(
-            Guid userId,
+            int userId,
             TextFilter textFilter,
             PaginationQuery paginationQuery)
         {
@@ -39,12 +38,12 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public Task<long> CountByUserAsync(Guid userId, TextFilter textFilter)
+        public Task<long> CountByUserAsync(int userId, TextFilter textFilter)
         {
             return this.Filter(userId, textFilter).CountDocumentsAsync();
         }
 
-        private IFindFluent<Text, Text> Filter(Guid userId, TextFilter textFilter)
+        private IFindFluent<Text, Text> Filter(int userId, TextFilter textFilter)
         {
             FilterDefinitionBuilder<Text> builder = Builders<Text>.Filter;
             FilterDefinition<Text> filter = builder.Eq(t => t.CreatorId, userId);

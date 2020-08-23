@@ -1,6 +1,5 @@
 namespace Lwt.Utilities
 {
-    using System;
     using System.Security.Claims;
 
     using Lwt.Interfaces;
@@ -11,11 +10,11 @@ namespace Lwt.Utilities
     public class AuthenticationHelper : IAuthenticationHelper
     {
         /// <inheritdoc/>
-        public Guid GetLoggedInUser(ClaimsPrincipal principal)
+        public int GetLoggedInUser(ClaimsPrincipal principal)
         {
             string userId = principal.FindFirstValue(Constants.UserIdClaimType);
 
-            return Guid.Parse(userId);
+            return int.Parse(userId);
         }
     }
 }

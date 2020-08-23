@@ -56,21 +56,21 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<T?> TryGetByIdAsync(Guid id);
+        Task<T?> TryGetByIdAsync(int id);
 
         /// <summary>
         /// get an entity by id if not found throw not found exception.
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<T> GetByIdAsync(Guid id);
+        Task<T> GetByIdAsync(int id);
 
         /// <summary>
         /// check if an entity exist.
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> IsExistAsync(Guid id);
+        Task<bool> IsExistAsync(int id);
 
         /// <summary>
         /// count all document in the collection.

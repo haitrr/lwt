@@ -1,6 +1,5 @@
 namespace Lwt.Interfaces.Services
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Models;
@@ -26,7 +25,7 @@ namespace Lwt.Interfaces.Services
         /// <param name="paginationQuery">the pagination query.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<IEnumerable<TextViewModel>> GetByUserAsync(
-            Guid userId,
+            int userId,
             TextFilter textFilter,
             PaginationQuery paginationQuery);
 
@@ -36,7 +35,7 @@ namespace Lwt.Interfaces.Services
         /// <param name="id">id.</param>
         /// <param name="userId">userId.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task DeleteAsync(Guid id, Guid userId);
+        Task DeleteAsync(int id, int userId);
 
         /// <summary>
         /// a.
@@ -45,7 +44,7 @@ namespace Lwt.Interfaces.Services
         /// <param name="userId">userId.</param>
         /// <param name="editModel">editModel.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task EditAsync(Guid textId, Guid userId, TextEditModel editModel);
+        Task EditAsync(int textId, int userId, TextEditModel editModel);
 
         /// <summary>
         /// count the ad from the user that match the filters.
@@ -53,7 +52,7 @@ namespace Lwt.Interfaces.Services
         /// <param name="userId">the user id.</param>
         /// <param name="textFilter">the filters.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<long> CountAsync(Guid userId, TextFilter textFilter);
+        Task<long> CountAsync(int userId, TextFilter textFilter);
 
         /// <summary>
         /// get the text to read.
@@ -61,7 +60,7 @@ namespace Lwt.Interfaces.Services
         /// <param name="id">the text id.</param>
         /// <param name="userId">the user id.</param>
         /// <returns>the text read model.</returns>
-        Task<TextReadModel> ReadAsync(Guid id, Guid userId);
+        Task<TextReadModel> ReadAsync(int id, int userId);
 
         /// <summary>
         /// get edit detail of a text.
@@ -69,7 +68,7 @@ namespace Lwt.Interfaces.Services
         /// <param name="id">the text's id.</param>
         /// <param name="userId">the request user.</param>
         /// <returns>the text edit detail.</returns>
-        Task<TextEditDetailModel> GetEditDetailAsync(Guid id, Guid userId);
+        Task<TextEditDetailModel> GetEditDetailAsync(int id, int userId);
 
         /// <summary>
         /// set user index in a text.
@@ -78,6 +77,6 @@ namespace Lwt.Interfaces.Services
         /// <param name="userId">user id.</param>
         /// <param name="setBookmarkModel">set bookmark model.</param>
         /// <returns>nothing.</returns>
-        Task SetBookmarkAsync(Guid id, Guid userId, SetBookmarkModel setBookmarkModel);
+        Task SetBookmarkAsync(int id, int userId, SetBookmarkModel setBookmarkModel);
     }
 }

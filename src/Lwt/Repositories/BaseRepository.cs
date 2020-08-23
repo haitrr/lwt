@@ -86,7 +86,7 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public Task<T?> TryGetByIdAsync(Guid id)
+        public Task<T?> TryGetByIdAsync(int id)
         {
             #nullable disable
             return this.Collection.Find(e => e.Id == id).SingleOrDefaultAsync();
@@ -94,7 +94,7 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<T> GetByIdAsync(Guid id)
+        public async Task<T> GetByIdAsync(int id)
         {
             T? text = await this.TryGetByIdAsync(id);
 
@@ -107,7 +107,7 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public Task<bool> IsExistAsync(Guid id)
+        public Task<bool> IsExistAsync(int id)
         {
             return this.Collection.Find(e => e.Id == id).AnyAsync();
         }
@@ -121,7 +121,7 @@ namespace Lwt.Repositories
         /// <inheritdoc />
         public async Task<long> CountAsync(FilterDefinition<T> filter)
         {
-            return await this.Collection.CountDocumentsAsync(filter ?? Builders<T>.Filter.Empty);
+            return await this.Collection.CountDocumentsAsync(filter);
         }
     }
 }

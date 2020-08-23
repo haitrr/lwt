@@ -55,19 +55,19 @@ namespace Lwt.Interfaces
         }
 
         /// <inheritdoc/>
-        public Task<T> TryGetByIdAsync(Guid id)
+        public Task<T> TryGetByIdAsync(int id)
         {
             return this.DbSet.SingleOrDefaultAsync(e => e.Id == id);
         }
 
         /// <inheritdoc />
-        public Task<T> GetByIdAsync(Guid id)
+        public Task<T> GetByIdAsync(int id)
         {
             return this.DbSet.SingleAsync(e => e.Id == id);
         }
 
         /// <inheritdoc />
-        public Task<bool> IsExistAsync(Guid id)
+        public Task<bool> IsExistAsync(int id)
         {
             return this.DbSet.AnyAsync(e => e.Id == id);
         }

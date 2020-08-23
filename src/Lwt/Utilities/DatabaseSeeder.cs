@@ -1,6 +1,5 @@
 namespace Lwt.Utilities
 {
-    using System;
     using System.IO;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
@@ -59,7 +58,7 @@ namespace Lwt.Utilities
             else
             {
                 this.logger.LogInformation("Seeding user.");
-                hai = new User { Id = new Guid("9E18BB68-66D2-4711-A27B-1A54AC2E8077"), UserName = "hai" };
+                hai = new User { Id = 1, UserName = "hai" };
                 await this.userRepository.CreateAsync(hai, "q");
             }
 
@@ -114,8 +113,6 @@ The long and the short of it; it is meaningless to talk about who is poor or who
             foreach (JToken item in terms)
             {
                 var term = item.ToObject<Term>();
-                term.Id = Guid.NewGuid();
-                Console.WriteLine(term.Id);
                 term.CreatorId = hai.Id;
                 term.Content = term.Content.ToUpperInvariant();
                 term.LanguageCode = LanguageCode.ENGLISH;

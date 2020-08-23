@@ -1,21 +1,21 @@
 namespace Lwt.Models
 {
-  using System;
-  using System.Collections.Generic;
-
-  /// <summary>
-  /// User setting view.
-  /// </summary>
-  public class UserSettingView
-  {
-    /// <summary>
-    /// Gets or sets the user id.
-    /// </summary>
-    public Guid UserId { get; set; }
+    using System.Collections.Generic;
 
     /// <summary>
-    /// Gets or sets the language settings.
+    /// User setting view.
     /// </summary>
-    public IDictionary<string, LanguageSetting> LanguageSettings { get; set; } = new Dictionary<string, LanguageSetting>();
-  }
+    public class UserSettingView
+    {
+        /// <summary>
+        /// Gets or sets the user id.
+        /// </summary>
+        public int UserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the language settings.
+        /// </summary>
+        public IDictionary<string, LanguageSetting> LanguageSettings { get; set; } =
+            new Dictionary<string, LanguageSetting>();
+    }
 }

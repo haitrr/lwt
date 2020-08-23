@@ -1,7 +1,5 @@
 namespace Lwt.ViewModels
 {
-    using System;
-
     /// <summary>
     /// term meaning dto.
     /// </summary>
@@ -10,7 +8,7 @@ namespace Lwt.ViewModels
         /// <summary>
         /// Gets or sets term id.
         /// </summary>
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets term meaning.

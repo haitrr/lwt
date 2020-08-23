@@ -19,7 +19,7 @@ namespace Lwt.Test.Controllers
 
         private readonly Mock<ITermService> termService;
 
-        private readonly Mock<IMapper<TermCreateModel, Guid, Term>> termCreateMapper;
+        private readonly Mock<IMapper<TermCreateModel, int, Term>> termCreateMapper;
 
         private readonly Mock<IAuthenticationHelper> authenticationHelper;
 
@@ -29,7 +29,7 @@ namespace Lwt.Test.Controllers
         public TermControllerTest()
         {
             this.termService = new Mock<ITermService>();
-            this.termCreateMapper = new Mock<IMapper<TermCreateModel, Guid, Term>>();
+            this.termCreateMapper = new Mock<IMapper<TermCreateModel, int, Term>>();
             this.authenticationHelper = new Mock<IAuthenticationHelper>();
 
             this.termController = new TermController(
@@ -54,7 +54,7 @@ namespace Lwt.Test.Controllers
         public async Task CreateAsyncShouldReturnOkTermId()
         {
             // arrange
-            var termId = Guid.NewGuid();
+            var termId = 1;
             this.termService.Setup(s => s.CreateAsync(It.IsAny<Term>()))
                 .ReturnsAsync(termId);
 
@@ -63,7 +63,7 @@ namespace Lwt.Test.Controllers
 
             // assert
             var obj = Assert.IsType<OkObjectResult>(actual);
-            var id = Assert.IsType<Guid>(obj.Value);
+            var id = Assert.IsType<int>(obj.Value);
             Assert.Equal(termId, id);
         }
 
@@ -75,7 +75,7 @@ namespace Lwt.Test.Controllers
         public async Task CreateAsyncShouldCallService()
         {
             // arrange
-            var userId = Guid.NewGuid();
+            var userId = 23;
             var term = new Term();
             this.authenticationHelper
                 .Setup(h => h.GetLoggedInUser(this.termController.User))

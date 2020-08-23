@@ -1,6 +1,5 @@
 namespace Lwt.Interfaces
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -17,13 +16,13 @@ namespace Lwt.Interfaces
         /// <param name="creatorId">creatorId.</param>
         /// <param name="languageCreateModel">languageCreateModel.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<Guid> CreateAsync(Guid creatorId, LanguageCreateModel languageCreateModel);
+        Task<int> CreateAsync(int creatorId, LanguageCreateModel languageCreateModel);
 
         /// <summary>
         /// get all the language of a user.
         /// </summary>
         /// <param name="userId">the user's id.</param>
         /// <returns>list of the user's language.</returns>
-        Task<ICollection<Language>> GetByUserAsync(Guid userId);
+        Task<ICollection<Language>> GetByUserAsync(int userId);
     }
 }

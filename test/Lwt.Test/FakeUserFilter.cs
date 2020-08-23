@@ -1,6 +1,5 @@
 namespace Lwt.Test
 {
-    using System;
     using System.Collections.Generic;
     using System.Security.Claims;
     using System.Threading.Tasks;
@@ -19,7 +18,7 @@ namespace Lwt.Test
         /// </summary>
         public FakeUserFilter()
         {
-            this.user = new User { Id = Guid.NewGuid(), UserName = "yolo", Email = "yolo@yolo.com" };
+            this.user = new User { Id = 1, UserName = "yolo", Email = "yolo@yolo.com" };
         }
 
         /// <summary>

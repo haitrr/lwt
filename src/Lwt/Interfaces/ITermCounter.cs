@@ -1,6 +1,5 @@
 namespace Lwt.Interfaces
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Models;
@@ -20,6 +19,6 @@ namespace Lwt.Interfaces
         Task<Dictionary<LearningLevel, long>> CountByLearningLevelAsync(
             IEnumerable<string> words,
             LanguageCode languageCode,
-            Guid userId);
+            int userId);
     }
 }

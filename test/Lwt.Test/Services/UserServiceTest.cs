@@ -1,6 +1,5 @@
 namespace Lwt.Test.Services
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
     using Lwt.Interfaces;
@@ -113,7 +112,7 @@ namespace Lwt.Test.Services
             var userName = "user";
             var password = "pass";
             var user = new User();
-            string token = Guid.NewGuid().ToString();
+            var token = 1.ToString();
             this.userManager.Setup(m => m.FindByNameAsync(userName)).ReturnsAsync(user);
             this.userManager.Setup(m => m.CheckPasswordAsync(user, password)).ReturnsAsync(true);
             this.tokenProvider.Setup(p => p.GenerateUserToken(user)).Returns(token);
@@ -190,7 +189,7 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task GetAsyncShouldThrowNotFoundIfUserNotFound()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             this.userManager.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User)null);
 
             await Assert.ThrowsAsync<NotFoundException>(() => this.userService.GetAsync(userId));
@@ -203,7 +202,7 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task GetAsyncShouldMapUser()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             var user = new User();
             var userViewModel = new UserView();
             this.userManager.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync(user);
@@ -220,7 +219,7 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task GetSettingAsyncShouldThrowNotFoundIfUserNotFound()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync((UserSetting)null);
 
             await Assert.ThrowsAsync<NotFoundException>(() => this.userService.GetSettingAsync(userId));
@@ -233,7 +232,7 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task GetSettingAsyncShouldMap()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             var userSettingView = new UserSettingView();
             var userSetting = new UserSetting();
             this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync(userSetting);
@@ -250,7 +249,7 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task ChangePasswordAsyncShouldThrowNotFoundIfUserNotFound()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             this.userManager.Setup(m => m.FindByIdAsync(userId.ToString())).ReturnsAsync((User)null);
 
             await Assert.ThrowsAsync<NotFoundException>(
@@ -265,12 +264,12 @@ namespace Lwt.Test.Services
         public async Task ChangePasswordAsyncShouldThrowBadRequestIfFailToChangePassword()
         {
             this.userPasswordChangerMock
-                .Setup(c => c.ChangePasswordAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(c => c.ChangePasswordAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(false);
-            this.userRepositoryMock.Setup(r => r.IsExistAsync(It.IsAny<Guid>())).ReturnsAsync(true);
+            this.userRepositoryMock.Setup(r => r.IsExistAsync(It.IsAny<int>())).ReturnsAsync(true);
 
             await Assert.ThrowsAsync<BadRequestException>(
-                () => this.userService.ChangePasswordAsync(Guid.NewGuid(), new UserChangePasswordModel()));
+                () => this.userService.ChangePasswordAsync(1, new UserChangePasswordModel()));
         }
 
         /// <summary>
@@ -280,7 +279,7 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task PutSettingAsyncShouldCreateSettingIfNotExisted()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync((UserSetting)null);
             this.userSettingUpdateMapper.Setup(m => m.Map(It.IsAny<UserSettingUpdate>())).Returns(new UserSetting());
 
@@ -296,7 +295,7 @@ namespace Lwt.Test.Services
         [Fact]
         public async Task PutSettingAsyncShouldUpdateUserSetting()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             var setting = new UserSetting();
             this.userSettingRepository.Setup(r => r.TryGetByUserIdAsync(userId)).ReturnsAsync(new UserSetting());
             this.userSettingUpdateMapper

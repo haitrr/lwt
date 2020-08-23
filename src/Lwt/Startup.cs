@@ -249,12 +249,12 @@ namespace Lwt
         private static void RegisterMappers(IServiceCollection services)
         {
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
-            services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
+            services.AddTransient<IMapper<TextCreateModel, int, Text>, TextCreateMapper>();
             services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
             services.AddTransient<IMapper<Text, TextEditDetailModel>, TextEditDetailMapper>();
             services.AddTransient<IMapper<ILanguage, LanguageViewModel>, LanguageViewMapper>();
             services.AddTransient<IMapper<TermEditModel, Term>, TermEditMapper>();
-            services.AddTransient<IMapper<TermCreateModel, Guid, Term>, TermCreateMapper>();
+            services.AddTransient<IMapper<TermCreateModel, int, Term>, TermCreateMapper>();
             services.AddTransient<IMapper<Term, TermViewModel>, TermViewMapper>();
             services.AddTransient<IJapaneseTextSplitter, JapaneseTextSplitter>();
             services.AddSingleton<IChineseTextSplitter, ChineseTextSplitter>();

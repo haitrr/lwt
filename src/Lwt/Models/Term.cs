@@ -1,7 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
-
     /// <summary>
     /// the term.
     /// </summary>
@@ -20,7 +18,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the term's language.
         /// </summary>
-        public LanguageCode LanguageCode { get; set; }
+        public LanguageCode LanguageCode { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the meaning.
@@ -30,11 +28,11 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the creator's id.
         /// </summary>
-        public Guid CreatorId { get; set; }
+        public int CreatorId { get; set; }
 
         /// <summary>
         /// Gets or sets the current learning level.
         /// </summary>
-        public LearningLevel LearningLevel { get; set; }
+        public LearningLevel LearningLevel { get; set; } = null!;
     }
 }

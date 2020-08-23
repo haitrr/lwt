@@ -54,7 +54,7 @@ namespace Lwt.Test.Controllers
         public void GetAsyncShouldWork()
         {
             // arrange
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             var languages = new List<ILanguage>();
             var viewModels = new List<LanguageViewModel>();
             this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.languageController.User)).Returns(userId);
@@ -87,7 +87,7 @@ namespace Lwt.Test.Controllers
         {
             if (disposing)
             {
-                this.languageController?.Dispose();
+                this.languageController.Dispose();
             }
         }
     }

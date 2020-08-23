@@ -1,6 +1,5 @@
 namespace Lwt.Repositories
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -26,7 +25,7 @@ namespace Lwt.Repositories
 
         /// <inheritdoc />
         public async Task<Dictionary<string, LearningLevel>> GetLearningLevelAsync(
-            Guid creatorId,
+            int creatorId,
             LanguageCode languageCode,
             ISet<string> terms)
         {
@@ -39,7 +38,7 @@ namespace Lwt.Repositories
 
         /// <inheritdoc />
         public async Task<IDictionary<string, Term>> GetManyAsync(
-            Guid creatorId,
+            int creatorId,
             LanguageCode languageCode,
             HashSet<string> terms)
         {
@@ -50,7 +49,7 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<Term> GetUserTermAsync(Guid termId, Guid userId)
+        public async Task<Term> GetUserTermAsync(int termId, int userId)
         {
             Term? term = await this.Collection.Find(t => t.Id == termId && t.CreatorId == userId)
                 .SingleOrDefaultAsync();

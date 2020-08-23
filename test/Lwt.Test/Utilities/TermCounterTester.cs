@@ -1,6 +1,5 @@
 namespace Lwt.Test.Utilities
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -53,7 +52,7 @@ namespace Lwt.Test.Utilities
         {
             var words = new List<string> { "hello", "yolo", "hello", "kk" };
             LanguageCode languageCode = LanguageCode.ENGLISH;
-            var userId = Guid.NewGuid();
+            var userId = 1;
             var learningLevelDict = new Dictionary<string, LearningLevel>
             {
                 { "hello", LearningLevel.Learning1 }, { "yolo", LearningLevel.Learning3 },

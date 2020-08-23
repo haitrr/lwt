@@ -1,7 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
-
     /// <summary>
     /// term view model.
     /// </summary>
@@ -30,6 +28,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets term's id.
         /// </summary>
-        public Guid Id { get; set; }
+        public int Id { get; set; }
     }
 }

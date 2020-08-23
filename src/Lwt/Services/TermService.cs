@@ -43,7 +43,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public async Task<Guid> CreateAsync(Term term)
+        public async Task<int> CreateAsync(Term term)
         {
             this.termRepository.Add(term);
             await this.dbTransaction.CommitAsync();
@@ -52,7 +52,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public async Task EditAsync(TermEditModel termEditModel, Guid termId, Guid userId)
+        public async Task EditAsync(TermEditModel termEditModel, int termId, int userId)
         {
             Term current = await this.termRepository.GetUserTermAsync(termId, userId);
 
@@ -62,7 +62,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc />
-        public async Task<TermViewModel> GetAsync(Guid userId, Guid termId)
+        public async Task<TermViewModel> GetAsync(int userId, int termId)
         {
             Term term = await this.termRepository.GetUserTermAsync(termId, userId);
 
@@ -70,7 +70,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc />
-        public Task<int> CountAsync(Guid userId, TermFilter termFilter)
+        public Task<int> CountAsync(int userId, TermFilter termFilter)
         {
             Expression<Func<Term, bool>> filter = termFilter.ToExpression();
             filter = filter.And(term => term.CreatorId == userId);
@@ -78,7 +78,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc />
-        public async Task<TermMeaningDto> GetMeaningAsync(Guid userId, Guid termId)
+        public async Task<TermMeaningDto> GetMeaningAsync(int userId, int termId)
         {
             Term term = await this.termRepository.GetUserTermAsync(termId, userId);
 

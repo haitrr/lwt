@@ -1,6 +1,5 @@
 namespace Lwt.Services
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.Interfaces;
     using Lwt.Models;
@@ -20,7 +19,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword)
+        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
             User user = await this.userRepository.GetByIdAsync(userId);
 

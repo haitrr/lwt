@@ -1,6 +1,5 @@
 namespace Lwt.Interfaces
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.Models;
 
@@ -12,6 +11,6 @@ namespace Lwt.Interfaces
     /// </summary>
     /// <param name="userId">user's id.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-    Task<UserSetting?> TryGetByUserIdAsync(Guid userId);
+    Task<UserSetting?> TryGetByUserIdAsync(int userId);
     }
 }

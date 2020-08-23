@@ -1,6 +1,5 @@
 namespace Lwt.Services
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Creators;
@@ -71,7 +70,7 @@ namespace Lwt.Services
 
         /// <inheritdoc/>
         public async Task<IEnumerable<TextViewModel>> GetByUserAsync(
-            Guid userId,
+            int userId,
             TextFilter textFilter,
             PaginationQuery paginationQuery)
         {
@@ -96,7 +95,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public async Task DeleteAsync(Guid id, Guid userId)
+        public async Task DeleteAsync(int id, int userId)
         {
             Text text = await this.textRepository.GetByIdAsync(id);
 
@@ -111,7 +110,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public async Task EditAsync(Guid textId, Guid userId, TextEditModel editModel)
+        public async Task EditAsync(int textId, int userId, TextEditModel editModel)
         {
             Text? text = await this.textRepository.TryGetByIdAsync(textId);
 
@@ -133,13 +132,13 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public Task<long> CountAsync(Guid userId, TextFilter textFilter)
+        public Task<long> CountAsync(int userId, TextFilter textFilter)
         {
             return this.textRepository.CountByUserAsync(userId, textFilter);
         }
 
         /// <inheritdoc />
-        public async Task<TextReadModel> ReadAsync(Guid id, Guid userId)
+        public async Task<TextReadModel> ReadAsync(int id, int userId)
         {
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
 
@@ -147,7 +146,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc />
-        public async Task<TextEditDetailModel> GetEditDetailAsync(Guid id, Guid userId)
+        public async Task<TextEditDetailModel> GetEditDetailAsync(int id, int userId)
         {
             Text? text = await this.textRepository.TryGetByIdAsync(id);
 
@@ -165,7 +164,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc />
-        public async Task SetBookmarkAsync(Guid id, Guid userId, SetBookmarkModel setBookmarkModel)
+        public async Task SetBookmarkAsync(int id, int userId, SetBookmarkModel setBookmarkModel)
         {
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
 

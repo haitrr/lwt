@@ -12,7 +12,8 @@
         /// Gets or sets id.
         /// </summary>
         [Key]
-        public Guid Id { get; set; }
+        [MaxLength(36)]
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets when did the entity created.

@@ -1,6 +1,5 @@
 namespace Lwt.Repositories
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.DbContexts;
     using Lwt.Interfaces;
@@ -23,9 +22,9 @@ namespace Lwt.Repositories
         }
 
     /// <inheritdoc/>
-    public Task<UserSetting?> TryGetByUserIdAsync(Guid userId)
+    public async Task<UserSetting?> TryGetByUserIdAsync(int userId)
         {
-            return this.Collection.AsQueryable().Where(u => u.UserId == userId).SingleOrDefaultAsync();
+            return await this.Collection.AsQueryable().Where(u => u.UserId == userId).SingleOrDefaultAsync();
         }
     }
 }
