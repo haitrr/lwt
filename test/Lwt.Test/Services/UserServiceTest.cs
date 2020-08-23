@@ -19,7 +19,8 @@ namespace Lwt.Test.Services
         private readonly Mock<UserManager<User>> userManager;
         private readonly Mock<IUserPasswordChanger> userPasswordChangerMock;
         private readonly Mock<IUserRepository> userRepositoryMock;
-        private readonly Mock<IUserSettingRepository> userSettingRepository;
+        private readonly Mock<ISqlUserSettingRepository> userSettingRepository;
+        private readonly Mock<IDbTransaction> dbTransactionMock;
         private readonly Mock<IMapper<UserSetting, UserSettingView>> userSettingViewMapper;
         private readonly Mock<IMapper<User, UserView>> userViewMapper;
         private readonly Mock<IMapper<UserSettingUpdate, UserSetting>> userSettingUpdateMapper;
@@ -36,10 +37,11 @@ namespace Lwt.Test.Services
 
             this.userRepositoryMock = new Mock<IUserRepository>();
             this.userViewMapper = new Mock<IMapper<User, UserView>>();
-            this.userSettingRepository = new Mock<IUserSettingRepository>();
+            this.userSettingRepository = new Mock<ISqlUserSettingRepository>();
             this.userSettingViewMapper = new Mock<IMapper<UserSetting, UserSettingView>>();
             this.userSettingUpdateMapper = new Mock<IMapper<UserSettingUpdate, UserSetting>>();
             this.userPasswordChangerMock = new Mock<IUserPasswordChanger>();
+            this.dbTransactionMock = new Mock<IDbTransaction>();
             this.userManager = new Mock<UserManager<User>>(
                 userStore.Object,
                 null,
@@ -60,7 +62,8 @@ namespace Lwt.Test.Services
                 this.userSettingViewMapper.Object,
                 this.userSettingUpdateMapper.Object,
                 this.userPasswordChangerMock.Object,
-                this.userRepositoryMock.Object);
+                this.userRepositoryMock.Object,
+                this.dbTransactionMock.Object);
         }
 
         /// <summary>
@@ -285,7 +288,7 @@ namespace Lwt.Test.Services
 
             await this.userService.PutSettingAsync(userId, new UserSettingUpdate());
 
-            this.userSettingRepository.Verify(r => r.AddAsync(It.Is<UserSetting>(s => s.UserId == userId)));
+            this.userSettingRepository.Verify(r => r.Update(It.Is<UserSetting>(s => s.UserId == userId)));
         }
 
         /// <summary>
@@ -304,7 +307,7 @@ namespace Lwt.Test.Services
 
             await this.userService.PutSettingAsync(userId, new UserSettingUpdate());
 
-            this.userSettingRepository.Verify(r => r.UpdateAsync(setting));
+            this.userSettingRepository.Verify(r => r.Update(setting));
         }
     }
 }

@@ -18,31 +18,22 @@ namespace Lwt.Services
         private readonly ITokenProvider tokenProvider;
         private readonly IUserRepository userRepository;
         private readonly IMapper<User, UserView> userViewMapper;
-        private readonly IUserSettingRepository userSettingRepository;
+        private readonly ISqlUserSettingRepository userSettingRepository;
         private readonly IMapper<UserSetting, UserSettingView> userSettingViewMapper;
         private readonly IMapper<UserSettingUpdate, UserSetting> userSettingUpdateMapper;
         private readonly IUserPasswordChanger userPasswordChanger;
+        private readonly IDbTransaction dbTransaction;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserService"/> class.
-        /// </summary>
-        /// <param name="userManager">userManager.</param>
-        /// <param name="tokenProvider">authentication token provider.</param>
-        /// <param name="userViewMapper">user view mapper.</param>
-        /// <param name="userSettingRepository">user setting repository.</param>
-        /// <param name="userSettingViewMapper">user setting view mapper.</param>
-        /// <param name="userSettingUpdateMapper">user setting update mapper.</param>
-        /// <param name="userPasswordChanger">user password changer.</param>
-        /// <param name="userRepository">user repository.</param>
         public UserService(
             UserManager<User> userManager,
             ITokenProvider tokenProvider,
             IMapper<User, UserView> userViewMapper,
-            IUserSettingRepository userSettingRepository,
+            ISqlUserSettingRepository userSettingRepository,
             IMapper<UserSetting, UserSettingView> userSettingViewMapper,
             IMapper<UserSettingUpdate, UserSetting> userSettingUpdateMapper,
             IUserPasswordChanger userPasswordChanger,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IDbTransaction dbTransaction)
         {
             this.userManager = userManager;
             this.tokenProvider = tokenProvider;
@@ -52,6 +43,7 @@ namespace Lwt.Services
             this.userSettingUpdateMapper = userSettingUpdateMapper;
             this.userPasswordChanger = userPasswordChanger;
             this.userRepository = userRepository;
+            this.dbTransaction = dbTransaction;
         }
 
         /// <inheritdoc/>
@@ -139,12 +131,15 @@ namespace Lwt.Services
             {
                 UserSetting newUserSetting = this.userSettingUpdateMapper.Map(userSettingUpdate);
                 newUserSetting.UserId = loggedInUserid;
-                await this.userSettingRepository.AddAsync(newUserSetting);
-                return;
+                this.userSettingRepository.Add(newUserSetting);
+            }
+            else
+            {
+                UserSetting updatedUserSetting = this.userSettingUpdateMapper.Map(userSettingUpdate, userSetting);
+                this.userSettingRepository.Update(updatedUserSetting);
             }
 
-            UserSetting updatedUserSetting = this.userSettingUpdateMapper.Map(userSettingUpdate, userSetting);
-            await this.userSettingRepository.UpdateAsync(updatedUserSetting);
+            await this.dbTransaction.CommitAsync();
         }
     }
 }

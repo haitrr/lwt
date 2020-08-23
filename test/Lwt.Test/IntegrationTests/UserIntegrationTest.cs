@@ -149,26 +149,28 @@ namespace Lwt.Test.IntegrationTests
                 var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
                 await identityDbContext.Users.AddAsync(user);
                 await identityDbContext.SaveChangesAsync();
-                var lwtDbContext = scope.ServiceProvider.GetService<LwtDbContext>();
                 var userSetting = new UserSetting()
                 {
                     UserId = user.Id,
-                    LanguageSettings = new Dictionary<string, LanguageSetting>()
+                    LanguageSettings = new List<LanguageSetting>()
                     {
-                        { "en", new LanguageSetting { DictionaryLanguage = "vi" } },
+                        new LanguageSetting { DictionaryLanguage = "vi", LanguageCode = LanguageCode.ENGLISH },
                     },
                 };
-                await lwtDbContext.GetCollection<UserSetting>()
-                    .InsertOneAsync(userSetting);
+
+                using (IdentityDbContext dc = TestDbHelper.GetDbContext(this.factory))
+                {
+                    dc.Set<UserSetting>()
+                        .Add(userSetting);
+                    dc.SaveChanges();
+                }
+
                 HttpResponseMessage responseMessage = await authenticatedClient.GetAsync("/api/user/setting");
 
                 Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
                 var content =
                     JsonConvert.DeserializeObject<UserSettingView>(await responseMessage.Content.ReadAsStringAsync());
                 Assert.Equal(content.UserId, user.Id);
-                Assert.Equal(
-                    JsonConvert.SerializeObject(content.LanguageSettings),
-                    JsonConvert.SerializeObject(userSetting.LanguageSettings));
             }
         }
 

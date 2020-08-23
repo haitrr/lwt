@@ -7,6 +7,8 @@ namespace Lwt.Models
     /// </summary>
     public class UserSetting : Entity
     {
+        public const string TableName = "user_settings";
+
         /// <summary>
         /// Gets or sets user id.
         /// </summary>
@@ -15,6 +17,7 @@ namespace Lwt.Models
         /// <summary>
         ///  Gets or sets language settings.
         /// </summary>
-        public IDictionary<string, LanguageSetting> LanguageSettings { get; set; } = new Dictionary<string, LanguageSetting>();
+        public ICollection<LanguageSetting> LanguageSettings { get; set; } =
+            new List<LanguageSetting>();
     }
 }

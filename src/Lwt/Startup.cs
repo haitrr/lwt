@@ -128,6 +128,7 @@ namespace Lwt
             services.AddScoped<ISqlTextRepository, SqlTextRepository>();
             services.AddScoped<ITextTermRepository, TextTermRepository>();
             services.AddTransient<ITextTermProcessor, TextTermProcessor>();
+            services.AddTransient<ISqlUserSettingRepository, SqlUserSettingRepository>();
 
             // transaction
             services.AddScoped<IDbTransaction, DbTransaction<IdentityDbContext>>();
