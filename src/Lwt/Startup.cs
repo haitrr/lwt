@@ -64,7 +64,6 @@ namespace Lwt
 
             services.AddDbContext<IdentityDbContext>(options => 
                 options.UseSqlite("Data Source=lwt.db"));
-            services.AddTransient<LwtDbContext>();
 
             // identity
             services.AddIdentity<User, Role>()

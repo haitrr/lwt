@@ -73,11 +73,6 @@ namespace Lwt.Test.IntegrationTests
                     HttpResponseMessage httpResponseMessage = await client.GetAsync("/api/language");
                     Assert.Equal(HttpStatusCode.OK, httpResponseMessage.StatusCode);
 
-                    var dbContext = seedEnabledFactory.Services.GetRequiredService<LwtDbContext>();
-                    Assert.Equal(
-                        1,
-                        await dbContext.GetCollection<Text>().Find(_ => true).CountDocumentsAsync());
-
                     using (IServiceScope scope = seedEnabledFactory.Services.CreateScope())
                     using (var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>())
                     {

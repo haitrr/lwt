@@ -24,7 +24,6 @@ namespace Lwt.Test.IntegrationTests
     {
         private readonly HttpClient client;
         private readonly LwtTestWebApplicationFactory factory;
-        private readonly LwtDbContext lwtDbContext;
         private readonly ITokenProvider tokenProvider;
 
         /// <summary>
@@ -34,7 +33,6 @@ namespace Lwt.Test.IntegrationTests
         {
             this.factory = new LwtTestWebApplicationFactory();
             this.tokenProvider = this.factory.Services.GetService<ITokenProvider>();
-            this.lwtDbContext = this.factory.Services.GetService<LwtDbContext>();
             this.client = this.factory.CreateClient();
         }
 
@@ -46,8 +44,7 @@ namespace Lwt.Test.IntegrationTests
         public async Task CreateTermAsyncShouldCreateTerm()
         {
             var user = new User { UserName = "test" };
-            await this.lwtDbContext.GetCollection<Term>()
-                .FindOneAndDeleteAsync(_ => true);
+            TestDbHelper.CleanTable<Term>(this.factory.Services);
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
             {
