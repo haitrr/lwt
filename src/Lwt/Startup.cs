@@ -134,7 +134,6 @@ namespace Lwt
 
             // database seeder
             services.AddTransient<IDatabaseSeeder, DatabaseSeeder>();
-            services.AddTransient<IIndexCreator, MongoDbIndexCreator>();
 
             // utilities
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
