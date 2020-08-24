@@ -61,7 +61,7 @@ namespace Lwt
                     config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
             services.AddDbContext<IdentityDbContext>(options => 
-                options.UseSqlite("Data Source=lwt.db"));
+                options.UseMySql("server=localhost;database=lwt;user=root;password="));
 
             // identity
             services.AddIdentity<User, Role>()
