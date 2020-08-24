@@ -28,17 +28,17 @@ namespace Lwt.Utilities
             {
                 new Vietnamese(), new English(),
                 new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>()),
-                new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>())
+                new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>()),
             };
 
-            var language = languages.SingleOrDefault(l => l.Code == languageCode);
+            ILanguage? language = languages.SingleOrDefault(l => l.Code == languageCode);
 
             if (language != null)
             {
                 return language;
             }
 
-            throw new NotSupportedException($"Language {languageCode.ToString()} is not supported.");
+            throw new NotSupportedException($"Language {languageCode} is not supported.");
         }
 
         /// <inheritdoc/>
