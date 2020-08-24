@@ -10,6 +10,6 @@ namespace Lwt.Models
     /// <summary>
     /// Gets or sets language setting.
     /// </summary>
-    public ICollection<LanguageSetting> LanguageSettings { get; set; } = new List<LanguageSetting>();
+    public IEnumerable<LanguageSetting> LanguageSettings { get; set; } = null!;
   }
 }

@@ -24,5 +24,7 @@ namespace Lwt.Models
         /// Gets or sets text id.
         /// </summary>
         public int Id { get; set; }
+
+        public int TermCount { get; set; }
     }
 }

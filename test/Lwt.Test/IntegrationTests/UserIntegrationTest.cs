@@ -154,7 +154,11 @@ namespace Lwt.Test.IntegrationTests
                     UserId = user.Id,
                     LanguageSettings = new List<LanguageSetting>()
                     {
-                        new LanguageSetting { DictionaryLanguage = "vi", LanguageCode = LanguageCode.ENGLISH },
+                        new LanguageSetting
+                        {
+                            DictionaryLanguageCode = LanguageCode.VIETNAMESE,
+                            LanguageCode = LanguageCode.ENGLISH,
+                        },
                     },
                 };
 

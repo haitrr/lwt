@@ -54,6 +54,10 @@ namespace Lwt.DbContexts
                 .Property(t => t.LanguageCode)
                 .HasConversion(converter);
 
+            builder.Entity<LanguageSetting>()
+                .Property(t => t.DictionaryLanguageCode)
+                .HasConversion(converter);
+
             builder.Entity<User>()
                 .ToTable("users");
             builder.Entity<Role>()

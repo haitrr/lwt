@@ -21,6 +21,13 @@ namespace Lwt.Repositories
         public async Task<UserSetting?> TryGetByUserIdAsync(int userId)
         {
             return await this.DbSet.Where(u => u.UserId == userId)
+                .Include(s => s.LanguageSettings)
+                .SingleOrDefaultAsync();
+        }
+
+        public async Task<UserSetting?> TryGetByUserIdNotIncludeLanguageSettingsAsync(int userId)
+        {
+            return await this.DbSet.Where(u => u.UserId == userId)
                 .SingleOrDefaultAsync();
         }
     }

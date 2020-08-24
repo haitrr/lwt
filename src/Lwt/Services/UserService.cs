@@ -125,7 +125,8 @@ namespace Lwt.Services
         /// <inheritdoc/>
         public async Task PutSettingAsync(int loggedInUserid, UserSettingUpdate userSettingUpdate)
         {
-            UserSetting? userSetting = await this.userSettingRepository.TryGetByUserIdAsync(loggedInUserid);
+            // not including language setting to avoid tracking issue.
+            UserSetting? userSetting = await this.userSettingRepository.TryGetByUserIdNotIncludeLanguageSettingsAsync(loggedInUserid);
 
             if (userSetting == null)
             {

@@ -10,7 +10,7 @@ namespace Lwt.Models
         /// <summary>
         ///  Gets or sets dictionary language.
         /// </summary>
-        public string DictionaryLanguage { get; set; } = string.Empty;
+        public LanguageCode DictionaryLanguageCode { get; set; } = LanguageCode.ENGLISH;
 
         public LanguageCode LanguageCode { get; set; } = null!;
     }

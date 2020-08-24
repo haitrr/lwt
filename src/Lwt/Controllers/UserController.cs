@@ -59,6 +59,7 @@ namespace Lwt.Controllers
         /// <param name="userSettingUpdate">user setting.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         [HttpPut("setting")]
+        [Authorize]
         public async Task<IActionResult> GetSettingAsync([FromBody] UserSettingUpdate userSettingUpdate)
         {
             int loggedInUserid = this.authenticationHelper.GetLoggedInUser(this.User);

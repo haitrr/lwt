@@ -11,7 +11,7 @@ namespace Lwt.Models
         /// <inheritdoc />
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(LanguageCode);
+            return objectType == typeof(LanguageCode) || objectType == typeof(string);
         }
 
         /// <inheritdoc />

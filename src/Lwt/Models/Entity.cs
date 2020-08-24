@@ -12,7 +12,6 @@
         /// Gets or sets id.
         /// </summary>
         [Key]
-        [MaxLength(36)]
         public int Id { get; set; }
 
         /// <summary>

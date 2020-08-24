@@ -1,5 +1,6 @@
 namespace Lwt.Mappers
 {
+    using System.Linq;
     using Lwt.Models;
     using Lwt.Services;
 
@@ -9,7 +10,7 @@ namespace Lwt.Mappers
         /// <inheritdoc/>
         public override UserSetting Map(UserSettingUpdate from, UserSetting result)
         {
-            result.LanguageSettings = from.LanguageSettings;
+            result.LanguageSettings = from.LanguageSettings.ToList();
             return result;
         }
     }
