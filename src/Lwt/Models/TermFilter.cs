@@ -3,7 +3,6 @@ namespace Lwt.Models
     using System;
     using System.Linq.Expressions;
     using Lwt.Extensions;
-    using MongoDB.Driver;
 
     /// <summary>
     /// term's filters.
@@ -13,7 +12,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets term's language.
         /// </summary>
-        public Language? Language { get; set; }
+        public LanguageCode? LanguageCode { get; set; }
 
         /// <summary>
         /// get the term filter expression.
@@ -23,29 +22,12 @@ namespace Lwt.Models
         {
             Expression<Func<Term, bool>> expression = term => true;
 
-            if (this.Language.HasValue)
+            if (this.LanguageCode != null)
             {
-                expression = expression.And(term => (int)this.Language.Value == (int)term.Language);
+                expression = expression.And(term => this.LanguageCode == term.LanguageCode);
             }
 
             return expression;
-        }
-
-        /// <summary>
-        /// return filter definition.
-        /// </summary>
-        /// <returns>the filter definition.</returns>
-        public FilterDefinition<Term> ToFilterDefinition()
-        {
-            FilterDefinitionBuilder<Term> filterBuilder = Builders<Term>.Filter;
-            FilterDefinition<Term> filter = filterBuilder.Empty;
-
-            if (this.Language.HasValue)
-            {
-                filter = filterBuilder.And(filter, filterBuilder.Eq(term => term.Language, this.Language.Value));
-            }
-
-            return filter;
         }
     }
 }

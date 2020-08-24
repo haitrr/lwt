@@ -20,9 +20,9 @@ namespace Lwt.Utilities
         }
 
         /// <inheritdoc/>
-        public IEnumerable<string> RemoveSkippedWords(IEnumerable<string> words, Language language)
+        public IEnumerable<string> RemoveSkippedWords(IEnumerable<string> words, LanguageCode languageCode)
         {
-            ILanguage lang = this.languageHelper.GetLanguage(language);
+            ILanguage lang = this.languageHelper.GetLanguage(languageCode);
             return words.Where(word => !lang.ShouldSkip(word));
         }
     }

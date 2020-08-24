@@ -13,7 +13,6 @@ namespace Lwt.Test
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
-    using Mongo2Go;
     using Moq;
 
     /// <summary>
@@ -21,16 +20,6 @@ namespace Lwt.Test
     /// </summary>
     public class LwtTestWebApplicationFactory : WebApplicationFactory<Startup>
     {
-        private readonly MongoDbRunner mongoDbRunner;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LwtTestWebApplicationFactory"/> class.
-        /// </summary>
-        public LwtTestWebApplicationFactory()
-        {
-            this.mongoDbRunner = MongoDbRunner.Start();
-        }
-
         /// <summary>
         /// return a new factory with fake user to test secured apis.
         /// </summary>
@@ -72,19 +61,8 @@ namespace Lwt.Test
                         .Returns(Task.CompletedTask);
                     services.AddTransient(resolver => mock.Object);
 
-                    // Replace database seeder.
-                    ServiceDescriptor indexCreatorDescriptor =
-                        services.Single(s => s.ServiceType == typeof(IIndexCreator));
-
-                    services.Remove(indexCreatorDescriptor);
-
-                    var indexCreatorMock = new Mock<IIndexCreator>();
-                    indexCreatorMock.Setup(s => s.CreateIndexesAsync())
-                        .Returns(Task.CompletedTask);
-                    services.AddTransient(resolver => indexCreatorMock.Object);
-
                     // Remove the app's ApplicationDbContext registration.
-                    ServiceDescriptor descriptor = services.SingleOrDefault(
+                    ServiceDescriptor? descriptor = services.SingleOrDefault(
                         d => d.ServiceType == typeof(DbContextOptions<IdentityDbContext>));
 
                     if (descriptor != null)
@@ -96,33 +74,16 @@ namespace Lwt.Test
                     services.AddDbContext<IdentityDbContext>(
                         (options, context) => { context.UseInMemoryDatabase("InMemoryDbForTesting"); });
 
-                    ServiceDescriptor appSettingDescriptor = services.SingleOrDefault(
+                    ServiceDescriptor? appSettingDescriptor = services.SingleOrDefault(
                         d => d.ServiceType == typeof(AppSettings));
 
                     if (appSettingDescriptor != null)
                     {
                         var appSetting = (AppSettings)appSettingDescriptor.ImplementationInstance;
                         services.Remove(appSettingDescriptor);
-                        services.AddSingleton(
-                            new AppSettings
-                            {
-                                MongoDatabase = appSetting.MongoDatabase,
-                                Secret = appSetting.Secret,
-                                MongoConnectionString = this.mongoDbRunner.ConnectionString,
-                            });
+                        services.AddSingleton(new AppSettings { Secret = appSetting.Secret, });
                     }
                 });
-        }
-
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                this.mongoDbRunner.Dispose();
-            }
-
-            base.Dispose(disposing);
         }
     }
 }

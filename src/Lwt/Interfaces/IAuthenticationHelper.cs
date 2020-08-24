@@ -1,6 +1,5 @@
 ﻿namespace Lwt.Interfaces
 {
-    using System;
     using System.Security.Claims;
 
     /// <summary>
@@ -13,6 +12,6 @@
         /// </summary>
         /// <param name="principal">principal.</param>
         /// <returns>id of current user.</returns>
-        Guid GetLoggedInUser(ClaimsPrincipal principal);
+        int GetLoggedInUser(ClaimsPrincipal principal);
     }
 }

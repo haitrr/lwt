@@ -1,14 +1,13 @@
 namespace Lwt.Services
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Creators;
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Interfaces.Services;
-    using Lwt.Mappers;
     using Lwt.Models;
+    using Lwt.Repositories;
     using Lwt.Utilities;
     using Lwt.ViewModels;
 
@@ -17,61 +16,58 @@ namespace Lwt.Services
     /// </summary>
     public class TextService : ITextService
     {
-        private readonly ITextRepository textRepository;
+        private readonly ISqlTextRepository textRepository;
 
-        private readonly ILanguageHelper languageHelper;
         private readonly IMapper<Text, TextViewModel> textViewMapper;
         private readonly ITextCreator textCreator;
 
         private readonly IMapper<TextEditModel, Text> textEditMapper;
         private readonly IMapper<Text, TextEditDetailModel> textEditDetailMapper;
-        private readonly IAsyncMapper<Text, TextReadModel> textReadMapper;
-        private readonly ITermCounter termCounter;
+        private readonly IMapper<Text, TextReadModel> textReadMapper;
+        private readonly IDbTransaction dbTransaction;
+        private readonly ITextTermRepository textTermRepository;
         private readonly IUserTextGetter userTextGetter;
+        private readonly ITextTermProcessor textTermProcessor;
+        private readonly ILanguageHelper languageHelper;
+        private readonly IMapper<TextTerm, TermReadModel> textTermMapper;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TextService"/> class.
-        /// </summary>
-        /// <param name="textRepository">textRepository.</param>
-        /// <param name="textViewMapper">text view mapper.</param>
-        /// <param name="textEditMapper">textEditMapper.</param>
-        /// <param name="languageHelper">the language helper.</param>
-        /// <param name="textEditDetailMapper">text edit detail mapper.</param>
-        /// <param name="textCreator">the text creator.</param>
-        /// <param name="termCounter">the term counter.</param>
-        /// <param name="userTextGetter">user text getter.</param>
-        /// <param name="textReadMapper">text read mapper.</param>
         public TextService(
-            ITextRepository textRepository,
+            ISqlTextRepository textRepository,
             IMapper<TextEditModel, Text> textEditMapper,
-            ILanguageHelper languageHelper,
             IMapper<Text, TextViewModel> textViewMapper,
             IMapper<Text, TextEditDetailModel> textEditDetailMapper,
             ITextCreator textCreator,
-            ITermCounter termCounter,
             IUserTextGetter userTextGetter,
-            IAsyncMapper<Text, TextReadModel> textReadMapper)
+            IMapper<Text, TextReadModel> textReadMapper,
+            IDbTransaction dbTransaction,
+            ITextTermRepository textTermRepository,
+            ITextTermProcessor termProcessor,
+            ILanguageHelper languageHelper,
+            IMapper<TextTerm, TermReadModel> textTermMapper)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
-            this.languageHelper = languageHelper;
             this.textViewMapper = textViewMapper;
             this.textEditDetailMapper = textEditDetailMapper;
             this.textCreator = textCreator;
-            this.termCounter = termCounter;
             this.userTextGetter = userTextGetter;
             this.textReadMapper = textReadMapper;
+            this.dbTransaction = dbTransaction;
+            this.textTermRepository = textTermRepository;
+            this.textTermProcessor = termProcessor;
+            this.languageHelper = languageHelper;
+            this.textTermMapper = textTermMapper;
         }
 
         /// <inheritdoc/>
-        public Task CreateAsync(Text text)
+        public Task<int> CreateAsync(Text text)
         {
             return this.textCreator.CreateAsync(text);
         }
 
         /// <inheritdoc/>
         public async Task<IEnumerable<TextViewModel>> GetByUserAsync(
-            Guid userId,
+            int userId,
             TextFilter textFilter,
             PaginationQuery paginationQuery)
         {
@@ -81,14 +77,6 @@ namespace Lwt.Services
             foreach (Text text in texts)
             {
                 TextViewModel viewModel = this.textViewMapper.Map(text);
-                Dictionary<TermLearningLevel, long> termCountDict =
-                    await this.termCounter.CountByLearningLevelAsync(text.Words, text.Language, text.CreatorId);
-
-                foreach (KeyValuePair<TermLearningLevel, long> keyValuePair in termCountDict)
-                {
-                    viewModel.Counts.Add(keyValuePair.Key, keyValuePair.Value);
-                }
-
                 viewModels.Add(viewModel);
             }
 
@@ -96,13 +84,14 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public async Task DeleteAsync(Guid id, Guid userId)
+        public async Task DeleteAsync(int id, int userId)
         {
             Text text = await this.textRepository.GetByIdAsync(id);
 
             if (text.CreatorId == userId)
             {
-                await this.textRepository.DeleteByIdAsync(text);
+                this.textRepository.Delete(text);
+                await this.dbTransaction.CommitAsync();
             }
             else
             {
@@ -111,7 +100,7 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public async Task EditAsync(Guid textId, Guid userId, TextEditModel editModel)
+        public async Task EditAsync(int textId, int userId, TextEditModel editModel)
         {
             Text? text = await this.textRepository.TryGetByIdAsync(textId);
 
@@ -123,8 +112,9 @@ namespace Lwt.Services
             if (text.CreatorId == userId)
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
-                this.SplitText(editedText);
-                await this.textRepository.UpdateAsync(editedText);
+                this.textRepository.Update(editedText);
+                await this.textTermProcessor.ProcessTextTermAsync(editedText);
+                await this.dbTransaction.CommitAsync();
             }
             else
             {
@@ -133,21 +123,21 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc/>
-        public Task<long> CountAsync(Guid userId, TextFilter textFilter)
+        public Task<long> CountAsync(int userId, TextFilter textFilter)
         {
             return this.textRepository.CountByUserAsync(userId, textFilter);
         }
 
         /// <inheritdoc />
-        public async Task<TextReadModel> ReadAsync(Guid id, Guid userId)
+        public async Task<TextReadModel> ReadAsync(int id, int userId)
         {
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
 
-            return await this.textReadMapper.MapAsync(text);
+            return this.textReadMapper.Map(text);
         }
 
         /// <inheritdoc />
-        public async Task<TextEditDetailModel> GetEditDetailAsync(Guid id, Guid userId)
+        public async Task<TextEditDetailModel> GetEditDetailAsync(int id, int userId)
         {
             Text? text = await this.textRepository.TryGetByIdAsync(id);
 
@@ -165,24 +155,82 @@ namespace Lwt.Services
         }
 
         /// <inheritdoc />
-        public async Task SetBookmarkAsync(Guid id, Guid userId, SetBookmarkModel setBookmarkModel)
+        public async Task SetBookmarkAsync(int id, int userId, SetBookmarkModel setBookmarkModel)
         {
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
 
-            if (setBookmarkModel.TermIndex >= (ulong)text.Words.Count)
+            int textTermCount = await this.textTermRepository.CountByTextAsync(text.Id);
+
+            if (setBookmarkModel.TermIndex >= (ulong)textTermCount)
             {
                 throw new BadRequestException("Invalid bookmark index.");
             }
 
             text.Bookmark = setBookmarkModel.TermIndex;
 
-            await this.textRepository.UpdateAsync(text);
+            this.textRepository.Update(text);
+            await this.dbTransaction.CommitAsync();
         }
 
-        private void SplitText(Text text)
+        public async Task<Dictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId)
         {
-            ILanguage language = this.languageHelper.GetLanguage(text.Language);
-            text.Words = language.SplitText(text.Content);
+            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
+            var counts =
+                new Dictionary<LearningLevel, int>
+                {
+                    { LearningLevel.Skipped, 0 },
+                    { LearningLevel.Ignored, 0 },
+                    { LearningLevel.Unknown, 0 },
+                    { LearningLevel.Learning1, 0 },
+                    { LearningLevel.Learning2, 0 },
+                    { LearningLevel.Learning3, 0 },
+                    { LearningLevel.Learning4, 0 },
+                    { LearningLevel.Learning5, 0 },
+                    { LearningLevel.WellKnown, 0 },
+                };
+            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
+            IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id, null, null);
+
+            foreach (var textTerm in textTerms)
+            {
+                if (textTerm.Term == null)
+                {
+                    if (language.ShouldSkip(textTerm.Content))
+                    {
+                        counts[LearningLevel.Skipped] += 1;
+                    }
+                    else
+                    {
+                        counts[LearningLevel.Unknown] += 1;
+                    }
+                }
+                else
+                {
+                    if (counts.ContainsKey(textTerm.Term.LearningLevel))
+                    {
+                        counts[textTerm.Term.LearningLevel] += 1;
+                    }
+                    else
+                    {
+                        counts[textTerm.Term.LearningLevel] = 1;
+                    }
+                }
+            }
+
+            return counts;
+        }
+
+        public async Task<int> CountTextTermsAsync(int id, int userId)
+        {
+            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
+            return await this.textTermRepository.CountByTextAsync(text.Id);
+        }
+
+        public async Task<IEnumerable<TermReadModel>> GetTextTermsAsync(int id, int userId, int indexFrom, int indexTo)
+        {
+            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
+            IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id, indexFrom, indexTo);
+            return this.textTermMapper.Map(textTerms);
         }
     }
 }

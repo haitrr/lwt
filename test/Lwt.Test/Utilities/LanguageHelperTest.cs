@@ -31,7 +31,7 @@ namespace Lwt.Test.Utilities
         [Fact]
         public void GetLanguageShouldReturnEnglish()
         {
-            ILanguage actual = this.languageHelper.GetLanguage(Language.English);
+            ILanguage actual = this.languageHelper.GetLanguage(LanguageCode.ENGLISH);
             Assert.IsType<English>(actual);
         }
 
@@ -41,7 +41,7 @@ namespace Lwt.Test.Utilities
         [Fact]
         public void GetLanguageShouldReturnChinese()
         {
-            ILanguage actual = this.languageHelper.GetLanguage(Language.Chinese);
+            ILanguage actual = this.languageHelper.GetLanguage(LanguageCode.CHINESE);
             Assert.IsType<Chinese>(actual);
         }
 
@@ -51,7 +51,7 @@ namespace Lwt.Test.Utilities
         [Fact]
         public void GetLanguageShouldReturnJapanese()
         {
-            ILanguage actual = this.languageHelper.GetLanguage(Language.Japanese);
+            ILanguage actual = this.languageHelper.GetLanguage(LanguageCode.JAPANESE);
             Assert.IsType<Japanese>(actual);
         }
 
@@ -61,17 +61,8 @@ namespace Lwt.Test.Utilities
         [Fact]
         public void GetLanguageShouldReturnVietnamese()
         {
-            ILanguage actual = this.languageHelper.GetLanguage(Language.Vietnamese);
+            ILanguage actual = this.languageHelper.GetLanguage(LanguageCode.VIETNAMESE);
             Assert.IsType<Vietnamese>(actual);
-        }
-
-        /// <summary>
-        /// throw if language not supported.
-        /// </summary>
-        [Fact]
-        public void GetLanguageShouldThrowIfNotSupported()
-        {
-            Assert.Throws<NotSupportedException>(() => this.languageHelper.GetLanguage((Language)342));
         }
 
         /// <summary>

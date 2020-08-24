@@ -1,7 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
-
     /// <summary>
     /// term view model.
     /// </summary>
@@ -20,11 +18,16 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets learning level.
         /// </summary>
-        public TermLearningLevel LearningLevel { get; set; }
+        public LearningLevel LearningLevel { get; set; } = null!;
+
+        /// <summary>
+        /// Gets or sets language code.
+        /// </summary>
+        public LanguageCode LanguageCode { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets term's id.
         /// </summary>
-        public Guid Id { get; set; }
+        public int Id { get; set; }
     }
 }

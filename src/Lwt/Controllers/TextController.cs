@@ -1,6 +1,5 @@
 namespace Lwt.Controllers
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Interfaces;
@@ -20,7 +19,7 @@ namespace Lwt.Controllers
     {
         private readonly ITextService textService;
 
-        private readonly IMapper<TextCreateModel, Guid, Text> textCreateMapper;
+        private readonly IMapper<TextCreateModel, int, Text> textCreateMapper;
 
         private readonly IAuthenticationHelper authenticationHelper;
 
@@ -33,7 +32,7 @@ namespace Lwt.Controllers
         public TextController(
             ITextService textService,
             IAuthenticationHelper authenticationHelper,
-            IMapper<TextCreateModel, Guid, Text> textCreateMapper)
+            IMapper<TextCreateModel, int, Text> textCreateMapper)
         {
             this.textService = textService;
             this.authenticationHelper = authenticationHelper;
@@ -49,11 +48,11 @@ namespace Lwt.Controllers
         [Authorize]
         public async Task<IActionResult> CreateAsync([FromBody] TextCreateModel model)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             Text text = this.textCreateMapper.Map(model, userId);
-            await this.textService.CreateAsync(text);
+            int id = await this.textService.CreateAsync(text);
 
-            return this.Ok();
+            return this.Ok(new { Id = id });
         }
 
         /// <summary>
@@ -68,7 +67,7 @@ namespace Lwt.Controllers
             [FromQuery] TextFilter filters,
             [FromQuery] PaginationQuery paginationQuery)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
 
             long count = await this.textService.CountAsync(userId, filters);
             IEnumerable<TextViewModel> viewModels =
@@ -84,9 +83,9 @@ namespace Lwt.Controllers
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteAsync([FromRoute] Guid id)
+        public async Task<IActionResult> DeleteAsync([FromRoute] int id)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             await this.textService.DeleteAsync(id, userId);
 
             return this.Ok();
@@ -99,10 +98,11 @@ namespace Lwt.Controllers
         /// <returns>the text read model.</returns>
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<IActionResult> ReadAsync([FromRoute] Guid id)
+        public async Task<IActionResult> ReadAsync([FromRoute] int id)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             TextReadModel textReadModel = await this.textService.ReadAsync(id, userId);
+            textReadModel.TermCount = await this.textService.CountTextTermsAsync(id, userId);
 
             return this.Ok(textReadModel);
         }
@@ -115,9 +115,9 @@ namespace Lwt.Controllers
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> EditAsync([FromRoute] Guid id, [FromBody] TextEditModel editModel)
+        public async Task<IActionResult> EditAsync([FromRoute] int id, [FromBody] TextEditModel editModel)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             await this.textService.EditAsync(id, userId, editModel);
 
             return this.Ok();
@@ -130,9 +130,9 @@ namespace Lwt.Controllers
         /// <returns>edit details.</returns>
         [HttpGet("{id}/edit-details")]
         [Authorize]
-        public async Task<IActionResult> GetEditDetailAsync([FromRoute] Guid id)
+        public async Task<IActionResult> GetEditDetailAsync([FromRoute] int id)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             TextEditDetailModel editDetail = await this.textService.GetEditDetailAsync(id, userId);
 
             return this.Ok(editDetail);
@@ -147,12 +147,31 @@ namespace Lwt.Controllers
         [HttpPatch("{id}/bookmark")]
         [Authorize]
         public async Task<IActionResult> SetBookmarkAsync(
-            [FromRoute] Guid id,
+            [FromRoute] int id,
             [FromBody] SetBookmarkModel setBookmarkModel)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             await this.textService.SetBookmarkAsync(id, userId, setBookmarkModel);
             return this.Ok();
+        }
+
+        [HttpGet("{id}/term-counts")]
+        [Authorize]
+        public async Task<IActionResult> GetTermCounts([FromRoute] int id)
+        {
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            Dictionary<LearningLevel, int> counts = await this.textService.GetTermCountsAsync(id, userId);
+            return this.Ok(new { Id = id, Counts = counts });
+        }
+
+        [HttpGet("{id}/terms")]
+        [Authorize]
+        public async Task<IActionResult> GetTerms([FromRoute] int id, [FromQuery] int indexFrom, [FromQuery]int indexTo)
+        {
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            IEnumerable<TermReadModel> terms = await this.textService.GetTextTermsAsync(id, userId, indexFrom, indexTo);
+            int totalCount = await this.textService.CountTextTermsAsync(id, userId);
+            return this.Ok(new { Id = id, Terms = terms, TotalCount = totalCount });
         }
     }
 }

@@ -2,6 +2,7 @@ namespace Lwt.Utilities
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Lwt.Interfaces;
     using Lwt.Models;
     using Microsoft.Extensions.DependencyInjection;
@@ -21,22 +22,23 @@ namespace Lwt.Utilities
         }
 
         /// <inheritdoc/>
-        public ILanguage GetLanguage(Language language)
+        public ILanguage GetLanguage(LanguageCode languageCode)
         {
-            switch (language)
+            var languages = new ILanguage[]
             {
-                case Language.Vietnamese:
-                    return new Vietnamese();
-                case Language.English:
+                new Vietnamese(), new English(),
+                new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>()),
+                new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>()),
+            };
 
-                    return new English();
-                case Language.Chinese:
-                    return new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>());
-                case Language.Japanese:
-                    return new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>());
+            ILanguage? language = languages.SingleOrDefault(l => l.Code == languageCode);
+
+            if (language != null)
+            {
+                return language;
             }
 
-            throw new NotSupportedException($"Language {language.ToString()} is not supported.");
+            throw new NotSupportedException($"Language {languageCode} is not supported.");
         }
 
         /// <inheritdoc/>

@@ -11,14 +11,9 @@ namespace Lwt.Models
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets language id.
-        /// </summary>
-        public Language Id { get; set; }
-
-        /// <summary>
         /// Gets or sets the language's code.
         /// </summary>
-        public string Code { get; set; } = string.Empty;
+        public LanguageCode Code { get; set; }
 
         /// <summary>
         /// Gets or sets the language's speak code.

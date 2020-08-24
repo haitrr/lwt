@@ -1,6 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -9,9 +8,14 @@ namespace Lwt.Models
     public class Text : Entity
     {
         /// <summary>
+        /// table name.
+        /// </summary>
+        public const string TableName = "texts";
+
+        /// <summary>
         /// Gets or sets creator id.
         /// </summary>
-        public Guid CreatorId { get; set; }
+        public int CreatorId { get; set; }
 
         /// <summary>
         /// Gets or sets bookmark by user.
@@ -31,11 +35,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets language.
         /// </summary>
-        public Language Language { get; set; }
-
-        /// <summary>
-        /// Gets or sets the words.
-        /// </summary>
-        public ICollection<string> Words { get; set; } = new List<string>();
+        public LanguageCode LanguageCode { get; set; } = null!;
+        public List<TextTerm> TextTerms { get; set; } = null!;
     }
 }

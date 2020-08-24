@@ -5,28 +5,31 @@ namespace Lwt.Interfaces
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Models;
-    using MongoDB.Driver;
 
     /// <summary>
     /// a.
     /// </summary>
     /// <typeparam name="T">type.</typeparam>
-    public interface IRepository<T>
+    public interface ISqlRepository<T>
         where T : Entity
     {
         /// <summary>
         /// insert an new entity to database.
         /// </summary>
         /// <param name="entity">entity.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task AddAsync(T entity);
+        void Add(T entity);
+
+        /// <summary>
+        /// insert many new entity to database.
+        /// </summary>
+        /// <param name="entities">entity.</param>
+        void BulkAdd(IEnumerable<T> entities);
 
         /// <summary>
         /// delete an entity by id.
         /// </summary>
         /// <param name="entity">entity.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<bool> DeleteByIdAsync(T entity);
+        void DeleteById(T entity);
 
         /// <summary>
         /// Search for entities.
@@ -37,53 +40,43 @@ namespace Lwt.Interfaces
         Task<IEnumerable<T>> SearchAsync(Expression<Func<T, bool>> filter, PaginationQuery paginationQuery);
 
         /// <summary>
-        /// Search for entities.
-        /// </summary>
-        /// <param name="filter">the filter.</param>
-        /// <param name="paginationQuery">pagination query.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<IEnumerable<T>> SearchAsync(FilterDefinition<T> filter, PaginationQuery paginationQuery);
-
-        /// <summary>
         /// update an entity.
         /// </summary>
         /// <param name="entity">entity.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<bool> UpdateAsync(T entity);
+        void Update(T entity);
 
         /// <summary>
         /// get an entity by id if not found return null.
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<T?> TryGetByIdAsync(Guid id);
+        Task<T?> TryGetByIdAsync(int id);
 
         /// <summary>
         /// get an entity by id if not found throw not found exception.
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<T> GetByIdAsync(Guid id);
+        Task<T> GetByIdAsync(int id);
 
         /// <summary>
         /// check if an entity exist.
         /// </summary>
         /// <param name="id">id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> IsExistAsync(Guid id);
+        Task<bool> IsExistAsync(int id);
 
         /// <summary>
         /// count all document in the collection.
         /// </summary>
         /// <param name="filter"> the filter.</param>
         /// <returns>the count.</returns>
-        Task<long> CountAsync(Expression<Func<T, bool>>? filter = null);
+        Task<int> CountAsync(Expression<Func<T, bool>>? filter = null);
 
         /// <summary>
-        /// count all document in the collection.
+        /// delete an entity.
         /// </summary>
-        /// <param name="filter"> the filter.</param>
-        /// <returns>the count.</returns>
-        Task<long> CountAsync(FilterDefinition<T> filter);
+        /// <param name="entity">entity.</param>
+        void Delete(T entity);
     }
 }

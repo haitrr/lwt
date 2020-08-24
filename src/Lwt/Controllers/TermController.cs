@@ -1,7 +1,5 @@
 namespace Lwt.Controllers
 {
-    using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Lwt.Interfaces;
     using Lwt.Models;
@@ -18,7 +16,7 @@ namespace Lwt.Controllers
     {
         private readonly ITermService termService;
 
-        private readonly IMapper<TermCreateModel, Guid, Term> termCreateMapper;
+        private readonly IMapper<TermCreateModel, int, Term> termCreateMapper;
 
         private readonly IAuthenticationHelper authenticationHelper;
 
@@ -30,7 +28,7 @@ namespace Lwt.Controllers
         /// <param name="authenticationHelper">the authentication helper.</param>
         public TermController(
             ITermService termService,
-            IMapper<TermCreateModel, Guid, Term> termCreateMapper,
+            IMapper<TermCreateModel, int, Term> termCreateMapper,
             IAuthenticationHelper authenticationHelper)
         {
             this.termService = termService;
@@ -47,11 +45,11 @@ namespace Lwt.Controllers
         [Authorize]
         public async Task<IActionResult> CreateAsync([FromBody] TermCreateModel termCreateModel)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             Term term = this.termCreateMapper.Map(termCreateModel, userId);
-            Guid id = await this.termService.CreateAsync(term);
+            int id = await this.termService.CreateAsync(term);
 
-            return this.Ok(id);
+            return this.Ok(new { Id = id });
         }
 
         /// <summary>
@@ -61,9 +59,9 @@ namespace Lwt.Controllers
         /// <returns>the term view model.</returns>
         [HttpGet("{termId}")]
         [Authorize]
-        public async Task<IActionResult> GetAsync([FromRoute] Guid termId)
+        public async Task<IActionResult> GetAsync([FromRoute] int termId)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             TermViewModel termViewModel = await this.termService.GetAsync(userId, termId);
             return this.Ok(termViewModel);
         }
@@ -76,29 +74,12 @@ namespace Lwt.Controllers
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> EditAsync([FromBody] TermEditModel termEditModel, [FromRoute] Guid id)
+        public async Task<IActionResult> EditAsync([FromBody] TermEditModel termEditModel, [FromRoute] int id)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             await this.termService.EditAsync(termEditModel, id, userId);
 
             return this.Ok(new { });
-        }
-
-        /// <summary>
-        /// get all terms match filter.
-        /// </summary>
-        /// <param name="termFilter">the filter.</param>
-        /// <param name="paginationQuery">the pagination query.</param>
-        /// <returns>the terms list.</returns>
-        [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> SearchAsync(TermFilter termFilter, PaginationQuery paginationQuery)
-        {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            long total = await this.termService.CountAsync(userId, termFilter);
-            IEnumerable<TermViewModel> termViewModels =
-                await this.termService.SearchAsync(userId, termFilter, paginationQuery);
-            return this.Ok(new TermList { Total = total, Items = termViewModels });
         }
 
         /// <summary>
@@ -109,9 +90,9 @@ namespace Lwt.Controllers
         [ETagFilter(200)]
         [Authorize]
         [HttpGet("{termId}/meaning")]
-        public async Task<IActionResult> GetMeaningAsync([FromRoute] Guid termId)
+        public async Task<IActionResult> GetMeaningAsync([FromRoute] int termId)
         {
-            Guid userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             TermMeaningDto termMeaningDto = await this.termService.GetMeaningAsync(userId, termId);
             return this.Ok(termMeaningDto);
         }

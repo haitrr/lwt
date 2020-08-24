@@ -1,7 +1,5 @@
 namespace Lwt.ViewModels
 {
-    using System;
-    using System.Collections.Generic;
     using Lwt.Models;
 
     /// <summary>
@@ -10,14 +8,6 @@ namespace Lwt.ViewModels
     public class TextViewModel
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TextViewModel"/> class.
-        /// </summary>
-        public TextViewModel()
-        {
-            this.Counts = new Dictionary<TermLearningLevel, long>();
-        }
-
-        /// <summary>
         /// Gets or sets x.
         /// </summary>
         public string Title { get; set; } = string.Empty;
@@ -25,16 +15,11 @@ namespace Lwt.ViewModels
         /// <summary>
         /// Gets or sets language.
         /// </summary>
-        public Language Language { get; set; }
+        public LanguageCode LanguageCode { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the id.
         /// </summary>
-        public Guid Id { get; set; }
-
-        /// <summary>
-        /// Gets term counts by learning levels.
-        /// </summary>
-        public Dictionary<TermLearningLevel, long> Counts { get; }
+        public int Id { get; set; }
     }
 }

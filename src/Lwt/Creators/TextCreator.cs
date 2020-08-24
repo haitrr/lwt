@@ -1,5 +1,6 @@
 namespace Lwt.Creators
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using FluentValidation;
@@ -7,42 +8,66 @@ namespace Lwt.Creators
     using Lwt.Exceptions;
     using Lwt.Interfaces;
     using Lwt.Models;
+    using Lwt.Repositories;
 
     /// <inheritdoc />
     public class TextCreator : ITextCreator
     {
         private readonly IValidator<Text> textValidator;
         private readonly ITextSeparator textSeparator;
-        private readonly ITextRepository textRepository;
+        private readonly ISqlTextRepository textRepository;
+        private readonly ISqlTermRepository termRepository;
+        private readonly ITextTermRepository textTermRepository;
+        private readonly IDbTransaction dbTransaction;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TextCreator"/> class.
-        /// </summary>
-        /// <param name="textValidator">the text validator.</param>
-        /// <param name="textSeparator">the text splitter.</param>
-        /// <param name="textRepository">the repo.</param>
         public TextCreator(
             IValidator<Text> textValidator,
             ITextSeparator textSeparator,
-            ITextRepository textRepository)
+            ISqlTextRepository textRepository,
+            IDbTransaction dbTransaction,
+            ISqlTermRepository termRepository,
+            ITextTermRepository textTermRepository)
         {
             this.textValidator = textValidator;
             this.textSeparator = textSeparator;
             this.textRepository = textRepository;
+            this.dbTransaction = dbTransaction;
+            this.termRepository = termRepository;
+            this.textTermRepository = textTermRepository;
         }
 
         /// <inheritdoc />
-        public async Task CreateAsync(Text text)
+        public async Task<int> CreateAsync(Text text)
         {
             ValidationResult validationResult = this.textValidator.Validate(text);
 
             if (!validationResult.IsValid)
             {
-                throw new BadRequestException(validationResult.Errors.First().ErrorMessage);
+                throw new BadRequestException(
+                    validationResult.Errors.First()
+                        .ErrorMessage);
             }
 
-            text.Words = this.textSeparator.SeparateText(text.Content, text.Language).ToList();
-            await this.textRepository.AddAsync(text);
+            this.textRepository.Add(text);
+            List<string> words = this.textSeparator.SeparateText(text.Content, text.LanguageCode)
+                .ToList();
+            var textTerms = new List<TextTerm>();
+
+            for (var i = 0; i < words.Count; i += 1)
+            {
+                string word = words[i];
+
+                Term? term = await this.termRepository.TryGetByUserAndLanguageAndContentAsync(
+                    text.CreatorId,
+                    text.LanguageCode,
+                    word);
+
+                textTerms.Add(new TextTerm() { TermId = term?.Id, Content = word, Index = i, Text = text });
+            }
+
+            this.textTermRepository.BulkAdd(textTerms);
+            await this.dbTransaction.CommitAsync();
+            return text.Id;
         }
     }
 }

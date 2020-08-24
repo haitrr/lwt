@@ -1,6 +1,5 @@
 namespace Lwt.Utilities
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.Models;
 
@@ -15,6 +14,6 @@ namespace Lwt.Utilities
         /// <param name="textId">text id.</param>
         /// <param name="userId">user id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<Text> GetUserTextAsync(Guid textId, Guid userId);
+        Task<Text> GetUserTextAsync(int textId, int userId);
     }
 }

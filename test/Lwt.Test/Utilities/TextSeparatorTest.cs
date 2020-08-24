@@ -40,10 +40,10 @@ namespace Lwt.Test.Utilities
         [Fact]
         public void SeparateShouldThrowExceptionIfLanguageNotSupported()
         {
-            var language = Language.Chinese;
+            var languageCode = LanguageCode.CHINESE;
             string text = string.Empty;
-            this.languageHelperMock.Setup(h => h.GetLanguage(language)).Throws<NotSupportedException>();
-            Assert.Throws<NotSupportedException>(() => this.textSeparator.SeparateText(text, language));
+            this.languageHelperMock.Setup(h => h.GetLanguage(languageCode)).Throws<NotSupportedException>();
+            Assert.Throws<NotSupportedException>(() => this.textSeparator.SeparateText(text, languageCode));
         }
     }
 }

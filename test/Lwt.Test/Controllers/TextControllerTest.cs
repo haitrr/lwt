@@ -25,7 +25,7 @@ namespace Lwt.Test.Controllers
 
         private readonly Mock<IAuthenticationHelper> authenticationHelper;
 
-        private readonly Mock<IMapper<TextCreateModel, Guid, Text>> textCreateMapper;
+        private readonly Mock<IMapper<TextCreateModel, int, Text>> textCreateMapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextControllerTest"/> class.
@@ -34,7 +34,7 @@ namespace Lwt.Test.Controllers
         public TextControllerTest()
         {
             this.textService = new Mock<ITextService>();
-            this.textCreateMapper = new Mock<IMapper<TextCreateModel, Guid, Text>>();
+            this.textCreateMapper = new Mock<IMapper<TextCreateModel, int, Text>>();
             this.authenticationHelper = new Mock<IAuthenticationHelper>();
 
             this.textController =
@@ -58,10 +58,10 @@ namespace Lwt.Test.Controllers
             this.textService.Reset();
             var model = new TextCreateModel();
             var text = new Text();
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             this.textCreateMapper.Setup(m => m.Map(model, userId)).Returns(text);
             this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.textController.User)).Returns(userId);
-            this.textService.Setup(s => s.CreateAsync(text)).Returns(Task.CompletedTask);
+            this.textService.Setup(s => s.CreateAsync(text)).Returns(Task.FromResult(1));
 
             // act
             await this.textController.CreateAsync(model);
@@ -78,7 +78,7 @@ namespace Lwt.Test.Controllers
         public async Task CreateAsyncShouldReturnOkIfSuccess()
         {
             // arrange
-            this.textService.Setup(m => m.CreateAsync(It.IsAny<Text>())).Returns(Task.CompletedTask);
+            this.textService.Setup(m => m.CreateAsync(It.IsAny<Text>())).Returns(Task.FromResult(1));
 
             // act
             IActionResult actual = await this.textController.CreateAsync(new TextCreateModel());
@@ -95,7 +95,7 @@ namespace Lwt.Test.Controllers
         public async Task GetAllAsyncShouldReturnOkIfSuccess()
         {
             // arrange
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             var filter = new TextFilter();
             var paginationQuery = new PaginationQuery();
             TextViewModel[] texts = Array.Empty<TextViewModel>();
@@ -117,8 +117,8 @@ namespace Lwt.Test.Controllers
         public async Task DeleteAsyncShouldCallService()
         {
             // arrange
-            Guid id = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
+            var id = 1;
+            var userId = 1;
             this.authenticationHelper.Setup(h => h.GetLoggedInUser(It.IsAny<ClaimsPrincipal>())).Returns(userId);
 
             // act
@@ -136,8 +136,8 @@ namespace Lwt.Test.Controllers
         public async Task DeleteAsyncShouldReturnOk()
         {
             // arrange
-            Guid id = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
+            var id = 1;
+            var userId = 1;
             this.authenticationHelper.Setup(h => h.GetLoggedInUser(It.IsAny<ClaimsPrincipal>())).Returns(userId);
 
             // act
@@ -155,7 +155,7 @@ namespace Lwt.Test.Controllers
         public async Task EditAsyncShouldReturnOk()
         {
             // arrange
-            Guid id = Guid.NewGuid();
+            var id = 1;
             var editModel = new TextEditModel();
 
             // act
@@ -173,8 +173,8 @@ namespace Lwt.Test.Controllers
         public async Task EditAsyncShouldCallService()
         {
             // arrange
-            Guid textId = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
+            var textId = 1;
+            var userId = 1;
             var editModel = new TextEditModel();
             this.authenticationHelper.Setup(h => h.GetLoggedInUser(It.IsAny<ClaimsPrincipal>())).Returns(userId);
 
@@ -192,7 +192,7 @@ namespace Lwt.Test.Controllers
         [Fact]
         public async Task GetAsyncShouldReturnCorrectCount()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             var filter = new TextFilter();
             var pagingQuery = new PaginationQuery();
             int count = new Random().Next(0, 10000);
@@ -213,8 +213,8 @@ namespace Lwt.Test.Controllers
         [Fact]
         public async Task ReadAsyncShouldReturnRightText()
         {
-            Guid userId = Guid.NewGuid();
-            Guid id = Guid.NewGuid();
+            var userId = 1;
+            var id = 1;
             var textReadModel = new TextReadModel();
             this.textService
                 .Setup(t => t.ReadAsync(id, userId))

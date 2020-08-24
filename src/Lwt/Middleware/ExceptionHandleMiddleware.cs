@@ -25,7 +25,6 @@ namespace Lwt.Middleware
             try
             {
                 await next(context);
-                Console.WriteLine(context.Response.StatusCode);
             }
             catch (BadRequestException exception)
             {
@@ -66,8 +65,6 @@ namespace Lwt.Middleware
         {
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            Console.WriteLine(e.Message);
-            Console.WriteLine(e.StackTrace);
 
             return context.Response.WriteAsync(new ErrorDetails("Internal Server Error.").ToString());
         }

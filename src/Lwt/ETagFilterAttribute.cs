@@ -50,7 +50,6 @@ namespace Lwt
                         .Request.Headers["If-None-Match"]
                         .ToString() == etag)
                     {
-                        Console.WriteLine("why ???");
                         context.Result = new StatusCodeResult(304);
                     }
 

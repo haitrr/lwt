@@ -1,27 +1,26 @@
 namespace Lwt.Utilities
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
-    using Lwt.Interfaces;
     using Lwt.Models;
+    using Lwt.Repositories;
 
     /// <inheritdoc />
     public class UserTextGetter : IUserTextGetter
     {
-        private readonly ITextRepository textRepository;
+        private readonly ISqlTextRepository textRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserTextGetter"/> class.
         /// </summary>
         /// <param name="textRepository"> text repo.</param>
-        public UserTextGetter(ITextRepository textRepository)
+        public UserTextGetter(ISqlTextRepository textRepository)
         {
             this.textRepository = textRepository;
         }
 
         /// <inheritdoc/>
-        public async Task<Text> GetUserTextAsync(Guid textId, Guid userId)
+        public async Task<Text> GetUserTextAsync(int textId, int userId)
         {
             Text text = await this.textRepository.GetByIdAsync(textId);
 

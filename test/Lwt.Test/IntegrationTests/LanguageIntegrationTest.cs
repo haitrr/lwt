@@ -28,10 +28,10 @@ namespace Lwt.Test.IntegrationTests
                 var languages =
                     JsonConvert.DeserializeObject<ICollection<LanguageViewModel>>(
                         await responseMessage.Content.ReadAsStringAsync());
-                Assert.Contains(languages, language => language.Code == "en");
-                Assert.Contains(languages, language => language.Code == "zh");
-                Assert.Contains(languages, language => language.Code == "ja");
-                Assert.Contains(languages, language => language.Code == "vi");
+                Assert.Contains(languages, language => language.Code == LanguageCode.ENGLISH);
+                Assert.Contains(languages, language => language.Code == LanguageCode.CHINESE);
+                Assert.Contains(languages, language => language.Code == LanguageCode.JAPANESE);
+                Assert.Contains(languages, language => language.Code == LanguageCode.VIETNAMESE);
             }
         }
     }

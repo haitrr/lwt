@@ -11,7 +11,7 @@ namespace Lwt.Mappers
         /// <inheritdoc/>
         public override Text Map(TextEditModel from, Text result)
         {
-            result.Language = from.Language;
+            result.LanguageCode = from.LanguageCode;
             result.Title = from.Title;
             result.Content = from.Content;
 

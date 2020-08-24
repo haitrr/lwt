@@ -1,7 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
-
     /// <summary>
     /// edit detail dto.
     /// </summary>
@@ -10,7 +8,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets text id.
         /// </summary>
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the text's title.
@@ -25,6 +23,6 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets text's language.
         /// </summary>
-        public Language Language { get; set; }
+        public LanguageCode LanguageCode { get; set; } = null!;
     }
 }

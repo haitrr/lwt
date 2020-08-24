@@ -1,14 +1,17 @@
 namespace Lwt.Models
 {
-    using System;
-    using MongoDB.Bson;
-    using MongoDB.Bson.Serialization.Attributes;
+    using System.Collections.Generic;
 
     /// <summary>
     /// the term.
     /// </summary>
     public class Term : Entity
     {
+        /// <summary>
+        /// table name.
+        /// </summary>
+        public const string TableName = "terms";
+
         /// <summary>
         /// Gets or sets the content.
         /// </summary>
@@ -17,8 +20,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the term's language.
         /// </summary>
-        [BsonRepresentation(BsonType.Int32)]
-        public Language Language { get; set; }
+        public LanguageCode LanguageCode { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the meaning.
@@ -28,11 +30,13 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the creator's id.
         /// </summary>
-        public Guid CreatorId { get; set; }
+        public int CreatorId { get; set; }
 
         /// <summary>
         /// Gets or sets the current learning level.
         /// </summary>
-        public TermLearningLevel LearningLevel { get; set; }
+        public LearningLevel LearningLevel { get; set; } = null!;
+
+        public List<TextTerm> TextTerms { get; set; } = null!;
     }
 }

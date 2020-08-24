@@ -1,22 +1,15 @@
 namespace Lwt.Models
 {
-    using System;
-
     using Microsoft.AspNetCore.Identity;
 
     /// <summary>
     /// User.
     /// </summary>
-    public class User : IdentityUser<Guid>
+    public class User : IdentityUser<int>
     {
         /// <summary>
         /// Gets or sets current language.
         /// </summary>
-        public Guid? CurrentLanguageId { get; set; }
-
-        /// <summary>
-        /// Gets or sets current language.
-        /// </summary>
-        public Language CurrentLanguage { get; set; }
+        public int? CurrentLanguageId { get; set; }
     }
 }

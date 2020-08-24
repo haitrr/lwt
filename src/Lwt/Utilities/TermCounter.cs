@@ -1,6 +1,5 @@
 namespace Lwt.Utilities
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -10,7 +9,7 @@ namespace Lwt.Utilities
     /// <inheritdoc />
     public class TermCounter : ITermCounter
     {
-        private readonly ITermRepository termRepository;
+        private readonly ISqlTermRepository termRepository;
         private readonly ISkippedWordRemover skippedWordRemover;
         private readonly ITextNormalizer textNormalizer;
 
@@ -21,7 +20,7 @@ namespace Lwt.Utilities
         /// <param name="skippedWordRemover">skipped words remover.</param>
         /// <param name="textNormalizer">text normalizer.</param>
         public TermCounter(
-            ITermRepository termRepository,
+            ISqlTermRepository termRepository,
             ISkippedWordRemover skippedWordRemover,
             ITextNormalizer textNormalizer)
         {
@@ -31,14 +30,14 @@ namespace Lwt.Utilities
         }
 
         /// <inheritdoc/>
-        public async Task<Dictionary<TermLearningLevel, long>> CountByLearningLevelAsync(
+        public async Task<Dictionary<LearningLevel, long>> CountByLearningLevelAsync(
             IEnumerable<string> words,
-            Language language,
-            Guid userId)
+            LanguageCode languageCode,
+            int userId)
         {
-            IEnumerable<string> notSkippedTerms = this.skippedWordRemover.RemoveSkippedWords(words, language);
+            IEnumerable<string> notSkippedTerms = this.skippedWordRemover.RemoveSkippedWords(words, languageCode);
             IEnumerable<string> notSkippedTermsNormalized =
-                this.textNormalizer.Normalize(notSkippedTerms, language);
+                this.textNormalizer.Normalize(notSkippedTerms, languageCode);
             var termDict = new Dictionary<string, long>();
 
             foreach (string term in notSkippedTermsNormalized)
@@ -53,15 +52,15 @@ namespace Lwt.Utilities
                 }
             }
 
-            Dictionary<string, TermLearningLevel> countDict =
+            Dictionary<string, LearningLevel> countDict =
                 await this.termRepository.GetLearningLevelAsync(
                     userId,
-                    language,
+                    languageCode,
                     termDict.Keys.ToHashSet());
 
-            var result = new Dictionary<TermLearningLevel, long>();
-            IEnumerable<TermLearningLevel> enums = Enum.GetValues(typeof(TermLearningLevel)).Cast<TermLearningLevel>();
-            foreach (TermLearningLevel termLearningLevel in enums)
+            var result = new Dictionary<LearningLevel, long>();
+            IEnumerable<LearningLevel> learningLevels = LearningLevel.GetAll();
+            foreach (LearningLevel termLearningLevel in learningLevels)
             {
                 result[termLearningLevel] = 0;
             }
@@ -70,7 +69,7 @@ namespace Lwt.Utilities
             {
                 if (!countDict.ContainsKey(word))
                 {
-                    result[TermLearningLevel.UnKnow] += termDict[word];
+                    result[LearningLevel.Unknown] += termDict[word];
                     continue;
                 }
 

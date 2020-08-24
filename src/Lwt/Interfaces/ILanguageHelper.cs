@@ -12,9 +12,9 @@ namespace Lwt.Interfaces
         /// <summary>
         /// get a language.
         /// </summary>
-        /// <param name="language">the language.</param>
+        /// <param name="languageCode"></param>
         /// <returns>the language object.</returns>
-        ILanguage GetLanguage(Language language);
+        ILanguage GetLanguage(LanguageCode languageCode);
 
         /// <summary>
         /// get all the languages.

@@ -15,6 +15,7 @@ namespace Lwt.Mappers
             result.Content = from.Content;
             result.Meaning = from.Meaning;
             result.LearningLevel = from.LearningLevel;
+            result.LanguageCode = from.LanguageCode;
             return result;
         }
     }

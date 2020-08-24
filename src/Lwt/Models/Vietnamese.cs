@@ -14,10 +14,7 @@ namespace Lwt.Models
     public string SpeakCode => "vi_VN";
 
     /// <inheritdoc/>
-    public string Code => "vi";
-
-    /// <inheritdoc/>
-    public Language Id => Language.Vietnamese;
+    public LanguageCode Code => LanguageCode.VIETNAMESE;
 
     /// <inheritdoc/>
     public bool ShouldSkip(string term)

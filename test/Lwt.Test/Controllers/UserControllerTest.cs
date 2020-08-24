@@ -80,7 +80,7 @@ namespace Lwt.Test.Controllers
             // arrange
             var viewModel = new LoginViewModel();
             this.userService.Reset();
-            string token = Guid.NewGuid().ToString();
+            string token = 1.ToString();
             this.userService.Setup(s => s.LoginAsync(viewModel.UserName, viewModel.Password)).ReturnsAsync(token);
 
             // act
@@ -110,7 +110,7 @@ namespace Lwt.Test.Controllers
         {
             if (disposing)
             {
-                this.userController?.Dispose();
+                this.userController.Dispose();
             }
         }
     }

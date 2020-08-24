@@ -16,10 +16,7 @@ namespace Lwt.Models
         public string SpeakCode => "en-US";
 
         /// <inheritdoc />
-        public string Code => "en";
-
-        /// <inheritdoc/>
-        public Language Id => Language.English;
+        public LanguageCode Code => LanguageCode.ENGLISH;
 
         /// <inheritdoc />
         public bool ShouldSkip(string term)

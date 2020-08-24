@@ -12,8 +12,9 @@ namespace Lwt.Interfaces
         /// separate the text base on its language.
         /// </summary>
         /// <param name="text">text.</param>
+        /// <param name="languageCode"></param>
         /// <param name="language">language.</param>
         /// <returns>the words separated from the text.</returns>
-        IEnumerable<string> SeparateText(string text, Language language);
+        IEnumerable<string> SeparateText(string text, LanguageCode languageCode);
     }
 }

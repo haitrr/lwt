@@ -29,7 +29,7 @@ namespace Lwt.Test.Utilities
         [Fact]
         public void GenerateUserTokenShouldReturnRightToken()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             var userName = "yolo";
             var user = new User { Id = userId, UserName = userName };
 
@@ -42,7 +42,7 @@ namespace Lwt.Test.Utilities
                 tokenS?.Claims.First(claim => claim.Type == "userName").Value);
             Assert.Equal(
                 userId,
-                Guid.Parse(
+                int.Parse(
                     (ReadOnlySpan<char>)tokenS?.Claims.First(claim => claim.Type == "id")
                         .Value));
         }

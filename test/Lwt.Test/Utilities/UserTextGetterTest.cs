@@ -1,10 +1,9 @@
 namespace Lwt.Test.Utilities
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
-    using Lwt.Interfaces;
     using Lwt.Models;
+    using Lwt.Repositories;
     using Lwt.Utilities;
     using Moq;
     using Xunit;
@@ -15,14 +14,14 @@ namespace Lwt.Test.Utilities
     public class UserTextGetterTest
     {
         private readonly UserTextGetter userTextGetter;
-        private readonly Mock<ITextRepository> textRepositoryMock;
+        private readonly Mock<ISqlTextRepository> textRepositoryMock;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserTextGetterTest"/> class.
         /// </summary>
         public UserTextGetterTest()
         {
-            this.textRepositoryMock = new Mock<ITextRepository>();
+            this.textRepositoryMock = new Mock<ISqlTextRepository>();
             this.userTextGetter = new UserTextGetter(this.textRepositoryMock.Object);
         }
 
@@ -34,8 +33,8 @@ namespace Lwt.Test.Utilities
         public async Task GetUserTextAsyncShouldThrowForbidentIfNotCreator()
         {
             var text = new Text();
-            Guid textId = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
+            var textId = 1;
+            var userId = 1;
             this.textRepositoryMock.Setup(r => r.GetByIdAsync(textId))
                 .ReturnsAsync(text);
 
@@ -49,8 +48,8 @@ namespace Lwt.Test.Utilities
         [Fact]
         public async Task GetUserTextAsyncShouldReturnRightText()
         {
-            Guid textId = Guid.NewGuid();
-            Guid userId = Guid.NewGuid();
+            var textId = 1;
+            var userId = 1;
             var text = new Text { CreatorId = userId };
             this.textRepositoryMock.Setup(r => r.GetByIdAsync(textId))
                 .ReturnsAsync(text);

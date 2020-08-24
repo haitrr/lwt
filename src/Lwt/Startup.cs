@@ -1,7 +1,6 @@
 #pragma warning disable
 namespace Lwt
 {
-    using System;
     using System.Collections.Generic;
     using System.IO.Compression;
     using System.Text;
@@ -63,7 +62,6 @@ namespace Lwt
 
             services.AddDbContext<IdentityDbContext>(options => 
                 options.UseSqlite("Data Source=lwt.db"));
-            services.AddTransient<LwtDbContext>();
 
             // identity
             services.AddIdentity<User, Role>()
@@ -118,20 +116,21 @@ namespace Lwt
 
             // text
             services.AddScoped<ITextService, TextService>();
-            services.AddScoped<ITextRepository, TextRepository>();
             services.AddScoped<ITermService, TermService>();
 
             // repos
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IUserSettingRepository, UserSettingRepository>();
-            services.AddScoped<ITermRepository, TermRepository>();
+            services.AddScoped<ISqlTermRepository, SqlTermRepository>();
+            services.AddScoped<ISqlTextRepository, SqlTextRepository>();
+            services.AddScoped<ITextTermRepository, TextTermRepository>();
+            services.AddTransient<ITextTermProcessor, TextTermProcessor>();
+            services.AddTransient<ISqlUserSettingRepository, SqlUserSettingRepository>();
 
             // transaction
-            services.AddScoped<ITransaction, Transaction<IdentityDbContext>>();
+            services.AddScoped<IDbTransaction, DbTransaction<IdentityDbContext>>();
 
             // database seeder
             services.AddTransient<IDatabaseSeeder, DatabaseSeeder>();
-            services.AddTransient<IIndexCreator, MongoDbIndexCreator>();
 
             // utilities
             services.AddScoped<IAuthenticationHelper, AuthenticationHelper>();
@@ -169,7 +168,6 @@ namespace Lwt
         public void Configure(
             IApplicationBuilder app,
             IDatabaseSeeder databaseSeeder,
-            IIndexCreator indexCreator,
             IWebHostEnvironment env)
 #pragma warning disable CA1822
         {
@@ -192,9 +190,6 @@ namespace Lwt
                 app.UseSwagger();
                 app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
             }
-            indexCreator.CreateIndexesAsync()
-                .GetAwaiter()
-                .GetResult();
             databaseSeeder.SeedData()
                 .GetAwaiter()
                 .GetResult();
@@ -245,20 +240,21 @@ namespace Lwt
         private static void RegisterMappers(IServiceCollection services)
         {
             services.AddTransient<IMapper<TextEditModel, Text>, TextEditMapper>();
-            services.AddTransient<IMapper<TextCreateModel, Guid, Text>, TextCreateMapper>();
+            services.AddTransient<IMapper<TextCreateModel, int, Text>, TextCreateMapper>();
             services.AddTransient<IMapper<Text, TextViewModel>, TextViewMapper>();
             services.AddTransient<IMapper<Text, TextEditDetailModel>, TextEditDetailMapper>();
             services.AddTransient<IMapper<ILanguage, LanguageViewModel>, LanguageViewMapper>();
             services.AddTransient<IMapper<TermEditModel, Term>, TermEditMapper>();
-            services.AddTransient<IMapper<TermCreateModel, Guid, Term>, TermCreateMapper>();
+            services.AddTransient<IMapper<TermCreateModel, int, Term>, TermCreateMapper>();
             services.AddTransient<IMapper<Term, TermViewModel>, TermViewMapper>();
             services.AddTransient<IJapaneseTextSplitter, JapaneseTextSplitter>();
             services.AddSingleton<IChineseTextSplitter, ChineseTextSplitter>();
             services.AddSingleton<IMapper<User, UserView>, UserViewMapper>();
             services.AddSingleton<IMapper<UserSetting, UserSettingView>, UserSettingViewMapper>();
             services.AddSingleton<IMapper<UserSettingUpdate, UserSetting>, UserSettingUpdateMapper>();
-            services.AddTransient<IAsyncMapper<Text, TextReadModel>, TextReadMapper>();
+            services.AddTransient<IMapper<Text, TextReadModel>, TextReadMapper>();
             services.AddTransient<IMapper<Term, TermMeaningDto>, TermMeaningMapper>();
+            services.AddTransient<IMapper<TextTerm, TermReadModel>, TextTermMapper>();
         }
     }
 }

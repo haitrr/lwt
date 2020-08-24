@@ -1,6 +1,5 @@
 namespace Lwt.Models
 {
-    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -8,14 +7,17 @@ namespace Lwt.Models
     /// </summary>
     public class UserSetting : Entity
     {
+        public const string TableName = "user_settings";
+
         /// <summary>
         /// Gets or sets user id.
         /// </summary>
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
 
         /// <summary>
         ///  Gets or sets language settings.
         /// </summary>
-        public IDictionary<string, LanguageSetting> LanguageSettings { get; set; } = new Dictionary<string, LanguageSetting>();
+        public ICollection<LanguageSetting> LanguageSettings { get; set; } =
+            new List<LanguageSetting>();
     }
 }

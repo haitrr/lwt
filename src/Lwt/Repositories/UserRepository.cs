@@ -1,6 +1,5 @@
 namespace Lwt.Repositories
 {
-    using System;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
     using Lwt.Interfaces;
@@ -23,7 +22,7 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsExistAsync(Guid id)
+        public async Task<bool> IsExistAsync(int id)
         {
             return await this.userManager.FindByIdAsync(id.ToString()) != null;
         }
@@ -35,13 +34,13 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public Task<User?> TryGetByIdAsync(Guid userId)
+        public Task<User?> TryGetByIdAsync(int userId)
         {
-            return this.userManager.FindByIdAsync(userId.ToString());
+            return this.userManager.FindByIdAsync(userId.ToString()) !;
         }
 
         /// <inheritdoc />
-        public async Task<User> GetByIdAsync(Guid userId)
+        public async Task<User> GetByIdAsync(int userId)
         {
             User? user = await this.TryGetByIdAsync(userId);
 
@@ -54,9 +53,9 @@ namespace Lwt.Repositories
         }
 
         /// <inheritdoc/>
-        public Task<User> GetByUserNameAsync(string userName)
+        public Task<User?> GetByUserNameAsync(string userName)
         {
-            return this.userManager.FindByNameAsync(userName);
+            return this.userManager.FindByNameAsync(userName) !;
         }
 
         /// <inheritdoc/>

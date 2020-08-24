@@ -1,6 +1,5 @@
 namespace Lwt.Services
 {
-    using System;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -15,6 +14,6 @@ namespace Lwt.Services
         /// <param name="currentPassword">current password.</param>
         /// <param name="newPassword">new password.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<bool> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
+        Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
     }
 }

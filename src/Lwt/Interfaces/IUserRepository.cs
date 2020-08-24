@@ -1,6 +1,5 @@
 namespace Lwt.Interfaces
 {
-    using System;
     using System.Threading.Tasks;
 
     using Lwt.Models;
@@ -15,7 +14,7 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="id">id of the user.</param>
         /// <returns>whether the user is exist or not.</returns>
-        Task<bool> IsExistAsync(Guid id);
+        Task<bool> IsExistAsync(int id);
 
         /// <summary>
         /// create a new user.
@@ -30,21 +29,21 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="userId">the user id.</param>
         /// <returns>the user.</returns>
-        Task<User?> TryGetByIdAsync(Guid userId);
+        Task<User?> TryGetByIdAsync(int userId);
 
         /// <summary>
         /// get user by id, throw exception if user not found.
         /// </summary>
         /// <param name="userId">the user id.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<User> GetByIdAsync(Guid userId);
+        Task<User> GetByIdAsync(int userId);
 
         /// <summary>
         /// get user by user name.
         /// </summary>
         /// <param name="userName">the user name.</param>
         /// <returns>the user.</returns>
-        Task<User> GetByUserNameAsync(string userName);
+        Task<User?> GetByUserNameAsync(string userName);
 
         /// <summary>
         /// change the password of a user.

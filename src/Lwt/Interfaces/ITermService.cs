@@ -1,9 +1,6 @@
 namespace Lwt.Interfaces
 {
-    using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Lwt.Controllers;
     using Lwt.Models;
     using Lwt.ViewModels;
 
@@ -17,7 +14,7 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="term">term.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<Guid> CreateAsync(Term term);
+        Task<int> CreateAsync(Term term);
 
         /// <summary>
         /// edit a term.
@@ -26,7 +23,7 @@ namespace Lwt.Interfaces
         /// <param name="termId">the term id want to edit.</param>
         /// <param name="userId">the user id that is trying to modify the term.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task EditAsync(TermEditModel termEditModel, Guid termId, Guid userId);
+        Task EditAsync(TermEditModel termEditModel, int termId, int userId);
 
         /// <summary>
         /// get a term.
@@ -34,7 +31,7 @@ namespace Lwt.Interfaces
         /// <param name="userId">the user id is requesting.</param>
         /// <param name="termId">the term id.</param>
         /// <returns>the term view model.</returns>
-        Task<TermViewModel> GetAsync(Guid userId, Guid termId);
+        Task<TermViewModel> GetAsync(int userId, int termId);
 
         /// <summary>
         /// return count of terms match filter.
@@ -42,19 +39,7 @@ namespace Lwt.Interfaces
         /// <param name="userId">the user.</param>
         /// <param name="termFilter">the filter.</param>
         /// <returns>count.</returns>
-        Task<long> CountAsync(Guid userId, TermFilter termFilter);
-
-        /// <summary>
-        /// return terms that match filter with pagination.
-        /// </summary>
-        /// <param name="userId">id of request user.</param>
-        /// <param name="termFilter">the filter.</param>
-        /// <param name="paginationQuery">the pagination query.</param>
-        /// <returns>list of term view models that match filter.</returns>
-        Task<IEnumerable<TermViewModel>> SearchAsync(
-            Guid userId,
-            TermFilter termFilter,
-            PaginationQuery paginationQuery);
+        Task<int> CountAsync(int userId, TermFilter termFilter);
 
         /// <summary>
         /// get meaning of a user's term.
@@ -62,6 +47,6 @@ namespace Lwt.Interfaces
         /// <param name="userId"> user id.</param>
         /// <param name="termId">term id.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<TermMeaningDto> GetMeaningAsync(Guid userId, Guid termId);
+        Task<TermMeaningDto> GetMeaningAsync(int userId, int termId);
     }
 }

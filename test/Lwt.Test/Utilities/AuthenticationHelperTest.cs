@@ -1,6 +1,5 @@
 namespace Lwt.Test.Utilities
 {
-    using System;
     using System.Collections.Generic;
     using System.Security.Claims;
     using Lwt.Utilities;
@@ -27,7 +26,7 @@ namespace Lwt.Test.Utilities
         [Fact]
         public void GetLoggedInUserShouldWork()
         {
-            Guid userId = Guid.NewGuid();
+            var userId = 1;
             var principal = new ClaimsPrincipal(
                 new[]
                 {
@@ -37,7 +36,7 @@ namespace Lwt.Test.Utilities
                             new Claim("id", userId.ToString()),
                         }),
                 });
-            Guid actual = this.authenticationHelper.GetLoggedInUser(principal);
+            int actual = this.authenticationHelper.GetLoggedInUser(principal);
 
             Assert.Equal(userId, actual);
         }
