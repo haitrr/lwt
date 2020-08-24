@@ -175,7 +175,19 @@ namespace Lwt.Services
         public async Task<Dictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId)
         {
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
-            var counts = new Dictionary<LearningLevel, int> { { LearningLevel.Unknown, 0 }, };
+            var counts =
+                new Dictionary<LearningLevel, int>
+                {
+                    { LearningLevel.Skipped, 0 },
+                    { LearningLevel.Ignored, 0 },
+                    { LearningLevel.Unknown, 0 },
+                    { LearningLevel.Learning1, 0 },
+                    { LearningLevel.Learning2, 0 },
+                    { LearningLevel.Learning3, 0 },
+                    { LearningLevel.Learning4, 0 },
+                    { LearningLevel.Learning5, 0 },
+                    { LearningLevel.WellKnown, 0 },
+                };
             ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
             IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id, null, null);
 
@@ -185,10 +197,12 @@ namespace Lwt.Services
                 {
                     if (language.ShouldSkip(textTerm.Content))
                     {
-                        continue;
+                        counts[LearningLevel.Skipped] += 1;
                     }
-
-                    counts[LearningLevel.Unknown] += 1;
+                    else
+                    {
+                        counts[LearningLevel.Unknown] += 1;
+                    }
                 }
                 else
                 {
