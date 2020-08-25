@@ -24,6 +24,7 @@ namespace Lwt.DbContexts
         /// <inheritdoc />
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            base.OnModelCreating(builder);
             var converter = new ValueConverter<LanguageCode, string>(
                 languageCode => languageCode.Value,
                 code => LanguageCode.GetFromString(code));
@@ -39,7 +40,6 @@ namespace Lwt.DbContexts
             builder.Entity<Term>()
                 .Property(t => t.LearningLevel)
                 .HasConversion(learningLevelConverter);
-            base.OnModelCreating(builder);
 
             builder.Entity<Text>()
                 .ToTable(Text.TableName)
