@@ -24,7 +24,7 @@ namespace Lwt.Utilities
         {
             Text text = await this.textRepository.GetByIdAsync(textId);
 
-            if (text.CreatorId != userId)
+            if (text.UserId != userId)
             {
                 throw new ForbiddenException("You don't have permission to access this text.");
             }

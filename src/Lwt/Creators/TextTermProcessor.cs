@@ -35,7 +35,7 @@ namespace Lwt.Creators
                 string word = words[i];
 
                 Term? term = await this.termRepository.TryGetByUserAndLanguageAndContentAsync(
-                    text.CreatorId,
+                    text.UserId,
                     text.LanguageCode,
                     word);
 

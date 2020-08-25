@@ -31,11 +31,11 @@ namespace Lwt.Repositories
             // sort by created time by default
             if (textFilter.LanguageCode != null)
             {
-                return await this.DbSet.Where(t => t.CreatorId == userId && t.LanguageCode == textFilter.LanguageCode)
+                return await this.DbSet.Where(t => t.UserId == userId && t.LanguageCode == textFilter.LanguageCode)
                     .ToListAsync();
             }
 
-            return await this.DbSet.Where(t => t.CreatorId == userId)
+            return await this.DbSet.Where(t => t.UserId == userId)
                 .Skip(skip)
                 .Take(paginationQuery.ItemPerPage)
                 .ToListAsync();
@@ -47,11 +47,11 @@ namespace Lwt.Repositories
             // sort by created time by default
             if (textFilter.LanguageCode != null)
             {
-                return await this.DbSet.Where(t => t.LanguageCode == textFilter.LanguageCode && t.CreatorId == userId)
+                return await this.DbSet.Where(t => t.LanguageCode == textFilter.LanguageCode && t.UserId == userId)
                     .CountAsync();
             }
 
-            return await this.DbSet.Where(t => t.CreatorId == userId)
+            return await this.DbSet.Where(t => t.UserId == userId)
                 .CountAsync();
         }
     }

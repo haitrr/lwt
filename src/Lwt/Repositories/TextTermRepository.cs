@@ -53,7 +53,7 @@ namespace Lwt.Repositories
             string termContent)
         {
             return await this.DbSet.Where(
-                    t => t.Text.CreatorId == termCreatorId && t.Text.LanguageCode == termLanguageCode &&
+                    t => t.Text.UserId == termCreatorId && t.Text.LanguageCode == termLanguageCode &&
                          t.Content.ToUpper() == termContent.ToUpper())
                 .ToListAsync();
         }

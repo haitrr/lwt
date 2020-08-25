@@ -88,7 +88,7 @@ namespace Lwt.Services
         {
             Text text = await this.textRepository.GetByIdAsync(id);
 
-            if (text.CreatorId == userId)
+            if (text.UserId == userId)
             {
                 this.textRepository.Delete(text);
                 await this.dbTransaction.CommitAsync();
@@ -109,7 +109,7 @@ namespace Lwt.Services
                 throw new NotFoundException("Text not found");
             }
 
-            if (text.CreatorId == userId)
+            if (text.UserId == userId)
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
                 this.textRepository.Update(editedText);
@@ -146,7 +146,7 @@ namespace Lwt.Services
                 throw new NotFoundException("Text not found.");
             }
 
-            if (text.CreatorId != userId)
+            if (text.UserId != userId)
             {
                 throw new ForbiddenException("You don't have permission to access this text.");
             }

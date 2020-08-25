@@ -130,7 +130,7 @@ If you think that in a macro plan (wars, international conflicts, terrorist orga
 The long and the short of it; it is meaningless to talk about who is poor or who is rich. The exact question must be “what did we do wrong?”",
 #pragma warning disable MEN002
                 LanguageCode = LanguageCode.ENGLISH,
-                CreatorId = userId,
+                UserId = userId,
                 Id = default,
             };
             this.textService.CreateAsync(text)

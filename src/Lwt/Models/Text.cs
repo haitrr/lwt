@@ -15,7 +15,9 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets creator id.
         /// </summary>
-        public int CreatorId { get; set; }
+        public int UserId { get; set; }
+
+        public User User { get; set; }
 
         /// <summary>
         /// Gets or sets bookmark by user.
@@ -36,6 +38,7 @@ namespace Lwt.Models
         /// Gets or sets language.
         /// </summary>
         public LanguageCode LanguageCode { get; set; } = null!;
+
         public List<TextTerm> TextTerms { get; set; } = null!;
     }
 }

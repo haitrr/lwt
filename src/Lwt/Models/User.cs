@@ -14,5 +14,7 @@ namespace Lwt.Models
         public int? CurrentLanguageId { get; set; }
 
         public IList<Term> Terms { get; set; }
+
+        public IList<Text> Text { get; set; }
     }
 }

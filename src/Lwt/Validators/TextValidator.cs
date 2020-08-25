@@ -19,7 +19,7 @@ namespace Lwt.Validators
         /// <param name="userManager">userManager.</param>
         public TextValidator(UserManager<User> userManager)
         {
-            this.RuleFor(text => text.CreatorId).NotEmpty()
+            this.RuleFor(text => text.UserId).NotEmpty()
                 .MustAsync(async (id, token) => await userManager.FindByIdAsync(id.ToString()) != null)
                 .WithMessage("Creator does not exist");
 
