@@ -41,6 +41,10 @@ namespace Lwt.DbContexts
                 .Property(t => t.LearningLevel)
                 .HasConversion(learningLevelConverter);
 
+            builder.Entity<Term>()
+                .HasIndex(t => new { t.Content, t.LanguageCode, t.UserId })
+                .IsUnique();
+
             builder.Entity<Text>()
                 .ToTable(Text.TableName)
                 .Property(t => t.LanguageCode)
