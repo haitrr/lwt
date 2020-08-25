@@ -8,6 +8,7 @@ namespace Lwt.Test.Creators
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Repositories;
+    using Lwt.Utilities;
     using Moq;
     using Xunit;
 
@@ -23,6 +24,8 @@ namespace Lwt.Test.Creators
         private readonly Mock<ISqlTermRepository> sqlTermRepository;
         private readonly Mock<ITextTermRepository> textTermRepository;
         private readonly Mock<IDbTransaction> dbTransaction;
+        private readonly Mock<ITextNormalizer> textNormalizer;
+        private readonly Mock<ILanguageHelper> languageHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextCreatorTest"/> class.
@@ -35,13 +38,17 @@ namespace Lwt.Test.Creators
             this.dbTransaction = new Mock<IDbTransaction>();
             this.sqlTermRepository = new Mock<ISqlTermRepository>();
             this.textTermRepository = new Mock<ITextTermRepository>();
+            this.textNormalizer = new Mock<ITextNormalizer>();
+            this.languageHelper = new Mock<ILanguageHelper>();
             this.textCreator = new TextCreator(
                 this.textValidatorMock.Object,
                 this.textSeparatorMock.Object,
                 this.textRepositoryMock.Object,
                 this.dbTransaction.Object,
                 this.sqlTermRepository.Object,
-                this.textTermRepository.Object);
+                this.textTermRepository.Object,
+                this.languageHelper.Object,
+                this.textNormalizer.Object);
         }
 
         /// <summary>
