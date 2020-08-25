@@ -30,7 +30,9 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the creator's id.
         /// </summary>
-        public int CreatorId { get; set; }
+        public int UserId { get; set; }
+
+        public User User { get; set; }
 
         /// <summary>
         /// Gets or sets the current learning level.

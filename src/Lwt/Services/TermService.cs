@@ -55,7 +55,7 @@ namespace Lwt.Services
             // link the existing text term to the new term.
             IEnumerable<TextTerm> textTerms =
                 await this.textTermRepository.GetByUserAndLanguageAndContentAsync(
-                    term.CreatorId,
+                    term.UserId,
                     term.LanguageCode,
                     term.Content);
 
@@ -92,7 +92,7 @@ namespace Lwt.Services
         public Task<int> CountAsync(int userId, TermFilter termFilter)
         {
             Expression<Func<Term, bool>> filter = termFilter.ToExpression();
-            filter = filter.And(term => term.CreatorId == userId);
+            filter = filter.And(term => term.UserId == userId);
             return this.termRepository.CountAsync(filter);
         }
 

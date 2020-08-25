@@ -1,5 +1,6 @@
 namespace Lwt.Models
 {
+    using System.Collections.Generic;
     using Microsoft.AspNetCore.Identity;
 
     /// <summary>
@@ -11,5 +12,7 @@ namespace Lwt.Models
         /// Gets or sets current language.
         /// </summary>
         public int? CurrentLanguageId { get; set; }
+
+        public IList<Term> Terms { get; set; }
     }
 }

@@ -8,6 +8,7 @@ namespace Lwt.Utilities
     using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Lwt.Repositories;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json.Linq;
 
@@ -50,7 +51,8 @@ namespace Lwt.Utilities
         /// <inheritdoc />
         public async Task SeedData()
         {
-            await this.lwtDbContext.Database.EnsureCreatedAsync();
+            this.lwtDbContext.Database.Migrate();
+
             User? hai = await this.userRepository.GetByUserNameAsync("hai");
 
             if (hai != null)
@@ -82,7 +84,7 @@ namespace Lwt.Utilities
             foreach (JToken item in terms.Take(200))
             {
                 var term = item.ToObject<Term>();
-                term.CreatorId = userId;
+                term.UserId = userId;
                 term.Content = term.Content.ToUpperInvariant();
                 term.LanguageCode = LanguageCode.ENGLISH;
                 this.termService.CreateAsync(term)

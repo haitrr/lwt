@@ -15,7 +15,7 @@ namespace Lwt.Mappers
             result.Meaning = from.Meaning;
             result.LearningLevel = from.LearningLevel;
             result.LanguageCode = from.LanguageCode;
-            result.CreatorId = from2;
+            result.UserId = from2;
 
             return result;
         }

@@ -27,7 +27,7 @@ namespace Lwt.Interfaces
             ISet<string> terms)
         {
             var list = await this.DbSet.Where(
-                    t => terms.Contains(t.Content) && t.CreatorId == creatorId && t.LanguageCode == languageCode)
+                    t => terms.Contains(t.Content) && t.UserId == creatorId && t.LanguageCode == languageCode)
                 .Select(t => new { t.Content, t.LearningLevel })
                 .ToListAsync();
             return list.ToDictionary(t => t.Content, t => t.LearningLevel);
@@ -40,14 +40,14 @@ namespace Lwt.Interfaces
             HashSet<string> terms)
         {
             return await this.DbSet.Where(
-                    t => t.CreatorId == creatorId && t.LanguageCode == languageCode && terms.Contains(t.Content))
+                    t => t.UserId == creatorId && t.LanguageCode == languageCode && terms.Contains(t.Content))
                 .ToDictionaryAsync(t => t.Content, t => t);
         }
 
         /// <inheritdoc />
         public async Task<Term> GetUserTermAsync(int termId, int userId)
         {
-            Term? term = await this.DbSet.SingleOrDefaultAsync(t => t.CreatorId == userId && t.Id == termId);
+            Term? term = await this.DbSet.SingleOrDefaultAsync(t => t.UserId == userId && t.Id == termId);
 
             if (term != null)
             {
@@ -62,7 +62,7 @@ namespace Lwt.Interfaces
         {
             return this.DbSet.Where(
                     term => term.Content == word.ToUpperInvariant() && term.LanguageCode == languageCode &&
-                            term.CreatorId == userId)
+                            term.UserId == userId)
                 .SingleOrDefaultAsync() !;
         }
     }
