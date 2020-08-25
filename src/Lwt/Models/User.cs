@@ -16,5 +16,7 @@ namespace Lwt.Models
         public IList<Term> Terms { get; set; }
 
         public IList<Text> Text { get; set; }
+
+        public UserSetting Setting { get; set; }
     }
 }
