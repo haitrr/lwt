@@ -57,5 +57,40 @@ namespace Lwt.Repositories
                          t.Content.ToUpper() == termContent.ToUpper())
                 .ToListAsync();
         }
+
+        public async Task<IDictionary<LearningLevel, int>> CountTextTermByLearningLevelAsync(int textId)
+        {
+            var groups = await this.DbSet.Where(tt => tt.TextId == textId)
+                .GroupBy(t => t.Term.LearningLevel)
+                .Select(group => new { LearningLevel = group.Key, Count = group.Sum(t => 1) })
+                .ToListAsync();
+
+            var result = new Dictionary<LearningLevel, int>()
+            {
+                { LearningLevel.Skipped, 0 },
+                { LearningLevel.Ignored, 0 },
+                { LearningLevel.Unknown, 0 },
+                { LearningLevel.Learning1, 0 },
+                { LearningLevel.Learning2, 0 },
+                { LearningLevel.Learning3, 0 },
+                { LearningLevel.Learning4, 0 },
+                { LearningLevel.Learning5, 0 },
+                { LearningLevel.WellKnown, 0 },
+            };
+
+            foreach (var group in groups)
+            {
+                if (group.LearningLevel == null)
+                {
+                    result[LearningLevel.Skipped] += group.Count;
+                }
+                else
+                {
+                    result[group.LearningLevel] += group.Count;
+                }
+            }
+
+            return result;
+        }
     }
 }

@@ -17,5 +17,7 @@ namespace Lwt.Repositories
             int termCreatorId,
             LanguageCode termLanguageCode,
             string termContent);
+
+        Task<IDictionary<LearningLevel, int>> CountTextTermByLearningLevelAsync(int textId);
     }
 }

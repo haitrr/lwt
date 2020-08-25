@@ -1,6 +1,7 @@
 namespace Lwt.Services
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Lwt.Creators;
     using Lwt.Exceptions;
@@ -172,52 +173,10 @@ namespace Lwt.Services
             await this.dbTransaction.CommitAsync();
         }
 
-        public async Task<Dictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId)
+        public async Task<IDictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId)
         {
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
-            var counts =
-                new Dictionary<LearningLevel, int>
-                {
-                    { LearningLevel.Skipped, 0 },
-                    { LearningLevel.Ignored, 0 },
-                    { LearningLevel.Unknown, 0 },
-                    { LearningLevel.Learning1, 0 },
-                    { LearningLevel.Learning2, 0 },
-                    { LearningLevel.Learning3, 0 },
-                    { LearningLevel.Learning4, 0 },
-                    { LearningLevel.Learning5, 0 },
-                    { LearningLevel.WellKnown, 0 },
-                };
-            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
-            IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id, null, null);
-
-            foreach (var textTerm in textTerms)
-            {
-                if (textTerm.Term == null)
-                {
-                    if (language.ShouldSkip(textTerm.Content))
-                    {
-                        counts[LearningLevel.Skipped] += 1;
-                    }
-                    else
-                    {
-                        counts[LearningLevel.Unknown] += 1;
-                    }
-                }
-                else
-                {
-                    if (counts.ContainsKey(textTerm.Term.LearningLevel))
-                    {
-                        counts[textTerm.Term.LearningLevel] += 1;
-                    }
-                    else
-                    {
-                        counts[textTerm.Term.LearningLevel] = 1;
-                    }
-                }
-            }
-
-            return counts;
+            return await this.textTermRepository.CountTextTermByLearningLevelAsync(text.Id);
         }
 
         public async Task<int> CountTextTermsAsync(int id, int userId)

@@ -160,7 +160,7 @@ namespace Lwt.Controllers
         public async Task<IActionResult> GetTermCounts([FromRoute] int id)
         {
             int userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            Dictionary<LearningLevel, int> counts = await this.textService.GetTermCountsAsync(id, userId);
+            IDictionary<LearningLevel, int> counts = await this.textService.GetTermCountsAsync(id, userId);
             return this.Ok(new { Id = id, Counts = counts });
         }
 

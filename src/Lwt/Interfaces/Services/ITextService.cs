@@ -79,7 +79,7 @@ namespace Lwt.Interfaces.Services
         /// <returns>nothing.</returns>
         Task SetBookmarkAsync(int id, int userId, SetBookmarkModel setBookmarkModel);
 
-        Task<Dictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId);
+        Task<IDictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId);
 
         Task<int> CountTextTermsAsync(int id, int userId);
 
