@@ -46,5 +46,7 @@ namespace Lwt.Interfaces
         /// <param name="word">the content.</param>
         /// <returns>the term.</returns>
         Task<Term?> TryGetByUserAndLanguageAndContentAsync(int userId, LanguageCode languageCode, string word);
+
+        Task<IEnumerable<Term>> TryGetManyByUserAndLanguageAndContentsAsync(int textUserId, LanguageCode textLanguageCode, HashSet<string> termContentSet);
     }
 }

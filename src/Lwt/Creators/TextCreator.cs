@@ -9,6 +9,7 @@ namespace Lwt.Creators
     using Lwt.Interfaces;
     using Lwt.Models;
     using Lwt.Repositories;
+    using Lwt.Utilities;
 
     /// <inheritdoc />
     public class TextCreator : ITextCreator
@@ -19,6 +20,8 @@ namespace Lwt.Creators
         private readonly ISqlTermRepository termRepository;
         private readonly ITextTermRepository textTermRepository;
         private readonly IDbTransaction dbTransaction;
+        private readonly ITextNormalizer textNormalizer;
+        private readonly ILanguageHelper languageHelper;
 
         public TextCreator(
             IValidator<Text> textValidator,
@@ -26,7 +29,9 @@ namespace Lwt.Creators
             ISqlTextRepository textRepository,
             IDbTransaction dbTransaction,
             ISqlTermRepository termRepository,
-            ITextTermRepository textTermRepository)
+            ITextTermRepository textTermRepository,
+            ILanguageHelper languageHelper,
+            ITextNormalizer textNormalizer)
         {
             this.textValidator = textValidator;
             this.textSeparator = textSeparator;
@@ -34,6 +39,8 @@ namespace Lwt.Creators
             this.dbTransaction = dbTransaction;
             this.termRepository = termRepository;
             this.textTermRepository = textTermRepository;
+            this.languageHelper = languageHelper;
+            this.textNormalizer = textNormalizer;
         }
 
         /// <inheritdoc />
@@ -48,21 +55,32 @@ namespace Lwt.Creators
                         .ErrorMessage);
             }
 
+            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
             this.textRepository.Add(text);
             List<string> words = this.textSeparator.SeparateText(text.Content, text.LanguageCode)
                 .ToList();
             var textTerms = new List<TextTerm>();
+            var termContentSet = new HashSet<string>();
+
+            foreach (string word in words.Where(word => !language.ShouldSkip(word)))
+            {
+                termContentSet.Add(this.textNormalizer.Normalize(word, text.LanguageCode));
+            }
+
+            IEnumerable<Term> terms = await this.termRepository.TryGetManyByUserAndLanguageAndContentsAsync(
+                text.UserId,
+                text.LanguageCode,
+                termContentSet);
+
+            Dictionary<string, Term> termDict = terms.ToDictionary(t => t.Content, t => t);
 
             for (var i = 0; i < words.Count; i += 1)
             {
                 string word = words[i];
 
-                Term? term = await this.termRepository.TryGetByUserAndLanguageAndContentAsync(
-                    text.UserId,
-                    text.LanguageCode,
-                    word);
+                termDict.TryGetValue(this.textNormalizer.Normalize(word, text.LanguageCode), out Term? term);
 
-                textTerms.Add(new TextTerm() { TermId = term?.Id, Content = word, Index = i, Text = text });
+                textTerms.Add(new TextTerm { TermId = term?.Id, Content = word, Index = i, Text = text });
             }
 
             this.textTermRepository.BulkAdd(textTerms);

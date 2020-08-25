@@ -65,5 +65,13 @@ namespace Lwt.Interfaces
                             term.UserId == userId)
                 .SingleOrDefaultAsync() !;
         }
+
+        public async Task<IEnumerable<Term>> TryGetManyByUserAndLanguageAndContentsAsync(int userId, LanguageCode languageCode, HashSet<string> contentSet)
+        {
+            return await this.DbSet.Where(
+                    term => contentSet.Contains(term.Content) && term.LanguageCode == languageCode &&
+                            term.UserId == userId)
+                .ToListAsync();
+        }
     }
 }
