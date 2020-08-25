@@ -96,6 +96,7 @@ namespace Lwt.Creators
                             LearningLevel = LearningLevel.Unknown,
                             Meaning = string.Empty,
                         };
+                        termDict[normalizedWord] = term;
                     }
                 }
 
