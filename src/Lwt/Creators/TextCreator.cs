@@ -77,10 +77,29 @@ namespace Lwt.Creators
             for (var i = 0; i < words.Count; i += 1)
             {
                 string word = words[i];
+                Term? term = null;
+                string normalizedWord = this.textNormalizer.Normalize(word, text.LanguageCode);
 
-                termDict.TryGetValue(this.textNormalizer.Normalize(word, text.LanguageCode), out Term? term);
+                if (termDict.ContainsKey(normalizedWord))
+                {
+                    term = termDict[normalizedWord];
+                }
+                else
+                {
+                    if (!language.ShouldSkip(normalizedWord))
+                    {
+                        term = new Term
+                        {
+                            LanguageCode = text.LanguageCode,
+                            Content = normalizedWord,
+                            UserId = text.UserId,
+                            LearningLevel = LearningLevel.Unknown,
+                            Meaning = string.Empty,
+                        };
+                    }
+                }
 
-                textTerms.Add(new TextTerm { TermId = term?.Id, Content = word, Index = i, Text = text });
+                textTerms.Add(new TextTerm { Term = term, Content = word, Index = i, Text = text });
             }
 
             this.textTermRepository.BulkAdd(textTerms);
