@@ -62,20 +62,6 @@ namespace Lwt.Services
             }
 
             this.termRepository.Add(term);
-
-            // link the existing text term to the new term.
-            IEnumerable<TextTerm> textTerms =
-                await this.textTermRepository.GetByUserAndLanguageAndContentAsync(
-                    term.UserId,
-                    term.LanguageCode,
-                    term.Content);
-
-            foreach (TextTerm textTerm in textTerms)
-            {
-                textTerm.Term = term;
-                this.textTermRepository.Update(textTerm);
-            }
-
             await this.dbTransaction.CommitAsync();
 
             return term.Id;
