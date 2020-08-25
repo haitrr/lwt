@@ -50,7 +50,7 @@ namespace Lwt.Test.Utilities
         {
             var textId = 1;
             var userId = 1;
-            var text = new Text { CreatorId = userId };
+            var text = new Text { UserId = userId };
             this.textRepositoryMock.Setup(r => r.GetByIdAsync(textId))
                 .ReturnsAsync(text);
 

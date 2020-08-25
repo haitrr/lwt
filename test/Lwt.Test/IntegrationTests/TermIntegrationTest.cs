@@ -80,7 +80,7 @@ namespace Lwt.Test.IntegrationTests
                 Assert.NotNull(term);
 
                 // ReSharper disable once PossibleNullReferenceException
-                Assert.Equal(user.Id, term.CreatorId);
+                Assert.Equal(user.Id, term.UserId);
                 Assert.Equal(termCreateModel.LanguageCode, term.LanguageCode);
                 Assert.Equal("TEST", term.Content);
                 Assert.Equal(termCreateModel.Meaning, term.Meaning);
@@ -122,7 +122,7 @@ namespace Lwt.Test.IntegrationTests
 
                 dbContext.Users.Add(user);
                 dbContext.SaveChanges();
-                existingTerm.CreatorId = user.Id;
+                existingTerm.UserId = user.Id;
                 dbContext.Set<Term>()
                     .Add(existingTerm);
                 dbContext.SaveChanges();
@@ -204,7 +204,7 @@ namespace Lwt.Test.IntegrationTests
 
             var term = new Term
             {
-                CreatorId = user.Id,
+                UserId = user.Id,
                 LanguageCode = LanguageCode.ENGLISH,
                 Content = "test",
                 LearningLevel = LearningLevel.Unknown,
@@ -215,7 +215,7 @@ namespace Lwt.Test.IntegrationTests
                 IServiceProvider services = scope.ServiceProvider;
                 var dbContext = services.GetRequiredService<IdentityDbContext>();
                 dbContext.Users.Add(user);
-                term.CreatorId = user.Id;
+                term.UserId = user.Id;
                 dbContext.Set<Term>()
                     .Add(term);
                 dbContext.SaveChanges();

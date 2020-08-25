@@ -81,7 +81,7 @@ namespace Lwt.Test.IntegrationTests
                 Assert.Equal(body.title, text.Title);
                 Assert.Equal(body.content, text.Content);
                 Assert.Equal(body.languageCode, text.LanguageCode.ToString());
-                Assert.Equal(this.user.Id, text.CreatorId);
+                Assert.Equal(this.user.Id, text.UserId);
             }
         }
 
@@ -107,7 +107,7 @@ namespace Lwt.Test.IntegrationTests
                                 Title = "test",
                                 Content = "test",
                                 LanguageCode = LanguageCode.ENGLISH,
-                                CreatorId = this.user.Id,
+                                UserId = this.user.Id,
                             });
                 }
 
@@ -138,7 +138,7 @@ namespace Lwt.Test.IntegrationTests
             TestDbHelper.CleanTable<Text>(this.factory.Services);
             var text = new Text
             {
-                Title = "test", Content = "test", LanguageCode = LanguageCode.ENGLISH, CreatorId = this.user.Id,
+                Title = "test", Content = "test", LanguageCode = LanguageCode.ENGLISH, UserId = this.user.Id,
             };
 
             using (IServiceScope? scope = this.factory.Services.CreateScope())
@@ -174,7 +174,7 @@ namespace Lwt.Test.IntegrationTests
                 Title = "test",
                 Content = "this is a test text",
                 LanguageCode = LanguageCode.ENGLISH,
-                CreatorId = this.user.Id,
+                UserId = this.user.Id,
             };
 
             using (IdentityDbContext dbContext = TestDbHelper.GetDbContext(this.factory))
@@ -221,7 +221,7 @@ namespace Lwt.Test.IntegrationTests
                 Title = "test",
                 Content = "this is a test text",
                 LanguageCode = LanguageCode.ENGLISH,
-                CreatorId = this.user.Id,
+                UserId = this.user.Id,
             };
 
             using (IdentityDbContext dc = TestDbHelper.GetDbContext(this.factory))
@@ -257,7 +257,7 @@ namespace Lwt.Test.IntegrationTests
                 Title = "test",
                 Content = "this is a test text",
                 LanguageCode = LanguageCode.ENGLISH,
-                CreatorId = this.user.Id,
+                UserId = this.user.Id,
             };
 
             using (IdentityDbContext dc = TestDbHelper.GetDbContext(this.factory))
@@ -293,7 +293,7 @@ namespace Lwt.Test.IntegrationTests
                 Title = "test",
                 Content = "this is a test text",
                 LanguageCode = LanguageCode.ENGLISH,
-                CreatorId = this.user.Id,
+                UserId = this.user.Id,
             };
 
             var body = new { title = text.Title, content = text.Content, languageCode = text.LanguageCode };

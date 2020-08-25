@@ -47,7 +47,7 @@ namespace Lwt.Test.Validators
         {
             // arrange
             var userId = 1;
-            var text = new Text { CreatorId = userId };
+            var text = new Text { UserId = userId };
 
             // act
             ValidationResult actual = this.textValidator.Validate(text);
@@ -55,7 +55,7 @@ namespace Lwt.Test.Validators
             // assert
             Assert.False(actual.IsValid);
             Assert.Equal(
-                nameof(text.CreatorId),
+                nameof(text.UserId),
                 actual.Errors.First().PropertyName);
         }
 
@@ -66,9 +66,9 @@ namespace Lwt.Test.Validators
         public void ValidateShouldReturnInValidIfTitleEmpty()
         {
             // arrange
-            var text = new Text { CreatorId = 1, Content = "valid", Title = string.Empty };
+            var text = new Text { UserId = 1, Content = "valid", Title = string.Empty };
 
-            this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString()))
+            this.userManager.Setup(m => m.FindByIdAsync(text.UserId.ToString()))
                 .ReturnsAsync(new User());
 
             // act
@@ -88,9 +88,9 @@ namespace Lwt.Test.Validators
         public void ValidateShouldReturnInValidIfContentEmpty()
         {
             // arrange
-            var text = new Text { CreatorId = 1, Content = string.Empty, Title = "yolo" };
+            var text = new Text { UserId = 1, Content = string.Empty, Title = "yolo" };
 
-            this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString()))
+            this.userManager.Setup(m => m.FindByIdAsync(text.UserId.ToString()))
                 .ReturnsAsync(new User());
 
             // act
@@ -110,9 +110,9 @@ namespace Lwt.Test.Validators
         public void ValidateShouldReturnInValidIfUserNotExist()
         {
             // arrange
-            var text = new Text { CreatorId = 1, Content = "yolo", Title = "yolo" };
+            var text = new Text { UserId = 1, Content = "yolo", Title = "yolo" };
 #nullable disable
-            this.userManager.Setup(m => m.FindByIdAsync(text.CreatorId.ToString()))
+            this.userManager.Setup(m => m.FindByIdAsync(text.UserId.ToString()))
                 .ReturnsAsync((User)null);
 #nullable disable
 
@@ -122,7 +122,7 @@ namespace Lwt.Test.Validators
             // assert
             Assert.False(actual.IsValid);
             Assert.Equal(
-                nameof(text.CreatorId),
+                nameof(text.UserId),
                 actual.Errors.Single().PropertyName);
         }
     }
