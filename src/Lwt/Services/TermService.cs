@@ -4,6 +4,7 @@ namespace Lwt.Services
     using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
+    using Lwt.Exceptions;
     using Lwt.Extensions;
     using Lwt.Interfaces;
     using Lwt.Models;
@@ -50,6 +51,16 @@ namespace Lwt.Services
         /// <inheritdoc/>
         public async Task<int> CreateAsync(Term term)
         {
+            Term? existingTerm = await this.termRepository.TryGetByUserAndLanguageAndContentAsync(
+                term.UserId,
+                term.LanguageCode,
+                term.Content);
+
+            if (existingTerm != null)
+            {
+                throw new BadRequestException("Term has already exist.");
+            }
+
             this.termRepository.Add(term);
 
             // link the existing text term to the new term.
