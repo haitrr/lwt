@@ -10,6 +10,7 @@ namespace Lwt.Creators
     using Lwt.Models;
     using Lwt.Repositories;
     using Lwt.Utilities;
+    using Microsoft.EntityFrameworkCore.Storage;
 
     /// <inheritdoc />
     public class TextCreator : ITextCreator
@@ -46,49 +47,47 @@ namespace Lwt.Creators
         /// <inheritdoc />
         public async Task<int> CreateAsync(Text text)
         {
-            ValidationResult validationResult = this.textValidator.Validate(text);
-
-            if (!validationResult.IsValid)
+            using (IDbContextTransaction transaction = this.dbTransaction.BeginTransaction())
             {
-                throw new BadRequestException(
-                    validationResult.Errors.First()
-                        .ErrorMessage);
-            }
+                this.textRepository.Add(text);
+                await this.dbTransaction.CommitAsync();
+                ValidationResult validationResult = this.textValidator.Validate(text);
 
-            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
-            this.textRepository.Add(text);
-            List<string> words = this.textSeparator.SeparateText(text.Content, text.LanguageCode)
-                .ToList();
-            var textTerms = new List<TextTerm>();
-            var termContentSet = new HashSet<string>();
-
-            foreach (string word in words.Where(word => !language.ShouldSkip(word)))
-            {
-                termContentSet.Add(this.textNormalizer.Normalize(word, text.LanguageCode));
-            }
-
-            IEnumerable<Term> terms = await this.termRepository.TryGetManyByUserAndLanguageAndContentsAsync(
-                text.UserId,
-                text.LanguageCode,
-                termContentSet);
-
-            Dictionary<string, Term> termDict = terms.ToDictionary(t => t.Content, t => t);
-
-            for (var i = 0; i < words.Count; i += 1)
-            {
-                string word = words[i];
-                Term? term = null;
-                string normalizedWord = this.textNormalizer.Normalize(word, text.LanguageCode);
-
-                if (termDict.ContainsKey(normalizedWord))
+                if (!validationResult.IsValid)
                 {
-                    term = termDict[normalizedWord];
+                    throw new BadRequestException(
+                        validationResult.Errors.First()
+                            .ErrorMessage);
                 }
-                else
+
+                ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
+                List<string> words = this.textSeparator.SeparateText(text.Content, text.LanguageCode)
+                    .ToList();
+                var textTerms = new List<TextTerm>();
+                var termContentSet = new HashSet<string>();
+
+                foreach (string word in words.Where(word => !language.ShouldSkip(word)))
                 {
-                    if (!language.ShouldSkip(normalizedWord))
+                    termContentSet.Add(this.textNormalizer.Normalize(word, text.LanguageCode));
+                }
+
+                IEnumerable<Term> terms = await this.termRepository.TryGetManyByUserAndLanguageAndContentsAsync(
+                    text.UserId,
+                    text.LanguageCode,
+                    termContentSet);
+
+                Dictionary<string, Term> termDict = terms.ToDictionary(t => t.Content, t => t);
+
+                var newTerms = new List<Term>();
+
+                for (var i = 0; i < words.Count; i += 1)
+                {
+                    string word = words[i];
+                    string normalizedWord = this.textNormalizer.Normalize(word, text.LanguageCode);
+
+                    if (!termDict.ContainsKey(normalizedWord) && !language.ShouldSkip(normalizedWord))
                     {
-                        term = new Term
+                        var term = new Term
                         {
                             LanguageCode = text.LanguageCode,
                             Content = normalizedWord,
@@ -97,14 +96,32 @@ namespace Lwt.Creators
                             Meaning = string.Empty,
                         };
                         termDict[normalizedWord] = term;
+                        newTerms.Add(term);
                     }
                 }
 
-                textTerms.Add(new TextTerm { Term = term, Content = word, Index = i, Text = text });
+                this.termRepository.BulkInsert(newTerms);
+
+                for (var i = 0; i < words.Count; i += 1)
+                {
+                    string word = words[i];
+                    Term? term = null;
+                    string normalizedWord = this.textNormalizer.Normalize(word, text.LanguageCode);
+
+                    if (termDict.ContainsKey(normalizedWord))
+                    {
+                        term = termDict[normalizedWord];
+                    }
+
+                    textTerms.Add(new TextTerm { TermId = term?.Id, Content = word, Index = i, TextId = text.Id });
+                }
+
+                await this.dbTransaction.CommitAsync();
+                this.textTermRepository.BulkInsert(textTerms);
+
+                transaction.Commit();
             }
 
-            this.textTermRepository.BulkAdd(textTerms);
-            await this.dbTransaction.CommitAsync();
             return text.Id;
         }
     }

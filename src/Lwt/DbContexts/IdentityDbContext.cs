@@ -21,6 +21,10 @@ namespace Lwt.DbContexts
         {
         }
 
+        public IdentityDbContext()
+        {
+        }
+
         /// <inheritdoc />
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -49,7 +53,8 @@ namespace Lwt.DbContexts
                 .ToTable(Text.TableName)
                 .Property(t => t.LanguageCode)
                 .HasConversion(converter);
-            builder.Entity<TextTerm>().ToTable(TextTerm.TableName);
+            builder.Entity<TextTerm>()
+                .ToTable(TextTerm.TableName);
 
             builder.Entity<UserSetting>()
                 .ToTable(UserSetting.TableName);

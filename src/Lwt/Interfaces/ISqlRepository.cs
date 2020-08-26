@@ -78,5 +78,7 @@ namespace Lwt.Interfaces
         /// </summary>
         /// <param name="entity">entity.</param>
         void Delete(T entity);
+
+        void BulkInsert(IEnumerable<T> entities);
     }
 }

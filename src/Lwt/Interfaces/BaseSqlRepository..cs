@@ -97,5 +97,10 @@ namespace Lwt.Interfaces
         {
             this.DbSet.Remove(entity);
         }
+
+        public void BulkInsert(IEnumerable<T> entities)
+        {
+            this.DbSet.BulkInsert(entities);
+        }
     }
 }

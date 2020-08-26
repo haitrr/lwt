@@ -1,10 +1,9 @@
 namespace Lwt.Transactions
 {
     using System.Threading.Tasks;
-
     using Lwt.Interfaces;
-
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage;
 
     /// <summary>
     /// transaction.
@@ -28,6 +27,16 @@ namespace Lwt.Transactions
         public async Task CommitAsync()
         {
             await this.databaseContext.SaveChangesAsync();
+        }
+
+        public async Task BulkCommitAsync()
+        {
+            await this.databaseContext.BulkSaveChangesAsync();
+        }
+
+        public IDbContextTransaction BeginTransaction()
+        {
+            return this.databaseContext.Database.BeginTransaction();
         }
     }
 }
