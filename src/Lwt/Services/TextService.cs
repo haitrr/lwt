@@ -133,11 +133,9 @@ namespace Lwt.Services
             Text? text = await this.textRepository.Queryable()
                 .Where(t => t.Id == id && t.UserId == userId)
                 .Select(
-                    t => new Text() {
-                        Id = t.Id,
-                        Title = t.Title,
-                        Bookmark = t.Bookmark,
-                        LanguageCode = t.LanguageCode
+                    t => new Text()
+                    {
+                        Id = t.Id, Title = t.Title, Bookmark = t.Bookmark, LanguageCode = t.LanguageCode,
                     })
                 .SingleOrDefaultAsync();
 
@@ -172,7 +170,9 @@ namespace Lwt.Services
         {
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
 
-            int textTermCount = await this.textTermRepository.CountByTextAsync(text.Id);
+            int textTermCount = await this.textTermRepository.Queryable()
+                .Where(tt => tt.TextId == text.Id)
+                .CountAsync();
 
             if (setBookmarkModel.TermIndex >= (ulong)textTermCount)
             {
@@ -187,28 +187,69 @@ namespace Lwt.Services
 
         public async Task<IDictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId)
         {
-            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
-            return await this.textTermRepository.CountTextTermByLearningLevelAsync(text.Id);
+            var groups = await this.textTermRepository.Queryable()
+                .AsNoTracking()
+                .Where(t => t.TextId == id && t.Text.UserId == userId)
+                .GroupBy(t => t.Term!.LearningLevel)
+                .Select(group => new { LearningLevel = group.Key, Count = group.Sum(t => 1) })
+                .ToListAsync();
+            var result = new Dictionary<LearningLevel, int>()
+            {
+                { LearningLevel.Skipped, 0 },
+                { LearningLevel.Ignored, 0 },
+                { LearningLevel.Unknown, 0 },
+                { LearningLevel.Learning1, 0 },
+                { LearningLevel.Learning2, 0 },
+                { LearningLevel.Learning3, 0 },
+                { LearningLevel.Learning4, 0 },
+                { LearningLevel.Learning5, 0 },
+                { LearningLevel.WellKnown, 0 },
+            };
+
+            foreach (var group in groups)
+            {
+                if (group.LearningLevel == null)
+                {
+                    result[LearningLevel.Skipped] += group.Count;
+                }
+                else
+                {
+                    result[group.LearningLevel] += group.Count;
+                }
+            }
+
+            return result;
         }
 
         public async Task<int> CountTextTermsAsync(int id, int userId)
         {
-            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
-            return await this.textTermRepository.CountByTextAsync(text.Id);
+            return await this.textTermRepository.Queryable()
+                .Where(t => t.Text.UserId == userId && t.TextId == id)
+                .CountAsync();
         }
 
         public async Task<IEnumerable<TermReadModel>> GetTextTermsAsync(int id, int userId, int indexFrom, int indexTo)
         {
-            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
-            IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id, indexFrom, indexTo);
+            IQueryable<TextTerm> query = this.textTermRepository.Queryable()
+                .AsNoTracking()
+                .Where(t => t.TextId == id && t.Index >= indexFrom && t.Index <= indexTo)
+                .Select(
+                    t => new TextTerm
+                    {
+                        Content = t.Content,
+                        TermId = t.TermId,
+                        Index = t.Index,
+                        Term = t.TermId.HasValue ? new Term { LearningLevel = t.Term!.LearningLevel } : null,
+                    });
+            IEnumerable<TextTerm> textTerms = await query.ToListAsync();
             return this.textTermMapper.Map(textTerms);
         }
 
         public async Task<int> GetTermCountInTextAsync(int id, int userId, int termId)
         {
-            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
-            int count = await this.textTermRepository.GetTermCountInTextAsync(text.Id, termId);
-            return count;
+            return await this.textTermRepository.Queryable()
+                .Where(t => t.TextId == id && t.Text.UserId == userId && t.TermId == termId)
+                .CountAsync();
         }
     }
 }

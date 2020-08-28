@@ -8,7 +8,7 @@ namespace Lwt.Mappers
         public override TermReadModel Map(TextTerm from, TermReadModel result)
         {
             result.Content = from.Content;
-            result.Id = from.Term?.Id;
+            result.Id = from.TermId;
             result.Index = from.Index;
             result.LearningLevel = from.Term == null ? LearningLevel.Skipped : from.Term.LearningLevel;
             return result;

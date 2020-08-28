@@ -28,14 +28,23 @@ namespace Lwt.Repositories
         {
             int skip = paginationQuery.ItemPerPage * (paginationQuery.Page - 1);
 
+            IQueryable<Text> query = this.DbSet;
+
             // sort by created time by default
             if (textFilter.LanguageCode != null)
             {
-                return await this.DbSet.Where(t => t.UserId == userId && t.LanguageCode == textFilter.LanguageCode)
-                    .ToListAsync();
+                query = query.Where(t => t.UserId == userId && t.LanguageCode == textFilter.LanguageCode);
             }
 
-            return await this.DbSet.Where(t => t.UserId == userId)
+            return await query
+                .AsNoTracking()
+                .Where(t => t.UserId == userId)
+                .Select(t => new Text
+                {
+                    Id = t.Id,
+                    Title = t.Title,
+                    LanguageCode = t.LanguageCode,
+                })
                 .Skip(skip)
                 .Take(paginationQuery.ItemPerPage)
                 .ToListAsync();
