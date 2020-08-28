@@ -92,6 +92,11 @@ namespace Lwt.Interfaces
             return this.DbSet.CountAsync();
         }
 
+        public IQueryable<T> Queryable()
+        {
+            return this.DbSet;
+        }
+
         /// <inheritdoc />
         public void Delete(T entity)
         {

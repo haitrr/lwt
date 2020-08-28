@@ -1,6 +1,7 @@
 namespace Lwt.Services
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Lwt.Creators;
     using Lwt.Exceptions;
@@ -10,6 +11,7 @@ namespace Lwt.Services
     using Lwt.Repositories;
     using Lwt.Utilities;
     using Lwt.ViewModels;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// the text service.
@@ -128,7 +130,21 @@ namespace Lwt.Services
         /// <inheritdoc />
         public async Task<TextReadModel> ReadAsync(int id, int userId)
         {
-            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
+            Text? text = await this.textRepository.Queryable()
+                .Where(t => t.Id == id && t.UserId == userId)
+                .Select(
+                    t => new Text() {
+                        Id = t.Id,
+                        Title = t.Title,
+                        Bookmark = t.Bookmark,
+                        LanguageCode = t.LanguageCode
+                    })
+                .SingleOrDefaultAsync();
+
+            if (text == null)
+            {
+                throw new NotFoundException("Text not found.");
+            }
 
             return this.textReadMapper.Map(text);
         }

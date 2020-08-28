@@ -2,6 +2,7 @@ namespace Lwt.Interfaces
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Models;
@@ -72,6 +73,8 @@ namespace Lwt.Interfaces
         /// <param name="filter"> the filter.</param>
         /// <returns>the count.</returns>
         Task<int> CountAsync(Expression<Func<T, bool>>? filter = null);
+
+        IQueryable<T> Queryable();
 
         /// <summary>
         /// delete an entity.
