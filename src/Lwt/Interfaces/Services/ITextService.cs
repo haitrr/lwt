@@ -84,5 +84,7 @@ namespace Lwt.Interfaces.Services
         Task<int> CountTextTermsAsync(int id, int userId);
 
         Task<IEnumerable<TermReadModel>> GetTextTermsAsync(int id, int userId, int indexFrom, int indexTo);
+
+        Task<int> GetTermCountInTextAsync(int id, int userId, int termId);
     }
 }

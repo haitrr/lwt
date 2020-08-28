@@ -92,5 +92,10 @@ namespace Lwt.Repositories
 
             return result;
         }
+
+        public Task<int> GetTermCountInTextAsync(int textId, int termId)
+        {
+            return this.DbSet.CountAsync(tt => tt.TextId == textId && tt.TermId == termId);
+        }
     }
 }

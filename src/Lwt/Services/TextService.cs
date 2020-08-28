@@ -1,7 +1,6 @@
 namespace Lwt.Services
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Lwt.Creators;
     using Lwt.Exceptions;
@@ -29,7 +28,6 @@ namespace Lwt.Services
         private readonly ITextTermRepository textTermRepository;
         private readonly IUserTextGetter userTextGetter;
         private readonly ITextTermProcessor textTermProcessor;
-        private readonly ILanguageHelper languageHelper;
         private readonly IMapper<TextTerm, TermReadModel> textTermMapper;
 
         public TextService(
@@ -43,7 +41,6 @@ namespace Lwt.Services
             IDbTransaction dbTransaction,
             ITextTermRepository textTermRepository,
             ITextTermProcessor termProcessor,
-            ILanguageHelper languageHelper,
             IMapper<TextTerm, TermReadModel> textTermMapper)
         {
             this.textRepository = textRepository;
@@ -56,7 +53,6 @@ namespace Lwt.Services
             this.dbTransaction = dbTransaction;
             this.textTermRepository = textTermRepository;
             this.textTermProcessor = termProcessor;
-            this.languageHelper = languageHelper;
             this.textTermMapper = textTermMapper;
         }
 
@@ -190,6 +186,13 @@ namespace Lwt.Services
             Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
             IEnumerable<TextTerm> textTerms = await this.textTermRepository.GetByTextAsync(text.Id, indexFrom, indexTo);
             return this.textTermMapper.Map(textTerms);
+        }
+
+        public async Task<int> GetTermCountInTextAsync(int id, int userId, int termId)
+        {
+            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
+            int count = await this.textTermRepository.GetTermCountInTextAsync(text.Id, termId);
+            return count;
         }
     }
 }

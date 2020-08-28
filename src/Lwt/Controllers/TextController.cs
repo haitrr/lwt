@@ -164,9 +164,21 @@ namespace Lwt.Controllers
             return this.Ok(new { Id = id, Counts = counts });
         }
 
+        [HttpGet("{id}/terms/{termId}/count")]
+        [Authorize]
+        public async Task<IActionResult> GetTermCountInTextAsync([FromRoute] int id, [FromRoute] int termId)
+        {
+            int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+            int count = await this.textService.GetTermCountInTextAsync(id, userId, termId);
+            return this.Ok(new { Id = id, TermId = termId, Count = count });
+        }
+
         [HttpGet("{id}/terms")]
         [Authorize]
-        public async Task<IActionResult> GetTerms([FromRoute] int id, [FromQuery] int indexFrom, [FromQuery]int indexTo)
+        public async Task<IActionResult> GetTerms(
+            [FromRoute] int id,
+            [FromQuery] int indexFrom,
+            [FromQuery] int indexTo)
         {
             int userId = this.authenticationHelper.GetLoggedInUser(this.User);
             IEnumerable<TermReadModel> terms = await this.textService.GetTextTermsAsync(id, userId, indexFrom, indexTo);
