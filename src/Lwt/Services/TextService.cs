@@ -232,7 +232,7 @@ namespace Lwt.Services
         {
             IQueryable<TextTerm> query = this.textTermRepository.Queryable()
                 .AsNoTracking()
-                .Where(t => t.TextId == id && t.Index >= indexFrom && t.Index <= indexTo)
+                .Where(t => t.Text.UserId == userId && t.TextId == id && t.Index >= indexFrom && t.Index <= indexTo)
                 .Select(
                     t => new TextTerm
                     {
