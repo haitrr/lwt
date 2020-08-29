@@ -55,7 +55,7 @@ namespace Lwt
         /// <param name="services">services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers()
+            services.AddControllers( option => option.ModelBinderProviders.Insert(0,new CustomBinderProvider()))
                 .AddNewtonsoftJson()
                 .AddFluentValidation(config => 
                     config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));

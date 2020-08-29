@@ -28,24 +28,28 @@ namespace Lwt.Repositories
         {
             int skip = paginationQuery.ItemPerPage * (paginationQuery.Page - 1);
 
-            IQueryable<Text> query = this.DbSet;
+            IQueryable<Text> query = this.DbSet.Where(t => t.UserId == userId);
 
             // sort by created time by default
             if (textFilter.LanguageCode != null)
             {
-                query = query.Where(t => t.UserId == userId && t.LanguageCode == textFilter.LanguageCode);
+                query = query.Where(t => t.LanguageCode == textFilter.LanguageCode);
+            }
+
+            if (textFilter.Title != null)
+            {
+                query = query.Where(t => t.Title.ToLower().Contains(textFilter.Title.ToLower()));
             }
 
             return await query
                 .AsNoTracking()
-                .Where(t => t.UserId == userId)
+                .OrderByDescending(t => t.CreatedDate)
                 .Select(t => new Text
                 {
                     Id = t.Id,
                     Title = t.Title,
                     LanguageCode = t.LanguageCode,
                 })
-                .OrderByDescending(t => t.CreatedDate)
                 .Skip(skip)
                 .Take(paginationQuery.ItemPerPage)
                 .ToListAsync();
@@ -54,14 +58,21 @@ namespace Lwt.Repositories
         /// <inheritdoc />
         public async Task<long> CountByUserAsync(int userId, TextFilter textFilter)
         {
+            IQueryable<Text> query = this.DbSet.Where(t => t.UserId == userId);
+
             // sort by created time by default
             if (textFilter.LanguageCode != null)
             {
-                return await this.DbSet.Where(t => t.LanguageCode == textFilter.LanguageCode && t.UserId == userId)
-                    .CountAsync();
+                query = query.Where(t => t.LanguageCode == textFilter.LanguageCode);
             }
 
-            return await this.DbSet.Where(t => t.UserId == userId)
+            if (textFilter.Title != null)
+            {
+                query = query.Where(t => t.Title.ToLower().Contains(textFilter.Title.ToLower()));
+            }
+
+            return await query
+                .AsNoTracking()
                 .CountAsync();
         }
     }

@@ -1,12 +1,14 @@
 namespace Lwt.Models
 {
     using System;
+    using Microsoft.AspNetCore.Mvc;
     using Newtonsoft.Json;
 
     /// <summary>
     /// language code.
     /// </summary>
     [JsonConverter(typeof(LanguageCodeJsonConverter))]
+    [ModelBinder(BinderType = typeof(LanguageCodeModelBinder))]
     public sealed class LanguageCode
     {
         /// <summary>

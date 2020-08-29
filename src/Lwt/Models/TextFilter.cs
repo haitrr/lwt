@@ -9,5 +9,7 @@ namespace Lwt.Models
         /// Gets or sets the language of the text.
         /// </summary>
         public LanguageCode? LanguageCode { get; set; }
+
+        public string? Title { get; set; }
     }
 }
