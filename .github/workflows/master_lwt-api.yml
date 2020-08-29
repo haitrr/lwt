@@ -20,6 +20,8 @@ jobs:
       with:
         dotnet-version: '3.1.102'
 
+    - name: Add local package source
+      run: dotnet nuget add source ./src/Lwt/Packages
     - name: Build with dotnet
       run: dotnet build --configuration Release -o publish
 
