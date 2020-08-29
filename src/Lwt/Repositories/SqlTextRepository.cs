@@ -45,6 +45,7 @@ namespace Lwt.Repositories
                     Title = t.Title,
                     LanguageCode = t.LanguageCode,
                 })
+                .OrderByDescending(t => t.CreatedDate)
                 .Skip(skip)
                 .Take(paginationQuery.ItemPerPage)
                 .ToListAsync();
