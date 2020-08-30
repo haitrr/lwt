@@ -171,6 +171,7 @@ namespace Lwt
             IWebHostEnvironment env)
 #pragma warning disable CA1822
         {
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             // compress response
             app.UseResponseCompression();
 
@@ -179,7 +180,6 @@ namespace Lwt
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             app.UseAuthentication();
             app.UseMiddleware<ExceptionHandleMiddleware>();
             app.UseRouting();
