@@ -1,6 +1,7 @@
 #pragma warning disable
 namespace Lwt
 {
+    using System;
     using System.Collections.Generic;
     using System.IO.Compression;
     using System.Text;
@@ -55,13 +56,13 @@ namespace Lwt
         /// <param name="services">services.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers( option => option.ModelBinderProviders.Insert(0,new CustomBinderProvider()))
+            services.AddControllers(option => option.ModelBinderProviders.Insert(0, new CustomBinderProvider()))
                 .AddNewtonsoftJson()
-                .AddFluentValidation(config => 
-                    config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
+                .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
-            services.AddDbContext<IdentityDbContext>(options => 
-                options.UseMySql("server=localhost;database=lwt;user=root;password=;Character Set=utf8;"));
+            services.AddDbContext<IdentityDbContext>(
+                options => options.UseMySql(
+                    Environment.GetEnvironmentVariable(this.Configuration.GetConnectionString("Default"))!));
 
             // identity
             services.AddIdentity<User, Role>()
@@ -76,24 +77,25 @@ namespace Lwt
             byte[] key = Encoding.ASCII.GetBytes(appSettings.Secret);
 
             services.AddAuthentication(
-                options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                }).AddJwtBearer(
-                options =>
-                {
-                    options.RequireHttpsMetadata = false;
-                    options.SaveToken = true;
-
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    options =>
                     {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                    };
-                });
+                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    })
+                .AddJwtBearer(
+                    options =>
+                    {
+                        options.RequireHttpsMetadata = false;
+                        options.SaveToken = true;
+
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = new SymmetricSecurityKey(key),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                        };
+                    });
 
             services.Configure<IdentityOptions>(
                 options =>
@@ -165,13 +167,13 @@ namespace Lwt
         /// <param name="databaseSeeder"> the database seeder.</param>
         /// <param name="indexCreator">the database indexes creator.</param>
 #pragma warning disable CA1822
-        public void Configure(
-            IApplicationBuilder app,
-            IDatabaseSeeder databaseSeeder,
-            IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IDatabaseSeeder databaseSeeder, IWebHostEnvironment env)
 #pragma warning disable CA1822
         {
-            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+            app.UseCors(
+                builder => builder.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod());
             // compress response
             app.UseResponseCompression();
 
@@ -185,11 +187,13 @@ namespace Lwt
             app.UseRouting();
             app.UseAuthorization();
             app.UseEndpoints(b => { b.MapControllers(); });
+
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
             }
+
             databaseSeeder.SeedData()
                 .GetAwaiter()
                 .GetResult();
