@@ -21,13 +21,13 @@ namespace Lwt.Models
         /// <inheritdoc />
         public bool ShouldSkip(string term)
         {
-            return Regex.IsMatch(term, @"([^a-zA-Z\’\'])");
+            return Regex.IsMatch(term, @"([^a-zA-Z\’\'\-])");
         }
 
         /// <inheritdoc/>
         public string[] SplitText(string text)
         {
-            return Regex.Split(text, @"([^a-zA-Z\’\'])").Where(word => !string.IsNullOrEmpty(word)).ToArray();
+            return Regex.Split(text, @"([^a-zA-Z\’\'\-])").Where(word => !string.IsNullOrEmpty(word)).ToArray();
         }
 
         /// <inheritdoc />
