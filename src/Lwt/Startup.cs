@@ -61,9 +61,24 @@ namespace Lwt
                 .AddNewtonsoftJson()
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
+            var connectionString =
+                Environment.GetEnvironmentVariable(this.Configuration.GetConnectionString("Default"))!;
+            var builder = new System.Data.Common.DbConnectionStringBuilder();
+            builder.ConnectionString = connectionString;
+
+            object dataSource;
+            if (builder.TryGetValue("Data Source", out dataSource))
+            {
+                var parts = dataSource.ToString().Split(":");
+                builder.Remove("Data Source");
+                builder.Add("server", parts[0]);
+                builder.Add("Port", parts[1]);
+            }
+            Console.WriteLine(builder.ConnectionString);
+
             services.AddDbContext<IdentityDbContext>(
                 options => options.UseMySql(
-                    Environment.GetEnvironmentVariable(this.Configuration.GetConnectionString("Default"))!,
+                    builder.ConnectionString,
                     o => { o.ServerVersion(new Version(5, 7, 22), ServerType.MySql); }));
 
             // identity
