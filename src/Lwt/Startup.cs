@@ -29,6 +29,7 @@ namespace Lwt
     using Microsoft.Extensions.Hosting;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.OpenApi.Models;
+    using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
     /// <summary>
     /// statup.
@@ -62,7 +63,8 @@ namespace Lwt
 
             services.AddDbContext<IdentityDbContext>(
                 options => options.UseMySql(
-                    Environment.GetEnvironmentVariable(this.Configuration.GetConnectionString("Default"))!));
+                    Environment.GetEnvironmentVariable(this.Configuration.GetConnectionString("Default"))!,
+                    o => { o.ServerVersion(new Version(5, 7, 22), ServerType.MySql); }));
 
             // identity
             services.AddIdentity<User, Role>()
