@@ -12,6 +12,7 @@ namespace Lwt.Services
     using Lwt.Utilities;
     using Lwt.ViewModels;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage;
 
     /// <summary>
     /// the text service.
@@ -111,9 +112,14 @@ namespace Lwt.Services
             if (text.UserId == userId)
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
-                this.textRepository.Update(editedText);
-                await this.textTermProcessor.ProcessTextTermAsync(editedText);
-                await this.dbTransaction.CommitAsync();
+
+                using (IDbContextTransaction transaction = this.dbTransaction.BeginTransaction())
+                {
+                    this.textRepository.Update(editedText);
+                    await this.textTermProcessor.ProcessTextTermAsync(editedText);
+                    await this.dbTransaction.CommitAsync();
+                    await transaction.CommitAsync();
+                }
             }
             else
             {

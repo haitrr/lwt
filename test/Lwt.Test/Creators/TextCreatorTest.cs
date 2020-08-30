@@ -19,13 +19,9 @@ namespace Lwt.Test.Creators
     {
         private readonly TextCreator textCreator;
         private readonly Mock<IValidator<Text>> textValidatorMock;
-        private readonly Mock<ITextSeparator> textSeparatorMock;
         private readonly Mock<ISqlTextRepository> textRepositoryMock;
-        private readonly Mock<ISqlTermRepository> sqlTermRepository;
-        private readonly Mock<ITextTermRepository> textTermRepository;
         private readonly Mock<IDbTransaction> dbTransaction;
-        private readonly Mock<ITextNormalizer> textNormalizer;
-        private readonly Mock<ILanguageHelper> languageHelper;
+        private readonly Mock<ITextTermProcessor> textTermProcessor;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextCreatorTest"/> class.
@@ -33,22 +29,14 @@ namespace Lwt.Test.Creators
         public TextCreatorTest()
         {
             this.textValidatorMock = new Mock<IValidator<Text>>();
-            this.textSeparatorMock = new Mock<ITextSeparator>();
             this.textRepositoryMock = new Mock<ISqlTextRepository>();
             this.dbTransaction = new Mock<IDbTransaction>();
-            this.sqlTermRepository = new Mock<ISqlTermRepository>();
-            this.textTermRepository = new Mock<ITextTermRepository>();
-            this.textNormalizer = new Mock<ITextNormalizer>();
-            this.languageHelper = new Mock<ILanguageHelper>();
+            this.textTermProcessor = new Mock<ITextTermProcessor>();
             this.textCreator = new TextCreator(
                 this.textValidatorMock.Object,
-                this.textSeparatorMock.Object,
                 this.textRepositoryMock.Object,
                 this.dbTransaction.Object,
-                this.sqlTermRepository.Object,
-                this.textTermRepository.Object,
-                this.languageHelper.Object,
-                this.textNormalizer.Object);
+                this.textTermProcessor.Object);
         }
 
         /// <summary>
