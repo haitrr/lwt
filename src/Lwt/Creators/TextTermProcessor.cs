@@ -36,10 +36,11 @@ namespace Lwt.Creators
         public async Task ProcessTextTermAsync(Text text)
         {
             this.textTermRepository.DeleteByTextId(text.Id);
-            await this.dbTransaction.CommitAsync();
-            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
             List<string> words = this.textSeparator.SeparateText(text.Content, text.LanguageCode)
                 .ToList();
+            text.TermCount = words.Count;
+            await this.dbTransaction.CommitAsync();
+            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
             var textTerms = new List<TextTerm>();
             var termContentSet = new HashSet<string>();
 

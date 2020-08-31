@@ -40,5 +40,7 @@ namespace Lwt.Models
         public LanguageCode LanguageCode { get; set; } = null!;
 
         public List<TextTerm> TextTerms { get; set; } = null!;
+
+        public long TermCount { get; set; }
     }
 }

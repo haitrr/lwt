@@ -137,7 +137,11 @@ namespace Lwt.Services
                 .Select(
                     t => new Text()
                     {
-                        Id = t.Id, Title = t.Title, Bookmark = t.Bookmark, LanguageCode = t.LanguageCode,
+                        Id = t.Id,
+                        Title = t.Title,
+                        Bookmark = t.Bookmark,
+                        LanguageCode = t.LanguageCode,
+                        TermCount = t.TermCount
                     })
                 .SingleOrDefaultAsync();
 
@@ -173,7 +177,7 @@ namespace Lwt.Services
             IQueryable<Text> query = this.textRepository.Queryable()
                 .AsNoTracking()
                 .Where(t => t.Id == id && t.UserId == userId)
-                .Select(t => new Text { Bookmark = t.Bookmark, Id = t.Id });
+                .Select(t => new Text { Bookmark = t.Bookmark, Id = t.Id, TermCount = t.TermCount });
             Text? text = await query.FirstOrDefaultAsync();
 
             if (text == null)
@@ -181,12 +185,7 @@ namespace Lwt.Services
                 throw new ForbiddenException("You don't have permission to access this text.");
             }
 
-            int textTermCount = await this.textTermRepository.Queryable()
-                .AsNoTracking()
-                .Where(tt => tt.TextId == text.Id)
-                .CountAsync();
-
-            if (setBookmarkModel.TermIndex >= (ulong)textTermCount)
+            if (setBookmarkModel.TermIndex >= (ulong)text.TermCount)
             {
                 throw new BadRequestException("Invalid bookmark index.");
             }
@@ -229,14 +228,6 @@ namespace Lwt.Services
             }
 
             return result;
-        }
-
-        public async Task<int> CountTextTermsAsync(int id, int userId)
-        {
-            return await this.textTermRepository.Queryable()
-                .AsNoTracking()
-                .Where(t => t.Text.UserId == userId && t.TextId == id)
-                .CountAsync();
         }
 
         public async Task<IEnumerable<TermReadModel>> GetTextTermsAsync(int id, int userId, int indexFrom, int indexTo)

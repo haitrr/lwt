@@ -15,6 +15,7 @@ namespace Lwt.Mappers
             result.LanguageCode = source.LanguageCode;
             result.Bookmark = source.Bookmark;
             result.Id = source.Id;
+            result.TermCount = source.TermCount;
 
             return result;
         }
