@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <RestoreSources>$(RestoreSources);./Packages;https://api.nuget.org/v3/index.json</RestoreSources>
         <CodeAnalysisRuleSet>../../style.ruleset</CodeAnalysisRuleSet>
+        <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;CA2007;SA1633</NoWarn>
