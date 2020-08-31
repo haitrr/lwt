@@ -38,18 +38,14 @@ namespace Lwt.Repositories
 
             if (textFilter.Title != null)
             {
-                query = query.Where(t => t.Title.ToLower().Contains(textFilter.Title.ToLower()));
+                query = query.Where(
+                    t => t.Title.ToLower()
+                        .Contains(textFilter.Title.ToLower()));
             }
 
-            return await query
-                .AsNoTracking()
+            return await query.AsNoTracking()
                 .OrderByDescending(t => t.CreatedDate)
-                .Select(t => new Text
-                {
-                    Id = t.Id,
-                    Title = t.Title,
-                    LanguageCode = t.LanguageCode,
-                })
+                .Select(t => new Text { Id = t.Id, Title = t.Title, LanguageCode = t.LanguageCode, })
                 .Skip(skip)
                 .Take(paginationQuery.ItemPerPage)
                 .ToListAsync();
@@ -68,12 +64,21 @@ namespace Lwt.Repositories
 
             if (textFilter.Title != null)
             {
-                query = query.Where(t => t.Title.ToLower().Contains(textFilter.Title.ToLower()));
+                query = query.Where(
+                    t => t.Title.ToLower()
+                        .Contains(textFilter.Title.ToLower()));
             }
 
-            return await query
-                .AsNoTracking()
+            return await query.AsNoTracking()
                 .CountAsync();
+        }
+
+        public void UpdateBookmarkAsync(int id, ulong? bookMark)
+        {
+            var text = new Text() { Id = id, Bookmark = bookMark };
+            this.DbSet.Attach(text)
+                .Property(t => t.Bookmark)
+                .IsModified = true;
         }
     }
 }

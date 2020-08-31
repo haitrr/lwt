@@ -26,5 +26,7 @@ namespace Lwt.Repositories
         /// <param name="textFilter">the filters.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<long> CountByUserAsync(int userId, TextFilter textFilter);
+
+        void UpdateBookmarkAsync(int id, ulong? bookMark);
     }
 }

@@ -9,7 +9,6 @@ namespace Lwt.Services
     using Lwt.Interfaces.Services;
     using Lwt.Models;
     using Lwt.Repositories;
-    using Lwt.Utilities;
     using Lwt.ViewModels;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
@@ -29,7 +28,6 @@ namespace Lwt.Services
         private readonly IMapper<Text, TextReadModel> textReadMapper;
         private readonly IDbTransaction dbTransaction;
         private readonly ITextTermRepository textTermRepository;
-        private readonly IUserTextGetter userTextGetter;
         private readonly ITextTermProcessor textTermProcessor;
         private readonly IMapper<TextTerm, TermReadModel> textTermMapper;
 
@@ -39,7 +37,6 @@ namespace Lwt.Services
             IMapper<Text, TextViewModel> textViewMapper,
             IMapper<Text, TextEditDetailModel> textEditDetailMapper,
             ITextCreator textCreator,
-            IUserTextGetter userTextGetter,
             IMapper<Text, TextReadModel> textReadMapper,
             IDbTransaction dbTransaction,
             ITextTermRepository textTermRepository,
@@ -51,7 +48,6 @@ namespace Lwt.Services
             this.textViewMapper = textViewMapper;
             this.textEditDetailMapper = textEditDetailMapper;
             this.textCreator = textCreator;
-            this.userTextGetter = userTextGetter;
             this.textReadMapper = textReadMapper;
             this.dbTransaction = dbTransaction;
             this.textTermRepository = textTermRepository;
@@ -174,7 +170,16 @@ namespace Lwt.Services
         /// <inheritdoc />
         public async Task SetBookmarkAsync(int id, int userId, SetBookmarkModel setBookmarkModel)
         {
-            Text text = await this.userTextGetter.GetUserTextAsync(id, userId);
+            IQueryable<Text> query = this.textRepository.Queryable()
+                .AsNoTracking()
+                .Where(t => t.Id == id && t.UserId == userId)
+                .Select(t => new Text { Bookmark = t.Bookmark, Id = t.Id });
+            Text? text = await query.SingleOrDefaultAsync();
+
+            if (text == null)
+            {
+                throw new ForbiddenException("You don't have permission to access this text.");
+            }
 
             int textTermCount = await this.textTermRepository.Queryable()
                 .Where(tt => tt.TextId == text.Id)
@@ -185,9 +190,7 @@ namespace Lwt.Services
                 throw new BadRequestException("Invalid bookmark index.");
             }
 
-            text.Bookmark = setBookmarkModel.TermIndex;
-
-            this.textRepository.Update(text);
+            this.textRepository.UpdateBookmarkAsync(text.Id, setBookmarkModel.TermIndex);
             await this.dbTransaction.CommitAsync();
         }
 
