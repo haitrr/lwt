@@ -174,7 +174,7 @@ namespace Lwt.Services
                 .AsNoTracking()
                 .Where(t => t.Id == id && t.UserId == userId)
                 .Select(t => new Text { Bookmark = t.Bookmark, Id = t.Id });
-            Text? text = await query.SingleOrDefaultAsync();
+            Text? text = await query.FirstOrDefaultAsync();
 
             if (text == null)
             {
