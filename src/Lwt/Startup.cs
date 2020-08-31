@@ -208,7 +208,12 @@ namespace Lwt
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "Lwt API V1"); });
+                app.UseSwaggerUI(
+                    c =>
+                    {
+                        string swaggerJsonBasePath = string.IsNullOrWhiteSpace(c.RoutePrefix) ? "." : "..";
+                        c.SwaggerEndpoint($"{swaggerJsonBasePath}/swagger/v1/swagger.json", "My API");
+                    });
             }
 
             databaseSeeder.SeedData()
