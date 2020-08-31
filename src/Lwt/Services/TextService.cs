@@ -182,6 +182,7 @@ namespace Lwt.Services
             }
 
             int textTermCount = await this.textTermRepository.Queryable()
+                .AsNoTracking()
                 .Where(tt => tt.TextId == text.Id)
                 .CountAsync();
 
