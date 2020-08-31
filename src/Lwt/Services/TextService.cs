@@ -141,7 +141,7 @@ namespace Lwt.Services
                         Title = t.Title,
                         Bookmark = t.Bookmark,
                         LanguageCode = t.LanguageCode,
-                        TermCount = t.TermCount
+                        TermCount = t.TermCount,
                     })
                 .SingleOrDefaultAsync();
 

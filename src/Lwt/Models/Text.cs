@@ -17,7 +17,7 @@ namespace Lwt.Models
         /// </summary>
         public int UserId { get; set; }
 
-        public User User { get; set; }
+        public User User { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets bookmark by user.
