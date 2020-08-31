@@ -250,7 +250,9 @@ namespace Lwt.Services
                         Content = t.Content,
                         TermId = t.TermId,
                         Index = t.Index,
-                        Term = t.TermId.HasValue ? new Term { LearningLevel = t.Term!.LearningLevel } : null,
+                        Term = t.TermId.HasValue
+                            ? new Term { LearningLevel = t.Term!.LearningLevel, Meaning = t.Term.Meaning }
+                            : null,
                     });
             IEnumerable<TextTerm> textTerms = await query.ToListAsync();
             return this.textTermMapper.Map(textTerms);
