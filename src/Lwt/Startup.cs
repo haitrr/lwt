@@ -67,13 +67,16 @@ namespace Lwt
             builder.ConnectionString = connectionString;
 
             object dataSource;
+
             if (builder.TryGetValue("Data Source", out dataSource))
             {
-                var parts = dataSource.ToString().Split(":");
+                var parts = dataSource.ToString()
+                    .Split(":");
                 builder.Remove("Data Source");
                 builder.Add("server", parts[0]);
                 builder.Add("Port", parts[1]);
             }
+
             Console.WriteLine(builder.ConnectionString);
 
             services.AddDbContext<IdentityDbContext>(
@@ -194,10 +197,7 @@ namespace Lwt
             // compress response
             app.UseResponseCompression();
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseDeveloperExceptionPage();
 
             app.UseAuthentication();
             app.UseMiddleware<ExceptionHandleMiddleware>();
