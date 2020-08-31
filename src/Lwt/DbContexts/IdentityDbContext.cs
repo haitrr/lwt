@@ -56,10 +56,6 @@ namespace Lwt.DbContexts
             builder.Entity<TextTerm>()
                 .ToTable(TextTerm.TableName);
 
-            builder.Entity<Text>()
-                .HasIndex(t => new { t.Id, t.UserId })
-                .IsUnique();
-
             builder.Entity<TextTerm>()
                 .ToTable(TextTerm.TableName);
 
