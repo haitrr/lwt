@@ -2,6 +2,7 @@ namespace Lwt.Services
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Lwt.Exceptions;
@@ -10,6 +11,7 @@ namespace Lwt.Services
     using Lwt.Models;
     using Lwt.Repositories;
     using Lwt.ViewModels;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// term service.
@@ -96,7 +98,10 @@ namespace Lwt.Services
         /// <inheritdoc />
         public async Task<TermMeaningDto> GetMeaningAsync(int userId, int termId)
         {
-            Term term = await this.termRepository.GetUserTermAsync(termId, userId);
+            Term term = await this.termRepository.Queryable()
+                .AsNoTracking()
+                .Where(t => t.UserId == userId && t.Id == termId)
+                .Select(t => new Term { Meaning = t.Meaning, Id = t.Id }).FirstOrDefaultAsync();
 
             return this.termMeaningMapper.Map(term);
         }
