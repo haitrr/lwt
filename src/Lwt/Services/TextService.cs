@@ -234,6 +234,7 @@ namespace Lwt.Services
         public async Task<int> CountTextTermsAsync(int id, int userId)
         {
             return await this.textTermRepository.Queryable()
+                .AsNoTracking()
                 .Where(t => t.Text.UserId == userId && t.TextId == id)
                 .CountAsync();
         }
