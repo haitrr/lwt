@@ -15,6 +15,8 @@ namespace Lwt.Mappers
             result.Title = from.Title;
             result.LanguageCode = from.LanguageCode;
             result.Id = from.Id;
+            result.TermCount = from.TermCount;
+            result.ProcessedTermCount = from.ProcessedTermCount;
 
             return result;
         }

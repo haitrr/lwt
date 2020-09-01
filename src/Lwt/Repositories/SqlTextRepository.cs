@@ -46,7 +46,15 @@ namespace Lwt.Repositories
 
             return await query.AsNoTracking()
                 .OrderByDescending(t => t.CreatedDate)
-                .Select(t => new Text { Id = t.Id, Title = t.Title, LanguageCode = t.LanguageCode, })
+                .Select(
+                    t => new Text
+                    {
+                        Id = t.Id,
+                        Title = t.Title,
+                        LanguageCode = t.LanguageCode,
+                        TermCount = t.TermCount,
+                        ProcessedTermCount = t.ProcessedTermCount
+                    })
                 .Skip(skip)
                 .Take(paginationQuery.ItemPerPage)
                 .ToListAsync();

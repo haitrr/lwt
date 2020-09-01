@@ -21,5 +21,9 @@ namespace Lwt.ViewModels
         /// Gets or sets the id.
         /// </summary>
         public int Id { get; set; }
+
+        public long TermCount { get; set; }
+
+        public int ProcessedTermCount { get; set; }
     }
 }
