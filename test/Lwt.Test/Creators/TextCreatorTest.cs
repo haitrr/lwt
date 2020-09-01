@@ -1,3 +1,4 @@
+/*
 namespace Lwt.Test.Creators
 {
     using System.Threading.Tasks;
@@ -81,3 +82,4 @@ namespace Lwt.Test.Creators
         }
     }
 }
+*/

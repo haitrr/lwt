@@ -42,5 +42,7 @@ namespace Lwt.Models
         public List<TextTerm> TextTerms { get; set; } = null!;
 
         public long TermCount { get; set; }
+
+        public int ProcessedTermCount { get; set; }
     }
 }

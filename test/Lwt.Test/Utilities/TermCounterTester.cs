@@ -1,4 +1,4 @@
-namespace Lwt.Test.Utilities
+/*namespace Lwt.Test.Utilities
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -80,3 +80,4 @@ namespace Lwt.Test.Utilities
         }
     }
 }
+*/

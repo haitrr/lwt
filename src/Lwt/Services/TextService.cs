@@ -11,7 +11,6 @@ namespace Lwt.Services
     using Lwt.Repositories;
     using Lwt.ViewModels;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage;
 
     /// <summary>
     /// the text service.
@@ -28,7 +27,6 @@ namespace Lwt.Services
         private readonly IMapper<Text, TextReadModel> textReadMapper;
         private readonly IDbTransaction dbTransaction;
         private readonly ITextTermRepository textTermRepository;
-        private readonly ITextTermProcessor textTermProcessor;
         private readonly IMapper<TextTerm, TermReadModel> textTermMapper;
 
         public TextService(
@@ -40,7 +38,6 @@ namespace Lwt.Services
             IMapper<Text, TextReadModel> textReadMapper,
             IDbTransaction dbTransaction,
             ITextTermRepository textTermRepository,
-            ITextTermProcessor termProcessor,
             IMapper<TextTerm, TermReadModel> textTermMapper)
         {
             this.textRepository = textRepository;
@@ -51,7 +48,6 @@ namespace Lwt.Services
             this.textReadMapper = textReadMapper;
             this.dbTransaction = dbTransaction;
             this.textTermRepository = textTermRepository;
-            this.textTermProcessor = termProcessor;
             this.textTermMapper = textTermMapper;
         }
 
@@ -109,13 +105,9 @@ namespace Lwt.Services
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
 
-                using (IDbContextTransaction transaction = this.dbTransaction.BeginTransaction())
-                {
-                    this.textRepository.Update(editedText);
-                    await this.textTermProcessor.ProcessTextTermAsync(editedText);
-                    await this.dbTransaction.CommitAsync();
-                    await transaction.CommitAsync();
-                }
+                editedText.ProcessedTermCount = 0;
+                this.textRepository.Update(editedText);
+                await this.dbTransaction.CommitAsync();
             }
             else
             {

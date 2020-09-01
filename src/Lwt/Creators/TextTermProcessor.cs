@@ -7,6 +7,9 @@ namespace Lwt.Creators
     using Lwt.Models;
     using Lwt.Repositories;
     using Lwt.Utilities;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage;
+    using Microsoft.Extensions.Logging;
 
     public class TextTermProcessor : ITextTermProcessor
     {
@@ -16,6 +19,8 @@ namespace Lwt.Creators
         private readonly ILanguageHelper languageHelper;
         private readonly ITextNormalizer textNormalizer;
         private readonly IDbTransaction dbTransaction;
+        private readonly ISqlTextRepository textRepository;
+        private readonly ILogger<ITextTermProcessor> logger;
 
         public TextTermProcessor(
             ITextSeparator textSeparator,
@@ -23,7 +28,9 @@ namespace Lwt.Creators
             ITextTermRepository textTermRepository,
             ILanguageHelper languageHelper,
             ITextNormalizer textNormalizer,
-            IDbTransaction dbTransaction)
+            IDbTransaction dbTransaction,
+            ISqlTextRepository textRepository,
+            ILogger<ITextTermProcessor> logger)
         {
             this.textSeparator = textSeparator;
             this.termRepository = termRepository;
@@ -31,45 +38,109 @@ namespace Lwt.Creators
             this.languageHelper = languageHelper;
             this.textNormalizer = textNormalizer;
             this.dbTransaction = dbTransaction;
+            this.textRepository = textRepository;
+            this.logger = logger;
         }
 
-        public async Task ProcessTextTermAsync(Text text)
+        public async Task ProcessTextTermAsync()
         {
-            this.textTermRepository.DeleteByTextId(text.Id);
-            List<string> words = this.textSeparator.SeparateText(text.Content, text.LanguageCode)
-                .ToList();
-            text.TermCount = words.Count;
-            await this.dbTransaction.CommitAsync();
-            ILanguage language = this.languageHelper.GetLanguage(text.LanguageCode);
-            var textTerms = new List<TextTerm>();
-            var termContentSet = new HashSet<string>();
-
-            foreach (string word in words.Where(word => !language.ShouldSkip(word)))
+            using (IDbContextTransaction transaction = this.dbTransaction.BeginTransaction())
             {
-                termContentSet.Add(this.textNormalizer.Normalize(word, text.LanguageCode));
+                Text? processingText = await this.textRepository.Queryable()
+                    .AsNoTracking()
+                    .Where(t => t.ProcessedTermCount < t.TermCount || t.ProcessedTermCount == 0)
+                    .FirstOrDefaultAsync();
+
+                if (processingText == null)
+                {
+                    this.logger.LogInformation("No text to process.");
+                    return;
+                }
+
+                List<string> words = this.textSeparator
+                    .SeparateText(processingText.Content, processingText.LanguageCode)
+                    .ToList();
+
+                this.logger.LogInformation($"Processing text {processingText.Id}");
+
+                if (processingText.TermCount == 0)
+                {
+                    this.logger.LogInformation($"New or updated text, set term count");
+                    processingText.TermCount = words.Count;
+                }
+
+                if (processingText.ProcessedTermCount == 0)
+                {
+                    this.logger.LogInformation($"Processing new or reset, removing old text term");
+                    this.textTermRepository.DeleteByTextId(processingText.Id);
+                    await this.dbTransaction.CommitAsync();
+                }
+                else if (processingText.TermCount != words.Count)
+                {
+                    this.logger.LogInformation("Text separator changed , resetting processing");
+                    this.textTermRepository.DeleteByTextId(processingText.Id);
+                    processingText.ProcessedTermCount = 0;
+                    processingText.TermCount = words.Count;
+                    this.textRepository.UpdateTermCountAndProcessedTermCount(processingText);
+                    await this.dbTransaction.CommitAsync();
+                    await transaction.CommitAsync();
+                    return;
+                }
+
+                int indexFrom = processingText.ProcessedTermCount;
+                var processingWordCount = 500;
+                this.logger.LogInformation(
+                    $"Processing text terms from {indexFrom} to {indexFrom + processingWordCount}");
+                ILanguage language = this.languageHelper.GetLanguage(processingText.LanguageCode);
+                string[] processingWords = words.Skip(indexFrom)
+                    .Take(processingWordCount)
+                    .ToArray();
+
+                var termContentSet = new HashSet<string>();
+
+                foreach (string word in processingWords.Where(word => !language.ShouldSkip(word)))
+                {
+                    termContentSet.Add(this.textNormalizer.Normalize(word, processingText.LanguageCode));
+                }
+
+                IEnumerable<Term> terms = await this.termRepository.TryGetManyByUserAndLanguageAndContentsAsync(
+                    processingText.UserId,
+                    processingText.LanguageCode,
+                    termContentSet);
+
+                Dictionary<string, Term> termDict = terms.ToDictionary(t => t.Content, t => t);
+
+                List<Term> newTerms = this.MapTerms(processingWords, processingText, termDict, language);
+
+                this.termRepository.BulkInsert(newTerms);
+
+                List<TextTerm> textTerms = this.GetTextTerms(processingWords, indexFrom, processingText, termDict);
+
+                this.logger.LogInformation("Saving change");
+                this.textTermRepository.BulkInsert(textTerms);
+                processingText.ProcessedTermCount = indexFrom + processingWords.Length;
+                this.textRepository.UpdateTermCountAndProcessedTermCount(processingText);
+                await this.dbTransaction.CommitAsync();
+                await transaction.CommitAsync();
             }
+        }
 
-            IEnumerable<Term> terms = await this.termRepository.TryGetManyByUserAndLanguageAndContentsAsync(
-                text.UserId,
-                text.LanguageCode,
-                termContentSet);
-
-            Dictionary<string, Term> termDict = terms.ToDictionary(t => t.Content, t => t);
-
+        private List<Term> MapTerms(string[] processingWords, Text processingText, Dictionary<string, Term> termDict, ILanguage language)
+        {
             var newTerms = new List<Term>();
 
-            for (var i = 0; i < words.Count; i += 1)
+            for (var i = 0; i < processingWords.Count(); i += 1)
             {
-                string word = words[i];
-                string normalizedWord = this.textNormalizer.Normalize(word, text.LanguageCode);
+                string word = processingWords[i];
+                string normalizedWord = this.textNormalizer.Normalize(word, processingText.LanguageCode);
 
                 if (!termDict.ContainsKey(normalizedWord) && !language.ShouldSkip(normalizedWord))
                 {
                     var term = new Term
                     {
-                        LanguageCode = text.LanguageCode,
+                        LanguageCode = processingText.LanguageCode,
                         Content = normalizedWord,
-                        UserId = text.UserId,
+                        UserId = processingText.UserId,
                         LearningLevel = LearningLevel.Unknown,
                         Meaning = string.Empty,
                     };
@@ -78,23 +149,34 @@ namespace Lwt.Creators
                 }
             }
 
-            this.termRepository.BulkInsert(newTerms);
+            return newTerms;
+        }
 
-            for (var i = 0; i < words.Count; i += 1)
+        private List<TextTerm> GetTextTerms(
+            string[] processingWords,
+            int indexFrom,
+            Text processingText,
+            Dictionary<string, Term> termDict)
+        {
+            var textTerms = new List<TextTerm>();
+
+            for (var i = 0; i < processingWords.Length; i += 1)
             {
-                string word = words[i];
+                string word = processingWords[i];
+                int index = indexFrom + i;
                 Term? term = null;
-                string normalizedWord = this.textNormalizer.Normalize(word, text.LanguageCode);
+                string normalizedWord = this.textNormalizer.Normalize(word, processingText.LanguageCode);
 
                 if (termDict.ContainsKey(normalizedWord))
                 {
                     term = termDict[normalizedWord];
                 }
 
-                textTerms.Add(new TextTerm { TermId = term?.Id, Content = word, Index = i, TextId = text.Id });
+                textTerms.Add(
+                    new TextTerm { TermId = term?.Id, Content = word, Index = index, TextId = processingText.Id });
             }
 
-            this.textTermRepository.BulkInsert(textTerms);
+            return textTerms;
         }
     }
 }

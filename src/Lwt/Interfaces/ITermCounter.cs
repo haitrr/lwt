@@ -20,5 +20,7 @@ namespace Lwt.Interfaces
             IEnumerable<string> words,
             LanguageCode languageCode,
             int userId);
+
+        long CountTermFromTextContent(Text text);
     }
 }

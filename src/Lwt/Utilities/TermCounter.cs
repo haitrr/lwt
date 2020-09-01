@@ -12,21 +12,18 @@ namespace Lwt.Utilities
         private readonly ISqlTermRepository termRepository;
         private readonly ISkippedWordRemover skippedWordRemover;
         private readonly ITextNormalizer textNormalizer;
+        private readonly ITextSeparator textSeparator;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TermCounter"/> class.
-        /// </summary>
-        /// <param name="termRepository">the term repo.</param>
-        /// <param name="skippedWordRemover">skipped words remover.</param>
-        /// <param name="textNormalizer">text normalizer.</param>
         public TermCounter(
             ISqlTermRepository termRepository,
             ISkippedWordRemover skippedWordRemover,
-            ITextNormalizer textNormalizer)
+            ITextNormalizer textNormalizer,
+            ITextSeparator textSeparator)
         {
             this.termRepository = termRepository;
             this.skippedWordRemover = skippedWordRemover;
             this.textNormalizer = textNormalizer;
+            this.textSeparator = textSeparator;
         }
 
         /// <inheritdoc/>
@@ -77,6 +74,12 @@ namespace Lwt.Utilities
             }
 
             return result;
+        }
+
+        public long CountTermFromTextContent(Text text)
+        {
+            return this.textSeparator.SeparateText(text.Content, text.LanguageCode)
+                .LongCount();
         }
     }
 }

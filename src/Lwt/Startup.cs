@@ -26,7 +26,6 @@ namespace Lwt
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.OpenApi.Models;
     using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
@@ -61,7 +60,7 @@ namespace Lwt
                 .AddNewtonsoftJson()
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
-            var connectionString =
+            string connectionString =
                 Environment.GetEnvironmentVariable(this.Configuration.GetConnectionString("Default"))!;
             var builder = new System.Data.Common.DbConnectionStringBuilder();
             builder.ConnectionString = connectionString;
@@ -70,14 +69,12 @@ namespace Lwt
 
             if (builder.TryGetValue("Data Source", out dataSource))
             {
-                var parts = dataSource.ToString()
+                string[] parts = dataSource.ToString()
                     .Split(":");
                 builder.Remove("Data Source");
                 builder.Add("server", parts[0]);
                 builder.Add("Port", parts[1]);
             }
-
-            Console.WriteLine(builder.ConnectionString);
 
             services.AddDbContext<IdentityDbContext>(
                 options => options.UseMySql(
@@ -172,6 +169,8 @@ namespace Lwt
             services.AddResponseCompression();
             services.Configure<GzipCompressionProviderOptions>(
                 options => { options.Level = CompressionLevel.Optimal; });
+
+            services.AddHostedService<TextTermProcessingService>();
 
             // swagger
             RegisterSwaggerGen(services);

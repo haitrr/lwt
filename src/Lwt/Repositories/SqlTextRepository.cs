@@ -7,6 +7,7 @@ namespace Lwt.Repositories
     using Lwt.Interfaces;
     using Lwt.Models;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.ChangeTracking;
 
     /// <inheritdoc cref="Lwt.Repositories.ISqlTextRepository" />
     public class SqlTextRepository : BaseSqlRepository<Text>, ISqlTextRepository
@@ -78,6 +79,27 @@ namespace Lwt.Repositories
             var text = new Text() { Id = id, Bookmark = bookMark };
             this.DbSet.Attach(text)
                 .Property(t => t.Bookmark)
+                .IsModified = true;
+        }
+
+        public void UpdateProcessedTermCount(Text text)
+        {
+            var updatedText = new Text() { Id = text.Id, ProcessedTermCount = text.ProcessedTermCount };
+            this.DbSet.Attach(updatedText)
+                .Property(t => t.ProcessedTermCount)
+                .IsModified = true;
+        }
+
+        public void UpdateTermCountAndProcessedTermCount(Text text)
+        {
+            var updatedText = new Text()
+            {
+                Id = text.Id, ProcessedTermCount = text.ProcessedTermCount, TermCount = text.TermCount,
+            };
+            EntityEntry<Text> attachedText = this.DbSet.Attach(updatedText);
+            attachedText.Property(t => t.ProcessedTermCount)
+                .IsModified = true;
+            attachedText.Property(t => t.TermCount)
                 .IsModified = true;
         }
     }

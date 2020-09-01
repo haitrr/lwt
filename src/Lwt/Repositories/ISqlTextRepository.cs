@@ -28,5 +28,9 @@ namespace Lwt.Repositories
         Task<long> CountByUserAsync(int userId, TextFilter textFilter);
 
         void UpdateBookmarkAsync(int id, ulong? bookMark);
+
+        void UpdateProcessedTermCount(Text text);
+
+        void UpdateTermCountAndProcessedTermCount(Text processingText);
     }
 }
