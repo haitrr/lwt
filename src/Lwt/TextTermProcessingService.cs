@@ -37,7 +37,9 @@ namespace Lwt
                     catch (Exception e)
 #pragma warning restore
                     {
-                        this.logger.LogError("Fail to process text term", e);
+                        this.logger.LogError("Fail to process text term");
+                        this.logger.LogError(e.Message);
+                        this.logger.LogError(e.StackTrace);
                     }
 
                     await Task.Delay(TimeSpan.FromMilliseconds(500));
