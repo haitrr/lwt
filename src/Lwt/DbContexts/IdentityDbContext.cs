@@ -56,9 +56,6 @@ namespace Lwt.DbContexts
             builder.Entity<TextTerm>()
                 .ToTable(TextTerm.TableName);
 
-            builder.Entity<TextTerm>()
-                .ToTable(TextTerm.TableName);
-
             builder.Entity<UserSetting>()
                 .ToTable(UserSetting.TableName);
             builder.Entity<LanguageSetting>()
