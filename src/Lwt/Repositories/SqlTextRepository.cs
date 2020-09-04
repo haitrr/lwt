@@ -53,7 +53,8 @@ namespace Lwt.Repositories
                         Title = t.Title,
                         LanguageCode = t.LanguageCode,
                         TermCount = t.TermCount,
-                        ProcessedTermCount = t.ProcessedTermCount
+                        ProcessedTermCount = t.ProcessedTermCount,
+                        Bookmark = t.Bookmark,
                     })
                 .Skip(skip)
                 .Take(paginationQuery.ItemPerPage)
