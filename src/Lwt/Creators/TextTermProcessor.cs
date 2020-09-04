@@ -66,16 +66,24 @@ namespace Lwt.Creators
                 if (processingText.TermCount == 0)
                 {
                     this.logger.LogInformation($"New or updated text, set term count");
-                    processingText.TermCount = words.Count;
+                    this.logger.LogInformation($"Processing new or reset, removing old text term");
+
+                    if (this.textTermRepository.Queryable()
+                        .Where(t => t.TextId == processingText.Id)
+                        .Take(10000)
+                        .DeleteFromQuery() == 0)
+                    {
+                        processingText.TermCount = words.Count;
+                        processingText.ProcessedTermCount = 0;
+                        this.textRepository.UpdateTermCountAndProcessedTermCount(processingText);
+                        await this.dbTransaction.CommitAsync();
+                    }
+
+                    await transaction.CommitAsync();
+                    return;
                 }
 
-                if (processingText.ProcessedTermCount == 0)
-                {
-                    this.logger.LogInformation($"Processing new or reset, removing old text term");
-                    this.textTermRepository.DeleteByTextId(processingText.Id);
-                    await this.dbTransaction.CommitAsync();
-                }
-                else if (processingText.TermCount != words.Count)
+                if (processingText.TermCount != words.Count)
                 {
                     this.logger.LogInformation("Text separator changed , resetting processing");
                     this.textTermRepository.DeleteByTextId(processingText.Id);
@@ -88,7 +96,7 @@ namespace Lwt.Creators
                 }
 
                 int indexFrom = processingText.ProcessedTermCount;
-                var processingWordCount = 500;
+                var processingWordCount = 1000;
                 this.logger.LogInformation(
                     $"Processing text terms from {indexFrom} to {indexFrom + processingWordCount}");
                 ILanguage language = this.languageHelper.GetLanguage(processingText.LanguageCode);
@@ -125,7 +133,11 @@ namespace Lwt.Creators
             }
         }
 
-        private List<Term> MapTerms(string[] processingWords, Text processingText, Dictionary<string, Term> termDict, ILanguage language)
+        private List<Term> MapTerms(
+            string[] processingWords,
+            Text processingText,
+            Dictionary<string, Term> termDict,
+            ILanguage language)
         {
             var newTerms = new List<Term>();
 
