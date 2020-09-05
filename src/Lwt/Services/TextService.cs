@@ -248,5 +248,35 @@ namespace Lwt.Services
                 .Where(t => t.TextId == id && t.Text.UserId == userId && t.TermId == termId)
                 .CountAsync();
         }
+
+        public async Task<int> GetProcessedTermCountAsync(int id, int userId)
+        {
+            int? count = await this.textRepository.Queryable()
+                .Where(t => t.Id == id && t.UserId == userId)
+                .Select(t => t.ProcessedTermCount)
+                .FirstOrDefaultAsync();
+
+            if (count == null)
+            {
+                throw new NotFoundException("Text not found.");
+            }
+
+            return count.Value;
+        }
+
+        public async Task<long> GetTermCountAsync(int id, int userId)
+        {
+            long? count = await this.textRepository.Queryable()
+                .Where(t => t.Id == id && t.UserId == userId)
+                .Select(t => t.TermCount)
+                .FirstOrDefaultAsync();
+
+            if (count == null)
+            {
+                throw new NotFoundException("Text not found.");
+            }
+
+            return count.Value;
+        }
     }
 }
