@@ -57,6 +57,21 @@ namespace Lwt.Creators
                     return;
                 }
 
+                if (processingText.TermCount == 0)
+                {
+                    this.logger.LogInformation($"New or updated text, set term count");
+                    this.logger.LogInformation($"Processing new or reset, removing old text term");
+
+                    if (this.textTermRepository.Queryable()
+                        .Where(t => t.TextId == processingText.Id)
+                        .Take(10000)
+                        .DeleteFromQuery() != 0)
+                    {
+                        await transaction.CommitAsync();
+                        return;
+                    }
+                }
+
                 List<string> words = this.textSeparator
                     .SeparateText(processingText.Content, processingText.LanguageCode)
                     .ToList();
@@ -66,19 +81,12 @@ namespace Lwt.Creators
                 if (processingText.TermCount == 0)
                 {
                     this.logger.LogInformation($"New or updated text, set term count");
-                    this.logger.LogInformation($"Processing new or reset, removing old text term");
+                    this.logger.LogInformation($"Reset term count");
 
-                    if (this.textTermRepository.Queryable()
-                        .Where(t => t.TextId == processingText.Id)
-                        .Take(10000)
-                        .DeleteFromQuery() == 0)
-                    {
-                        processingText.TermCount = words.Count;
-                        processingText.ProcessedTermCount = 0;
-                        this.textRepository.UpdateTermCountAndProcessedTermCount(processingText);
-                        await this.dbTransaction.CommitAsync();
-                    }
-
+                    processingText.TermCount = words.Count;
+                    processingText.ProcessedTermCount = 0;
+                    this.textRepository.UpdateTermCountAndProcessedTermCount(processingText);
+                    await this.dbTransaction.CommitAsync();
                     await transaction.CommitAsync();
                     return;
                 }
@@ -86,9 +94,8 @@ namespace Lwt.Creators
                 if (processingText.TermCount != words.Count)
                 {
                     this.logger.LogInformation("Text separator changed , resetting processing");
-                    this.textTermRepository.DeleteByTextId(processingText.Id);
                     processingText.ProcessedTermCount = 0;
-                    processingText.TermCount = words.Count;
+                    processingText.TermCount = 0;
                     this.textRepository.UpdateTermCountAndProcessedTermCount(processingText);
                     await this.dbTransaction.CommitAsync();
                     await transaction.CommitAsync();
