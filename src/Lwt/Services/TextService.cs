@@ -233,13 +233,29 @@ namespace Lwt.Services
                     {
                         Content = t.Content,
                         TermId = t.TermId,
+                        TextId = id,
                         Index = t.Index,
                         Term = t.TermId.HasValue
                             ? new Term { LearningLevel = t.Term!.LearningLevel, Meaning = t.Term.Meaning }
                             : null,
                     });
             IEnumerable<TextTerm> textTerms = await query.ToListAsync();
-            return this.textTermMapper.Map(textTerms);
+            HashSet<int?> termToCount = textTerms.Where(t => t.TermId != null)
+                .Select(t => t.TermId)
+                .ToHashSet();
+            Dictionary<int?, int> termCounts = this.textTermRepository.Queryable()
+                .Where(t => t.TextId == id && termToCount.Contains(t.TermId))
+                .GroupBy(t => t.TermId)
+                .Select(t => new { Id = t.Key, Count = t.Count() })
+                .ToDictionary(t => t.Id, t => t.Count);
+            ICollection<TermReadModel> result =  this.textTermMapper.Map(textTerms);
+
+            foreach (TermReadModel termReadModel in result.Where(r => r.Id.HasValue))
+            {
+                termReadModel.Count = termCounts[termReadModel.Id.Value];
+            }
+
+            return result;
         }
 
         public async Task<int> GetTermCountInTextAsync(int id, int userId, int termId)

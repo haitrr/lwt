@@ -21,6 +21,9 @@ namespace Lwt.Models
         public LearningLevel LearningLevel { get; set; } = null!;
 
         public int Index { get; set; }
+
         public string? Meaning { get; set; }
+
+        public int? Count { get; set; }
     }
 }
