@@ -53,7 +53,8 @@ namespace Lwt.Repositories
                         Title = t.Title,
                         LanguageCode = t.LanguageCode,
                         TermCount = t.TermCount,
-                        ProcessedTermCount = t.ProcessedTermCount,
+                        ProcessedIndex = t.ProcessedIndex,
+                        Length = t.Length,
                         Bookmark = t.Bookmark,
                     })
                 .Skip(skip)
@@ -93,9 +94,9 @@ namespace Lwt.Repositories
 
         public void UpdateProcessedTermCount(Text text)
         {
-            var updatedText = new Text() { Id = text.Id, ProcessedTermCount = text.ProcessedTermCount };
+            var updatedText = new Text() { Id = text.Id, ProcessedIndex = text.ProcessedIndex, Length = text.Length };
             this.DbSet.Attach(updatedText)
-                .Property(t => t.ProcessedTermCount)
+                .Property(t => t.ProcessedIndex)
                 .IsModified = true;
         }
 
@@ -103,10 +104,10 @@ namespace Lwt.Repositories
         {
             var updatedText = new Text()
             {
-                Id = text.Id, ProcessedTermCount = text.ProcessedTermCount, TermCount = text.TermCount,
+                Id = text.Id, ProcessedIndex = text.ProcessedIndex, TermCount = text.TermCount,
             };
             EntityEntry<Text> attachedText = this.DbSet.Attach(updatedText);
-            attachedText.Property(t => t.ProcessedTermCount)
+            attachedText.Property(t => t.ProcessedIndex)
                 .IsModified = true;
             attachedText.Property(t => t.TermCount)
                 .IsModified = true;

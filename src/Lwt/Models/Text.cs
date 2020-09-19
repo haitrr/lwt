@@ -43,6 +43,8 @@ namespace Lwt.Models
 
         public long TermCount { get; set; }
 
-        public int ProcessedTermCount { get; set; }
+        public int Length { get; set; }
+
+        public int ProcessedIndex { get; set; }
     }
 }

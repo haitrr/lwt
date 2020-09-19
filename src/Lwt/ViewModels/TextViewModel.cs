@@ -24,7 +24,7 @@ namespace Lwt.ViewModels
 
         public long TermCount { get; set; }
 
-        public int ProcessedTermCount { get; set; }
+        public int ProcessedIndex { get; set; }
 
         public ulong? Bookmark { get; set; }
     }

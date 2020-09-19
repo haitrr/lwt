@@ -105,7 +105,7 @@ namespace Lwt.Services
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
 
-                editedText.ProcessedTermCount = 0;
+                editedText.ProcessedIndex = 0;
                 editedText.TermCount = 0;
                 this.textRepository.Update(editedText);
                 await this.dbTransaction.CommitAsync();
@@ -254,7 +254,7 @@ namespace Lwt.Services
         {
             int? count = await this.textRepository.Queryable()
                 .Where(t => t.Id == id && t.UserId == userId)
-                .Select(t => t.ProcessedTermCount)
+                .Select(t => t.ProcessedIndex)
                 .FirstOrDefaultAsync();
 
             if (count == null)

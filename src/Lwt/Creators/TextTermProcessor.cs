@@ -48,7 +48,7 @@ namespace Lwt.Creators
             {
                 Text? processingText = await this.textRepository.Queryable()
                     .AsNoTracking()
-                    .Where(t => t.ProcessedTermCount < t.TermCount || t.ProcessedTermCount == 0)
+                    .Where(t => t.ProcessedIndex < t.TermCount || t.ProcessedIndex == 0)
                     .FirstOrDefaultAsync();
 
                 if (processingText == null)
@@ -84,7 +84,7 @@ namespace Lwt.Creators
                     this.logger.LogInformation($"Reset term count");
 
                     processingText.TermCount = words.Count;
-                    processingText.ProcessedTermCount = 0;
+                    processingText.ProcessedIndex = 0;
                     this.textRepository.UpdateTermCountAndProcessedTermCount(processingText);
                     await this.dbTransaction.CommitAsync();
                     await transaction.CommitAsync();
@@ -94,7 +94,7 @@ namespace Lwt.Creators
                 if (processingText.TermCount != words.Count)
                 {
                     this.logger.LogInformation("Text separator changed , resetting processing");
-                    processingText.ProcessedTermCount = 0;
+                    processingText.ProcessedIndex = 0;
                     processingText.TermCount = 0;
                     this.textRepository.UpdateTermCountAndProcessedTermCount(processingText);
                     await this.dbTransaction.CommitAsync();
@@ -102,7 +102,7 @@ namespace Lwt.Creators
                     return;
                 }
 
-                int indexFrom = processingText.ProcessedTermCount;
+                int indexFrom = processingText.ProcessedIndex;
                 var processingWordCount = 1000;
                 this.logger.LogInformation(
                     $"Processing text terms from {indexFrom} to {indexFrom + processingWordCount}");
@@ -133,7 +133,7 @@ namespace Lwt.Creators
 
                 this.logger.LogInformation("Saving change");
                 this.textTermRepository.BulkInsert(textTerms);
-                processingText.ProcessedTermCount = indexFrom + processingWords.Length;
+                processingText.ProcessedIndex = indexFrom + processingWords.Length;
                 this.textRepository.UpdateTermCountAndProcessedTermCount(processingText);
                 await this.dbTransaction.CommitAsync();
                 await transaction.CommitAsync();
