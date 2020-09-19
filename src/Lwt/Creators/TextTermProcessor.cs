@@ -192,7 +192,7 @@ namespace Lwt.Creators
                 }
 
                 textTerms.Add(
-                    new TextTerm { TermId = term?.Id, Content = word, Index = index, TextId = processingText.Id });
+                    new TextTerm { TermId = term?.Id, Content = word, IndexFrom = index, TextId = processingText.Id });
             }
 
             return textTerms;

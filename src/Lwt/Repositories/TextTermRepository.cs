@@ -35,15 +35,15 @@ namespace Lwt.Repositories
 
             if (indexFrom != null)
             {
-                query = query.Where(t => t.Index >= indexFrom);
+                query = query.Where(t => t.IndexFrom >= indexFrom);
             }
 
             if (indexTo != null)
             {
-                query = query.Where(t => t.Index <= indexTo);
+                query = query.Where(t => t.IndexTo <= indexTo);
             }
 
-            return await query.OrderBy(t => t.Index)
+            return await query.OrderBy(t => t.IndexFrom)
                 .ToListAsync();
         }
 
@@ -61,7 +61,7 @@ namespace Lwt.Repositories
         public async Task<IDictionary<LearningLevel, int>> CountTextTermByLearningLevelAsync(int textId)
         {
             var groups = await this.DbSet.Where(tt => tt.TextId == textId)
-                .GroupBy(t => t.Term.LearningLevel)
+                .GroupBy(t => t.Term!.LearningLevel)
                 .Select(group => new { LearningLevel = group.Key, Count = group.Sum(t => 1) })
                 .ToListAsync();
 

@@ -9,7 +9,8 @@ namespace Lwt.Mappers
         {
             result.Content = from.Content;
             result.Id = from.TermId;
-            result.Index = from.Index;
+            result.IndexFrom = from.IndexFrom;
+            result.IndexTo = from.IndexTo;
             result.LearningLevel = from.Term == null ? LearningLevel.Skipped : from.Term.LearningLevel;
 
             if (result.LearningLevel != LearningLevel.Ignored && result.LearningLevel != LearningLevel.Skipped &&

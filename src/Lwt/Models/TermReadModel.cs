@@ -20,7 +20,10 @@ namespace Lwt.Models
         /// </summary>
         public LearningLevel LearningLevel { get; set; } = null!;
 
-        public int Index { get; set; }
+        public int IndexFrom { get; set; }
+
         public string? Meaning { get; set; }
+
+        public int IndexTo { get; set; }
     }
 }

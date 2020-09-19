@@ -32,6 +32,8 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets index.
         /// </summary>
-        public int Index { get; set; }
+        public int IndexFrom { get; set; }
+
+        public int IndexTo { get; set; }
     }
 }

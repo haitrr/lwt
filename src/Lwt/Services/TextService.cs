@@ -227,13 +227,14 @@ namespace Lwt.Services
         {
             IQueryable<TextTerm> query = this.textTermRepository.Queryable()
                 .AsNoTracking()
-                .Where(t => t.Text.UserId == userId && t.TextId == id && t.Index >= indexFrom && t.Index <= indexTo)
+                .Where(t => t.Text.UserId == userId && t.TextId == id && t.IndexFrom >= indexFrom && t.IndexFrom <= indexTo)
                 .Select(
                     t => new TextTerm
                     {
                         Content = t.Content,
                         TermId = t.TermId,
-                        Index = t.Index,
+                        IndexFrom = t.IndexFrom,
+                        IndexTo = t.IndexTo,
                         Term = t.TermId.HasValue
                             ? new Term { LearningLevel = t.Term!.LearningLevel, Meaning = t.Term.Meaning }
                             : null,
