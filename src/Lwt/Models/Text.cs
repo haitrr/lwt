@@ -45,6 +45,6 @@ namespace Lwt.Models
 
         public int Length { get; set; }
 
-        public int ProcessedIndex { get; set; }
+        public int ProcessedIndex { get; set; } = -1;
     }
 }
