@@ -38,6 +38,7 @@ namespace Lwt.Creators
                         .ErrorMessage);
             }
 
+            text.Length = text.Content.Length;
             this.textRepository.Add(text);
             await this.dbTransaction.CommitAsync();
 

@@ -8,6 +8,7 @@ namespace Lwt.Creators
     using Lwt.Models;
     using Lwt.Repositories;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Internal;
     using Microsoft.EntityFrameworkCore.Storage;
     using Microsoft.Extensions.Logging;
 
@@ -39,7 +40,7 @@ namespace Lwt.Creators
             {
                 Text? processingText = await this.textRepository.Queryable()
                     .AsNoTracking()
-                    .Where(t => t.ProcessedIndex < t.TermCount || t.ProcessedIndex == 0)
+                    .Where(t => t.ProcessedIndex < t.Length - 1)
                     .FirstOrDefaultAsync();
 
                 if (processingText == null)
@@ -60,7 +61,7 @@ namespace Lwt.Creators
                 this.logger.LogInformation($"Processing text {processingText.Id}");
 
                 int indexFrom = processingText.ProcessedIndex + 1;
-                var processingCharCount = 1000;
+                var processingCharCount = 100;
                 int indexTo = Math.Min(indexFrom + processingCharCount, processingText.Content.Length - 1);
                 this.logger.LogInformation($"Processing text content index from {indexFrom} to {indexTo}");
 
@@ -108,45 +109,55 @@ namespace Lwt.Creators
             while (end < indexTo)
             {
                 string current = content[start.. (end + 1)];
-                matches = matches.Where(t => t.StartsWith(current.ToUpperInvariant()));
+                matches = matches.Where(t => t.AsParallel().StartsWith(current.ToUpperInvariant()));
                 int count = matches.Count();
 
                 if (count == 1)
                 {
-                    match = matches.First();
-                    end = start + match.Length - 1;
+                    string? m = matches.First();
+                    end = start + m.Length - 1;
 
                     if (end > indexTo)
                     {
-                        finish = start - 1;
-                        break;
-                    }
-
-                    current = content[start.. (end + 1)];
-
-                    if (current.ToUpperInvariant() != match)
-                    {
-                        count = 0;
-                        match = null;
+                        if (end > processingText.Length - 1)
+                        {
+                            count = 0;
+                        }
+                        else
+                        {
+                            finish = start - 1;
+                            break;
+                        }
                     }
                     else
                     {
-                        Term term = contentDict[match];
-                        textTerms.Add(
-                            new TextTerm
-                            {
-                                TextId = processingText.Id,
-                                Content = current,
-                                IndexFrom = start,
-                                IndexTo = end,
-                                TermId = term.Id,
-                            });
-                        matches = dictionary;
-                        finish = end;
-                        start = end + 1;
-                        end = end + 1;
-                        match = null;
-                        continue;
+                        match = m;
+                        current = content[start.. (end + 1)];
+
+                        if (current.ToUpperInvariant() != match)
+                        {
+                            count = 0;
+                            match = null;
+                        }
+                        else
+                        {
+                            Term term = contentDict[match];
+                            textTerms.Add(
+                                new TextTerm
+                                {
+                                    TextId = processingText.Id,
+                                    Content = current,
+                                    IndexFrom = start,
+                                    IndexTo = end,
+                                    TermId = term.Id,
+                                });
+                            matches = dictionary;
+                            finish = end;
+                            start = end + 1;
+                            end = end + 1;
+                            match = null;
+                            continue;
+                        }
                     }
                 }
 
@@ -156,10 +167,11 @@ namespace Lwt.Creators
                     {
                         end = start + match.Length - 1;
                         current = content[start.. (end + 1)];
+                        var term = contentDict[match];
                         textTerms.Add(
                             new TextTerm()
                             {
-                                TextId = processingText.Id, Content = current, IndexFrom = start, IndexTo = end,
+                                TextId = processingText.Id, Content = current, IndexFrom = start, IndexTo = end, TermId = term.Id,
                             });
                         finish = end;
                         start = end + 1;
@@ -188,7 +200,7 @@ namespace Lwt.Creators
 
                 if (count > 1)
                 {
-                    if (matches.Contains(current.ToUpperInvariant()))
+                    if (matches.AsParallel().Contains(current.ToUpperInvariant()))
                     {
                         match = current.ToUpperInvariant();
                     }
