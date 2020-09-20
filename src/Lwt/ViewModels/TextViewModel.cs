@@ -27,5 +27,7 @@ namespace Lwt.ViewModels
         public int ProcessedIndex { get; set; }
 
         public ulong? Bookmark { get; set; }
+
+        public int Length { get; set; }
     }
 }

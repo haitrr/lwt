@@ -16,6 +16,7 @@ namespace Lwt.Mappers
             result.LanguageCode = from.LanguageCode;
             result.Id = from.Id;
             result.TermCount = from.TermCount;
+            result.Length = from.Length;
             result.ProcessedIndex = from.ProcessedIndex;
             result.Bookmark = from.Bookmark;
 
