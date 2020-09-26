@@ -105,8 +105,9 @@ namespace Lwt.Services
             {
                 Text editedText = this.textEditMapper.Map(editModel, text);
 
-                editedText.ProcessedIndex = 0;
+                editedText.ProcessedIndex = -1;
                 editedText.TermCount = 0;
+                editedText.Length = editedText.Content.Length;
                 this.textRepository.Update(editedText);
                 await this.dbTransaction.CommitAsync();
             }
