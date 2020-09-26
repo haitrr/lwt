@@ -25,5 +25,7 @@ namespace Lwt.Models
         public string? Meaning { get; set; }
 
         public int IndexTo { get; set; }
+
+        public int TextTermId { get; set; }
     }
 }

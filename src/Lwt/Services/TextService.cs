@@ -235,6 +235,7 @@ namespace Lwt.Services
                         Content = t.Content,
                         TermId = t.TermId,
                         IndexFrom = t.IndexFrom,
+                        Id = t.Id,
                         IndexTo = t.IndexTo,
                         Term = t.TermId.HasValue
                             ? new Term { LearningLevel = t.Term!.LearningLevel, Meaning = t.Term.Meaning }
