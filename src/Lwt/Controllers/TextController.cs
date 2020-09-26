@@ -163,13 +163,13 @@ namespace Lwt.Controllers
             return this.Ok(new { Id = id, Counts = counts });
         }
 
-        [HttpGet("{id}/processed-term-count")]
+        [HttpGet("{id}/processed-index")]
         [Authorize]
-        public async Task<IActionResult> GetProcessedTermCountAsync([FromRoute] int id)
+        public async Task<IActionResult> GetProcessedIndexAsync([FromRoute] int id)
         {
             int userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            int processedTermCount = await this.textService.GetProcessedTermCountAsync(id, userId);
-            return this.Ok(new { ProcessedTermCount = processedTermCount });
+            int processedTermCount = await this.textService.GetProcessedIndexAsync(id, userId);
+            return this.Ok(new { ProcessedIndex = processedTermCount });
         }
 
         [HttpGet("{id}/term-count")]

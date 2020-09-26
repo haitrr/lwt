@@ -250,7 +250,7 @@ namespace Lwt.Services
                 .CountAsync();
         }
 
-        public async Task<int> GetProcessedTermCountAsync(int id, int userId)
+        public async Task<int> GetProcessedIndexAsync(int id, int userId)
         {
             int? count = await this.textRepository.Queryable()
                 .Where(t => t.Id == id && t.UserId == userId)
