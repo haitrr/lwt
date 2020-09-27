@@ -81,12 +81,11 @@ namespace Lwt.Interfaces.Services
 
         Task<IDictionary<LearningLevel, int>> GetTermCountsAsync(int id, int userId);
 
-        Task<IEnumerable<TermReadModel>> GetTextTermsAsync(int id, int userId, int indexFrom, int indexTo);
-
         Task<int> GetTermCountInTextAsync(int id, int userId, int termId);
 
         Task<int> GetProcessedIndexAsync(int id, int userId);
 
         Task<long> GetTermCountAsync(int id, int userId);
+        Task<(IEnumerable<TermReadModel>, IDictionary<int, TermViewModel>)> GetTextTermsAsync(int id, int userId, int indexFrom, int indexTo);
     }
 }

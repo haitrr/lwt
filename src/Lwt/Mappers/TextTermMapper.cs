@@ -12,17 +12,6 @@ namespace Lwt.Mappers
             result.TextTermId = from.Id;
             result.IndexFrom = from.IndexFrom;
             result.IndexTo = from.IndexTo;
-            result.LearningLevel = from.Term == null ? LearningLevel.Skipped : from.Term.LearningLevel;
-
-            if (result.LearningLevel != LearningLevel.Ignored && result.LearningLevel != LearningLevel.Skipped &&
-                result.LearningLevel != LearningLevel.WellKnown)
-            {
-                result.Meaning = from.Term!.Meaning;
-            }
-            else
-            {
-                result.Meaning = null;
-            }
 
             return result;
         }

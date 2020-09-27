@@ -198,8 +198,9 @@ namespace Lwt.Controllers
             [FromQuery] int indexTo)
         {
             int userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            IEnumerable<TermReadModel> terms = await this.textService.GetTextTermsAsync(id, userId, indexFrom, indexTo);
-            return this.Ok(new { Id = id, Terms = terms });
+            (IEnumerable<TermReadModel> textTerms, IDictionary<int, TermViewModel> terms) =
+                await this.textService.GetTextTermsAsync(id, userId, indexFrom, indexTo);
+            return this.Ok(new { Id = id, TextTerms = textTerms, Terms = terms });
         }
     }
 }

@@ -28,6 +28,8 @@ namespace Lwt.Services
         private readonly IDbTransaction dbTransaction;
         private readonly ITextTermRepository textTermRepository;
         private readonly IMapper<TextTerm, TermReadModel> textTermMapper;
+        private readonly ISqlTermRepository termRepository;
+        private readonly IMapper<Term, TermViewModel> termViewMapper;
 
         public TextService(
             ISqlTextRepository textRepository,
@@ -38,7 +40,9 @@ namespace Lwt.Services
             IMapper<Text, TextReadModel> textReadMapper,
             IDbTransaction dbTransaction,
             ITextTermRepository textTermRepository,
-            IMapper<TextTerm, TermReadModel> textTermMapper)
+            IMapper<TextTerm, TermReadModel> textTermMapper,
+            ISqlTermRepository termRepository,
+            IMapper<Term, TermViewModel> termViewMapper)
         {
             this.textRepository = textRepository;
             this.textEditMapper = textEditMapper;
@@ -49,6 +53,8 @@ namespace Lwt.Services
             this.dbTransaction = dbTransaction;
             this.textTermRepository = textTermRepository;
             this.textTermMapper = textTermMapper;
+            this.termRepository = termRepository;
+            this.termViewMapper = termViewMapper;
         }
 
         /// <inheritdoc/>
@@ -172,7 +178,7 @@ namespace Lwt.Services
             IQueryable<Text> query = this.textRepository.Queryable()
                 .AsNoTracking()
                 .Where(t => t.Id == id && t.UserId == userId)
-                .Select(t => new Text { Bookmark = t.Bookmark, Id = t.Id, Length = t.Length});
+                .Select(t => new Text { Bookmark = t.Bookmark, Id = t.Id, Length = t.Length });
             Text? text = await query.FirstOrDefaultAsync();
 
             if (text == null)
@@ -225,11 +231,17 @@ namespace Lwt.Services
             return result;
         }
 
-        public async Task<IEnumerable<TermReadModel>> GetTextTermsAsync(int id, int userId, int indexFrom, int indexTo)
+        public async Task<(IEnumerable<TermReadModel>, IDictionary<int, TermViewModel>)> GetTextTermsAsync(
+            int id,
+            int userId,
+            int indexFrom,
+            int indexTo)
         {
             IQueryable<TextTerm> query = this.textTermRepository.Queryable()
                 .AsNoTracking()
-                .Where(t => t.Text.UserId == userId && t.TextId == id && t.IndexFrom >= indexFrom && t.IndexFrom <= indexTo)
+                .Where(
+                    t => t.Text.UserId == userId && t.TextId == id && t.IndexFrom >= indexFrom &&
+                         t.IndexFrom <= indexTo)
                 .Select(
                     t => new TextTerm
                     {
@@ -238,12 +250,16 @@ namespace Lwt.Services
                         IndexFrom = t.IndexFrom,
                         Id = t.Id,
                         IndexTo = t.IndexTo,
-                        Term = t.TermId.HasValue
-                            ? new Term { LearningLevel = t.Term!.LearningLevel, Meaning = t.Term.Meaning }
-                            : null,
                     });
             IEnumerable<TextTerm> textTerms = await query.ToListAsync();
-            return this.textTermMapper.Map(textTerms);
+            var termReadModels = this.textTermMapper.Map(textTerms);
+            var termIds = textTerms.Select(t => t.TermId)
+                .ToHashSet();
+            var terms = await this.termRepository.Queryable()
+                .Where(t => termIds.Contains(t.Id))
+                .Select(t => new Term() { LearningLevel = t.LearningLevel, Meaning = t.Meaning, Id = t.Id })
+                .ToDictionaryAsync(t => t.Id, t => this.termViewMapper.Map(t));
+            return (termReadModels, terms);
         }
 
         public async Task<int> GetTermCountInTextAsync(int id, int userId, int termId)

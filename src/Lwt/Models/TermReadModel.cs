@@ -15,14 +15,7 @@ namespace Lwt.Models
         /// </summary>
         public string Content { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the term's learning level.
-        /// </summary>
-        public LearningLevel LearningLevel { get; set; } = null!;
-
         public int IndexFrom { get; set; }
-
-        public string? Meaning { get; set; }
 
         public int IndexTo { get; set; }
 
