@@ -136,6 +136,7 @@ namespace Lwt.Services
                         Bookmark = t.Bookmark,
                         LanguageCode = t.LanguageCode,
                         TermCount = t.TermCount,
+                        Length = t.Length,
                     })
                 .SingleOrDefaultAsync();
 
@@ -179,7 +180,7 @@ namespace Lwt.Services
                 throw new ForbiddenException("You don't have permission to access this text.");
             }
 
-            if (setBookmarkModel.TermIndex >= (ulong)text.TermCount)
+            if (setBookmarkModel.TermIndex >= (ulong)text.Length)
             {
                 throw new BadRequestException("Invalid bookmark index.");
             }

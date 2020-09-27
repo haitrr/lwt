@@ -26,5 +26,7 @@ namespace Lwt.Models
         public int Id { get; set; }
 
         public long TermCount { get; set; }
+
+        public int Length { get; set; }
     }
 }
