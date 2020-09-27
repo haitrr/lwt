@@ -231,8 +231,6 @@ namespace Lwt.Test.IntegrationTests
             Assert.Equal(expectedResponse, response.StatusCode);
             var termViewModel = JsonConvert.DeserializeObject<TermViewModel>(
                 await response.Content.ReadAsStringAsync());
-            Assert.Equal(termViewModel.Content, term.Content);
-            Assert.Equal(termViewModel.Id, term.Id);
         }
     }
 }

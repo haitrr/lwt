@@ -248,8 +248,6 @@ namespace Lwt.Services
                         Content = t.Content,
                         TermId = t.TermId,
                         IndexFrom = t.IndexFrom,
-                        Id = t.Id,
-                        IndexTo = t.IndexTo,
                     });
             IEnumerable<TextTerm> textTerms = await query.ToListAsync();
             var termReadModels = this.textTermMapper.Map(textTerms);

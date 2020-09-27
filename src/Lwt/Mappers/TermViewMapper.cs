@@ -11,11 +11,12 @@ namespace Lwt.Mappers
         /// <inheritdoc />
         public override TermViewModel Map(Term from, TermViewModel result)
         {
-            result.Id = from.Id;
-            result.Content = from.Content;
-            result.Meaning = from.Meaning;
+            if (from.LearningLevel != LearningLevel.WellKnown && from.LearningLevel != LearningLevel.Ignored)
+            {
+                result.Meaning = from.Meaning;
+            }
+
             result.LearningLevel = from.LearningLevel;
-            result.LanguageCode = from.LanguageCode;
             return result;
         }
     }

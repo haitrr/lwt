@@ -9,9 +9,7 @@ namespace Lwt.Mappers
         {
             result.Content = from.Content;
             result.Id = from.TermId;
-            result.TextTermId = from.Id;
             result.IndexFrom = from.IndexFrom;
-            result.IndexTo = from.IndexTo;
 
             return result;
         }

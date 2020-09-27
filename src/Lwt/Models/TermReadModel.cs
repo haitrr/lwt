@@ -16,9 +16,5 @@ namespace Lwt.Models
         public string Content { get; set; } = string.Empty;
 
         public int IndexFrom { get; set; }
-
-        public int IndexTo { get; set; }
-
-        public int TextTermId { get; set; }
     }
 }
