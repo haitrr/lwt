@@ -172,7 +172,7 @@ namespace Lwt.Services
             IQueryable<Text> query = this.textRepository.Queryable()
                 .AsNoTracking()
                 .Where(t => t.Id == id && t.UserId == userId)
-                .Select(t => new Text { Bookmark = t.Bookmark, Id = t.Id, TermCount = t.TermCount });
+                .Select(t => new Text { Bookmark = t.Bookmark, Id = t.Id, Length = t.Length});
             Text? text = await query.FirstOrDefaultAsync();
 
             if (text == null)
