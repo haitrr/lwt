@@ -76,10 +76,9 @@ namespace Lwt
                 builder.Add("Port", parts[1]);
             }
 
-            services.AddDbContext<IdentityDbContext>(
-                options => options.UseMySql(
-                    builder.ConnectionString,
-                    o => { o.ServerVersion(new Version(5, 7, 22), ServerType.MySql); }));
+            services.AddDbContext<IdentityDbContext>(options =>
+                options.UseMySql(builder.ConnectionString,
+                    new MySqlServerVersion(new Version(5,7,2))));
 
             // identity
             services.AddIdentity<User, Role>()
