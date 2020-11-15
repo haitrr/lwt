@@ -1,5 +1,6 @@
 namespace Lwt.Services
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -142,6 +143,10 @@ namespace Lwt.Services
             {
                 throw new NotFoundException("Text not found.");
             }
+
+            text.LastReadAt = DateTime.UtcNow;
+            this.textRepository.UpdateTextLastReadAt(text);
+            await this.dbTransaction.CommitAsync();
 
             return this.textReadMapper.Map(text);
         }

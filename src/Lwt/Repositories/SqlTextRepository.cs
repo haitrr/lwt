@@ -99,6 +99,14 @@ namespace Lwt.Repositories
                 .IsModified = true;
         }
 
+        public void UpdateTextLastReadAt(Text text)
+        {
+            var updatedText = new Text() { Id = text.Id, LastReadAt = text.LastReadAt };
+            this.DbSet.Attach(updatedText)
+                .Property(t => t.LastReadAt)
+                .IsModified = true;
+        }
+
         public void UpdateTermCountAndProcessedTermCount(Text text)
         {
             var updatedText = new Text()

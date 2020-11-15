@@ -32,5 +32,7 @@ namespace Lwt.Repositories
         void UpdateProcessedTermCount(Text text);
 
         void UpdateTermCountAndProcessedTermCount(Text processingText);
+
+        void UpdateTextLastReadAt(Text text);
     }
 }
