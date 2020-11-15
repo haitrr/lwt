@@ -1,5 +1,6 @@
 namespace Lwt.Creators
 {
+    using System;
     using System.Linq;
     using System.Threading.Tasks;
     using FluentValidation;
@@ -38,6 +39,7 @@ namespace Lwt.Creators
                         .ErrorMessage);
             }
 
+            text.LastReadAt = DateTime.UtcNow;
             this.textRepository.Add(text);
             await this.dbTransaction.CommitAsync();
 
