@@ -55,6 +55,7 @@ namespace Lwt.Repositories
                         TermCount = t.TermCount,
                         ProcessedTermCount = t.ProcessedTermCount,
                         Bookmark = t.Bookmark,
+                        CreatedDate = t.CreatedDate,
                     })
                 .Skip(skip)
                 .Take(paginationQuery.ItemPerPage)

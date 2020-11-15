@@ -18,6 +18,7 @@ namespace Lwt.Mappers
             result.TermCount = from.TermCount;
             result.ProcessedTermCount = from.ProcessedTermCount;
             result.Bookmark = from.Bookmark;
+            result.CreatedAt = from.CreatedDate;
 
             return result;
         }

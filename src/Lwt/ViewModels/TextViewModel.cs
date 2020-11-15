@@ -1,5 +1,6 @@
 namespace Lwt.ViewModels
 {
+    using System;
     using Lwt.Models;
 
     /// <summary>
@@ -27,5 +28,7 @@ namespace Lwt.ViewModels
         public int ProcessedTermCount { get; set; }
 
         public ulong? Bookmark { get; set; }
+
+        public DateTime CreatedAt { get; set; }
     }
 }
