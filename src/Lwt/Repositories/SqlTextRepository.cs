@@ -45,7 +45,7 @@ namespace Lwt.Repositories
             }
 
             return await query.AsNoTracking()
-                .OrderByDescending(t => t.CreatedDate)
+                .OrderByDescending(t => t.LastReadAt)
                 .Select(
                     t => new Text
                     {
