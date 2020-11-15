@@ -1,5 +1,6 @@
 namespace Lwt.Models
 {
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -44,5 +45,7 @@ namespace Lwt.Models
         public long TermCount { get; set; }
 
         public int ProcessedTermCount { get; set; }
+
+        public DateTime LastReadAt { get; set; } = DateTime.UtcNow;
     }
 }
