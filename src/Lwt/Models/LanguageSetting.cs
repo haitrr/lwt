@@ -3,7 +3,7 @@ namespace Lwt.Models
     /// <summary>
     /// language setting.
     /// </summary>
-    public class LanguageSetting : Entity
+    public record LanguageSetting : Entity
     {
         public const string TableName = "language_settings";
 

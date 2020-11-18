@@ -6,7 +6,7 @@
     /// <summary>
     /// a.
     /// </summary>
-    public abstract class Entity
+    public record Entity
     {
         /// <summary>
         /// Gets or sets id.

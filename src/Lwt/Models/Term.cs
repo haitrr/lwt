@@ -5,7 +5,7 @@ namespace Lwt.Models
     /// <summary>
     /// the term.
     /// </summary>
-    public class Term : Entity
+    public record Term : Entity
     {
         /// <summary>
         /// table name.

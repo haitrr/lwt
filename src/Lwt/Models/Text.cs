@@ -6,7 +6,7 @@ namespace Lwt.Models
     /// <summary>
     /// a.
     /// </summary>
-    public class Text : Entity
+    public record Text : Entity
     {
         /// <summary>
         /// table name.

@@ -5,7 +5,7 @@ namespace Lwt.Models
     /// <summary>
     /// user setting.
     /// </summary>
-    public class UserSetting : Entity
+    public record UserSetting : Entity
     {
         public const string TableName = "user_settings";
 

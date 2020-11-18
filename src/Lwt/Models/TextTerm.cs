@@ -3,7 +3,7 @@ namespace Lwt.Models
     /// <summary>
     /// text term.
     /// </summary>
-    public class TextTerm : Entity
+    public record TextTerm : Entity
     {
         /// <summary>
         /// table name.

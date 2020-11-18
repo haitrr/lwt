@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <CodeAnalysisRuleSet>../../style.ruleset</CodeAnalysisRuleSet>
     <IsPackable>false</IsPackable>
-    <LangVersion>8</LangVersion>
+    <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
