@@ -85,7 +85,7 @@ namespace Lwt.Interfaces.Services
 
         Task<int> GetTermCountInTextAsync(int id, int userId, int termId);
 
-        Task<int> GetProcessedTermCountAsync(int id, int userId);
+        Task<long> GetProcessedTermCountAsync(int id, int userId);
 
         Task<long> GetTermCountAsync(int id, int userId);
     }

@@ -168,7 +168,7 @@ namespace Lwt.Controllers
         public async Task<IActionResult> GetProcessedTermCountAsync([FromRoute] int id)
         {
             int userId = this.authenticationHelper.GetLoggedInUser(this.User);
-            int processedTermCount = await this.textService.GetProcessedTermCountAsync(id, userId);
+            long processedTermCount = await this.textService.GetProcessedTermCountAsync(id, userId);
             return this.Ok(new { ProcessedTermCount = processedTermCount });
         }
 

@@ -44,7 +44,7 @@ namespace Lwt.Models
 
         public long TermCount { get; set; }
 
-        public int ProcessedTermCount { get; set; }
+        public long ProcessedTermCount { get; set; }
 
         public DateTime LastReadAt { get; set; } = DateTime.UtcNow;
     }

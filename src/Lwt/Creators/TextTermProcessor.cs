@@ -1,5 +1,6 @@
 namespace Lwt.Creators
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -102,12 +103,18 @@ namespace Lwt.Creators
                     return;
                 }
 
-                int indexFrom = processingText.ProcessedTermCount;
+                long indexFrom = processingText.ProcessedTermCount;
                 var processingWordCount = 1000;
                 this.logger.LogInformation(
                     $"Processing text terms from {indexFrom} to {indexFrom + processingWordCount}");
                 ILanguage language = this.languageHelper.GetLanguage(processingText.LanguageCode);
-                string[] processingWords = words.Skip(indexFrom)
+
+                if (indexFrom > int.MaxValue)
+                {
+                    throw new Exception("this text is too big to be processed");
+                }
+
+                string[] processingWords = words.Skip((int)indexFrom)
                     .Take(processingWordCount)
                     .ToArray();
 
@@ -173,7 +180,7 @@ namespace Lwt.Creators
 
         private List<TextTerm> GetTextTerms(
             string[] processingWords,
-            int indexFrom,
+            long indexFrom,
             Text processingText,
             Dictionary<string, Term> termDict)
         {
@@ -182,7 +189,7 @@ namespace Lwt.Creators
             for (var i = 0; i < processingWords.Length; i += 1)
             {
                 string word = processingWords[i];
-                int index = indexFrom + i;
+                long index = indexFrom + i;
                 Term? term = null;
                 string normalizedWord = this.textNormalizer.Normalize(word, processingText.LanguageCode);
 
