@@ -59,7 +59,11 @@ namespace Lwt.DbContexts
 
             builder.Entity<TextTerm>()
                 .ToTable(TextTerm.TableName);
-
+            
+            // (TextIdxTermId) index
+            builder.Entity<TextTerm>()
+                .HasIndex(t => new { t.TextId, t.TermId });
+            
             builder.Entity<UserSetting>()
                 .ToTable(UserSetting.TableName);
             builder.Entity<LanguageSetting>()
