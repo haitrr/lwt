@@ -192,7 +192,7 @@ namespace Lwt.Migrations
 
                     b.HasIndex("TermId");
 
-                    b.HasIndex("TextId", "TermId");
+                    b.HasIndex("TextId");
 
                     b.ToTable("text_terms");
                 });
