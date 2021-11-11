@@ -13,10 +13,10 @@ namespace Lwt.Models
         /// </summary>
         public int? CurrentLanguageId { get; set; }
 
-        public IList<Term> Terms { get; set; }
+        public IList<Term> Terms { get; set; } = new List<Term>();
 
-        public IList<Text> Text { get; set; }
+        public IList<Text> Text { get; set; } = new List<Text>();
 
-        public UserSetting Setting { get; set; }
+        public UserSetting Setting { get; set; } = new UserSetting();
     }
 }

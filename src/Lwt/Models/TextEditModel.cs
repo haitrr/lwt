@@ -8,7 +8,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets text language.
         /// </summary>
-        public LanguageCode LanguageCode { get; set; }
+        public LanguageCode LanguageCode { get; set; } = LanguageCode.ENGLISH;
 
         /// <summary>
         /// Gets or sets title.

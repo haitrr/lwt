@@ -16,3 +16,15 @@ What it does better:
 * More detailed learning status of texts.
 * Unlimit text length (You can import a whole book into just 1 text) without affect performance while reading.
 * Intergrated dictionary api.
+
+
+# Getting started
+* Clone the project
+* Set the connection string env variable
+```shell
+export LWTDB="Server=localhost;Database=lwt;User=root;Password=;"
+```
+* Start the server by running
+```shell
+dotnet start
+```

@@ -27,8 +27,8 @@ namespace Lwt.Utilities
             var languages = new ILanguage[]
             {
                 new Vietnamese(), new English(),
-                new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>()),
-                new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>()),
+                new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>() !),
+                new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>() !),
             };
 
             ILanguage? language = languages.SingleOrDefault(l => l.Code == languageCode);
@@ -47,8 +47,8 @@ namespace Lwt.Utilities
             return new List<ILanguage>
             {
                 new English(),
-                new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>()),
-                new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>()),
+                new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>() !),
+                new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>() !),
                 new Vietnamese(),
             };
         }

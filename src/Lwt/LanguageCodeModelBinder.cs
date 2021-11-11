@@ -8,7 +8,7 @@ namespace Lwt
         {
             public Task BindModelAsync(ModelBindingContext bindingContext)
             {
-                string? modelTypeValue = bindingContext.ValueProvider.GetValue(nameof(LanguageCode)).FirstValue;
+                string? modelTypeValue = bindingContext.ValueProvider.GetValue(nameof(LanguageCode)).FirstValue!;
 
                 try
                 {

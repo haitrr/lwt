@@ -15,10 +15,10 @@ namespace Lwt.Models
         }
 
         /// <inheritdoc />
-        public override object ReadJson(
+        public override object? ReadJson(
             JsonReader reader,
             Type objectType,
-            object existingValue,
+            object? existingValue,
             JsonSerializer serializer)
         {
             if (reader.TokenType != JsonToken.String)
@@ -26,13 +26,16 @@ namespace Lwt.Models
                 throw new JsonSerializationException();
             }
 
-            var code = serializer.Deserialize<string>(reader);
+            var code = serializer.Deserialize<string>(reader)!;
             return LearningLevel.GetFromString(code);
         }
 
         /// <inheritdoc />
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
+            if (value == null) {
+                throw new Exception("unexpected value");
+            }
             var item = (LearningLevel)value;
             writer.WriteValue(item.ToString());
             writer.Flush();

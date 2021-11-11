@@ -29,11 +29,6 @@ namespace Lwt.Transactions
             await this.databaseContext.SaveChangesAsync();
         }
 
-        public async Task BulkCommitAsync()
-        {
-            await this.databaseContext.BulkSaveChangesAsync();
-        }
-
         public IDbContextTransaction BeginTransaction()
         {
             return this.databaseContext.Database.BeginTransaction();

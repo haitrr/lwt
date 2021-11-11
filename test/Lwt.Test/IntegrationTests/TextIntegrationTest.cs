@@ -33,12 +33,12 @@ namespace Lwt.Test.IntegrationTests
         public TextIntegrationTest()
         {
             this.factory = new LwtTestWebApplicationFactory();
-            this.tokenProvider = this.factory.Services.GetService<ITokenProvider>();
+            this.tokenProvider = this.factory.Services.GetRequiredService<ITokenProvider>();
             this.user = new User() { UserName = "test" };
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
             {
-                var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
                 identityDbContext.Users.Add(this.user);
                 identityDbContext.SaveChangesAsync();
             }
@@ -69,15 +69,15 @@ namespace Lwt.Test.IntegrationTests
                 "api/text",
                 new StringContent(content, Encoding.UTF8, MediaTypeNames.Application.Json));
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-            var id = (int)JsonConvert.DeserializeObject<dynamic>(await responseMessage.Content.ReadAsStringAsync())
+            var id = (int)JsonConvert.DeserializeObject<dynamic>(await responseMessage.Content.ReadAsStringAsync()) !
                 .id;
 
-            using (IServiceScope? scope = this.factory.Services.CreateScope())
+            using (IServiceScope scope = this.factory.Services.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
-                Text? text = await dbContext.Set<Text>()
-                    .SingleOrDefaultAsync(t => t.Id == id);
-                Assert.NotNull(text);
+                var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+                Text text = await dbContext.Set<Text>()
+                    .SingleAsync(t => t.Id == id);
+
                 Assert.Equal(body.title, text.Title);
                 Assert.Equal(body.content, text.Content);
                 Assert.Equal(body.languageCode, text.LanguageCode.ToString());
@@ -96,7 +96,7 @@ namespace Lwt.Test.IntegrationTests
 
             using (IServiceScope? scope = this.factory.Services.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
 
                 for (var i = 0; i < 20; i++)
                 {

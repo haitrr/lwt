@@ -29,7 +29,7 @@ namespace Lwt.Utilities
         /// <inheritdoc/>
         public IEnumerable<string> Normalize(IEnumerable<string> text, LanguageCode languageCode)
         {
-            return text.Select(t => this.Normalize(t, (LanguageCode)languageCode));
+            return text.Select(t => this.Normalize(t, languageCode));
         }
     }
 }

@@ -35,6 +35,7 @@ namespace Lwt.Test
         /// <typeparam name="T">type of service.</typeparam>
         /// <returns> the service.</returns>
         public T GetService<T>()
+            where T : notnull
         {
             using (IServiceScope serviceScope = this.webHost.Services.CreateScope())
             {

@@ -31,7 +31,7 @@ namespace Lwt.Test.IntegrationTests
         public TermIntegrationTest()
         {
             this.factory = new LwtTestWebApplicationFactory();
-            this.tokenProvider = this.factory.Services.GetService<ITokenProvider>();
+            this.tokenProvider = this.factory.Services.GetService<ITokenProvider>() !;
             this.client = this.factory.CreateClient();
         }
 
@@ -63,16 +63,16 @@ namespace Lwt.Test.IntegrationTests
 
             string token = this.tokenProvider.GenerateUserToken(user);
             this.client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            HttpResponseMessage? result = await this.client.PostAsync(
+            HttpResponseMessage result = await this.client.PostAsync(
                 "api/term",
                 new StringContent(JsonConvert.SerializeObject(termCreateModel), Encoding.UTF8, "application/json"));
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-            var id = (int)JsonConvert.DeserializeObject<dynamic>(await result.Content.ReadAsStringAsync())
+            var id = (int)JsonConvert.DeserializeObject<dynamic>(await result.Content.ReadAsStringAsync()) !
                 .id;
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
             {
-                var identityDbContext = scope.ServiceProvider.GetService<IdentityDbContext>();
+                var identityDbContext = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
                 List<Term> terms = await identityDbContext.Set<Term>()
                     .Where(t => t.Id == id)
                     .ToListAsync();
@@ -231,7 +231,9 @@ namespace Lwt.Test.IntegrationTests
             Assert.Equal(expectedResponse, response.StatusCode);
             var termViewModel = JsonConvert.DeserializeObject<TermViewModel>(
                 await response.Content.ReadAsStringAsync());
-            Assert.Equal(termViewModel.Content, term.Content);
+            Assert.NotNull(termViewModel);
+
+            Assert.Equal(termViewModel!.Content, term.Content);
             Assert.Equal(termViewModel.Id, term.Id);
         }
     }

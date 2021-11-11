@@ -13,7 +13,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets the language's code.
         /// </summary>
-        public LanguageCode Code { get; set; }
+        public LanguageCode Code { get; set; } = LanguageCode.ENGLISH;
 
         /// <summary>
         /// Gets or sets the language's speak code.

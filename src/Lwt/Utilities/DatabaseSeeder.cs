@@ -1,5 +1,6 @@
 namespace Lwt.Utilities
 {
+    using System;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -84,6 +85,12 @@ namespace Lwt.Utilities
             foreach (JToken item in terms.Take(200))
             {
                 var term = item.ToObject<Term>();
+
+                if (term == null)
+                {
+                    throw new Exception("Can't parse term");
+                }
+
                 term.UserId = userId;
                 term.Content = term.Content.ToUpperInvariant();
                 term.LanguageCode = LanguageCode.ENGLISH;

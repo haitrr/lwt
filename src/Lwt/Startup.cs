@@ -6,18 +6,18 @@ namespace Lwt
     using System.IO.Compression;
     using System.Text;
     using FluentValidation.AspNetCore;
-    using Lwt.Creators;
-    using Lwt.DbContexts;
-    using Lwt.Interfaces;
+    using Creators;
+    using DbContexts;
+    using Interfaces;
     using Lwt.Interfaces.Services;
-    using Lwt.Mappers;
-    using Lwt.Middleware;
-    using Lwt.Models;
-    using Lwt.Repositories;
-    using Lwt.Services;
-    using Lwt.Transactions;
-    using Lwt.Utilities;
-    using Lwt.ViewModels;
+    using Mappers;
+    using Middleware;
+    using Models;
+    using Repositories;
+    using Services;
+    using Transactions;
+    using Utilities;
+    using ViewModels;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -28,7 +28,6 @@ namespace Lwt
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.OpenApi.Models;
-    using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
     /// <summary>
     /// statup.
@@ -41,7 +40,7 @@ namespace Lwt
         /// <param name="configuration">the configuration.</param>
         public Startup(IConfiguration configuration)
         {
-            this.Configuration = configuration;
+            Configuration = configuration;
         }
 
         /// <summary>
@@ -61,7 +60,7 @@ namespace Lwt
                 .AddFluentValidation(config => config.RegisterValidatorsFromAssemblyContaining(typeof(Startup)));
 
             string connectionString =
-                Environment.GetEnvironmentVariable(this.Configuration.GetConnectionString("Default"))!;
+                Environment.GetEnvironmentVariable(Configuration.GetConnectionString("Default"))!;
             var builder = new System.Data.Common.DbConnectionStringBuilder();
             builder.ConnectionString = connectionString;
 
@@ -85,7 +84,7 @@ namespace Lwt
                 .AddEntityFrameworkStores<IdentityDbContext>()
                 .AddDefaultTokenProviders();
 
-            IConfigurationSection appSettingsSection = this.Configuration.GetSection("AppSettings");
+            IConfigurationSection appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
             var appSettings = appSettingsSection.Get<AppSettings>();
             services.AddSingleton(appSettings);

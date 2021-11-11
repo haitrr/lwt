@@ -67,7 +67,7 @@ namespace Lwt.Models
         /// <summary>
         /// Gets or sets value of code.
         /// </summary>
-        public string Value { get; protected set; }
+        public string Value { get; }
 
         /// <summary>
         /// get language code from string.
