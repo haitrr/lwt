@@ -1,39 +1,38 @@
-namespace Lwt.Models
+namespace Lwt.Models;
+
+using System.Linq;
+using System.Text.RegularExpressions;
+using Lwt.Interfaces;
+
+/// <summary>
+/// English language.
+/// </summary>
+public class English : ILanguage
 {
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using Lwt.Interfaces;
+    /// <inheritdoc/>
+    public string Name => "English";
 
-    /// <summary>
-    /// English language.
-    /// </summary>
-    public class English : ILanguage
+    /// <inheritdoc />
+    public string SpeakCode => "en-US";
+
+    /// <inheritdoc />
+    public LanguageCode Code => LanguageCode.ENGLISH;
+
+    /// <inheritdoc />
+    public bool ShouldSkip(string term)
     {
-        /// <inheritdoc/>
-        public string Name => "English";
+        return Regex.IsMatch(term, @"([^a-zA-Z\’\'\-])");
+    }
 
-        /// <inheritdoc />
-        public string SpeakCode => "en-US";
+    /// <inheritdoc/>
+    public string[] SplitText(string text)
+    {
+        return Regex.Split(text, @"([^a-zA-Z\’\'\-])").Where(word => !string.IsNullOrEmpty(word)).ToArray();
+    }
 
-        /// <inheritdoc />
-        public LanguageCode Code => LanguageCode.ENGLISH;
-
-        /// <inheritdoc />
-        public bool ShouldSkip(string term)
-        {
-            return Regex.IsMatch(term, @"([^a-zA-Z\’\'\-])");
-        }
-
-        /// <inheritdoc/>
-        public string[] SplitText(string text)
-        {
-            return Regex.Split(text, @"([^a-zA-Z\’\'\-])").Where(word => !string.IsNullOrEmpty(word)).ToArray();
-        }
-
-        /// <inheritdoc />
-        public string Normalize(string word)
-        {
-            return word.ToUpperInvariant();
-        }
+    /// <inheritdoc />
+    public string Normalize(string word)
+    {
+        return word.ToUpperInvariant();
     }
 }

@@ -1,56 +1,55 @@
-namespace Lwt.Utilities
+namespace Lwt.Utilities;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Lwt.Interfaces;
+using Lwt.Models;
+using Microsoft.Extensions.DependencyInjection;
+
+/// <inheritdoc />
+public class LanguageHelper : ILanguageHelper
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Lwt.Interfaces;
-    using Lwt.Models;
-    using Microsoft.Extensions.DependencyInjection;
+    private readonly IServiceProvider serviceProvider;
 
-    /// <inheritdoc />
-    public class LanguageHelper : ILanguageHelper
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LanguageHelper"/> class.
+    /// </summary>
+    /// <param name="serviceProvider">the service provider.</param>
+    public LanguageHelper(IServiceProvider serviceProvider)
     {
-        private readonly IServiceProvider serviceProvider;
+        this.serviceProvider = serviceProvider;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LanguageHelper"/> class.
-        /// </summary>
-        /// <param name="serviceProvider">the service provider.</param>
-        public LanguageHelper(IServiceProvider serviceProvider)
+    /// <inheritdoc/>
+    public ILanguage GetLanguage(LanguageCode languageCode)
+    {
+        var languages = new ILanguage[]
         {
-            this.serviceProvider = serviceProvider;
+            new Vietnamese(), new English(),
+            new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>() !),
+            new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>() !),
+        };
+
+        ILanguage? language = languages.SingleOrDefault(l => l.Code == languageCode);
+
+        if (language != null)
+        {
+            return language;
         }
 
-        /// <inheritdoc/>
-        public ILanguage GetLanguage(LanguageCode languageCode)
+        throw new NotSupportedException($"Language {languageCode} is not supported.");
+    }
+
+    /// <inheritdoc/>
+    public ICollection<ILanguage> GetAllLanguages()
+    {
+        return new List<ILanguage>
         {
-            var languages = new ILanguage[]
-            {
-                new Vietnamese(), new English(),
-                new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>() !),
-                new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>() !),
-            };
-
-            ILanguage? language = languages.SingleOrDefault(l => l.Code == languageCode);
-
-            if (language != null)
-            {
-                return language;
-            }
-
-            throw new NotSupportedException($"Language {languageCode} is not supported.");
-        }
-
-        /// <inheritdoc/>
-        public ICollection<ILanguage> GetAllLanguages()
-        {
-            return new List<ILanguage>
-            {
-                new English(),
-                new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>() !),
-                new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>() !),
-                new Vietnamese(),
-            };
-        }
+            new English(),
+            new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>() !),
+            new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>() !),
+            new Vietnamese(),
+        };
     }
 }

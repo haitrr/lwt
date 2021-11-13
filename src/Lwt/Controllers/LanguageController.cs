@@ -1,48 +1,47 @@
-namespace Lwt.Controllers
+namespace Lwt.Controllers;
+
+using System.Collections.Generic;
+
+using Lwt.Interfaces;
+using Lwt.Models;
+
+using Microsoft.AspNetCore.Mvc;
+
+/// <inheritdoc />
+/// <summary>
+/// a.
+/// </summary>
+[Route("/api/language")]
+public class LanguageController : Controller
 {
-    using System.Collections.Generic;
+    private readonly ILanguageHelper languageHelper;
 
-    using Lwt.Interfaces;
-    using Lwt.Models;
+    private IMapper<ILanguage, LanguageViewModel> languageViewMapper;
 
-    using Microsoft.AspNetCore.Mvc;
-
-    /// <inheritdoc />
     /// <summary>
-    /// a.
+    /// Initializes a new instance of the <see cref="LanguageController"/> class.
     /// </summary>
-    [Route("/api/language")]
-    public class LanguageController : Controller
+    /// <param name="languageViewMapper">language view model mapper.</param>
+    /// <param name="languageHelper">language helper.</param>
+    public LanguageController(
+        IMapper<ILanguage, LanguageViewModel> languageViewMapper,
+        ILanguageHelper languageHelper)
     {
-        private readonly ILanguageHelper languageHelper;
+        this.languageViewMapper = languageViewMapper;
+        this.languageHelper = languageHelper;
+    }
 
-        private IMapper<ILanguage, LanguageViewModel> languageViewMapper;
+    /// <summary>
+    /// get all language of the logged in user.
+    /// </summary>
+    /// <returns>list of the language view model.</returns>
+    [HttpGet]
+    public IActionResult GetAsync()
+    {
+        ICollection<ILanguage> languages = this.languageHelper.GetAllLanguages();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LanguageController"/> class.
-        /// </summary>
-        /// <param name="languageViewMapper">language view model mapper.</param>
-        /// <param name="languageHelper">language helper.</param>
-        public LanguageController(
-            IMapper<ILanguage, LanguageViewModel> languageViewMapper,
-            ILanguageHelper languageHelper)
-        {
-            this.languageViewMapper = languageViewMapper;
-            this.languageHelper = languageHelper;
-        }
+        ICollection<LanguageViewModel> languageViewModels = this.languageViewMapper.Map(languages);
 
-        /// <summary>
-        /// get all language of the logged in user.
-        /// </summary>
-        /// <returns>list of the language view model.</returns>
-        [HttpGet]
-        public IActionResult GetAsync()
-        {
-            ICollection<ILanguage> languages = this.languageHelper.GetAllLanguages();
-
-            ICollection<LanguageViewModel> languageViewModels = this.languageViewMapper.Map(languages);
-
-            return this.Ok(languageViewModels);
-        }
+        return this.Ok(languageViewModels);
     }
 }

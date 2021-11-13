@@ -1,19 +1,18 @@
-namespace Lwt.Utilities
-{
-    using System.Collections.Generic;
-    using Lwt.Models;
+namespace Lwt.Utilities;
 
+using System.Collections.Generic;
+using Lwt.Models;
+
+/// <summary>
+/// skipped words remover.
+/// </summary>
+public interface ISkippedWordRemover
+{
     /// <summary>
-    /// skipped words remover.
+    /// remove skipped words of a languages from the words.
     /// </summary>
-    public interface ISkippedWordRemover
-    {
-        /// <summary>
-        /// remove skipped words of a languages from the words.
-        /// </summary>
-        /// <param name="words"> the words.</param>
-        /// <param name="languageCode">language code.</param>
-        /// <returns>none skipped words.</returns>
-        IEnumerable<string> RemoveSkippedWords(IEnumerable<string> words, LanguageCode languageCode);
-    }
+    /// <param name="words"> the words.</param>
+    /// <param name="languageCode">language code.</param>
+    /// <returns>none skipped words.</returns>
+    IEnumerable<string> RemoveSkippedWords(IEnumerable<string> words, LanguageCode languageCode);
 }

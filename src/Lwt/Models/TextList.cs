@@ -1,14 +1,14 @@
-namespace Lwt.Models
+namespace Lwt.Models;
+
+using System.Collections.Generic;
+
+using Lwt.ViewModels;
+
+/// <summary>
+/// the text list with pagination.
+/// </summary>
+public class TextList
 {
-  using System.Collections.Generic;
-
-  using Lwt.ViewModels;
-
-  /// <summary>
-  /// the text list with pagination.
-  /// </summary>
-  public class TextList
-  {
     /// <summary>
     /// Initializes a new instance of the <see cref="TextList"/> class.
     /// </summary>
@@ -16,8 +16,8 @@ namespace Lwt.Models
     /// <param name="items">texts.</param>
     public TextList(long total, IEnumerable<TextViewModel> items)
     {
-      this.Total = total;
-      this.Items = items;
+        this.Total = total;
+        this.Items = items;
     }
 
     /// <summary>
@@ -29,5 +29,4 @@ namespace Lwt.Models
     /// Gets or sets the text in the current page.
     /// </summary>
     public IEnumerable<TextViewModel> Items { get; set; }
-  }
 }

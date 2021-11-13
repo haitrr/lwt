@@ -1,40 +1,39 @@
-namespace Lwt.Utilities
+namespace Lwt.Utilities;
+
+using System.Linq;
+using System.Threading.Tasks;
+using Lwt.Exceptions;
+using Lwt.Models;
+using Lwt.Repositories;
+using Microsoft.EntityFrameworkCore;
+
+/// <inheritdoc />
+public class UserTextGetter : IUserTextGetter
 {
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Lwt.Exceptions;
-    using Lwt.Models;
-    using Lwt.Repositories;
-    using Microsoft.EntityFrameworkCore;
+    private readonly ISqlTextRepository textRepository;
 
-    /// <inheritdoc />
-    public class UserTextGetter : IUserTextGetter
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserTextGetter"/> class.
+    /// </summary>
+    /// <param name="textRepository"> text repo.</param>
+    public UserTextGetter(ISqlTextRepository textRepository)
     {
-        private readonly ISqlTextRepository textRepository;
+        this.textRepository = textRepository;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserTextGetter"/> class.
-        /// </summary>
-        /// <param name="textRepository"> text repo.</param>
-        public UserTextGetter(ISqlTextRepository textRepository)
+    /// <inheritdoc/>
+    public async Task<Text> GetUserTextAsync(int textId, int userId)
+    {
+        Text? text = await this.textRepository.Queryable()
+            .Where(t => t.Id == textId && t.UserId == userId)
+            .Select(t => new Text() { Bookmark = t.Bookmark, Id = t.Id })
+            .FirstOrDefaultAsync();
+
+        if (text == null)
         {
-            this.textRepository = textRepository;
+            throw new ForbiddenException("You don't have permission to access this text.");
         }
 
-        /// <inheritdoc/>
-        public async Task<Text> GetUserTextAsync(int textId, int userId)
-        {
-            Text? text = await this.textRepository.Queryable()
-                .Where(t => t.Id == textId && t.UserId == userId)
-                .Select(t => new Text() { Bookmark = t.Bookmark, Id = t.Id })
-                .FirstOrDefaultAsync();
-
-            if (text == null)
-            {
-                throw new ForbiddenException("You don't have permission to access this text.");
-            }
-
-            return text;
-        }
+        return text;
     }
 }

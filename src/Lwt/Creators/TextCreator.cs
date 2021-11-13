@@ -1,49 +1,48 @@
-namespace Lwt.Creators
+namespace Lwt.Creators;
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using FluentValidation;
+using FluentValidation.Results;
+using Lwt.Exceptions;
+using Lwt.Interfaces;
+using Lwt.Models;
+using Lwt.Repositories;
+
+/// <inheritdoc />
+public class TextCreator : ITextCreator
 {
-    using System;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using FluentValidation;
-    using FluentValidation.Results;
-    using Lwt.Exceptions;
-    using Lwt.Interfaces;
-    using Lwt.Models;
-    using Lwt.Repositories;
+    private readonly IValidator<Text> textValidator;
+    private readonly ISqlTextRepository textRepository;
+    private readonly IDbTransaction dbTransaction;
+
+    public TextCreator(
+        IValidator<Text> textValidator,
+        ISqlTextRepository textRepository,
+        IDbTransaction dbTransaction)
+    {
+        this.textValidator = textValidator;
+        this.textRepository = textRepository;
+        this.dbTransaction = dbTransaction;
+    }
 
     /// <inheritdoc />
-    public class TextCreator : ITextCreator
+    public async Task<int> CreateAsync(Text text)
     {
-        private readonly IValidator<Text> textValidator;
-        private readonly ISqlTextRepository textRepository;
-        private readonly IDbTransaction dbTransaction;
+        ValidationResult validationResult = this.textValidator.Validate(text);
 
-        public TextCreator(
-            IValidator<Text> textValidator,
-            ISqlTextRepository textRepository,
-            IDbTransaction dbTransaction)
+        if (!validationResult.IsValid)
         {
-            this.textValidator = textValidator;
-            this.textRepository = textRepository;
-            this.dbTransaction = dbTransaction;
+            throw new BadRequestException(
+                validationResult.Errors.First()
+                    .ErrorMessage);
         }
 
-        /// <inheritdoc />
-        public async Task<int> CreateAsync(Text text)
-        {
-            ValidationResult validationResult = this.textValidator.Validate(text);
+        text.LastReadAt = DateTime.UtcNow;
+        this.textRepository.Add(text);
+        await this.dbTransaction.CommitAsync();
 
-            if (!validationResult.IsValid)
-            {
-                throw new BadRequestException(
-                    validationResult.Errors.First()
-                        .ErrorMessage);
-            }
-
-            text.LastReadAt = DateTime.UtcNow;
-            this.textRepository.Add(text);
-            await this.dbTransaction.CommitAsync();
-
-            return text.Id;
-        }
+        return text.Id;
     }
 }

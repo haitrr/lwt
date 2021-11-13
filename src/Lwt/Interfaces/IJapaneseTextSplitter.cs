@@ -1,9 +1,8 @@
-namespace Lwt.Interfaces
+namespace Lwt.Interfaces;
+
+/// <summary>
+/// the japanese text splitter.
+/// </summary>
+public interface IJapaneseTextSplitter : ITextSplitter
 {
-    /// <summary>
-    /// the japanese text splitter.
-    /// </summary>
-    public interface IJapaneseTextSplitter : ITextSplitter
-    {
-    }
 }

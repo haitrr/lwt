@@ -1,25 +1,24 @@
-namespace Lwt.Models
+namespace Lwt.Models;
+
+using System.Collections.Generic;
+
+/// <summary>
+/// user setting.
+/// </summary>
+public record UserSetting : Entity
 {
-    using System.Collections.Generic;
+    public const string TableName = "user_settings";
 
     /// <summary>
-    /// user setting.
+    /// Gets or sets user id.
     /// </summary>
-    public record UserSetting : Entity
-    {
-        public const string TableName = "user_settings";
+    public int UserId { get; set; }
 
-        /// <summary>
-        /// Gets or sets user id.
-        /// </summary>
-        public int UserId { get; set; }
+    public User User { get; set; }
 
-        public User User { get; set; }
-
-        /// <summary>
-        ///  Gets or sets language settings.
-        /// </summary>
-        public ICollection<LanguageSetting> LanguageSettings { get; set; } =
-            new List<LanguageSetting>();
-    }
+    /// <summary>
+    ///  Gets or sets language settings.
+    /// </summary>
+    public ICollection<LanguageSetting> LanguageSettings { get; set; } =
+        new List<LanguageSetting>();
 }

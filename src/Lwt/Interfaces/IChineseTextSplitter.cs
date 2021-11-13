@@ -1,9 +1,8 @@
-namespace Lwt.Interfaces
+namespace Lwt.Interfaces;
+
+/// <summary>
+/// the chinese text splitter.
+/// </summary>
+public interface IChineseTextSplitter : ITextSplitter
 {
-    /// <summary>
-    /// the chinese text splitter.
-    /// </summary>
-    public interface IChineseTextSplitter : ITextSplitter
-    {
-    }
 }

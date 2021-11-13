@@ -1,23 +1,22 @@
-namespace Lwt.Mappers
+namespace Lwt.Mappers;
+
+using Lwt.Models;
+using Lwt.Services;
+using Lwt.ViewModels;
+
+/// <summary>
+/// a.
+/// </summary>
+public class TextCreateMapper : BaseMapper<TextCreateModel, int, Text>
 {
-    using Lwt.Models;
-    using Lwt.Services;
-    using Lwt.ViewModels;
-
-    /// <summary>
-    /// a.
-    /// </summary>
-    public class TextCreateMapper : BaseMapper<TextCreateModel, int, Text>
+    /// <inheritdoc/>
+    public override Text Map(TextCreateModel from, int from2, Text result)
     {
-        /// <inheritdoc/>
-        public override Text Map(TextCreateModel from, int from2, Text result)
-        {
-            result.Title = from.Title;
-            result.Content = from.Content;
-            result.UserId = from2;
-            result.LanguageCode = from.LanguageCode;
+        result.Title = from.Title;
+        result.Content = from.Content;
+        result.UserId = from2;
+        result.LanguageCode = from.LanguageCode;
 
-            return result;
-        }
+        return result;
     }
 }

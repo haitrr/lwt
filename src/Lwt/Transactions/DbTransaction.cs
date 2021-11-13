@@ -1,37 +1,36 @@
-namespace Lwt.Transactions
+namespace Lwt.Transactions;
+
+using System.Threading.Tasks;
+using Lwt.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+
+/// <summary>
+/// transaction.
+/// </summary>
+/// <typeparam name="T">type.</typeparam>
+public class DbTransaction<T> : IDbTransaction
+    where T : DbContext
 {
-    using System.Threading.Tasks;
-    using Lwt.Interfaces;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage;
+    private readonly T databaseContext;
 
     /// <summary>
-    /// transaction.
+    /// Initializes a new instance of the <see cref="DbTransaction{T}"/> class.
     /// </summary>
-    /// <typeparam name="T">type.</typeparam>
-    public class DbTransaction<T> : IDbTransaction
-        where T : DbContext
+    /// <param name="databaseContext">dbContext.</param>
+    public DbTransaction(T databaseContext)
     {
-        private readonly T databaseContext;
+        this.databaseContext = databaseContext;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DbTransaction{T}"/> class.
-        /// </summary>
-        /// <param name="databaseContext">dbContext.</param>
-        public DbTransaction(T databaseContext)
-        {
-            this.databaseContext = databaseContext;
-        }
+    /// <inheritdoc/>
+    public async Task CommitAsync()
+    {
+        await this.databaseContext.SaveChangesAsync();
+    }
 
-        /// <inheritdoc/>
-        public async Task CommitAsync()
-        {
-            await this.databaseContext.SaveChangesAsync();
-        }
-
-        public IDbContextTransaction BeginTransaction()
-        {
-            return this.databaseContext.Database.BeginTransaction();
-        }
+    public IDbContextTransaction BeginTransaction()
+    {
+        return this.databaseContext.Database.BeginTransaction();
     }
 }

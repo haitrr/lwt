@@ -1,29 +1,28 @@
-namespace Lwt.Models
+namespace Lwt.Models;
+
+/// <summary>
+/// the term's view model.
+/// </summary>
+public class TermReadModel
 {
     /// <summary>
-    /// the term's view model.
+    /// Gets or sets the term's id.
     /// </summary>
-    public class TermReadModel
-    {
-        /// <summary>
-        /// Gets or sets the term's id.
-        /// </summary>
-        public int? Id { get; set; }
+    public int? Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the term content.
-        /// </summary>
-        public string Content { get; set; } = string.Empty;
+    /// <summary>
+    /// Gets or sets the term content.
+    /// </summary>
+    public string Content { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the term's learning level.
-        /// </summary>
-        public LearningLevel LearningLevel { get; set; } = null!;
+    /// <summary>
+    /// Gets or sets the term's learning level.
+    /// </summary>
+    public LearningLevel LearningLevel { get; set; } = null!;
 
-        public long Index { get; set; }
+    public long Index { get; set; }
 
-        public string? Meaning { get; set; }
+    public string? Meaning { get; set; }
 
-        public int? Count { get; set; }
-    }
+    public int? Count { get; set; }
 }

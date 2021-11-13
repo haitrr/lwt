@@ -1,10 +1,10 @@
-namespace Lwt.Models
+namespace Lwt.Models;
+
+/// <summary>
+/// user view model.
+/// </summary>
+public class UserView
 {
-  /// <summary>
-  /// user view model.
-  /// </summary>
-  public class UserView
-  {
     /// <summary>
     /// Gets or sets user name.
     /// </summary>
@@ -14,5 +14,4 @@ namespace Lwt.Models
     /// Gets or sets user email.
     /// </summary>
     public string Email { get; set; } = string.Empty;
-  }
 }

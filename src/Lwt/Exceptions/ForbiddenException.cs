@@ -1,36 +1,35 @@
-namespace Lwt.Exceptions
+namespace Lwt.Exceptions;
+
+using System;
+
+/// <summary>
+/// a.
+/// </summary>
+public class ForbiddenException : Exception
 {
-    using System;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ForbiddenException"/> class.
+    /// </summary>
+    /// <param name="description">description.</param>
+    public ForbiddenException(string description)
+        : base(description)
+    {
+    }
 
     /// <summary>
-    /// a.
+    /// Initializes a new instance of the <see cref="ForbiddenException"/> class.
     /// </summary>
-    public class ForbiddenException : Exception
+    public ForbiddenException()
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ForbiddenException"/> class.
-        /// </summary>
-        /// <param name="description">description.</param>
-        public ForbiddenException(string description)
-            : base(description)
-        {
-        }
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ForbiddenException"/> class.
-        /// </summary>
-        public ForbiddenException()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ForbiddenException"/> class.
-        /// </summary>
-        /// <param name="message">message.</param>
-        /// <param name="innerException">innerException.</param>
-        public ForbiddenException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ForbiddenException"/> class.
+    /// </summary>
+    /// <param name="message">message.</param>
+    /// <param name="innerException">innerException.</param>
+    public ForbiddenException(string message, Exception innerException)
+        : base(message, innerException)
+    {
     }
 }

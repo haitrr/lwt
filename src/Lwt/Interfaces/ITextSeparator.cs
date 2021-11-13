@@ -1,19 +1,18 @@
-namespace Lwt.Interfaces
-{
-    using System.Collections.Generic;
-    using Lwt.Models;
+namespace Lwt.Interfaces;
 
+using System.Collections.Generic;
+using Lwt.Models;
+
+/// <summary>
+/// text separator.
+/// </summary>
+public interface ITextSeparator
+{
     /// <summary>
-    /// text separator.
+    /// separate the text base on its language.
     /// </summary>
-    public interface ITextSeparator
-    {
-        /// <summary>
-        /// separate the text base on its language.
-        /// </summary>
-        /// <param name="text">text.</param>
-        /// <param name="languageCode"></param>
-        /// <returns>the words separated from the text.</returns>
-        IEnumerable<string> SeparateText(string text, LanguageCode languageCode);
-    }
+    /// <param name="text">text.</param>
+    /// <param name="languageCode"></param>
+    /// <returns>the words separated from the text.</returns>
+    IEnumerable<string> SeparateText(string text, LanguageCode languageCode);
 }

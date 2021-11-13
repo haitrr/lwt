@@ -1,25 +1,24 @@
-namespace Lwt.Repositories
+namespace Lwt.Repositories;
+
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Lwt.Interfaces;
+using Lwt.Models;
+
+public interface ITextTermRepository : ISqlRepository<TextTerm>
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Lwt.Interfaces;
-    using Lwt.Models;
+    Task<int> CountByTextAsync(int textId);
 
-    public interface ITextTermRepository : ISqlRepository<TextTerm>
-    {
-        Task<int> CountByTextAsync(int textId);
+    void DeleteByTextId(int textId);
 
-        void DeleteByTextId(int textId);
+    Task<IEnumerable<TextTerm>> GetByTextAsync(int textId, int? indexFrom, int? indexTo);
 
-        Task<IEnumerable<TextTerm>> GetByTextAsync(int textId, int? indexFrom, int? indexTo);
+    Task<IEnumerable<TextTerm>> GetByUserAndLanguageAndContentAsync(
+        int termCreatorId,
+        LanguageCode termLanguageCode,
+        string termContent);
 
-        Task<IEnumerable<TextTerm>> GetByUserAndLanguageAndContentAsync(
-            int termCreatorId,
-            LanguageCode termLanguageCode,
-            string termContent);
+    Task<IDictionary<LearningLevel, int>> CountTextTermByLearningLevelAsync(int textId);
 
-        Task<IDictionary<LearningLevel, int>> CountTextTermByLearningLevelAsync(int textId);
-
-        Task<int> GetTermCountInTextAsync(int textId, int termId);
-    }
+    Task<int> GetTermCountInTextAsync(int textId, int termId);
 }

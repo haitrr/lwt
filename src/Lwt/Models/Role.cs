@@ -1,11 +1,10 @@
-﻿namespace Lwt.Models
-{
-    using Microsoft.AspNetCore.Identity;
+﻿namespace Lwt.Models;
 
-    /// <summary>
-    /// a.
-    /// </summary>
-    public class Role : IdentityRole<int>
-    {
-    }
+using Microsoft.AspNetCore.Identity;
+
+/// <summary>
+/// a.
+/// </summary>
+public class Role : IdentityRole<int>
+{
 }

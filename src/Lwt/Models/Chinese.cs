@@ -1,50 +1,49 @@
-namespace Lwt.Models
+namespace Lwt.Models;
+
+using System.Linq;
+using System.Text.RegularExpressions;
+using Lwt.Interfaces;
+
+/// <summary>
+/// chinese language support.
+/// </summary>
+public class Chinese : ILanguage
 {
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using Lwt.Interfaces;
+    private readonly IChineseTextSplitter textSplitter;
 
     /// <summary>
-    /// chinese language support.
+    /// Initializes a new instance of the <see cref="Chinese"/> class.
     /// </summary>
-    public class Chinese : ILanguage
+    /// <param name="textSplitter">the text splitter.</param>
+    public Chinese(IChineseTextSplitter textSplitter)
     {
-        private readonly IChineseTextSplitter textSplitter;
+        this.textSplitter = textSplitter;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Chinese"/> class.
-        /// </summary>
-        /// <param name="textSplitter">the text splitter.</param>
-        public Chinese(IChineseTextSplitter textSplitter)
-        {
-            this.textSplitter = textSplitter;
-        }
+    /// <inheritdoc />
+    public string Name => "Chinese";
 
-        /// <inheritdoc />
-        public string Name => "Chinese";
+    /// <inheritdoc />
+    public string SpeakCode => "zh-CN";
 
-        /// <inheritdoc />
-        public string SpeakCode => "zh-CN";
+    /// <inheritdoc />
+    public LanguageCode Code => LanguageCode.CHINESE;
 
-        /// <inheritdoc />
-        public LanguageCode Code => LanguageCode.CHINESE;
+    /// <inheritdoc />
+    public bool ShouldSkip(string term)
+    {
+        return !Regex.IsMatch(term, "^\\p{Lo}+$");
+    }
 
-        /// <inheritdoc />
-        public bool ShouldSkip(string term)
-        {
-            return !Regex.IsMatch(term, "^\\p{Lo}+$");
-        }
+    /// <inheritdoc />
+    public string[] SplitText(string text)
+    {
+        return this.textSplitter.Split(text).ToArray();
+    }
 
-        /// <inheritdoc />
-        public string[] SplitText(string text)
-        {
-            return this.textSplitter.Split(text).ToArray();
-        }
-
-        /// <inheritdoc />
-        public string Normalize(string word)
-        {
-            return word;
-        }
+    /// <inheritdoc />
+    public string Normalize(string word)
+    {
+        return word;
     }
 }

@@ -1,49 +1,48 @@
-namespace Lwt
+namespace Lwt;
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Lwt.Creators;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+public class TextTermProcessingService : BackgroundService
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Lwt.Creators;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
+    private readonly ILogger<TextTermProcessingService> logger;
+    private readonly IServiceProvider serviceProvider;
 
-    public class TextTermProcessingService : BackgroundService
+    public TextTermProcessingService(ILogger<TextTermProcessingService> logger, IServiceProvider serviceProvider)
     {
-        private readonly ILogger<TextTermProcessingService> logger;
-        private readonly IServiceProvider serviceProvider;
+        this.logger = logger;
+        this.serviceProvider = serviceProvider;
+    }
 
-        public TextTermProcessingService(ILogger<TextTermProcessingService> logger, IServiceProvider serviceProvider)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        this.logger.LogInformation("Text processing service running");
+
+        while (!stoppingToken.IsCancellationRequested)
         {
-            this.logger = logger;
-            this.serviceProvider = serviceProvider;
-        }
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            this.logger.LogInformation("Text processing service running");
-
-            while (!stoppingToken.IsCancellationRequested)
+            using (IServiceScope scope = this.serviceProvider.CreateScope())
             {
-                using (IServiceScope scope = this.serviceProvider.CreateScope())
+                var textTermProcessor = scope.ServiceProvider.GetRequiredService<ITextTermProcessor>();
+
+                try
                 {
-                    var textTermProcessor = scope.ServiceProvider.GetRequiredService<ITextTermProcessor>();
-
-                    try
-                    {
-                        await textTermProcessor.ProcessTextTermAsync();
-                    }
-#pragma warning disable
-                    catch (Exception e)
-#pragma warning restore
-                    {
-                        this.logger.LogError("Fail to process text term");
-                        this.logger.LogError(e.Message);
-                        this.logger.LogError(e.StackTrace);
-                    }
-
-                    await Task.Delay(TimeSpan.FromMilliseconds(500));
+                    await textTermProcessor.ProcessTextTermAsync();
                 }
+#pragma warning disable
+                catch (Exception e)
+#pragma warning restore
+                {
+                    this.logger.LogError("Fail to process text term");
+                    this.logger.LogError(e.Message);
+                    this.logger.LogError(e.StackTrace);
+                }
+
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
             }
         }
     }

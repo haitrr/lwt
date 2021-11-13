@@ -1,10 +1,10 @@
-namespace Lwt.Test.Services
+namespace Lwt.Test.Services;
+
+/// <summary>
+/// test text service.
+/// </summary>
+public class TextServiceTest
 {
-    /// <summary>
-    /// test text service.
-    /// </summary>
-    public class TextServiceTest
-    {
     // private readonly TextService textService;
     //
     //     private readonly Mock<ISqlTextRepository> textRepository;
@@ -351,5 +351,4 @@ namespace Lwt.Test.Services
     //         Assert.Equal(termIndex, text.Bookmark);
     //         this.textRepository.Verify(r => r.Update(text), Times.Once);
     //     }
-    }
 }

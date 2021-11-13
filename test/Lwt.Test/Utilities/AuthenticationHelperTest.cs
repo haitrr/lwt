@@ -1,44 +1,43 @@
-namespace Lwt.Test.Utilities
+namespace Lwt.Test.Utilities;
+
+using System.Collections.Generic;
+using System.Security.Claims;
+using Lwt.Utilities;
+using Xunit;
+
+/// <summary>
+/// test authentication helper.
+/// </summary>
+public class AuthenticationHelperTest
 {
-    using System.Collections.Generic;
-    using System.Security.Claims;
-    using Lwt.Utilities;
-    using Xunit;
+    private readonly AuthenticationHelper authenticationHelper;
 
     /// <summary>
-    /// test authentication helper.
+    /// Initializes a new instance of the <see cref="AuthenticationHelperTest"/> class.
     /// </summary>
-    public class AuthenticationHelperTest
+    public AuthenticationHelperTest()
     {
-        private readonly AuthenticationHelper authenticationHelper;
+        this.authenticationHelper = new AuthenticationHelper();
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AuthenticationHelperTest"/> class.
-        /// </summary>
-        public AuthenticationHelperTest()
-        {
-            this.authenticationHelper = new AuthenticationHelper();
-        }
+    /// <summary>
+    /// get user id should work.
+    /// </summary>
+    [Fact]
+    public void GetLoggedInUserShouldWork()
+    {
+        var userId = 1;
+        var principal = new ClaimsPrincipal(
+            new[]
+            {
+                new ClaimsIdentity(
+                    new List<Claim>
+                    {
+                        new Claim("id", userId.ToString()),
+                    }),
+            });
+        int actual = this.authenticationHelper.GetLoggedInUser(principal);
 
-        /// <summary>
-        /// get user id should work.
-        /// </summary>
-        [Fact]
-        public void GetLoggedInUserShouldWork()
-        {
-            var userId = 1;
-            var principal = new ClaimsPrincipal(
-                new[]
-                {
-                    new ClaimsIdentity(
-                        new List<Claim>
-                        {
-                            new Claim("id", userId.ToString()),
-                        }),
-                });
-            int actual = this.authenticationHelper.GetLoggedInUser(principal);
-
-            Assert.Equal(userId, actual);
-        }
+        Assert.Equal(userId, actual);
     }
 }

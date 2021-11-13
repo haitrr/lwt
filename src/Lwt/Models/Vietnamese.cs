@@ -1,12 +1,12 @@
-namespace Lwt.Models
-{
-  using Lwt.Interfaces;
+namespace Lwt.Models;
 
-  /// <summary>
-  /// Vietnamese language.
-  /// </summary>
-  public class Vietnamese : ILanguage
-  {
+using Lwt.Interfaces;
+
+/// <summary>
+/// Vietnamese language.
+/// </summary>
+public class Vietnamese : ILanguage
+{
     /// <inheritdoc/>
     public string Name => "Vietnamese";
 
@@ -19,19 +19,18 @@ namespace Lwt.Models
     /// <inheritdoc/>
     public bool ShouldSkip(string term)
     {
-      throw new System.NotSupportedException();
+        throw new System.NotSupportedException();
     }
 
     /// <inheritdoc/>
     public string[] SplitText(string text)
     {
-      throw new System.NotSupportedException();
+        throw new System.NotSupportedException();
     }
 
     /// <inheritdoc/>
     public string Normalize(string word)
     {
-      throw new System.NotSupportedException();
+        throw new System.NotSupportedException();
     }
-  }
 }

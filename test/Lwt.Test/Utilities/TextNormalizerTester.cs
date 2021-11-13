@@ -1,21 +1,20 @@
-namespace Lwt.Test.Utilities
-{
-    using Lwt.Utilities;
-    using Xunit;
+namespace Lwt.Test.Utilities;
 
+using Lwt.Utilities;
+using Xunit;
+
+/// <summary>
+/// TextNormalizer tester.
+/// </summary>
+public class TextNormalizerTester
+{
     /// <summary>
-    /// TextNormalizer tester.
+    /// should get resolved by DI.
     /// </summary>
-    public class TextNormalizerTester
+    [Fact]
+    public void ShouldGetResolveByDi()
     {
-        /// <summary>
-        /// should get resolved by DI.
-        /// </summary>
-        [Fact]
-        public void ShouldGetResolveByDi()
-        {
-            var helper = new DependencyResolverHelper();
-            Assert.IsType<TextNormalizer>(helper.GetService<ITextNormalizer>());
-        }
+        var helper = new DependencyResolverHelper();
+        Assert.IsType<TextNormalizer>(helper.GetService<ITextNormalizer>());
     }
 }

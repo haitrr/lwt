@@ -1,114 +1,114 @@
-namespace Lwt.Utilities
+namespace Lwt.Utilities;
+
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Lwt.DbContexts;
+using Lwt.Interfaces;
+using Lwt.Interfaces.Services;
+using Lwt.Models;
+using Lwt.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+
+/// <inheritdoc />
+public class DatabaseSeeder : IDatabaseSeeder
 {
-    using System;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Lwt.DbContexts;
-    using Lwt.Interfaces;
-    using Lwt.Interfaces.Services;
-    using Lwt.Models;
-    using Lwt.Repositories;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json.Linq;
+    private readonly IUserRepository userRepository;
+
+    private readonly IdentityDbContext lwtDbContext;
+    private readonly ITextService textService;
+    private readonly ITermService termService;
+    private readonly ISqlTextRepository textRepository;
+    private readonly ILogger<DatabaseSeeder> logger;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DatabaseSeeder"/> class.
+    /// </summary>
+    /// <param name="userRepository"> user repo.</param>
+    /// <param name="lwtDbContext">the db context.</param>
+    /// <param name="textService">the text service.</param>
+    /// <param name="termService">the term service.</param>
+    /// <param name="textRepository">the text repository.</param>
+    /// <param name="logger">the logger.</param>
+    public DatabaseSeeder(
+        IUserRepository userRepository,
+        IdentityDbContext lwtDbContext,
+        ITextService textService,
+        ITermService termService,
+        ISqlTextRepository textRepository,
+        ILogger<DatabaseSeeder> logger)
+    {
+        this.userRepository = userRepository;
+        this.lwtDbContext = lwtDbContext;
+        this.textService = textService;
+        this.termService = termService;
+        this.textRepository = textRepository;
+        this.logger = logger;
+    }
 
     /// <inheritdoc />
-    public class DatabaseSeeder : IDatabaseSeeder
+    public async Task SeedData()
     {
-        private readonly IUserRepository userRepository;
+        this.lwtDbContext.Database.Migrate();
 
-        private readonly IdentityDbContext lwtDbContext;
-        private readonly ITextService textService;
-        private readonly ITermService termService;
-        private readonly ISqlTextRepository textRepository;
-        private readonly ILogger<DatabaseSeeder> logger;
+        User? hai = await this.userRepository.GetByUserNameAsync("hai");
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseSeeder"/> class.
-        /// </summary>
-        /// <param name="userRepository"> user repo.</param>
-        /// <param name="lwtDbContext">the db context.</param>
-        /// <param name="textService">the text service.</param>
-        /// <param name="termService">the term service.</param>
-        /// <param name="textRepository">the text repository.</param>
-        /// <param name="logger">the logger.</param>
-        public DatabaseSeeder(
-            IUserRepository userRepository,
-            IdentityDbContext lwtDbContext,
-            ITextService textService,
-            ITermService termService,
-            ISqlTextRepository textRepository,
-            ILogger<DatabaseSeeder> logger)
+        if (hai != null)
         {
-            this.userRepository = userRepository;
-            this.lwtDbContext = lwtDbContext;
-            this.textService = textService;
-            this.termService = termService;
-            this.textRepository = textRepository;
-            this.logger = logger;
+            this.logger.LogInformation("Identity has already seeded.");
+        }
+        else
+        {
+            this.logger.LogInformation("Seeding user.");
+            hai = new User { Id = 1, UserName = "hai" };
+            await this.userRepository.CreateAsync(hai, "q");
         }
 
-        /// <inheritdoc />
-        public async Task SeedData()
+        if (await this.textRepository.CountAsync() > 0)
         {
-            this.lwtDbContext.Database.Migrate();
-
-            User? hai = await this.userRepository.GetByUserNameAsync("hai");
-
-            if (hai != null)
-            {
-                this.logger.LogInformation("Identity has already seeded.");
-            }
-            else
-            {
-                this.logger.LogInformation("Seeding user.");
-                hai = new User { Id = 1, UserName = "hai" };
-                await this.userRepository.CreateAsync(hai, "q");
-            }
-
-            if (await this.textRepository.CountAsync() > 0)
-            {
-                this.logger.LogInformation("Database has already seeded.");
-                return;
-            }
-
-            this.logger.LogInformation("Seeding database.");
-            this.SeedTerms(hai.Id);
-            this.SeedTexts(hai.Id);
+            this.logger.LogInformation("Database has already seeded.");
+            return;
         }
 
-        private void SeedTerms(int userId)
+        this.logger.LogInformation("Seeding database.");
+        this.SeedTerms(hai.Id);
+        this.SeedTexts(hai.Id);
+    }
+
+    private void SeedTerms(int userId)
+    {
+        JArray terms = JArray.Parse(File.ReadAllText("./term.json"));
+
+        foreach (JToken item in terms.Take(200))
         {
-            JArray terms = JArray.Parse(File.ReadAllText("./term.json"));
+            var term = item.ToObject<Term>();
 
-            foreach (JToken item in terms.Take(200))
+            if (term == null)
             {
-                var term = item.ToObject<Term>();
-
-                if (term == null)
-                {
-                    throw new Exception("Can't parse term");
-                }
-
-                term.UserId = userId;
-                term.Content = term.Content.ToUpperInvariant();
-                term.LanguageCode = LanguageCode.ENGLISH;
-                this.termService.CreateAsync(term)
-                    .GetAwaiter()
-                    .GetResult();
+                throw new Exception("Can't parse term");
             }
 
-            this.logger.LogInformation("Done seeding database.");
+            term.UserId = userId;
+            term.Content = term.Content.ToUpperInvariant();
+            term.LanguageCode = LanguageCode.ENGLISH;
+            this.termService.CreateAsync(term)
+                .GetAwaiter()
+                .GetResult();
         }
 
-        private void SeedTexts(int userId)
+        this.logger.LogInformation("Done seeding database.");
+    }
+
+    private void SeedTexts(int userId)
+    {
+        var text = new Text
         {
-            var text = new Text
-            {
-                Title = @"Why do people never get rich by working as an employee?",
+            Title = @"Why do people never get rich by working as an employee?",
 #pragma warning disable MEN002
-                Content = @"First things first, what is “rich” and what is “poor”?
+            Content = @"First things first, what is “rich” and what is “poor”?
 
 There are 2 types of people all around the world, if you divide them by financially: The richests and the remainings (poors).
 
@@ -136,13 +136,12 @@ If you think that in a macro plan (wars, international conflicts, terrorist orga
 
 The long and the short of it; it is meaningless to talk about who is poor or who is rich. The exact question must be “what did we do wrong?”",
 #pragma warning disable MEN002
-                LanguageCode = LanguageCode.ENGLISH,
-                UserId = userId,
-                Id = default,
-            };
-            this.textService.CreateAsync(text)
-                .GetAwaiter()
-                .GetResult();
-        }
+            LanguageCode = LanguageCode.ENGLISH,
+            UserId = userId,
+            Id = default,
+        };
+        this.textService.CreateAsync(text)
+            .GetAwaiter()
+            .GetResult();
     }
 }

@@ -1,17 +1,16 @@
-namespace Lwt.Mappers
-{
-    using System.Linq;
-    using Lwt.Models;
-    using Lwt.Services;
+namespace Lwt.Mappers;
 
+using System.Linq;
+using Lwt.Models;
+using Lwt.Services;
+
+/// <inheritdoc/>
+public class UserSettingUpdateMapper : BaseMapper<UserSettingUpdate, UserSetting>
+{
     /// <inheritdoc/>
-    public class UserSettingUpdateMapper : BaseMapper<UserSettingUpdate, UserSetting>
+    public override UserSetting Map(UserSettingUpdate from, UserSetting result)
     {
-        /// <inheritdoc/>
-        public override UserSetting Map(UserSettingUpdate from, UserSetting result)
-        {
-            result.LanguageSettings = from.LanguageSettings.ToList();
-            return result;
-        }
+        result.LanguageSettings = from.LanguageSettings.ToList();
+        return result;
     }
 }

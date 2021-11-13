@@ -1,36 +1,35 @@
-namespace Lwt.Utilities
+namespace Lwt.Utilities;
+
+using System;
+using System.Collections.Generic;
+using Lwt.Interfaces;
+using Lwt.Models;
+
+/// <inheritdoc />
+public class TextSeparator : ITextSeparator
 {
-    using System;
-    using System.Collections.Generic;
-    using Lwt.Interfaces;
-    using Lwt.Models;
+    private readonly ILanguageHelper languageHelper;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TextSeparator"/> class.
+    /// </summary>
+    /// <param name="languageHelper">the language helper.</param>
+    public TextSeparator(ILanguageHelper languageHelper)
+    {
+        this.languageHelper = languageHelper;
+    }
 
     /// <inheritdoc />
-    public class TextSeparator : ITextSeparator
+    public IEnumerable<string> SeparateText(string text, LanguageCode language)
     {
-        private readonly ILanguageHelper languageHelper;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TextSeparator"/> class.
-        /// </summary>
-        /// <param name="languageHelper">the language helper.</param>
-        public TextSeparator(ILanguageHelper languageHelper)
+        try
         {
-            this.languageHelper = languageHelper;
+            ILanguage lang = this.languageHelper.GetLanguage(language);
+            return lang.SplitText(text);
         }
-
-        /// <inheritdoc />
-        public IEnumerable<string> SeparateText(string text, LanguageCode language)
+        catch (NotSupportedException exception)
         {
-            try
-            {
-                ILanguage lang = this.languageHelper.GetLanguage(language);
-                return lang.SplitText(text);
-            }
-            catch (NotSupportedException exception)
-            {
-                throw new NotSupportedException(exception.Message);
-            }
+            throw new NotSupportedException(exception.Message);
         }
     }
 }

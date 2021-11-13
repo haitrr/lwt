@@ -1,18 +1,17 @@
-namespace Lwt.Models
+namespace Lwt.Models;
+
+/// <summary>
+/// term edit model.
+/// </summary>
+public class TermEditModel
 {
     /// <summary>
-    /// term edit model.
+    /// Gets or sets meaning.
     /// </summary>
-    public class TermEditModel
-    {
-        /// <summary>
-        /// Gets or sets meaning.
-        /// </summary>
-        public string Meaning { get; set; } = string.Empty;
+    public string Meaning { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Gets or sets the learning level.
-        /// </summary>
-        public LearningLevel LearningLevel { get; set; } = null!;
-    }
+    /// <summary>
+    /// Gets or sets the learning level.
+    /// </summary>
+    public LearningLevel LearningLevel { get; set; } = null!;
 }

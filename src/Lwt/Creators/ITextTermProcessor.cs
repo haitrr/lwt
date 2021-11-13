@@ -1,9 +1,8 @@
-namespace Lwt.Creators
-{
-    using System.Threading.Tasks;
+namespace Lwt.Creators;
 
-    public interface ITextTermProcessor
-    {
-        Task ProcessTextTermAsync();
-    }
+using System.Threading.Tasks;
+
+public interface ITextTermProcessor
+{
+    Task ProcessTextTermAsync();
 }
