@@ -67,8 +67,8 @@ namespace Lwt.Test.IntegrationTests
                 "api/term",
                 new StringContent(JsonConvert.SerializeObject(termCreateModel), Encoding.UTF8, "application/json"));
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-            var id = (int)JsonConvert.DeserializeObject<dynamic>(await result.Content.ReadAsStringAsync()) !
-                .id;
+            var id = JsonConvert.DeserializeObject<CreateTermResponse>(await result.Content.ReadAsStringAsync()) !
+                .Id;
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
             {

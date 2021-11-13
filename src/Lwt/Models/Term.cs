@@ -32,7 +32,7 @@ namespace Lwt.Models
         /// </summary>
         public int UserId { get; set; }
 
-        public User User { get; set; } = new User();
+        public User? User { get; set; }
 
         /// <summary>
         /// Gets or sets the current learning level.

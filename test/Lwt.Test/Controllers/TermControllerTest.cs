@@ -63,8 +63,8 @@ namespace Lwt.Test.Controllers
 
             // assert
             var obj = Assert.IsType<OkObjectResult>(actual);
-            var id = Assert.IsType<int>(obj.Value);
-            Assert.Equal(termId, id);
+            var res = Assert.IsType<CreateTermResponse>(obj.Value);
+            Assert.Equal(termId, res.Id);
         }
 
         /// <summary>

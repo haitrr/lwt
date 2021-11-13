@@ -52,7 +52,7 @@ namespace Lwt.Controllers
             Text text = this.textCreateMapper.Map(model, userId);
             int id = await this.textService.CreateAsync(text);
 
-            return this.Ok(new { Id = id });
+            return this.Ok(new CreateTextResponse { Id = id });
         }
 
         /// <summary>

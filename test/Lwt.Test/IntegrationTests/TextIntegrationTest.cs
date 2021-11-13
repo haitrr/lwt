@@ -34,7 +34,7 @@ namespace Lwt.Test.IntegrationTests
         {
             this.factory = new LwtTestWebApplicationFactory();
             this.tokenProvider = this.factory.Services.GetRequiredService<ITokenProvider>();
-            this.user = new User() { UserName = "test" };
+            this.user = new User() {UserName = "test"};
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
             {
@@ -63,13 +63,13 @@ namespace Lwt.Test.IntegrationTests
         public async Task ShouldAbleToCreateText()
         {
             TestDbHelper.CleanTable<Text>(this.factory.Services);
-            var body = new { title = "test text", content = "this is a test text", languageCode = "en" };
+            var body = new {title = "test text", content = "this is a test text", languageCode = "en"};
             string content = JsonConvert.SerializeObject(body);
             HttpResponseMessage responseMessage = await this.client.PostAsync(
                 "api/text",
                 new StringContent(content, Encoding.UTF8, MediaTypeNames.Application.Json));
             Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-            var id = (int)JsonConvert.DeserializeObject<dynamic>(await responseMessage.Content.ReadAsStringAsync()) !
+            var id = (int) JsonConvert.DeserializeObject<dynamic>(await responseMessage.Content.ReadAsStringAsync()) !
                 .id;
 
             using (IServiceScope scope = this.factory.Services.CreateScope())
@@ -242,86 +242,6 @@ namespace Lwt.Test.IntegrationTests
                     .ToLower());
             Assert.Equal(text.LanguageCode, LanguageCode.GetFromString(content.Value<string>("languageCode")));
             Assert.Equal(text.Content, content.Value<string>("content"));
-        }
-
-        /// <summary>
-        /// should be able to read my text.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task ShouldBeAbleToReadText()
-        {
-            TestDbHelper.CleanTable<Text>(this.factory.Services);
-            var text = new Text
-            {
-                Title = "test",
-                Content = "this is a test text",
-                LanguageCode = LanguageCode.ENGLISH,
-                UserId = this.user.Id,
-            };
-
-            using (IdentityDbContext dc = TestDbHelper.GetDbContext(this.factory))
-            {
-                dc.Set<Text>()
-                    .Add(text);
-                dc.SaveChanges();
-            }
-
-            HttpResponseMessage responseMessage = await this.client.GetAsync($"api/text/{text.Id}");
-            Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-            JToken content = JToken.Parse(await responseMessage.Content.ReadAsStringAsync());
-            Assert.Equal(text.Title, content.Value<string>("title"));
-            Assert.Equal(
-                text.Id.ToString()
-                    .ToLower(),
-                content.Value<string>("id")
-                    .ToLower());
-            Assert.Equal(text.LanguageCode, LanguageCode.GetFromString(content.Value<string>("languageCode")));
-            Assert.NotNull(content.Value<JArray>("terms"));
-        }
-
-        /// <summary>
-        /// should be able to edit my text.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact]
-        public async Task ShouldBeAbleToSetBookmark()
-        {
-            TestDbHelper.CleanTable<Text>(this.factory.Services);
-            var text = new Text
-            {
-                Title = "test",
-                Content = "this is a test text",
-                LanguageCode = LanguageCode.ENGLISH,
-                UserId = this.user.Id,
-            };
-
-            var body = new { title = text.Title, content = text.Content, languageCode = text.LanguageCode };
-            string content = JsonConvert.SerializeObject(body);
-            HttpResponseMessage rm = await this.client.PostAsync(
-                "api/text",
-                new StringContent(content, Encoding.UTF8, MediaTypeNames.Application.Json));
-            Assert.Equal(HttpStatusCode.OK, rm.StatusCode);
-            var id = (int)JsonConvert.DeserializeObject<dynamic>(await rm.Content.ReadAsStringAsync())
-                .id;
-
-            var bookMarkContent = new { termIndex = 2UL };
-
-            HttpResponseMessage responseMessage = await this.client.PatchAsync(
-                $"api/text/{id}/bookmark",
-                new StringContent(
-                    JsonConvert.SerializeObject(bookMarkContent),
-                    Encoding.UTF8,
-                    MediaTypeNames.Application.Json));
-            Assert.Equal(HttpStatusCode.OK, responseMessage.StatusCode);
-
-            using (IdentityDbContext dc = TestDbHelper.GetDbContext(this.factory))
-            {
-                Text editedText = await dc.Set<Text>()
-                    .Where(t => t.Id == id)
-                    .SingleAsync();
-                Assert.Equal(bookMarkContent.termIndex, editedText.Bookmark);
-            }
         }
     }
 }

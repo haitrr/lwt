@@ -84,7 +84,7 @@ namespace Lwt.Test.Controllers
             IActionResult actual = await this.textController.CreateAsync(new TextCreateModel());
 
             // assert
-            Assert.IsType<OkResult>(actual);
+            Assert.IsType<OkObjectResult>(actual);
         }
 
         /// <summary>
