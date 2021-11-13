@@ -1,7 +1,6 @@
 namespace Lwt.Test.IntegrationTests;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -13,7 +12,6 @@ using Lwt.Interfaces;
 using Lwt.Models;
 using Lwt.ViewModels.User;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
