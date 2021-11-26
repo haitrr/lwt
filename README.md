@@ -28,3 +28,29 @@ export LWTDB="Server=localhost;Database=lwt;User=root;Password=;"
 ```shell
 dotnet start
 ```
+
+# Monitoring
+The server output monitoring data using `AppMetrics` then the data is stored using `prometheus` and displayed with `Grafana`
+## install Prometheus
+```shell
+brew install prometheus
+```
+replace `/opt/homebrew/etc/prometheus.yml` content with this
+```yml
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+    - targets: ["localhost:9090"]
+  - job_name: "lwt"
+    static_configs:
+    - targets: ["localhost:5000"]
+    metrics_path: /metrics-text
+```
+
+## install Grafana
+```shell
+brew install grafana
+```
