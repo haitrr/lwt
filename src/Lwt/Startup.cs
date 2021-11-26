@@ -170,6 +170,8 @@ public class Startup
 
         services.AddHostedService<TextTermProcessingService>();
 
+        services.AddMetrics();
+
         // swagger
         RegisterSwaggerGen(services);
 
