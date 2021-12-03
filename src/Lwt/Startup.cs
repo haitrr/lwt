@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 #pragma warning disable
 namespace Lwt;
 
@@ -140,6 +142,7 @@ public class Startup
         services.AddScoped<ISqlTermRepository, SqlTermRepository>();
         services.AddScoped<ISqlTextRepository, SqlTextRepository>();
         services.AddScoped<ITextTermRepository, TextTermRepository>();
+        services.AddScoped<ILogRepository, LogRepository>();
         services.AddTransient<ITextTermProcessor, TextTermProcessor>();
         services.AddTransient<ISqlUserSettingRepository, SqlUserSettingRepository>();
 
@@ -170,6 +173,7 @@ public class Startup
 
         services.AddHostedService<TextTermProcessingService>();
 
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddMetrics();
 
         // swagger

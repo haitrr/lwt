@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace Lwt.Utilities;
 
 using System.Security.Claims;
@@ -9,11 +11,23 @@ using Lwt.Interfaces;
 /// </summary>
 public class AuthenticationHelper : IAuthenticationHelper
 {
-    /// <inheritdoc/>
-    public int GetLoggedInUser(ClaimsPrincipal principal)
+    private readonly IHttpContextAccessor httpContextAccessor;
+
+    public AuthenticationHelper(IHttpContextAccessor httpContextAccessor)
     {
-        string userId = principal.FindFirstValue(Constants.UserIdClaimType);
+        this.httpContextAccessor = httpContextAccessor;
+    }
+
+    /// <inheritdoc/>
+    public int GetLoggedInUser()
+    {
+        string userId = this.httpContextAccessor.HttpContext!.User.FindFirstValue(Constants.UserIdClaimType);
 
         return int.Parse(userId);
+    }
+
+    public string GetLoggedInUserName()
+    {
+        return this.httpContextAccessor.HttpContext!.User.FindFirstValue(Constants.UserNameClaimType);
     }
 }

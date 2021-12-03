@@ -1,3 +1,6 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 namespace Lwt.DbContexts;
 
 using Lwt.Models;
@@ -46,9 +49,9 @@ public class IdentityDbContext : IdentityDbContext<User, Role, int>
             .HasConversion(learningLevelConverter);
 
         builder.Entity<Term>()
-            .HasIndex(t => new { t.Content, t.LanguageCode, t.UserId })
+            .HasIndex(t => new {t.Content, t.LanguageCode, t.UserId})
             .IsUnique();
-            
+
         builder.Entity<Text>()
             .ToTable(Text.TableName)
             .Property(t => t.LanguageCode)
@@ -62,10 +65,10 @@ public class IdentityDbContext : IdentityDbContext<User, Role, int>
 
         builder.Entity<TextTerm>()
             .HasIndex(t => t.TextId);
-            
+
         builder.Entity<TextTerm>()
             .HasIndex(t => t.TermId);
-            
+
         builder.Entity<TextTerm>()
             .HasIndex(t => new {t.TextId, t.TermId});
 
@@ -79,6 +82,24 @@ public class IdentityDbContext : IdentityDbContext<User, Role, int>
         builder.Entity<LanguageSetting>()
             .Property(t => t.DictionaryLanguageCode)
             .HasConversion(converter);
+
+        builder.Entity<Log>()
+            .ToTable("logs")
+            .Property(l => l.Data)
+            .HasConversion<string?>(
+                v => JsonConvert.SerializeObject(
+                    v,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    }),
+                v => JsonConvert.DeserializeObject<JObject>(
+                    v,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    }));
+
 
         builder.Entity<User>()
             .ToTable("users");

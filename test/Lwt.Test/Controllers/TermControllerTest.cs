@@ -78,7 +78,7 @@ public class TermControllerTest : IDisposable
         var userId = 23;
         var term = new Term();
         this.authenticationHelper
-            .Setup(h => h.GetLoggedInUser(this.termController.User))
+            .Setup(h => h.GetLoggedInUser())
             .Returns(userId);
         var termCreateModel = new TermCreateModel();
 

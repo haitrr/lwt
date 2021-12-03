@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+
 namespace Lwt.Creators;
 
 using System;
@@ -16,15 +18,19 @@ public class TextCreator : ITextCreator
     private readonly IValidator<Text> textValidator;
     private readonly ISqlTextRepository textRepository;
     private readonly IDbTransaction dbTransaction;
+    private readonly ILogRepository logRepository;
+    private readonly IAuthenticationHelper authenticationHelper;
 
     public TextCreator(
         IValidator<Text> textValidator,
         ISqlTextRepository textRepository,
-        IDbTransaction dbTransaction)
+        IDbTransaction dbTransaction, ILogRepository logRepository, IAuthenticationHelper authenticationHelper)
     {
         this.textValidator = textValidator;
         this.textRepository = textRepository;
         this.dbTransaction = dbTransaction;
+        this.logRepository = logRepository;
+        this.authenticationHelper = authenticationHelper;
     }
 
     /// <inheritdoc />
@@ -41,6 +47,11 @@ public class TextCreator : ITextCreator
 
         text.LastReadAt = DateTime.UtcNow;
         this.textRepository.Add(text);
+        this.logRepository.Add(
+            new Log(Constants.TextCreatedEvent,
+                JObject.FromObject(new TextCreateLogData(text.Title, text.Content)),
+                authenticationHelper.GetLoggedInUserName()
+            ));
         await this.dbTransaction.CommitAsync();
 
         return text.Id;

@@ -37,7 +37,7 @@ public class TokenProvider : ITokenProvider
                 new[]
                 {
                     new Claim(Constants.UserIdClaimType, user.Id.ToString()),
-                    new Claim("userName", user.UserName),
+                    new Claim(Constants.UserNameClaimType, user.UserName),
                 }),
             Expires = DateTime.UtcNow.AddMonths(3),
             SigningCredentials = new SigningCredentials(

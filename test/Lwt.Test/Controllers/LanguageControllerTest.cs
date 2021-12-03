@@ -57,7 +57,7 @@ public class LanguageControllerTest : IDisposable
         var userId = 1;
         var languages = new List<ILanguage>();
         var viewModels = new List<LanguageViewModel>();
-        this.authenticationHelper.Setup(h => h.GetLoggedInUser(this.languageController.User)).Returns(userId);
+        this.authenticationHelper.Setup(h => h.GetLoggedInUser()).Returns(userId);
         this.languageHelper.Setup(h => h.GetAllLanguages()).Returns(languages);
         this.languageViewModelMapper.Setup(m => m.Map(languages)).Returns(viewModels);
 

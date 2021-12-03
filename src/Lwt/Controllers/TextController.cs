@@ -48,7 +48,7 @@ public class TextController : Controller
     [Authorize]
     public async Task<IActionResult> CreateAsync([FromBody] TextCreateModel model)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         Text text = this.textCreateMapper.Map(model, userId);
         int id = await this.textService.CreateAsync(text);
 
@@ -67,7 +67,7 @@ public class TextController : Controller
         [FromQuery] TextFilter filters,
         [FromQuery] PaginationQuery paginationQuery)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
 
         long count = await this.textService.CountAsync(userId, filters);
         IEnumerable<TextViewModel> viewModels =
@@ -85,7 +85,7 @@ public class TextController : Controller
     [Authorize]
     public async Task<IActionResult> DeleteAsync([FromRoute] int id)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         await this.textService.DeleteAsync(id, userId);
 
         return this.Ok();
@@ -100,7 +100,7 @@ public class TextController : Controller
     [Authorize]
     public async Task<IActionResult> ReadAsync([FromRoute] int id)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         TextReadModel textReadModel = await this.textService.ReadAsync(id, userId);
 
         return this.Ok(textReadModel);
@@ -116,7 +116,7 @@ public class TextController : Controller
     [Authorize]
     public async Task<IActionResult> EditAsync([FromRoute] int id, [FromBody] TextEditModel editModel)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         await this.textService.EditAsync(id, userId, editModel);
 
         return this.Ok();
@@ -131,7 +131,7 @@ public class TextController : Controller
     [Authorize]
     public async Task<IActionResult> GetEditDetailAsync([FromRoute] int id)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         TextEditDetailModel editDetail = await this.textService.GetEditDetailAsync(id, userId);
 
         return this.Ok(editDetail);
@@ -149,7 +149,7 @@ public class TextController : Controller
         [FromRoute] int id,
         [FromBody] SetBookmarkModel setBookmarkModel)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         await this.textService.SetBookmarkAsync(id, userId, setBookmarkModel);
         return this.Ok();
     }
@@ -158,7 +158,7 @@ public class TextController : Controller
     [Authorize]
     public async Task<IActionResult> GetTermCounts([FromRoute] int id)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         IDictionary<LearningLevel, int> counts = await this.textService.GetTermCountsAsync(id, userId);
         return this.Ok(new { Id = id, Counts = counts });
     }
@@ -167,7 +167,7 @@ public class TextController : Controller
     [Authorize]
     public async Task<IActionResult> GetProcessedTermCountAsync([FromRoute] int id)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         long processedTermCount = await this.textService.GetProcessedTermCountAsync(id, userId);
         return this.Ok(new { ProcessedTermCount = processedTermCount });
     }
@@ -176,7 +176,7 @@ public class TextController : Controller
     [Authorize]
     public async Task<IActionResult> GetTermCountAsync([FromRoute] int id)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         long termCount = await this.textService.GetTermCountAsync(id, userId);
         return this.Ok(new { TermCount = termCount });
     }
@@ -185,7 +185,7 @@ public class TextController : Controller
     [Authorize]
     public async Task<IActionResult> GetTermCountInTextAsync([FromRoute] int id, [FromRoute] int termId)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         int count = await this.textService.GetTermCountInTextAsync(id, userId, termId);
         return this.Ok(new { Id = id, TermId = termId, Count = count });
     }
@@ -197,7 +197,7 @@ public class TextController : Controller
         [FromQuery] int indexFrom,
         [FromQuery] int indexTo)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser(this.User);
+        int userId = this.authenticationHelper.GetLoggedInUser();
         IEnumerable<TermReadModel> terms = await this.textService.GetTextTermsAsync(id, userId, indexFrom, indexTo);
         return this.Ok(new { Id = id, Terms = terms });
     }

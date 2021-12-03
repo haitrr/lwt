@@ -36,7 +36,7 @@ public class UserController : Controller
     [HttpGet]
     public async Task<IActionResult> GetAsync()
     {
-        int loggedInUserid = this.authenticationHelper.GetLoggedInUser(this.User);
+        int loggedInUserid = this.authenticationHelper.GetLoggedInUser();
         UserView user = await this.service.GetAsync(loggedInUserid);
         return this.Ok(user);
     }
@@ -48,7 +48,7 @@ public class UserController : Controller
     [HttpGet("setting")]
     public async Task<IActionResult> GetSettingAsync()
     {
-        int loggedInUserid = this.authenticationHelper.GetLoggedInUser(this.User);
+        int loggedInUserid = this.authenticationHelper.GetLoggedInUser();
         UserSettingView userSetting = await this.service.GetSettingAsync(loggedInUserid);
         return this.Ok(userSetting);
     }
@@ -62,7 +62,7 @@ public class UserController : Controller
     [Authorize]
     public async Task<IActionResult> GetSettingAsync([FromBody] UserSettingUpdate userSettingUpdate)
     {
-        int loggedInUserid = this.authenticationHelper.GetLoggedInUser(this.User);
+        int loggedInUserid = this.authenticationHelper.GetLoggedInUser();
         await this.service.PutSettingAsync(loggedInUserid, userSettingUpdate);
         return this.Ok();
     }
@@ -107,7 +107,7 @@ public class UserController : Controller
     [Authorize]
     public async Task<IActionResult> ChangePasswordAsync([FromBody] UserChangePasswordModel changePasswordModel)
     {
-        int loggedInUserid = this.authenticationHelper.GetLoggedInUser(this.User);
+        int loggedInUserid = this.authenticationHelper.GetLoggedInUser();
         await this.service.ChangePasswordAsync(loggedInUserid, changePasswordModel);
         return this.Ok();
     }

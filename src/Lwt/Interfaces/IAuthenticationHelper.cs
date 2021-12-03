@@ -12,5 +12,7 @@ public interface IAuthenticationHelper
     /// </summary>
     /// <param name="principal">principal.</param>
     /// <returns>id of current user.</returns>
-    int GetLoggedInUser(ClaimsPrincipal principal);
+    int GetLoggedInUser();
+
+    string GetLoggedInUserName();
 }
