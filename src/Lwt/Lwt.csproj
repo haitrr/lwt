@@ -7,7 +7,7 @@
         <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <NoWarn>1701;1702;CA2007;SA1633</NoWarn>
+        <NoWarn>1701;1702;CA2007;SA1633;CS1591</NoWarn>
         <DocumentationFile>bin\Lwt.xml</DocumentationFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

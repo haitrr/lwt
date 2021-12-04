@@ -16,4 +16,5 @@ public static class Constants
     public const string UserNameClaimType = "userName";
 
     public const string TextCreatedEvent = "textCreated";
+    public const string TextReadEvent  = "textRead";
 }

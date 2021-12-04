@@ -1,5 +1,3 @@
-using Newtonsoft.Json.Linq;
-
 namespace Lwt.Creators;
 
 using System;
@@ -49,7 +47,7 @@ public class TextCreator : ITextCreator
         this.textRepository.Add(text);
         this.logRepository.Add(
             new Log(Constants.TextCreatedEvent,
-                JObject.FromObject(new TextCreateLogData(text.Title, text.Content)),
+                new TextCreateLogData(text.Title, text.Content),
                 authenticationHelper.GetLoggedInUserName()
             ));
         await this.dbTransaction.CommitAsync();

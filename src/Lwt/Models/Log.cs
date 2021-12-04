@@ -1,12 +1,11 @@
 namespace Lwt.Models;
 
 using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json.Linq;
 
 /// <summary>
 /// Log object to store event logs.
 /// </summary>
-public record Log(string Event, JObject Data, string UserName) : Entity
+public record Log(string Event, object Data, string UserName) : Entity
 {
     /// <summary>
     /// Gets or sets the event type.
@@ -18,7 +17,7 @@ public record Log(string Event, JObject Data, string UserName) : Entity
     /// Gets or sets the event data.
     /// </summary>
     [Required]
-    public JObject Data { get; set; } = Data;
+    public object Data { get; set; } = Data;
 
     /// <summary>
     /// Gets or sets the user id that this log belong to.

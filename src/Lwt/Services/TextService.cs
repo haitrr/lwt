@@ -1,6 +1,5 @@
 namespace Lwt.Services;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,10 +21,10 @@ public class TextService : ITextService
 
     private readonly IMapper<Text, TextViewModel> textViewMapper;
     private readonly ITextCreator textCreator;
+    private readonly ITextReader textReader;
 
     private readonly IMapper<TextEditModel, Text> textEditMapper;
     private readonly IMapper<Text, TextEditDetailModel> textEditDetailMapper;
-    private readonly IMapper<Text, TextReadModel> textReadMapper;
     private readonly IDbTransaction dbTransaction;
     private readonly ITextTermRepository textTermRepository;
     private readonly IMapper<TextTerm, TermReadModel> textTermMapper;
@@ -36,20 +35,19 @@ public class TextService : ITextService
         IMapper<Text, TextViewModel> textViewMapper,
         IMapper<Text, TextEditDetailModel> textEditDetailMapper,
         ITextCreator textCreator,
-        IMapper<Text, TextReadModel> textReadMapper,
         IDbTransaction dbTransaction,
         ITextTermRepository textTermRepository,
-        IMapper<TextTerm, TermReadModel> textTermMapper)
+        IMapper<TextTerm, TermReadModel> textTermMapper, ITextReader textReader)
     {
         this.textRepository = textRepository;
         this.textEditMapper = textEditMapper;
         this.textViewMapper = textViewMapper;
         this.textEditDetailMapper = textEditDetailMapper;
         this.textCreator = textCreator;
-        this.textReadMapper = textReadMapper;
         this.dbTransaction = dbTransaction;
         this.textTermRepository = textTermRepository;
         this.textTermMapper = textTermMapper;
+        this.textReader = textReader;
     }
 
     /// <inheritdoc/>
@@ -124,31 +122,9 @@ public class TextService : ITextService
     }
 
     /// <inheritdoc />
-    public async Task<TextReadModel> ReadAsync(int id, int userId)
+    public Task<TextReadModel> ReadAsync(int id, int userId)
     {
-        Text? text = await this.textRepository.Queryable()
-            .Where(t => t.Id == id && t.UserId == userId)
-            .Select(
-                t => new Text()
-                {
-                    Id = t.Id,
-                    Title = t.Title,
-                    Bookmark = t.Bookmark,
-                    LanguageCode = t.LanguageCode,
-                    TermCount = t.TermCount,
-                })
-            .SingleOrDefaultAsync();
-
-        if (text == null)
-        {
-            throw new NotFoundException("Text not found.");
-        }
-
-        text.LastReadAt = DateTime.UtcNow;
-        this.textRepository.UpdateTextLastReadAt(text);
-        await this.dbTransaction.CommitAsync();
-
-        return this.textReadMapper.Map(text);
+        return this.textReader.ReadAsync(id, userId);
     }
 
     /// <inheritdoc />
