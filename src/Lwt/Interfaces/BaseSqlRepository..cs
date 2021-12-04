@@ -105,6 +105,11 @@ public class BaseSqlRepository<T> : ISqlRepository<T>
 
     public void BulkInsert(IEnumerable<T> entities)
     {
-        this.DbSet.BulkInsert(entities);
+        this.DbSet.AddRange(entities);
+    }
+
+    public void DeleteRange(IEnumerable<T> entities)
+    {
+        this.DbSet.RemoveRange(entities);
     }
 }

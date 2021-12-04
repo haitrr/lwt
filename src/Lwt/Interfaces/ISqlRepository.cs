@@ -83,4 +83,6 @@ public interface ISqlRepository<T>
     void Delete(T entity);
 
     void BulkInsert(IEnumerable<T> entities);
+    
+    void DeleteRange(IEnumerable<T> entities);
 }

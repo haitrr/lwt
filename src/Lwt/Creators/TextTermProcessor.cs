@@ -63,11 +63,13 @@ public class TextTermProcessor : ITextTermProcessor
                 this.logger.LogInformation($"New or updated text, set term count");
                 this.logger.LogInformation($"Processing new or reset, removing old text term");
 
-                if (this.textTermRepository.Queryable()
-                        .Where(t => t.TextId == processingText.Id)
-                        .Take(10000)
-                        .DeleteFromQuery() != 0)
+                List<TextTerm> oldTexTerms = await this.textTermRepository.Queryable()
+                    .Where(t => t.TextId == processingText.Id)
+                    .Take(1000).ToListAsync();
+                if (oldTexTerms.Count() != 0)
                 {
+                    this.textTermRepository.DeleteRange(oldTexTerms);
+                    await this.dbTransaction.CommitAsync();
                     await transaction.CommitAsync();
                     return;
                 }
@@ -135,6 +137,7 @@ public class TextTermProcessor : ITextTermProcessor
             List<Term> newTerms = this.MapTerms(processingWords, processingText, termDict, language);
 
             this.termRepository.BulkInsert(newTerms);
+            this.dbTransaction.SaveChanges();
 
             List<TextTerm> textTerms = this.GetTextTerms(processingWords, indexFrom, processingText, termDict);
 
