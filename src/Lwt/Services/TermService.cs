@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Lwt.Exceptions;
 using Lwt.Extensions;
 using Lwt.Interfaces;
 using Lwt.Models;
@@ -17,43 +16,29 @@ using Microsoft.EntityFrameworkCore;
 public class TermService : ITermService
 {
     private readonly ISqlTermRepository termRepository;
-    private readonly IDbTransaction dbTransaction;
 
     private readonly IMapper<Term, TermViewModel> termViewMapper;
     private readonly IMapper<Term, TermMeaningDto> termMeaningMapper;
     private readonly ITermEditor termEditor;
+    private readonly ITermCreator termCreator;
 
     public TermService(
         ISqlTermRepository termRepository,
         IMapper<Term, TermViewModel> termViewMapper,
         IMapper<Term, TermMeaningDto> termMeaningMapper,
-        IDbTransaction dbTransaction,
-        ITermEditor termEditor)
+        ITermEditor termEditor, ITermCreator termCreator)
     {
         this.termRepository = termRepository;
         this.termViewMapper = termViewMapper;
         this.termMeaningMapper = termMeaningMapper;
-        this.dbTransaction = dbTransaction;
         this.termEditor = termEditor;
+        this.termCreator = termCreator;
     }
 
     /// <inheritdoc/>
-    public async Task<int> CreateAsync(Term term)
+    public Task<int> CreateAsync(Term term)
     {
-        Term? existingTerm = await this.termRepository.TryGetByUserAndLanguageAndContentAsync(
-            term.UserId,
-            term.LanguageCode,
-            term.Content);
-
-        if (existingTerm != null)
-        {
-            throw new BadRequestException("Term has already exist.");
-        }
-
-        this.termRepository.Add(term);
-        await this.dbTransaction.CommitAsync();
-
-        return term.Id;
+        return this.termCreator.CreateAsync(term);
     }
 
     /// <inheritdoc/>
