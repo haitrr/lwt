@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Lwt.Exceptions;
 using Lwt.Interfaces;
 using Lwt.Models;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Lwt.Services;
 
@@ -36,19 +37,24 @@ public class TermCreator : ITermCreator
             throw new BadRequestException("Term has already exist.");
         }
 
-        this.termRepository.Add(term);
-        this.logRepository.Add(
-            new Log(
-                Constants.TermCreatedEvent,
-                new TermCreatedLogData(
-                    term.LanguageCode.ToString(),
-                    term.Content,
-                    term.LearningLevel.ToString()
-                ),
-                authenticationHelper.GetLoggedInUserName()
-            )
-        );
-        await this.dbTransaction.CommitAsync();
+        await using (IDbContextTransaction transaction = this.dbTransaction.BeginTransaction())
+        {
+            this.termRepository.Add(term);
+            this.dbTransaction.SaveChanges();
+            this.logRepository.Add(
+                new Log(
+                    Constants.TermCreatedEvent,
+                    new TermCreatedLogData(
+                        term.LanguageCode.ToString(),
+                        term.Content,
+                        term.LearningLevel.ToString()
+                    ),
+                    authenticationHelper.GetLoggedInUserName()
+                ).WithEntity(nameof(Term), term.Id)
+            );
+            this.dbTransaction.SaveChanges();
+            await transaction.CommitAsync();
+        }
 
         return term.Id;
     }

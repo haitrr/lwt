@@ -24,4 +24,15 @@ public record Log(string Event, object Data, string UserName) : Entity
     /// </summary>
     [Required]
     public string UserName { get; set; } = UserName;
+
+    public string? EntityType { get; set; }
+
+    public int? EntityId { get; set; }
+
+    public Log WithEntity(string entityType, int entityId)
+    {
+        this.EntityType = entityType;
+        this.EntityId = entityId;
+        return this;
+    }
 }

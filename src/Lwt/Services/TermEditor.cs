@@ -36,7 +36,7 @@ public class TermEditor : ITermEditor
                 Constants.TermEditedEvent,
                 new TermEditedEventData(before, after),
                 authenticationHelper.GetLoggedInUserName()
-            )
+            ).WithEntity(nameof(Term), current.Id)
         );
         await this.dbTransaction.CommitAsync();
     }

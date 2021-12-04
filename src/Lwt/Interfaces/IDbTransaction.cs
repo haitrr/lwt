@@ -15,4 +15,5 @@ public interface IDbTransaction
     Task CommitAsync();
 
     IDbContextTransaction BeginTransaction();
+    void SaveChanges();
 }

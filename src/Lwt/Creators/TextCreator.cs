@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore.Storage;
+
 namespace Lwt.Creators;
 
 using System;
@@ -44,13 +46,20 @@ public class TextCreator : ITextCreator
         }
 
         text.LastReadAt = DateTime.UtcNow;
-        this.textRepository.Add(text);
-        this.logRepository.Add(
-            new Log(Constants.TextCreatedEvent,
-                new TextCreateLogData(text.Title, text.Content),
-                authenticationHelper.GetLoggedInUserName()
-            ));
-        await this.dbTransaction.CommitAsync();
+
+        await using (IDbContextTransaction transaction = this.dbTransaction.BeginTransaction())
+        {
+            this.textRepository.Add(text);
+            this.dbTransaction.SaveChanges();
+            this.logRepository.Add(
+                new Log(
+                    Constants.TextCreatedEvent,
+                    new TextCreateLogData(text.Title, text.LanguageCode.ToString()),
+                    authenticationHelper.GetLoggedInUserName()
+                ).WithEntity(nameof(Text), text.Id));
+            this.dbTransaction.SaveChanges();
+            await transaction.CommitAsync();
+        }
 
         return text.Id;
     }

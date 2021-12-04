@@ -28,9 +28,15 @@ public class DbTransaction<T> : IDbTransaction
     {
         await this.databaseContext.SaveChangesAsync();
     }
+    
 
     public IDbContextTransaction BeginTransaction()
     {
         return this.databaseContext.Database.BeginTransaction();
+    }
+
+    public void SaveChanges()
+    {
+        this.databaseContext.SaveChanges();
     }
 }
