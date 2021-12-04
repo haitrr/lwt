@@ -17,4 +17,5 @@ public static class Constants
 
     public const string TextCreatedEvent = "textCreated";
     public const string TextReadEvent  = "textRead";
+    public const string TermEditedEvent = "termEdited";
 }

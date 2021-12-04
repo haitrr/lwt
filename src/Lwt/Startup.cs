@@ -162,6 +162,7 @@ public class Startup
         services.AddScoped<ISkippedWordRemover, SkippedWordRemover>();
         services.AddScoped<IUserTextGetter, UserTextGetter>();
         services.AddScoped<ITextReader, TextReader>();
+        services.AddScoped<ITermEditor, TermEditor>();
         services.AddScoped<IUserPasswordChanger, UserPasswordChanger>();
 
         // middleware

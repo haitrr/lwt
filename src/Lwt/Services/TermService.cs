@@ -1,7 +1,6 @@
 namespace Lwt.Services;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -9,7 +8,6 @@ using Lwt.Exceptions;
 using Lwt.Extensions;
 using Lwt.Interfaces;
 using Lwt.Models;
-using Lwt.Repositories;
 using Lwt.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,33 +19,22 @@ public class TermService : ITermService
     private readonly ISqlTermRepository termRepository;
     private readonly IDbTransaction dbTransaction;
 
-    private readonly IMapper<TermEditModel, Term> termEditMapper;
     private readonly IMapper<Term, TermViewModel> termViewMapper;
     private readonly IMapper<Term, TermMeaningDto> termMeaningMapper;
-    private readonly ITextTermRepository textTermRepository;
+    private readonly ITermEditor termEditor;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TermService"/> class.
-    /// </summary>
-    /// <param name="termRepository">the term repository.</param>
-    /// <param name="termEditMapper">the term edit mapper.</param>
-    /// <param name="termViewMapper">term view mapper.</param>
-    /// <param name="termMeaningMapper">term meaning mapper.</param>
-    /// <param name="dbTransaction">db transaction.</param>
     public TermService(
         ISqlTermRepository termRepository,
-        IMapper<TermEditModel, Term> termEditMapper,
         IMapper<Term, TermViewModel> termViewMapper,
         IMapper<Term, TermMeaningDto> termMeaningMapper,
         IDbTransaction dbTransaction,
-        ITextTermRepository textTermRepository)
+        ITermEditor termEditor)
     {
         this.termRepository = termRepository;
-        this.termEditMapper = termEditMapper;
         this.termViewMapper = termViewMapper;
         this.termMeaningMapper = termMeaningMapper;
         this.dbTransaction = dbTransaction;
-        this.textTermRepository = textTermRepository;
+        this.termEditor = termEditor;
     }
 
     /// <inheritdoc/>
@@ -70,13 +57,9 @@ public class TermService : ITermService
     }
 
     /// <inheritdoc/>
-    public async Task EditAsync(TermEditModel termEditModel, int termId, int userId)
+    public Task EditAsync(TermEditModel termEditModel, int termId, int userId)
     {
-        Term current = await this.termRepository.GetUserTermAsync(termId, userId);
-
-        Term edited = this.termEditMapper.Map(termEditModel, current);
-        this.termRepository.Update(edited);
-        await this.dbTransaction.CommitAsync();
+        return this.termEditor.EditAsync(termEditModel, termId, userId);
     }
 
     /// <inheritdoc />
