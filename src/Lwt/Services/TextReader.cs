@@ -59,7 +59,7 @@ public class TextReader : ITextReader
                 Constants.TextReadEvent,
                 new TextReadLogData(text.Id, text.LanguageCode.ToString()),
             authenticationHelper.GetLoggedInUserName()
-        ).WithEntity(nameof(text),text.Id)
+        ).WithEntity(nameof(Text),text.Id)
             );
         await this.dbTransaction.CommitAsync();
         return this.textReadMapper.Map(text);
