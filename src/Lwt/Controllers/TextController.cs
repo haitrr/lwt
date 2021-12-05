@@ -201,4 +201,13 @@ public class TextController : Controller
         IEnumerable<TermReadModel> terms = await this.textService.GetTextTermsAsync(id, userId, indexFrom, indexTo);
         return this.Ok(new { Id = id, Terms = terms });
     }
+
+    [HttpGet("count")]
+    [Authorize]
+    public async Task<IActionResult> CountAsync([FromQuery] TextFilter filters)
+    {
+        int userId = this.authenticationHelper.GetLoggedInUser();
+        long count = await this.textService.CountAsync(userId, filters);
+        return this.Ok(new {Count = count});
+    }
 }
