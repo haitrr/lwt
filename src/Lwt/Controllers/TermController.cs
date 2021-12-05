@@ -45,7 +45,7 @@ public class TermController : Controller
     [Authorize]
     public async Task<IActionResult> CreateAsync([FromBody] TermCreateModel termCreateModel)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser();
+        int userId = this.authenticationHelper.GetLoggedInUserId();
         Term term = this.termCreateMapper.Map(termCreateModel, userId);
         int id = await this.termService.CreateAsync(term);
 
@@ -61,7 +61,7 @@ public class TermController : Controller
     [Authorize]
     public async Task<IActionResult> GetAsync([FromRoute] int termId)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser();
+        int userId = this.authenticationHelper.GetLoggedInUserId();
         TermViewModel termViewModel = await this.termService.GetAsync(userId, termId);
         return this.Ok(termViewModel);
     }
@@ -76,7 +76,7 @@ public class TermController : Controller
     [Authorize]
     public async Task<IActionResult> EditAsync([FromBody] TermEditModel termEditModel, [FromRoute] int id)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser();
+        int userId = this.authenticationHelper.GetLoggedInUserId();
         await this.termService.EditAsync(termEditModel, id, userId);
 
         return this.Ok(new { });
@@ -92,7 +92,7 @@ public class TermController : Controller
     [HttpGet("{termId}/meaning")]
     public async Task<IActionResult> GetMeaningAsync([FromRoute] int termId)
     {
-        int userId = this.authenticationHelper.GetLoggedInUser();
+        int userId = this.authenticationHelper.GetLoggedInUserId();
         TermMeaningDto termMeaningDto = await this.termService.GetMeaningAsync(userId, termId);
         return this.Ok(termMeaningDto);
     }

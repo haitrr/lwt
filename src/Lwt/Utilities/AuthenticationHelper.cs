@@ -19,7 +19,7 @@ public class AuthenticationHelper : IAuthenticationHelper
     }
 
     /// <inheritdoc/>
-    public int GetLoggedInUser()
+    public int GetLoggedInUserId()
     {
         string userId = this.httpContextAccessor.HttpContext!.User.FindFirstValue(Constants.UserIdClaimType);
 

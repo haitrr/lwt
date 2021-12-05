@@ -60,7 +60,7 @@ public class TextControllerTest : IDisposable
         var text = new Text();
         var userId = 1;
         this.textCreateMapper.Setup(m => m.Map(model, userId)).Returns(text);
-        this.authenticationHelper.Setup(h => h.GetLoggedInUser()).Returns(userId);
+        this.authenticationHelper.Setup(h => h.GetLoggedInUserId()).Returns(userId);
         this.textService.Setup(s => s.CreateAsync(text)).Returns(Task.FromResult(1));
 
         // act
@@ -100,7 +100,7 @@ public class TextControllerTest : IDisposable
         var paginationQuery = new PaginationQuery();
         TextViewModel[] texts = Array.Empty<TextViewModel>();
         this.textService.Setup(s => s.GetByUserAsync(userId, filter, paginationQuery)).ReturnsAsync(texts);
-        this.authenticationHelper.Setup(h => h.GetLoggedInUser()).Returns(userId);
+        this.authenticationHelper.Setup(h => h.GetLoggedInUserId()).Returns(userId);
 
         // act
         IActionResult actual = await this.textController.GetAllAsync(filter, paginationQuery);
@@ -119,7 +119,7 @@ public class TextControllerTest : IDisposable
         // arrange
         var id = 1;
         var userId = 1;
-        this.authenticationHelper.Setup(h => h.GetLoggedInUser()).Returns(userId);
+        this.authenticationHelper.Setup(h => h.GetLoggedInUserId()).Returns(userId);
 
         // act
         await this.textController.DeleteAsync(id);
@@ -138,7 +138,7 @@ public class TextControllerTest : IDisposable
         // arrange
         var id = 1;
         var userId = 1;
-        this.authenticationHelper.Setup(h => h.GetLoggedInUser()).Returns(userId);
+        this.authenticationHelper.Setup(h => h.GetLoggedInUserId()).Returns(userId);
 
         // act
         IActionResult actual = await this.textController.DeleteAsync(id);
@@ -176,7 +176,7 @@ public class TextControllerTest : IDisposable
         var textId = 1;
         var userId = 1;
         var editModel = new TextEditModel();
-        this.authenticationHelper.Setup(h => h.GetLoggedInUser()).Returns(userId);
+        this.authenticationHelper.Setup(h => h.GetLoggedInUserId()).Returns(userId);
 
         // act
         await this.textController.EditAsync(textId, editModel);
@@ -197,7 +197,7 @@ public class TextControllerTest : IDisposable
         var pagingQuery = new PaginationQuery();
         int count = new Random().Next(0, 10000);
         this.textService.Setup(t => t.CountAsync(userId, filter)).ReturnsAsync(count);
-        this.authenticationHelper.Setup(h => h.GetLoggedInUser()).Returns(userId);
+        this.authenticationHelper.Setup(h => h.GetLoggedInUserId()).Returns(userId);
 
         IActionResult actual = await this.textController.GetAllAsync(filter, pagingQuery);
 
@@ -219,7 +219,7 @@ public class TextControllerTest : IDisposable
         this.textService
             .Setup(t => t.ReadAsync(id, userId))
             .ReturnsAsync(textReadModel);
-        this.authenticationHelper.Setup(h => h.GetLoggedInUser()).Returns(userId);
+        this.authenticationHelper.Setup(h => h.GetLoggedInUserId()).Returns(userId);
 
         IActionResult actual = await this.textController.ReadAsync(id);
 
