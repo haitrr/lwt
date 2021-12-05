@@ -88,4 +88,5 @@ public interface ITextService
     Task<long> GetProcessedTermCountAsync(int id, int userId);
 
     Task<long> GetTermCountAsync(int id, int userId);
+    Task<Dictionary<LanguageCode, long>> CountByLanguageAsync(int userId, TextFilter filters);
 }

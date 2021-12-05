@@ -22,6 +22,7 @@ public class TextService : ITextService
     private readonly IMapper<Text, TextViewModel> textViewMapper;
     private readonly ITextCreator textCreator;
     private readonly ITextReader textReader;
+    private readonly ITextCounter textCounter;
 
     private readonly IMapper<TextEditModel, Text> textEditMapper;
     private readonly IMapper<Text, TextEditDetailModel> textEditDetailMapper;
@@ -37,7 +38,7 @@ public class TextService : ITextService
         ITextCreator textCreator,
         IDbTransaction dbTransaction,
         ITextTermRepository textTermRepository,
-        IMapper<TextTerm, TermReadModel> textTermMapper, ITextReader textReader)
+        IMapper<TextTerm, TermReadModel> textTermMapper, ITextReader textReader, ITextCounter textCounter)
     {
         this.textRepository = textRepository;
         this.textEditMapper = textEditMapper;
@@ -48,6 +49,7 @@ public class TextService : ITextService
         this.textTermRepository = textTermRepository;
         this.textTermMapper = textTermMapper;
         this.textReader = textReader;
+        this.textCounter = textCounter;
     }
 
     /// <inheritdoc/>
@@ -274,5 +276,11 @@ public class TextService : ITextService
         }
 
         return count.Value;
+    }
+
+    public async Task<Dictionary<LanguageCode, long>> CountByLanguageAsync(int userId, TextFilter filters)
+    {
+        List<CountByLanguageCode> counts = await this.textCounter.CountByLanguageAsync(userId, filters);
+        return counts.ToDictionary(t => t.LanguageCode, t => t.Count);
     }
 }

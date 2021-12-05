@@ -164,6 +164,7 @@ public class Startup
         services.AddScoped<ITextReader, TextReader>();
         services.AddScoped<ITermEditor, TermEditor>();
         services.AddScoped<ITermCreator, TermCreator>();
+        services.AddScoped<ITextCounter, TextCounter>();
         services.AddScoped<IUserPasswordChanger, UserPasswordChanger>();
 
         // middleware

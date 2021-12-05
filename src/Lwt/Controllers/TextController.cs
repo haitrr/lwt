@@ -207,7 +207,7 @@ public class TextController : Controller
     public async Task<IActionResult> CountAsync([FromQuery] TextFilter filters)
     {
         int userId = this.authenticationHelper.GetLoggedInUserId();
-        long count = await this.textService.CountAsync(userId, filters);
-        return this.Ok(new {Count = count});
+        Dictionary<LanguageCode, long> counts = await this.textService.CountByLanguageAsync(userId, filters);
+        return this.Ok(counts);
     }
 }
