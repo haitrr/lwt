@@ -6,15 +6,15 @@ services:
           - "5000:80"
         container_name: server
         links:
-          - mongo
+          - mysql:mysql
         depends_on:
-          - mongo
+          - mysql
         restart: always
-    mongo:
-        image: mongo
-        restart: always
-        container_name: mongo
-        ports:
-          - "27017:27017"
-        volumes:
-          - /data/db:/data/db
+        environment:
+          LWTDB: "Server=mysql;Database=lwt;User=root;Password=;"
+    mysql:
+      image: mysql
+      command: --default-authentication-plugin=mysql_native_password
+      restart: always
+      environment:
+        MYSQL_ROOT_PASSWORD: ''
