@@ -11,10 +11,14 @@ services:
           - mysql
         restart: always
         environment:
-          LWTDB: "Server=mysql;Database=lwt;User=root;Password=;"
+          - 'LWTDB=Server=mysql;Database=lwt;User=root;'
     mysql:
-      image: mysql
+      image: mysql/mysql-server
       command: --default-authentication-plugin=mysql_native_password
+      ports:
+        - "3306:3306"
       restart: always
       environment:
         MYSQL_ROOT_PASSWORD: ''
+        MYSQL_ALLOW_EMPTY_PASSWORD: true
+        MYSQL_ROOT_HOST: '%'
