@@ -20,6 +20,8 @@ public interface ITermCounter
         IEnumerable<string> words,
         LanguageCode languageCode,
         int userId);
+    
+    Task<Dictionary<LanguageCode, long>> CountByLanguageAsync();
 
     long CountTermFromTextContent(Text text);
 }

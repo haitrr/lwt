@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using Lwt.Exceptions;
+
 namespace Lwt.Services;
 
 using System;
@@ -21,18 +24,20 @@ public class TermService : ITermService
     private readonly IMapper<Term, TermMeaningDto> termMeaningMapper;
     private readonly ITermEditor termEditor;
     private readonly ITermCreator termCreator;
+    private readonly ITermCounter termCounter;
 
     public TermService(
         ISqlTermRepository termRepository,
         IMapper<Term, TermViewModel> termViewMapper,
         IMapper<Term, TermMeaningDto> termMeaningMapper,
-        ITermEditor termEditor, ITermCreator termCreator)
+        ITermEditor termEditor, ITermCreator termCreator, ITermCounter termCounter)
     {
         this.termRepository = termRepository;
         this.termViewMapper = termViewMapper;
         this.termMeaningMapper = termMeaningMapper;
         this.termEditor = termEditor;
         this.termCreator = termCreator;
+        this.termCounter = termCounter;
     }
 
     /// <inheritdoc/>
@@ -66,11 +71,22 @@ public class TermService : ITermService
     /// <inheritdoc />
     public async Task<TermMeaningDto> GetMeaningAsync(int userId, int termId)
     {
-        Term term = await this.termRepository.Queryable()
+        Term? term = await this.termRepository.Queryable()
             .AsNoTracking()
             .Where(t => t.UserId == userId && t.Id == termId)
-            .Select(t => new Term { Meaning = t.Meaning, Id = t.Id }).FirstOrDefaultAsync();
+            .Select(t => new Term {Meaning = t.Meaning, Id = t.Id}).FirstOrDefaultAsync();
+
+        if (term is null)
+        {
+            throw new NotFoundException("term not found");
+        }
 
         return this.termMeaningMapper.Map(term);
+    }
+
+    public async Task<Dictionary<string, long>> CountByLanguageAsync()
+    {
+        Dictionary<LanguageCode, long> counts = await this.termCounter.CountByLanguageAsync();
+        return counts.ToDictionary(d => d.Key.ToString(), d => d.Value);
     }
 }

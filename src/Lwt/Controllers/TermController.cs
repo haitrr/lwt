@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Lwt.Controllers;
 
 using System.Threading.Tasks;
@@ -95,5 +97,14 @@ public class TermController : Controller
         int userId = this.authenticationHelper.GetLoggedInUserId();
         TermMeaningDto termMeaningDto = await this.termService.GetMeaningAsync(userId, termId);
         return this.Ok(termMeaningDto);
+    }
+    
+    [HttpGet("count")]
+    [Authorize]
+    public async Task<IActionResult> CountByLanguageAsync()
+    {
+        Dictionary<string, long> counts = await this.termService.CountByLanguageAsync();
+
+        return this.Ok(counts);
     }
 }

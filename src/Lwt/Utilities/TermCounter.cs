@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Lwt.Utilities;
 
 using System.Collections.Generic;
@@ -74,6 +76,13 @@ public class TermCounter : ITermCounter
         }
 
         return result;
+    }
+
+    public Task<Dictionary<LanguageCode, long>> CountByLanguageAsync()
+    {
+        return this.termRepository.Queryable()
+            .GroupBy(t => t.LanguageCode)
+            .ToDictionaryAsync(g => g.Key, g => g.LongCount());
     }
 
     public long CountTermFromTextContent(Text text)

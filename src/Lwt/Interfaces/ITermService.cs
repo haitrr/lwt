@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Lwt.Interfaces;
 
 using System.Threading.Tasks;
@@ -48,4 +50,6 @@ public interface ITermService
     /// <param name="termId">term id.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
     Task<TermMeaningDto> GetMeaningAsync(int userId, int termId);
+
+    Task<Dictionary<string,long>> CountByLanguageAsync();
 }
