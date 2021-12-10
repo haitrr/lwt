@@ -1,3 +1,4 @@
+using Lwt.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lwt.Utilities;
@@ -15,17 +16,19 @@ public class TermCounter : ITermCounter
     private readonly ISkippedWordRemover skippedWordRemover;
     private readonly ITextNormalizer textNormalizer;
     private readonly ITextSeparator textSeparator;
+    private readonly IAuthenticationHelper authenticationHelper;
 
     public TermCounter(
         ISqlTermRepository termRepository,
         ISkippedWordRemover skippedWordRemover,
         ITextNormalizer textNormalizer,
-        ITextSeparator textSeparator)
+        ITextSeparator textSeparator, IAuthenticationHelper authenticationHelper)
     {
         this.termRepository = termRepository;
         this.skippedWordRemover = skippedWordRemover;
         this.textNormalizer = textNormalizer;
         this.textSeparator = textSeparator;
+        this.authenticationHelper = authenticationHelper;
     }
 
     /// <inheritdoc/>
@@ -78,11 +81,16 @@ public class TermCounter : ITermCounter
         return result;
     }
 
-    public Task<Dictionary<LanguageCode, long>> CountByLanguageAsync()
+    public async Task<Dictionary<LanguageCode, long>> CountByLanguageAsync()
     {
-        return this.termRepository.Queryable()
+        int userId = this.authenticationHelper.GetLoggedInUserId();
+        List<CountByLanguageCode> list = await this.termRepository.Queryable()
+            .Where(term => term.UserId == userId)
             .GroupBy(t => t.LanguageCode)
-            .ToDictionaryAsync(g => g.Key, g => g.LongCount());
+            .Select(g => new CountByLanguageCode(g.Key, g.LongCount()))
+            .ToListAsync();
+            
+        return list.ToDictionary(g => g.LanguageCode, g => g.Count);
     }
 
     public long CountTermFromTextContent(Text text)
