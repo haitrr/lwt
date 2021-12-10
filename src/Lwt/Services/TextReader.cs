@@ -64,4 +64,20 @@ public class TextReader : ITextReader
         await this.dbTransaction.CommitAsync();
         return this.textReadMapper.Map(text);
     }
+
+    public async Task<Text?> GetLastReadAsync(string userName)
+    {
+        Log? log = await this.logRepository.Queryable()
+            .Where(l => l.UserName == userName && l.Event == Constants.TextReadEvent)
+            .OrderByDescending(l => l.Id)
+            .FirstOrDefaultAsync();
+
+        if (log is null)
+        {
+            return null;
+        }
+
+        Text text = await this.textRepository.GetByIdAsync(log.EntityId!.Value);
+        return text;
+    }
 }

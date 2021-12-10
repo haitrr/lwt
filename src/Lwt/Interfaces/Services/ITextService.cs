@@ -24,7 +24,7 @@ public interface ITextService
     /// <param name="textFilter">the filters.</param>
     /// <param name="paginationQuery">the pagination query.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-    Task<IEnumerable<TextViewModel>> GetByUserAsync(
+    Task<IEnumerable<TextViewModel?>> GetByUserAsync(
         int userId,
         TextFilter textFilter,
         PaginationQuery paginationQuery);
@@ -89,4 +89,5 @@ public interface ITextService
 
     Task<long> GetTermCountAsync(int id, int userId);
     Task<Dictionary<LanguageCode, long>> CountByLanguageAsync(int userId, TextFilter filters);
+    Task<TextViewModel?> GetLastReadAsync(string userName);
 }

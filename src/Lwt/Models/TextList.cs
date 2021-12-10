@@ -14,7 +14,7 @@ public class TextList
     /// </summary>
     /// <param name="total">total texts.</param>
     /// <param name="items">texts.</param>
-    public TextList(long total, IEnumerable<TextViewModel> items)
+    public TextList(long total, IEnumerable<TextViewModel?> items)
     {
         this.Total = total;
         this.Items = items;
@@ -28,5 +28,5 @@ public class TextList
     /// <summary>
     /// Gets or sets the text in the current page.
     /// </summary>
-    public IEnumerable<TextViewModel> Items { get; set; }
+    public IEnumerable<TextViewModel?> Items { get; set; }
 }

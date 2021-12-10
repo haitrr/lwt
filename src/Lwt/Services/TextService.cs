@@ -19,7 +19,7 @@ public class TextService : ITextService
 {
     private readonly ISqlTextRepository textRepository;
 
-    private readonly IMapper<Text, TextViewModel> textViewMapper;
+    private readonly IMapper<Text, TextViewModel?> textViewMapper;
     private readonly ITextCreator textCreator;
     private readonly ITextReader textReader;
     private readonly ITextCounter textCounter;
@@ -33,7 +33,7 @@ public class TextService : ITextService
     public TextService(
         ISqlTextRepository textRepository,
         IMapper<TextEditModel, Text> textEditMapper,
-        IMapper<Text, TextViewModel> textViewMapper,
+        IMapper<Text, TextViewModel?> textViewMapper,
         IMapper<Text, TextEditDetailModel> textEditDetailMapper,
         ITextCreator textCreator,
         IDbTransaction dbTransaction,
@@ -59,17 +59,17 @@ public class TextService : ITextService
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<TextViewModel>> GetByUserAsync(
+    public async Task<IEnumerable<TextViewModel?>> GetByUserAsync(
         int userId,
         TextFilter textFilter,
         PaginationQuery paginationQuery)
     {
         IEnumerable<Text> texts = await this.textRepository.GetByUserAsync(userId, textFilter, paginationQuery);
-        var viewModels = new List<TextViewModel>();
+        var viewModels = new List<TextViewModel?>();
 
         foreach (Text text in texts)
         {
-            TextViewModel viewModel = this.textViewMapper.Map(text);
+            TextViewModel? viewModel = this.textViewMapper.Map(text);
             viewModels.Add(viewModel);
         }
 
@@ -235,7 +235,7 @@ public class TextService : ITextService
 
         foreach (TermReadModel termReadModel in result.Where(r => r.Id.HasValue))
         {
-            termReadModel.Count = termCounts[termReadModel.Id.Value];
+            termReadModel.Count = termCounts[termReadModel.Id!.Value];
         }
 
         return result;
@@ -282,5 +282,16 @@ public class TextService : ITextService
     {
         List<CountByLanguageCode> counts = await this.textCounter.CountByLanguageAsync(userId, filters);
         return counts.ToDictionary(t => t.LanguageCode, t => t.Count);
+    }
+
+    public async Task<TextViewModel?> GetLastReadAsync(string userName)
+    {
+        Text? text = await this.textReader.GetLastReadAsync(userName);
+
+        if (text is null)
+        {
+            return null;
+        }
+        return this.textViewMapper.Map(text);
     }
 }

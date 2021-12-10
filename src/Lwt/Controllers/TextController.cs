@@ -70,7 +70,7 @@ public class TextController : Controller
         int userId = this.authenticationHelper.GetLoggedInUserId();
 
         long count = await this.textService.CountAsync(userId, filters);
-        IEnumerable<TextViewModel> viewModels =
+        IEnumerable<TextViewModel?> viewModels =
             await this.textService.GetByUserAsync(userId, filters, paginationQuery);
 
         return this.Ok(new TextList(count, viewModels));
@@ -209,5 +209,15 @@ public class TextController : Controller
         int userId = this.authenticationHelper.GetLoggedInUserId();
         Dictionary<LanguageCode, long> counts = await this.textService.CountByLanguageAsync(userId, filters);
         return this.Ok(counts);
+    }
+    
+    [HttpGet("last-read")]
+    [Authorize]
+    public async Task<IActionResult> GetLastReadAsync()
+    {
+        string userName = this.authenticationHelper.GetLoggedInUserName();
+        TextViewModel? textViewModel = await this.textService.GetLastReadAsync(userName);
+
+        return this.Ok(textViewModel);
     }
 }
