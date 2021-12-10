@@ -15,6 +15,8 @@ services:
     mysql:
       image: mysql/mysql-server
       command: --default-authentication-plugin=mysql_native_password
+      volumes:
+        - ${LWT_MYSQL_DIR}:/var/lib/mysql
       ports:
         - "3306:3306"
       restart: always
