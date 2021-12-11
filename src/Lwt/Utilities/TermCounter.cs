@@ -62,6 +62,7 @@ public class TermCounter : ITermCounter
 
         var result = new Dictionary<LearningLevel, long>();
         IEnumerable<LearningLevel> learningLevels = LearningLevel.GetAll();
+
         foreach (LearningLevel termLearningLevel in learningLevels)
         {
             result[termLearningLevel] = 0;
@@ -85,11 +86,14 @@ public class TermCounter : ITermCounter
     {
         int userId = this.authenticationHelper.GetLoggedInUserId();
         List<CountByLanguageCode> list = await this.termRepository.Queryable()
-            .Where(term => term.UserId == userId)
+            .Where(term => term.UserId == userId
+                           && term.LearningLevel != LearningLevel.Ignored
+                           && term.LearningLevel != LearningLevel.Skipped
+                           && term.LearningLevel != LearningLevel.Unknown)
             .GroupBy(t => t.LanguageCode)
             .Select(g => new CountByLanguageCode(g.Key, g.LongCount()))
             .ToListAsync();
-            
+
         return list.ToDictionary(g => g.LanguageCode, g => g.Count);
     }
 
