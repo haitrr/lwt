@@ -7,6 +7,7 @@ services:
         container_name: server
         links:
           - mysql:mysql
+          - japanese-segmenter:japanse-segmenter
         depends_on:
           - mysql
         restart: always
@@ -14,6 +15,7 @@ services:
           - 'LWTDB=Server=mysql;Database=lwt;User=root;'
     mysql:
       image: mysql/mysql-server
+      container_name: mysql
       command: --default-authentication-plugin=mysql_native_password
       volumes:
         - ${LWT_MYSQL_DIR}:/var/lib/mysql
@@ -24,3 +26,10 @@ services:
         MYSQL_ROOT_PASSWORD: ''
         MYSQL_ALLOW_EMPTY_PASSWORD: true
         MYSQL_ROOT_HOST: '%'
+    japanese-segmenter:
+      build: ./JapaneseSegmenter
+      ports:
+        - "63825:8080"
+      restart: always
+      container_name: japanese-segmenter
+
