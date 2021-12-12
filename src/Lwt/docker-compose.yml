@@ -27,7 +27,7 @@ services:
         MYSQL_ALLOW_EMPTY_PASSWORD: true
         MYSQL_ROOT_HOST: '%'
     japanese-segmenter:
-      build: ./JapaneseSegmenter
+      build: ./JapaneseSegmenter/Natto
       ports:
         - "63825:8080"
       restart: always
