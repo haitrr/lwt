@@ -7,7 +7,7 @@ services:
         container_name: server
         links:
           - mysql:mysql
-          - japanese-segmenter:japanse-segmenter
+          - japanese-segmenter:japanese-segmenter
         depends_on:
           - mysql
         restart: always
