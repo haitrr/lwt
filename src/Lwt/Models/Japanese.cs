@@ -1,3 +1,5 @@
+using Lwt.Clients;
+
 namespace Lwt.Models;
 
 using System.Linq;
@@ -9,15 +11,11 @@ using Lwt.Interfaces;
 /// </summary>
 public class Japanese : ILanguage
 {
-    private readonly IJapaneseTextSplitter textSplitter;
+    private readonly IJapaneseSegmenterClient japaneseSegmenterClient;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Japanese"/> class.
-    /// </summary>
-    /// <param name="textSplitter">the text splitter.</param>
-    public Japanese(IJapaneseTextSplitter textSplitter)
+    public Japanese(IJapaneseSegmenterClient japaneseSegmenterClient)
     {
-        this.textSplitter = textSplitter;
+        this.japaneseSegmenterClient = japaneseSegmenterClient;
     }
 
     /// <inheritdoc/>
@@ -40,7 +38,7 @@ public class Japanese : ILanguage
     /// <inheritdoc />
     public string[] SplitText(string text)
     {
-        return this.textSplitter.Split(text).ToArray();
+        return this.japaneseSegmenterClient.CutAsync(text).GetAwaiter().GetResult().ToArray();
     }
 
     /// <inheritdoc />

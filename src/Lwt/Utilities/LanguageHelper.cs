@@ -1,3 +1,5 @@
+using Lwt.Clients;
+
 namespace Lwt.Utilities;
 
 using System;
@@ -28,7 +30,7 @@ public class LanguageHelper : ILanguageHelper
         {
             new Vietnamese(), new English(),
             new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>() !),
-            new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>() !),
+            new Japanese(this.serviceProvider.GetService<IJapaneseSegmenterClient>() !),
         };
 
         ILanguage? language = languages.SingleOrDefault(l => l.Code == languageCode);
@@ -48,7 +50,7 @@ public class LanguageHelper : ILanguageHelper
         {
             new English(),
             new Chinese(this.serviceProvider.GetService<IChineseTextSplitter>() !),
-            new Japanese(this.serviceProvider.GetService<IJapaneseTextSplitter>() !),
+            new Japanese(this.serviceProvider.GetService<IJapaneseSegmenterClient>() !),
             new Vietnamese(),
         };
     }

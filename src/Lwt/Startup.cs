@@ -1,3 +1,4 @@
+using Lwt.Clients;
 using Microsoft.AspNetCore.Http;
 
 #pragma warning disable
@@ -166,6 +167,7 @@ public class Startup
         services.AddScoped<ITermCreator, TermCreator>();
         services.AddScoped<ITextCounter, TextCounter>();
         services.AddScoped<IUserPasswordChanger, UserPasswordChanger>();
+        services.AddScoped<IJapaneseSegmenterClient, JapaneseSegmenterClient>();
 
         // middleware
         services.AddSingleton<ExceptionHandleMiddleware>();
