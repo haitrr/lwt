@@ -24,4 +24,5 @@ public interface ITermCounter
     Task<Dictionary<LanguageCode, long>> CountByLanguageAsync();
 
     long CountTermFromTextContent(Text text);
+    Task<Dictionary<LearningLevel, long>> CountByLearningLevelAsync();
 }

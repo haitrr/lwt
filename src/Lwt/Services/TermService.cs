@@ -89,4 +89,10 @@ public class TermService : ITermService
         Dictionary<LanguageCode, long> counts = await this.termCounter.CountByLanguageAsync();
         return counts.ToDictionary(d => d.Key.ToString(), d => d.Value);
     }
+
+    public async Task<Dictionary<string, long>> CountByLearningLevelAsync()
+    {
+        Dictionary<LearningLevel, long> counts = await this.termCounter.CountByLearningLevelAsync();
+        return counts.ToDictionary(d => d.Key.ToString(), d => d.Value);
+    }
 }

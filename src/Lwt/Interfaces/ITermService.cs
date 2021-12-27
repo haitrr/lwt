@@ -52,4 +52,5 @@ public interface ITermService
     Task<TermMeaningDto> GetMeaningAsync(int userId, int termId);
 
     Task<Dictionary<string,long>> CountByLanguageAsync();
+    Task<Dictionary<string, long>> CountByLearningLevelAsync();
 }

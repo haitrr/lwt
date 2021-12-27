@@ -46,3 +46,9 @@ public record CountByLanguageCode(LanguageCode LanguageCode, long Count)
     public LanguageCode LanguageCode = LanguageCode;
     public long Count = Count;
 }
+
+public record CountByLearningLevel(LearningLevel LearningLevel, long Count)
+{
+    public LearningLevel LearningLevel = LearningLevel;
+    public long Count = Count;
+}

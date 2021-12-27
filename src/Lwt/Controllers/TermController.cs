@@ -107,4 +107,13 @@ public class TermController : Controller
 
         return this.Ok(counts);
     }
+    
+    [HttpGet("countByLearningLevel")]
+    [Authorize]
+    public async Task<IActionResult> CountByLearningLevel()
+    {
+        Dictionary<string, long> counts = await this.termService.CountByLearningLevelAsync();
+
+        return this.Ok(counts);
+    }
 }

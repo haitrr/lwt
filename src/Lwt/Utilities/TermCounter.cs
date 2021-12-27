@@ -102,4 +102,19 @@ public class TermCounter : ITermCounter
         return this.textSeparator.SeparateText(text.Content, text.LanguageCode)
             .LongCount();
     }
+
+    public async Task<Dictionary<LearningLevel, long>> CountByLearningLevelAsync()
+    {
+        int userId = this.authenticationHelper.GetLoggedInUserId();
+        List<CountByLearningLevel> list = await this.termRepository.Queryable()
+            .Where(term => term.UserId == userId
+                           && term.LearningLevel != LearningLevel.Ignored
+                           && term.LearningLevel != LearningLevel.Skipped
+                           && term.LearningLevel != LearningLevel.Unknown)
+            .GroupBy(t => t.LearningLevel)
+            .Select(g => new CountByLearningLevel(g.Key, g.LongCount()))
+            .ToListAsync();
+
+        return list.ToDictionary(g => g.LearningLevel, g => g.Count);
+    }
 }
