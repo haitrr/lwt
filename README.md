@@ -3,6 +3,11 @@
 
 This project is a simple clone of [Lwt](https://sourceforge.net/projects/lwt/)
 
+Try demo here
+```
+https://lwt.hai.fyi
+```
+
 What it doesn't support:
 * Word splitting/joining.
 * Word review.
