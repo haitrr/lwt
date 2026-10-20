@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, lte } from '
 import { getDb, schema } from './db';
 import { UserError } from './errors';
 import { addLog } from './logs';
-import { isLanguageCode } from '@/lib/languages';
+import { hasSplitter } from './languages';
 import type { Session } from './auth/session';
 import {
   LearningLevel,
@@ -43,6 +43,7 @@ const listColumns = {
   termCount: texts.termCount,
   processedTermCount: texts.processedTermCount,
   bookmark: texts.bookmark,
+  processingError: texts.processingError,
   createdDate: texts.createdDate,
   lastReadAt: texts.lastReadAt,
 };
@@ -56,7 +57,7 @@ function toTextItem({
 }
 
 function validate(input: TextInput) {
-  if (!isLanguageCode(input.languageCode)) throw new UserError('Unsupported language.');
+  if (!hasSplitter(input.languageCode)) throw new UserError('Unsupported language.');
   if (!input.title.trim()) throw new UserError("'Title' must not be empty.");
   if (!input.content.trim()) throw new UserError("'Content' must not be empty.");
 }
@@ -109,13 +110,13 @@ export async function createText(session: Session, input: TextInput) {
   });
 }
 
-/** Editing resets the term counts so the background job splits the text again. */
+/** Editing resets the term counts (and any processing failure) so the background job splits the text again. */
 export async function editText(id: number, userId: number, input: TextInput) {
   validate(input);
   await getOwnedText(id, userId);
   await getDb()
     .update(texts)
-    .set({ ...input, termCount: 0, processedTermCount: 0 })
+    .set({ ...input, termCount: 0, processedTermCount: 0, processingError: null, failedAt: null })
     .where(eq(texts.id, id));
 }
 

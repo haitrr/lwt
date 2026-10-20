@@ -37,6 +37,7 @@ export default function TextForm({ languages, action, initial, submitLabel }: Pr
               <LanguageSelect
                 id="languageCode"
                 languages={languages}
+                textsOnly
                 name="languageCode"
                 defaultValue={values?.languageCode ?? ''}
                 emptyLabel="Choose a language"

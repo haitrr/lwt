@@ -14,7 +14,7 @@ vi.mock('./db', async () => {
     });
   return { schema, getDb: query };
 });
-const { getTextTerms } = await import('./texts');
+const { createText, editText, getTextTerms } = await import('./texts');
 
 describe('getTextTerms', () => {
   it('sends the stored meaning for every level, so saving the term panel keeps it', async () => {
@@ -40,5 +40,20 @@ describe('getTextTerms', () => {
       LearningLevel.Skipped,
     ]);
     expect(terms.map((t) => t.count)).toEqual([2, 1, 4, null]);
+  });
+});
+
+describe('text validation', () => {
+  const session = { userId: 1, userName: 'reader' } as Parameters<typeof createText>[0];
+  const input = { title: 'Xin chào', content: 'Tôi là sinh viên.' };
+
+  it('rejects languages without a splitter', async () => {
+    await expect(createText(session, { ...input, languageCode: 'vi' })).rejects.toThrow('Unsupported language.');
+    await expect(editText(1, 1, { ...input, languageCode: 'vi' })).rejects.toThrow('Unsupported language.');
+  });
+
+  it('accepts languages with a splitter', async () => {
+    results = [[]];
+    await expect(createText(session, { ...input, languageCode: 'en' })).resolves.not.toThrow();
   });
 });

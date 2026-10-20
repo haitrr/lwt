@@ -43,10 +43,11 @@ export async function deleteText(id: number) {
 /**
  * Works through pending text splitting for a few seconds. The background loop does this on a
  * long-running server; on serverless hosts (Vercel) there is no such loop, so pages that wait
- * on processing call this instead.
+ * on processing call this instead. Where the loop runs it already does the work, so this is a no-op.
  */
 export async function advanceProcessing() {
   await requireSession();
+  if (globalThis.lwtProcessingStarted) return;
   const deadline = Date.now() + 3000;
   while (Date.now() < deadline && (await processNextText())) {
     // keep going

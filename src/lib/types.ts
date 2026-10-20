@@ -2,6 +2,8 @@ export type Language = {
   name: string;
   code: string;
   speakCode: string;
+  /** Whether texts can be written in it, i.e. the server has a splitter for it. */
+  supportsTexts: boolean;
 };
 
 export type TextItem = {
@@ -11,6 +13,8 @@ export type TextItem = {
   termCount: number;
   processedTermCount: number;
   bookmark: number | null;
+  /** Why splitting gave up; null unless it failed. */
+  processingError: string | null;
   createdAt: string;
   lastReadAt: string;
 };

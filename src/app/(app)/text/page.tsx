@@ -31,7 +31,16 @@ function plural(n: number, word: string) {
   return `${n.toLocaleString('en')} ${n === 1 ? word : `${word}s`}`;
 }
 
-const isProcessing = (text: TextItem) => text.termCount === 0 || text.processedTermCount < text.termCount;
+const isProcessing = (text: TextItem) =>
+  !text.processingError && (text.termCount === 0 || text.processedTermCount < text.termCount);
+
+function FailedBadge() {
+  return (
+    <Badge variant="outline" className="shrink-0 border-destructive/30 bg-destructive/10 text-destructive">
+      Failed
+    </Badge>
+  );
+}
 
 function ProcessingBadge({ text }: { text: TextItem }) {
   const pct = text.termCount ? Math.floor((text.processedTermCount * 100) / text.termCount) : 0;
@@ -67,6 +76,7 @@ function TextCard({ text, counts }: { text: TextItem; counts: TermCounts }) {
             {text.title}
           </Link>
           {processing && <ProcessingBadge text={text} />}
+          {text.processingError && <FailedBadge />}
         </div>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
           <Badge variant="secondary">{languageName(text.languageCode)}</Badge>
@@ -80,7 +90,11 @@ function TextCard({ text, counts }: { text: TextItem; counts: TermCounts }) {
         </div>
         <ReadProgress text={text} />
       </div>
-      {text.termCount === 0 ? (
+      {text.processingError ? (
+        <p className="text-sm break-words text-destructive">
+          {`Processing failed (edit the text to retry): ${text.processingError}`}
+        </p>
+      ) : text.termCount === 0 ? (
         <p className="text-sm text-muted-foreground">Splitting this text into words…</p>
       ) : (
         <Vocabulary counts={counts} />
