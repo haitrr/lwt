@@ -45,15 +45,16 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
 
 ## Deploying
 
-`docker compose up` builds the app (Next.js standalone output) and starts it with Postgres. Set `POSTGRES_PASSWORD` and
-`LWT_JWT_SECRET` in the environment or a `.env` file.
+`./deploy.sh` backs up the database, then builds the app (Next.js standalone output) and starts it with Postgres and the
+backup service (`docker compose up -d --build`). Set `POSTGRES_PASSWORD`, `LWT_JWT_SECRET` and `BACKUP_AGE_RECIPIENT` in
+the environment or a `.env` file.
 
 ### Backups
 
 The `postgres-backup` service dumps the database every hour into the `postgres-backups` volume, an NFS mount of
 `ugnas.lc:/volume2/backups/lwt` (the same setup as Life). Each dump is `pg_dump | gzip | age`, so nothing reaches the NAS
 unencrypted. Hourly dumps are kept for 48 hours, with daily, weekly and monthly copies kept for 7 days, 4 weeks and 6
-months.
+months. `./deploy.sh` also runs `./backup.sh` before each deploy, which keeps the last 20 dumps in `deployments/`.
 
 Make a key pair on your own machine and set `BACKUP_AGE_RECIPIENT` to its public half; the service will not start
 without it:
