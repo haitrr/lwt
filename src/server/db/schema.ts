@@ -1,4 +1,4 @@
-import { bigint, customType, index, integer, pgTable, serial, text, timestamp, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import { bigint, customType, index, integer, pgTable, primaryKey, serial, text, timestamp, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
 // Tables and columns follow the old .NET API's MySQL schema, renamed to snake_case.
 // scripts/import-mysql.mjs copies an existing database over.
@@ -130,3 +130,29 @@ export const logs = pgTable('logs', {
   entityId: integer('entity_id'),
   entityType: text('entity_type'),
 });
+
+// Built-in dictionaries (dictionary/*.tsv.gz, made by scripts/build-dictionary.mjs), loaded at startup by
+// src/server/dictionaryImport.ts. One row per headword and dictionary pair; meaning lines are separated by \n.
+export const dictionaries = pgTable(
+  'dictionaries',
+  {
+    languageCode: text('language_code').notNull(),
+    dictionaryLanguageCode: text('dictionary_language_code').notNull(),
+    source: text('source').notNull(),
+    // Checksum of the imported file; a different one at startup means re-import.
+    sha256: text('sha256').notNull(),
+    importedAt: timestamp('imported_at', { withTimezone: true, precision: 6 }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.languageCode, t.dictionaryLanguageCode] })],
+);
+
+export const dictionaryEntries = pgTable(
+  'dictionary_entries',
+  {
+    languageCode: text('language_code').notNull(),
+    dictionaryLanguageCode: text('dictionary_language_code').notNull(),
+    word: text('word').notNull(),
+    meaning: text('meaning').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.languageCode, t.dictionaryLanguageCode, t.word] })],
+);
