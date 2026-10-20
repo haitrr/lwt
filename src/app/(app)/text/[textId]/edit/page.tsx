@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { parseId } from '@/lib/ids';
 import { LANGUAGES } from '@/lib/languages';
 import { editText } from '@/lib/texts';
 import { requireSession } from '@/server/auth/session';
@@ -9,7 +10,8 @@ import TextForm from '../../TextForm';
 export const metadata = { title: 'Edit text' };
 
 export default async function EditTextPage({ params }: PageProps<'/text/[textId]/edit'>) {
-  const id = Number((await params).textId);
+  const id = parseId((await params).textId);
+  if (id === null) notFound();
   const session = await requireSession();
   const detail = await getTextEditDetail(id, session.userId).catch((e) => {
     if (e instanceof UserError) notFound();
