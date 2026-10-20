@@ -1,17 +1,18 @@
 import type { ComponentProps } from 'react';
 import type { Language } from '@/lib/types';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 
-type Props = ComponentProps<'select'> & { languages: Language[]; emptyLabel: string };
+type Props = ComponentProps<typeof NativeSelect> & { languages: Language[]; emptyLabel: string };
 
 export default function LanguageSelect({ languages, emptyLabel, ...props }: Props) {
   return (
-    <select {...props}>
-      <option value="">{emptyLabel}</option>
+    <NativeSelect {...props}>
+      <NativeSelectOption value="">{emptyLabel}</NativeSelectOption>
       {languages.map((l) => (
-        <option key={l.code} value={l.code}>
+        <NativeSelectOption key={l.code} value={l.code}>
           {l.name}
-        </option>
+        </NativeSelectOption>
       ))}
-    </select>
+    </NativeSelect>
   );
 }

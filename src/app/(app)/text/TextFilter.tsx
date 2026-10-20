@@ -4,8 +4,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { Language } from '@/lib/types';
 import LanguageSelect from './LanguageSelect';
-import { SearchIcon } from '@/components/icons';
-import styles from './texts.module.css';
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 type Props = { languages: Language[]; title: string; languageCode: string };
 
@@ -28,13 +28,14 @@ export default function TextFilter({ languages, title: initialTitle, languageCod
   }, [title, languageCode, initialTitle, initialLanguage, pathname, router]);
 
   return (
-    <div className={styles.filter}>
-      <div className={styles.search}>
-        <SearchIcon />
-        <input
+    <div className="flex flex-wrap gap-2">
+      <div className="relative min-w-60 flex-1">
+        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
           type="search"
           placeholder="Filter by title"
           aria-label="Filter by title"
+          className="pl-9"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -45,7 +46,7 @@ export default function TextFilter({ languages, title: initialTitle, languageCod
         onChange={(e) => setLanguageCode(e.target.value)}
         emptyLabel="All languages"
         aria-label="Language"
-        className={styles.languageSelect}
+        className="w-44"
       />
     </div>
   );

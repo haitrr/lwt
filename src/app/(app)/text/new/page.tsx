@@ -7,9 +7,7 @@ export const metadata = { title: 'Add text' };
 export default function NewTextPage() {
   return (
     <>
-      <div className="pageHeader">
-        <h1>Add text</h1>
-      </div>
+      <h1 className="mb-4 text-2xl font-semibold tracking-tight">Add text</h1>
       <TextForm languages={LANGUAGES} action={createText} submitLabel="Add" />
     </>
   );

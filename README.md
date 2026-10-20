@@ -40,6 +40,8 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
   segmenter with the same dictionary, Japanese uses kuromoji (IPADIC, as the old MeCab service did). The tests check
   both against output recorded from the old API.
 - Pages are server components; mutations are server functions in `src/lib`.
+- The UI uses [shadcn/ui](https://ui.shadcn.com) components (`src/components/ui`, add more with `npx shadcn add <name>`) on
+  Tailwind CSS v4, with light, dark and system themes.
 
 ## Deploying
 

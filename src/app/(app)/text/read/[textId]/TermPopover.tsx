@@ -2,8 +2,9 @@
 
 import { importanceColor } from '@/lib/importance';
 import { nextLevel, previousLevel, LEVEL_LABELS, type LearningLevel, type TextTermView } from '@/lib/types';
-import { ArrowDownIcon, ArrowUpIcon } from '@/components/icons';
-import styles from './reader.module.css';
+import { ArrowDown, ArrowUp } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 type Props = {
   term: TextTermView;
@@ -19,7 +20,7 @@ export default function TermPopover({ term, rect, suggestion, onKeep, onLeave, o
   const above = rect.top > window.innerHeight / 2;
   return (
     <div
-      className={styles.popover}
+      className="fixed z-30 flex w-[300px] flex-col gap-2 rounded-lg border bg-popover p-4 text-sm text-popover-foreground shadow-lg animate-in fade-in-0 zoom-in-95"
       role="dialog"
       style={{
         left: Math.min(rect.left, window.innerWidth - 320),
@@ -28,31 +29,32 @@ export default function TermPopover({ term, rect, suggestion, onKeep, onLeave, o
       onMouseEnter={onKeep}
       onMouseLeave={onLeave}
     >
-      <div className={styles.popoverHead}>
-        <strong className={styles.popoverTerm}>{term.content}</strong>
-        <span className={styles.levelBadge} data-level={term.learningLevel}>
+      <div className="flex items-center justify-between gap-2">
+        <strong className="text-xl">{term.content}</strong>
+        <Badge variant="secondary" data-level={term.learningLevel}>
+          <span className="size-2 rounded-full bg-level" />
           {LEVEL_LABELS[term.learningLevel]}
-        </span>
+        </Badge>
       </div>
       {term.count ? (
-        <div className={styles.occurrences}>
-          <span style={{ background: importanceColor(term.count) }} />
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="h-[3px] w-3 rounded-full" style={{ background: importanceColor(term.count) }} />
           {`${term.count} in this text`}
         </div>
       ) : null}
-      <p className={styles.meaning}>
-        {meaning || <em>No meaning yet</em>}
-        {!term.meaning && suggestion && <span className={styles.hint}> (dictionary)</span>}
+      <p className="whitespace-pre-line">
+        {meaning || <em className="text-muted-foreground">No meaning yet</em>}
+        {!term.meaning && suggestion && <span className="text-xs text-muted-foreground"> (dictionary)</span>}
       </p>
-      <div className={styles.popoverActions}>
-        <button type="button" className="small" onClick={() => onChangeLevel(nextLevel(term.learningLevel))}>
-          <ArrowUpIcon />
+      <div className="grid grid-cols-2 gap-2">
+        <Button size="sm" onClick={() => onChangeLevel(nextLevel(term.learningLevel))}>
+          <ArrowUp />
           Better
-        </button>
-        <button type="button" className="secondary small" onClick={() => onChangeLevel(previousLevel(term.learningLevel))}>
-          <ArrowDownIcon />
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => onChangeLevel(previousLevel(term.learningLevel))}>
+          <ArrowDown />
           Worse
-        </button>
+        </Button>
       </div>
     </div>
   );

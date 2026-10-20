@@ -1,46 +1,84 @@
 'use client';
 
+import { Monitor, Moon, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useSyncExternalStore } from 'react';
-import { MoonIcon, SunIcon } from './icons';
 
-const STORAGE_KEY = 'lwt-theme';
+type Theme = 'light' | 'dark' | 'system';
 
-// Runs before the page paints, so a saved theme doesn't flash the system one first.
-export const themeScript = `try{var t=localStorage.getItem('${STORAGE_KEY}');if(t)document.documentElement.dataset.theme=t}catch(e){}`;
+import { STORAGE_KEY } from './theme-script';
 
 const listeners = new Set<() => void>();
-const subscribe = (listener: () => void) => {
+const media = () => matchMedia('(prefers-color-scheme: dark)');
+
+function readTheme(): Theme {
+  try {
+    const t = localStorage.getItem(STORAGE_KEY);
+    return t === 'light' || t === 'dark' ? t : 'system';
+  } catch {
+    return 'system';
+  }
+}
+
+function apply(theme: Theme) {
+  const dark = theme === 'dark' || (theme === 'system' && media().matches);
+  document.documentElement.classList.toggle('dark', dark);
+}
+
+function subscribe(listener: () => void) {
   listeners.add(listener);
-  const media = matchMedia('(prefers-color-scheme: dark)');
-  media.addEventListener('change', listener);
+  const onSystemChange = () => {
+    apply(readTheme());
+    listener();
+  };
+  media().addEventListener('change', onSystemChange);
   return () => {
     listeners.delete(listener);
-    media.removeEventListener('change', listener);
+    media().removeEventListener('change', onSystemChange);
   };
-};
-const isDark = () =>
-  (document.documentElement.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) ===
-  'dark';
+}
 
 export default function ThemeToggle() {
-  const dark = useSyncExternalStore(subscribe, isDark, () => false);
-  const toggle = () => {
-    const next = dark ? 'light' : 'dark';
-    document.documentElement.dataset.theme = next;
+  const theme = useSyncExternalStore(subscribe, readTheme, () => 'system' as Theme);
+  const choose = (value: string) => {
+    const next = value as Theme;
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {}
+    apply(next);
     listeners.forEach((l) => l());
   };
   return (
-    <button
-      type="button"
-      className="iconButton"
-      onClick={toggle}
-      aria-label={dark ? 'Use light theme' : 'Use dark theme'}
-      title={dark ? 'Light theme' : 'Dark theme'}
-    >
-      {dark ? <SunIcon /> : <MoonIcon />}
-    </button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="Theme" title="Theme">
+          <Sun className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+          <Moon className="absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuRadioGroup value={theme} onValueChange={choose}>
+          <DropdownMenuRadioItem value="light">
+            <Sun />
+            Light
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="dark">
+            <Moon />
+            Dark
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="system">
+            <Monitor />
+            System
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

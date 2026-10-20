@@ -17,9 +17,7 @@ export default async function EditTextPage({ params }: PageProps<'/text/[textId]
   });
   return (
     <>
-      <div className="pageHeader">
-        <h1>Edit text</h1>
-      </div>
+      <h1 className="mb-4 text-2xl font-semibold tracking-tight">Edit text</h1>
       <TextForm languages={LANGUAGES} action={editText.bind(null, id)} initial={detail} submitLabel="Save" />
     </>
   );

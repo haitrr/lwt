@@ -5,7 +5,9 @@ import { loadTermCounts, loadTextTerms, lookUpTerm, saveBookmark, saveTerm } fro
 import { LearningLevel, type TermCounts, type TextReadInfo, type TextTermView } from '@/lib/types';
 import Link from 'next/link';
 import { languageName } from '@/lib/languages';
-import { ArrowLeftIcon, BookmarkIcon } from '@/components/icons';
+import { ArrowLeft, Bookmark, LoaderCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import TermToken from './TermToken';
 import TermPopover from './TermPopover';
 import TermPanel from './TermPanel';
@@ -220,31 +222,42 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   const percent = text.termCount ? Math.round(((bookmark ?? 0) / text.termCount) * 10000) / 100 : 0;
 
   return (
-    <div className={styles.reader}>
+    <div className={`${styles.reader} flex h-[calc(100dvh-3.5rem)] flex-col`}>
       <title>{text.title}</title>
-      <header className={styles.top}>
-        <div className={styles.titleRow}>
-          <Link href="/text" className={`button ghost small ${styles.back}`} aria-label="Back to texts" title="Back to texts">
-            <ArrowLeftIcon />
-          </Link>
-          <h1 className={styles.title}>{text.title}</h1>
-          <span className="badge">{languageName(text.languageCode)}</span>
+      <header className="flex-none border-b bg-card">
+        <div className="mx-auto flex max-w-3xl flex-col gap-2.5 px-4 py-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <Button asChild variant="ghost" size="icon-sm" className="-ml-2">
+              <Link href="/text" aria-label="Back to texts" title="Back to texts">
+                <ArrowLeft />
+              </Link>
+            </Button>
+            <h1 className="truncate text-lg font-semibold">{text.title}</h1>
+            <Badge variant="secondary">{languageName(text.languageCode)}</Badge>
+          </div>
+          <TextStats counts={counts} termCount={text.termCount} />
         </div>
-        <TextStats counts={counts} termCount={text.termCount} />
       </header>
       {text.processedTermCount < text.termCount || text.termCount === 0 ? (
-        <p className={styles.notice}>This text is still being split into words. Reload in a moment to see all of it.</p>
+        <p className="flex-none bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-700 dark:text-amber-400">
+          This text is still being split into words. Reload in a moment to see all of it.
+        </p>
       ) : null}
-      <div className={styles.body}>
-        <div ref={panelRef} className={styles.content} onScroll={onScroll} lang={text.languageCode}>
+      <div className="flex min-h-0 flex-1">
+        <div ref={panelRef} className="flex-1 overflow-y-auto [overflow-anchor:none]" onScroll={onScroll} lang={text.languageCode}>
           <div className={styles.page}>
-            {range.begin > 0 && <p className={styles.more}>Scroll up for more</p>}
+            {range.begin > 0 && <p className="mb-4 text-center text-sm leading-normal text-muted-foreground">Scroll up for more</p>}
             {tokens}
-            {terms.size === 0 && text.termCount > 0 && <p className="loading">Loading…</p>}
+            {terms.size === 0 && text.termCount > 0 && (
+              <p className="flex items-center gap-2 text-sm leading-normal text-muted-foreground">
+                <LoaderCircle className="size-4 animate-spin" />
+                Loading…
+              </p>
+            )}
           </div>
         </div>
-        <div className={styles.progress} aria-hidden>
-          <div style={{ height: `${text.termCount ? (viewing * 100) / text.termCount : 0}%` }} />
+        <div className="my-3 mr-2 ml-1 w-1 flex-none overflow-hidden rounded-full bg-muted" aria-hidden>
+          <div className="rounded-full bg-primary" style={{ height: `${text.termCount ? (viewing * 100) / text.termCount : 0}%` }} />
         </div>
       </div>
       {selectedTerm && selectedTerm.id != null && (
@@ -273,15 +286,15 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
         />
       )}
       {!selectedTerm && bookmark != null && (
-        <button
-          type="button"
-          className={styles.bookmarkButton}
+        <Button
+          size="lg"
+          className="fixed right-6 bottom-6 z-20 rounded-full bg-bookmark px-5 text-white shadow-lg tabular-nums hover:bg-bookmark/90"
           title="Go to bookmark"
           onClick={() => document.getElementById(`t${bookmark}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })}
         >
-          <BookmarkIcon />
+          <Bookmark />
           {`${percent}%`}
-        </button>
+        </Button>
       )}
     </div>
   );
