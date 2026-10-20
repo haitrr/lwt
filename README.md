@@ -4,6 +4,13 @@
 you know it, and track progress. Next.js (App Router, TypeScript) with MySQL; it replaces both the old .NET API (this repo's `master`) and the
 React app in [haitrr/lwt.web](https://github.com/haitrr/lwt.web), and works on the API's existing database as is.
 
+![Reading a text: hover a word to see its meaning and move it up a level, click it to edit](docs/screenshots/demo.gif)
+
+| | |
+| --- | --- |
+| ![Reader with an English text](docs/screenshots/reader-en.png) | ![Reader with a Chinese text](docs/screenshots/reader-zh.png) |
+| ![Texts list](docs/screenshots/texts.png) | ![Statistics](docs/screenshots/statistics.png) |
+
 ## Getting started
 
 ```shell

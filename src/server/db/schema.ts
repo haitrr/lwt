@@ -19,16 +19,16 @@ export const users = mysqlTable('users', {
   normalizedUserName: varchar('NormalizedUserName', { length: 256 }),
   email: varchar('Email', { length: 256 }),
   normalizedEmail: varchar('NormalizedEmail', { length: 256 }),
-  emailConfirmed: boolean('EmailConfirmed').notNull().default(false),
+  emailConfirmed: boolean('EmailConfirmed').notNull().$defaultFn(() => false),
   passwordHash: longtext('PasswordHash'),
   securityStamp: longtext('SecurityStamp'),
   concurrencyStamp: longtext('ConcurrencyStamp'),
   phoneNumber: longtext('PhoneNumber'),
-  phoneNumberConfirmed: boolean('PhoneNumberConfirmed').notNull().default(false),
-  twoFactorEnabled: boolean('TwoFactorEnabled').notNull().default(false),
+  phoneNumberConfirmed: boolean('PhoneNumberConfirmed').notNull().$defaultFn(() => false),
+  twoFactorEnabled: boolean('TwoFactorEnabled').notNull().$defaultFn(() => false),
   lockoutEnd: datetime('LockoutEnd', { fsp: 6 }),
-  lockoutEnabled: boolean('LockoutEnabled').notNull().default(true),
-  accessFailedCount: int('AccessFailedCount').notNull().default(0),
+  lockoutEnabled: boolean('LockoutEnabled').notNull().$defaultFn(() => true),
+  accessFailedCount: int('AccessFailedCount').notNull().$defaultFn(() => 0),
   currentLanguageId: int('CurrentLanguageId'),
 });
 
@@ -40,8 +40,8 @@ export const texts = mysqlTable('texts', {
   title: longtext('Title').notNull(),
   content: longtext('Content').notNull(),
   languageCode: longtext('LanguageCode').notNull(),
-  termCount: bigint('TermCount', { mode: 'number' }).notNull().default(0),
-  processedTermCount: bigint('ProcessedTermCount', { mode: 'number' }).notNull().default(0),
+  termCount: bigint('TermCount', { mode: 'number' }).notNull().$defaultFn(() => 0),
+  processedTermCount: bigint('ProcessedTermCount', { mode: 'number' }).notNull().$defaultFn(() => 0),
   lastReadAt: datetime('LastReadAt', { fsp: 6 })
     .notNull()
     .$defaultFn(() => new Date()),
