@@ -27,8 +27,9 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
   postgres-backup:
-    # Hourly pg_dump, encrypted with age before it reaches the volume. See "Backups" in README.md.
-    build: docker/backup
+    # Hourly pg_dump, encrypted with age before it reaches the volume (github.com/haitrr/pg-backup).
+    # The tag matches the postgres major version above. See "Backups" in README.md.
+    image: ghcr.io/haitrr/pg-backup:17
     restart: always
     depends_on:
       postgres:

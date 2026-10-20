@@ -1,9 +1,7 @@
 #!/bin/bash
-# The pre-deploy backup. It runs the same dump.sh as the hourly sidecar, so these
-# files are encrypted and restored the same way.
+# The pre-deploy backup: the same encrypted dump as the hourly one, kept in
+# deployments/ (last 20).
 set -euo pipefail
 
-KEEP=20
-FILE=$(docker compose exec -T postgres-backup \
-  /usr/local/bin/dump.sh /backups/deployments lwt-deploy "$KEEP" </dev/null | tr -d '\r')
+FILE=$(docker compose exec -T postgres-backup pg-backup now </dev/null | tr -d '\r')
 echo "Backup complete -> ${FILE#/backups/} (encrypted; restore with ./restore.sh)"
