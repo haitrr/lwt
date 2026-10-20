@@ -50,7 +50,10 @@ export type TextReadInfo = {
   processedTermCount: number;
 };
 
-/** One token of a text in reading order; id/meaning/count are set when it is a real term. */
+/**
+ * One token of a text in reading order; id/meaning/count are set when it is a real term.
+ * A phrase token covers several words, and the indices of all but its first are unused.
+ */
 export type TextTermView = {
   id: number | null;
   content: string;
@@ -58,6 +61,9 @@ export type TextTermView = {
   index: number;
   meaning: string | null;
   count: number | null;
+  phrase: boolean;
+  /** A phrase joined in all texts, rather than only where the user joined it. */
+  autoJoin: boolean;
 };
 
 /** A dictionary lookup for a term: still running, its meaning, no entry, or the dictionary could not be asked. */

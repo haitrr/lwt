@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { requireSession } from '@/server/auth/session';
 import { UserError } from '@/server/errors';
+import { getLanguage } from '@/server/languages';
 import { getTermCounts, readText } from '@/server/texts';
 import { getLanguageSettings } from '@/server/users';
 import { LANGUAGES } from '@/lib/languages';
@@ -23,6 +24,7 @@ export default async function TextReadPage({ params }: PageProps<'/text/read/[te
       initialCounts={counts}
       speakCode={language?.speakCode ?? null}
       dictionaryLanguage={dictionaryLanguage}
+      phraseSeparator={getLanguage(text.languageCode).phraseSeparator}
     />
   );
 }

@@ -1,4 +1,4 @@
-import { bigint, customType, index, integer, pgTable, primaryKey, serial, text, timestamp, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
+import { bigint, boolean, customType, index, integer, pgTable, primaryKey, serial, text, timestamp, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
 // Tables and columns follow the old .NET API's MySQL schema, renamed to snake_case.
 // scripts/import-mysql.mjs copies an existing database over.
@@ -71,6 +71,10 @@ export const terms = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     learningLevel: text('learning_level').notNull(),
+    // Made by the user from several words the splitter cut apart; see src/server/phrases.ts.
+    phrase: boolean('phrase').notNull().default(false),
+    // A phrase joined wherever its words appear, new texts included; otherwise only where the user joined it.
+    autoJoin: boolean('auto_join').notNull().default(false),
   },
   (t) => [
     uniqueIndex('terms_content_language_code_user_id_key').on(t.content, t.languageCode, t.userId),

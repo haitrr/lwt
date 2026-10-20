@@ -180,6 +180,8 @@ export async function getTextTerms(id: number, userId: number, indexFrom: number
       index: textTerms.index,
       learningLevel: terms.learningLevel,
       meaning: terms.meaning,
+      phrase: terms.phrase,
+      autoJoin: terms.autoJoin,
     })
     .from(textTerms)
     .innerJoin(texts, eq(textTerms.textId, texts.id))
@@ -214,6 +216,8 @@ export async function getTextTerms(id: number, userId: number, indexFrom: number
       index: r.index,
       meaning: HIDDEN_MEANING.has(learningLevel) ? null : (r.meaning ?? null),
       count: r.termId == null ? null : (counts.get(r.termId) ?? 0),
+      phrase: r.phrase ?? false,
+      autoJoin: r.autoJoin ?? false,
     };
   });
 }

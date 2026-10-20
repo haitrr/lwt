@@ -1,7 +1,17 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { loadTermCounts, loadTextTerms, lookUpTerm, saveBookmark, saveTerm } from '@/lib/reader';
+import {
+  joinEverywhere,
+  loadPhrase,
+  loadTermCounts,
+  loadTextTerms,
+  lookUpTerm,
+  saveBookmark,
+  savePhrase,
+  saveTerm,
+  unmakePhrase,
+} from '@/lib/reader';
 import { LearningLevel, type DictionaryLookup, type TermCounts, type TextReadInfo, type TextTermView } from '@/lib/types';
 import Link from 'next/link';
 import { languageName } from '@/lib/languages';
@@ -10,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import TermToken from './TermToken';
 import TermPopover from './TermPopover';
-import TermPanel from './TermPanel';
+import TermPanel, { type PhraseAction } from './TermPanel';
 import { suggestionOf } from './DictionaryHint';
 import TextStats from './TextStats';
 import styles from './reader.module.css';
@@ -20,6 +30,8 @@ type Props = {
   initialCounts: Required<TermCounts>;
   speakCode: string | null;
   dictionaryLanguage: string | null;
+  /** Between a phrase's words: a space for English, nothing for Chinese and Japanese. */
+  phraseSeparator: string;
 };
 
 // Tokens loaded around the bookmark first, then this many more when scrolling near an edge.
@@ -31,20 +43,28 @@ const EDGE_PX = 200;
 const NO_MEANING = new Set<LearningLevel>([LearningLevel.Skipped, LearningLevel.Ignored, LearningLevel.WellKnown]);
 
 export type Hover = { index: number; rect: DOMRect };
+/** Selected tokens, first to last, grown from the clicked one (anchor); more than one word makes a new phrase. */
+type Selection = { from: number; to: number; anchor: number };
+/** The saved phrase that selected words spell, looked up by `${from}-${to}`; term is null when there is none. */
+type KnownPhrase = { range: string; term: Awaited<ReturnType<typeof loadPhrase>> };
 
-export default function Reader({ text, initialCounts, speakCode, dictionaryLanguage }: Props) {
+// Mirrors src/server/languages/phrases.ts: words join across spaces with at most one line break.
+const NO_PHRASE_GAP = /\S|\n[^]*\n/;
+
+export default function Reader({ text, initialCounts, speakCode, dictionaryLanguage, phraseSeparator }: Props) {
   const lastIndex = text.termCount - 1;
   const start = Math.min(text.bookmark ?? 0, Math.max(lastIndex, 0));
 
   const [terms, setTerms] = useState<Map<number, TextTermView>>(new Map());
   const [range, setRange] = useState({ begin: Math.max(0, start - INITIAL_BEFORE), end: Math.min(lastIndex, start + INITIAL_AFTER) });
   const [bookmark, setBookmarkState] = useState<number | null>(text.bookmark);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selection, setSelection] = useState<Selection | null>(null);
+  const [knownPhrase, setKnownPhrase] = useState<KnownPhrase | null>(null);
   const [hover, setHover] = useState<Hover | null>(null);
   const [counts, setCounts] = useState(initialCounts);
   const [viewing, setViewing] = useState(start);
-  // Dictionary lookups by term id; a found meaning is suggested until the user saves their own.
-  const [lookups, setLookups] = useState<Map<number, DictionaryLookup>>(new Map());
+  // Dictionary lookups by lower-cased word or phrase; a found meaning is suggested until the user saves their own.
+  const [lookups, setLookups] = useState<Map<string, DictionaryLookup>>(new Map());
 
   const panelRef = useRef<HTMLDivElement>(null);
   const loading = useRef(false);
@@ -70,12 +90,21 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The element for a token index; one inside a phrase finds the phrase.
+  const tokenElement = useCallback((index: number) => {
+    for (let i = index; i >= Math.max(0, index - 100); i--) {
+      const el = document.getElementById(`t${i}`);
+      if (el) return el;
+    }
+    return null;
+  }, []);
+
   // Once the first tokens render, bring the bookmark into view.
   useLayoutEffect(() => {
     if (initialScrollDone.current || terms.size === 0) return;
     initialScrollDone.current = true;
-    document.getElementById(`t${start}`)?.scrollIntoView({ block: 'center' });
-  }, [terms, start]);
+    tokenElement(start)?.scrollIntoView({ block: 'center' });
+  }, [terms, start, tokenElement]);
 
   // Keep the reading position when tokens are added above it.
   useLayoutEffect(() => {
@@ -136,12 +165,12 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
 
   const suggestMeaning = useCallback(
     (term: TextTermView) => {
-      if (!dictionaryLanguage || term.id == null || term.meaning || NO_MEANING.has(term.learningLevel)) return;
+      if (!dictionaryLanguage || term.meaning || NO_MEANING.has(term.learningLevel)) return;
       // Only a lookup that could not reach the dictionary is tried again.
-      const status = lookups.get(term.id)?.status;
+      const key = lookupKey(term);
+      const status = lookups.get(key)?.status;
       if (status && status !== 'unavailable') return;
-      const id = term.id;
-      const settle = (lookup: DictionaryLookup) => setLookups((prev) => new Map(prev).set(id, lookup));
+      const settle = (lookup: DictionaryLookup) => setLookups((prev) => new Map(prev).set(key, lookup));
       settle({ status: 'loading' });
       lookUpTerm(term.content, text.languageCode, dictionaryLanguage).then(
         (meaning) =>
@@ -181,15 +210,66 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
     [text.id],
   );
 
-  const onTermClick = useCallback(
-    (term: TextTermView) => {
-      setHover(null);
-      setSelected(term.index);
-      markBookmark(term.index);
-      speak(term.content);
-      suggestMeaning(term);
+  // Making or splitting a phrase changes tokens across the text, so the loaded part is fetched again.
+  const reload = useCallback(async () => {
+    const loaded = await loadTextTerms(text.id, range.begin, range.end);
+    setTerms(new Map(loaded.map((t) => [t.index, t])));
+    setCounts(await loadTermCounts(text.id));
+  }, [text.id, range]);
+
+  /** The next word from `index` in direction `step` that a phrase could join, or null past punctuation or a paragraph. */
+  const joinableWord = useCallback(
+    (index: number, step: 1 | -1) => {
+      let gap = '';
+      for (let i = index + step; i >= range.begin && i <= range.end; i += step) {
+        const t = terms.get(i);
+        if (!t) continue; // inside a phrase
+        if (t.id != null) return i;
+        gap += t.content;
+        if (!phraseSeparator || NO_PHRASE_GAP.test(gap)) return null;
+      }
+      return null;
     },
-    [markBookmark, speak, suggestMeaning],
+    [terms, range, phraseSeparator],
+  );
+
+  const select = useCallback(
+    (next: Selection) => {
+      setSelection(next);
+      const tokens = tokensIn(terms, next);
+      if (tokens.length === 1) {
+        speak(tokens[0].content);
+        suggestMeaning(tokens[0]);
+      } else {
+        const phrase = phraseView(tokens, next.from, null);
+        speak(phrase.content);
+        suggestMeaning(phrase);
+        // Words joined elsewhere, or split here, are already a phrase term: show its level and meaning.
+        const range = `${next.from}-${next.to}`;
+        void loadPhrase(text.id, next.from, next.to).then((term) => setKnownPhrase({ range, term }));
+      }
+    },
+    [terms, speak, suggestMeaning, text.id],
+  );
+
+  const onTermClick = useCallback(
+    (term: TextTermView, extend: boolean) => {
+      setHover(null);
+      // Shift-click grows the selection into a phrase, when only spaces lie between.
+      if (extend && selection) {
+        const from = Math.min(selection.from, term.index);
+        const to = Math.max(selection.to, term.index);
+        let i: number | null = from;
+        while (i != null && i < to) i = joinableWord(i, 1);
+        if (i === to) {
+          select({ from, to, anchor: selection.anchor });
+          return;
+        }
+      }
+      markBookmark(term.index);
+      select({ from: term.index, to: term.index, anchor: term.index });
+    },
+    [selection, joinableWord, markBookmark, select],
   );
 
   // The popover stays up briefly after the pointer leaves, so it can be reached.
@@ -214,17 +294,44 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
     [speak, suggestMeaning, cancelHide, scheduleHide],
   );
 
+  // A bookmark on a word inside a phrase shows on the phrase.
+  let bookmarkedIndex = bookmark;
+  while (bookmarkedIndex != null && bookmarkedIndex > range.begin && !terms.has(bookmarkedIndex)) bookmarkedIndex--;
+
   const tokens = [];
   for (let i = range.begin; i <= range.end; i++) {
     const term = terms.get(i);
     if (term) {
       tokens.push(
-        <TermToken key={i} term={term} bookmarked={bookmark === i} selected={selected === i} onClick={onTermClick} onHover={onTermHover} />,
+        <TermToken
+          key={i}
+          term={term}
+          bookmarked={bookmarkedIndex === i}
+          selected={selection != null && i >= selection.from && i <= selection.to}
+          onClick={onTermClick}
+          onHover={onTermHover}
+        />,
       );
     }
   }
 
-  const selectedTerm = selected == null ? undefined : terms.get(selected);
+  const selectedTokens = selection ? tokensIn(terms, selection) : [];
+  const selectedWords = selectedTokens.filter((t) => t.id != null);
+  const selectedTerm: PhraseView | undefined =
+    selection == null || selectedWords.length === 0
+      ? undefined
+      : selectedWords.length === 1
+        ? selectedWords[0]
+        : phraseView(
+            selectedTokens,
+            selection.from,
+            knownPhrase?.range === `${selection.from}-${selection.to}` ? knownPhrase : undefined,
+          );
+  // New words join everywhere by default; a saved phrase's other occurrences were left apart on purpose.
+  const phraseScope =
+    selectedTerm?.id !== null ? undefined : !selectedTerm.lookedUp ? 'loading' : selectedTerm.phraseId ? 'here' : 'everywhere';
+  const joinBefore = selection && joinableWord(selection.from, -1);
+  const joinAfter = selection && joinableWord(selection.to, 1);
   const hoverTerm = hover == null ? undefined : terms.get(hover.index);
   const percent = text.termCount ? Math.round(((bookmark ?? 0) / text.termCount) * 10000) / 100 : 0;
 
@@ -267,37 +374,61 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
           <div className="rounded-full bg-primary" style={{ height: `${text.termCount ? (viewing * 100) / text.termCount : 0}%` }} />
         </div>
       </div>
-      {selectedTerm && selectedTerm.id != null && (
+      {selection && selectedTerm && (
         <TermPanel
-          key={selectedTerm.index}
+          // Joining words keeps the panel, and what was typed in it; a saved phrase's level and meaning replace it.
+          key={`${selection.anchor}-${selectedTerm.id ?? `phrase-${selectedTerm.phraseId ?? ''}`}`}
           term={selectedTerm}
-          lookup={lookups.get(selectedTerm.id)}
-          onSave={async (level, meaning) => {
-            await updateTerm(selectedTerm, level, meaning);
-            setSelected(null);
+          phraseScope={phraseScope}
+          lookup={lookups.get(lookupKey(selectedTerm))}
+          onSave={async (level, meaning, everywhere) => {
+            if (selectedTerm.id != null) {
+              await updateTerm(selectedTerm, level, meaning);
+            } else {
+              const result = await savePhrase(text.id, selection.from, selection.to, level, meaning, everywhere);
+              if (!result.ok) return alert(result.error);
+              await reload();
+            }
+            setSelection(null);
           }}
-          onClose={() => setSelected(null)}
+          onJoinBefore={joinBefore == null ? undefined : () => select({ ...selection, from: joinBefore })}
+          onJoinAfter={joinAfter == null ? undefined : () => select({ ...selection, to: joinAfter })}
+          onPhraseAction={
+            selectedTerm.phrase && selectedTerm.id != null
+              ? async (action: PhraseAction) => {
+                  const id = selectedTerm.id!;
+                  const result =
+                    action === 'join-everywhere'
+                      ? await joinEverywhere(id)
+                      : await unmakePhrase(id, action === 'split-here' ? { textId: text.id, index: selectedTerm.index } : null);
+                  if (!result.ok) return alert(result.error);
+                  await reload();
+                  setSelection(null);
+                }
+              : undefined
+          }
+          onClose={() => setSelection(null)}
         />
       )}
       {hover && hoverTerm && hoverTerm.id != null && (
         <TermPopover
           term={hoverTerm}
           rect={hover.rect}
-          lookup={lookups.get(hoverTerm.id)}
+          lookup={lookups.get(lookupKey(hoverTerm))}
           onKeep={cancelHide}
           onLeave={scheduleHide}
           onChangeLevel={async (level) => {
             markBookmark(hoverTerm.index);
-            await updateTerm(hoverTerm, level, hoverTerm.meaning ?? suggestionOf(lookups.get(hoverTerm.id!)) ?? '');
+            await updateTerm(hoverTerm, level, hoverTerm.meaning ?? suggestionOf(lookups.get(lookupKey(hoverTerm))) ?? '');
           }}
         />
       )}
-      {!selectedTerm && bookmark != null && (
+      {!selection && bookmark != null && (
         <Button
           size="lg"
           className="fixed right-6 bottom-6 z-20 rounded-full bg-bookmark px-5 text-white shadow-lg tabular-nums hover:bg-bookmark/90"
           title="Go to bookmark"
-          onClick={() => document.getElementById(`t${bookmark}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })}
+          onClick={() => tokenElement(bookmark)?.scrollIntoView({ block: 'center', behavior: 'smooth' })}
         >
           <Bookmark />
           {`${percent}%`}
@@ -305,4 +436,39 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
       )}
     </div>
   );
+}
+
+function tokensIn(terms: Map<number, TextTermView>, { from, to }: Selection) {
+  const tokens = [];
+  for (let i = from; i <= to; i++) {
+    const t = terms.get(i);
+    if (t) tokens.push(t);
+  }
+  return tokens;
+}
+
+function lookupKey(term: TextTermView) {
+  return term.content.toLowerCase();
+}
+
+/** Selected words not joined here yet; phraseId is set when they spell a saved phrase, lookedUp once that is known. */
+type PhraseView = TextTermView & { phraseId?: number; lookedUp?: boolean };
+
+/** A phrase not saved yet, from the selected tokens: spaces and line breaks between its words read as one space. */
+function phraseView(tokens: TextTermView[], index: number, known: KnownPhrase | null | undefined): PhraseView {
+  return {
+    id: null,
+    content: tokens
+      .map((t) => t.content)
+      .join('')
+      .replace(/\s+/g, ' '),
+    learningLevel: known?.term?.learningLevel ?? LearningLevel.Unknown,
+    index,
+    meaning: known?.term?.meaning || null,
+    count: null,
+    phrase: true,
+    autoJoin: known?.term?.autoJoin ?? false,
+    phraseId: known?.term?.id,
+    lookedUp: known !== undefined,
+  };
 }
