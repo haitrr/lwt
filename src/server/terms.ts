@@ -81,15 +81,6 @@ export async function editTerm(session: Session, termId: number, input: { meanin
 // Statistics only count terms the user is actually learning or knows.
 const NOT_LEARNING = [LearningLevel.Ignored, LearningLevel.Skipped, LearningLevel.Unknown];
 
-export async function countTermsByLanguage(userId: number): Promise<Record<string, number>> {
-  const rows = await getDb()
-    .select({ key: terms.languageCode, n: count() })
-    .from(terms)
-    .where(and(eq(terms.userId, userId), notInArray(terms.learningLevel, NOT_LEARNING)))
-    .groupBy(terms.languageCode);
-  return Object.fromEntries(rows.map((r) => [r.key, r.n]));
-}
-
 export async function countTermsByLearningLevel(userId: number): Promise<Record<string, number>> {
   const rows = await getDb()
     .select({ key: terms.learningLevel, n: count() })

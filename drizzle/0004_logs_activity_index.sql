@@ -1,0 +1,1 @@
+CREATE INDEX "logs_user_name_created_date_idx" ON "logs" USING btree ("user_name","created_date");
