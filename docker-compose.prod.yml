@@ -2,7 +2,7 @@
 # service. ./deploy.sh pulls and starts it. docker-compose.yaml is the same stack built from this checkout.
 services:
   web:
-    # LWT_IMAGE_TAG pins a build (sha-<commit>); latest is the newest master.
+    # LWT_IMAGE_TAG pins a release (0.2.1) or a release line (0.2); latest is the newest release.
     image: ghcr.io/haitrr/lwt:${LWT_IMAGE_TAG:-latest}
     restart: always
     ports:
