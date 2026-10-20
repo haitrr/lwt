@@ -8,29 +8,31 @@ import { Button } from '@/components/ui/button';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import DictionaryHint, { suggestionOf } from './DictionaryHint';
+import { panelMeaning } from './termEditing';
 
 type Props = {
   term: TextTermView;
   lookup: DictionaryLookup | undefined;
-  onSave: (level: LearningLevel, meaning: string) => Promise<void>;
+  /** Resolves to null once saved, or to the error to show while the panel stays open. */
+  onSave: (level: LearningLevel, meaning: string) => Promise<string | null>;
   onClose: () => void;
 };
 
 const EDITABLE_LEVELS = Object.values(LearningLevel).filter((l) => l !== LearningLevel.Skipped);
 
 export default function TermPanel({ term, lookup, onSave, onClose }: Props) {
-  const [meaning, setMeaning] = useState(term.meaning ?? '');
+  // Null until the user types in the box.
+  const [edited, setEdited] = useState<string | null>(null);
   const [level, setLevel] = useState(term.learningLevel);
   const [saving, setSaving] = useState(false);
-  const shownMeaning = meaning || (term.meaning ? '' : (suggestionOf(lookup) ?? ''));
+  const [error, setError] = useState<string | null>(null);
+  const shownMeaning = panelMeaning(edited, term.meaning, suggestionOf(lookup));
 
   const save = async (nextLevelValue: LearningLevel) => {
     setSaving(true);
-    try {
-      await onSave(nextLevelValue, shownMeaning);
-    } finally {
-      setSaving(false);
-    }
+    setError(null);
+    setError(await onSave(nextLevelValue, shownMeaning));
+    setSaving(false);
   };
 
   return (
@@ -61,10 +63,15 @@ export default function TermPanel({ term, lookup, onSave, onClose }: Props) {
         className="max-h-[40dvh] overflow-y-auto"
         placeholder="Meaning"
         value={shownMeaning}
-        onChange={(e) => setMeaning(e.target.value)}
+        onChange={(e) => setEdited(e.target.value)}
         disabled={saving}
       />
-      {!term.meaning && !meaning && <DictionaryHint lookup={lookup} />}
+      {!term.meaning && edited === null && <DictionaryHint lookup={lookup} />}
+      {error && (
+        <p className="text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      )}
       <div className="flex gap-2">
         <NativeSelect
           aria-label="Level"

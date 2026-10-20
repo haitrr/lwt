@@ -26,7 +26,7 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
 | Variable | |
 | --- | --- |
 | `DATABASE_URL` | Postgres connection string (tested with 17), e.g. `postgres://user:pass@host:5432/lwt` |
-| `LWT_JWT_SECRET` | Secret for session tokens. Use the .NET API's `AppSettings:Secret` to keep its tokens valid. |
+| `LWT_JWT_SECRET` | Secret for session tokens, at least 32 bytes; production refuses to start with a shorter one or the `.env.example` placeholder. Use the .NET API's `AppSettings:Secret` to keep its tokens valid. |
 
 `npm test` runs the unit tests, `npm run lint` and `npm run typecheck` the static checks.
 
@@ -86,7 +86,8 @@ Postgres 17 and the backup service. The built-in dictionaries are inside the ima
    # LWT_IMAGE_TAG=0.2                 # optional: pin a release (0.2.1) or a line (0.2) instead of latest
    ```
 
-   Moving from the old .NET API? Use its `AppSettings:Secret` as `LWT_JWT_SECRET` so existing sessions stay signed in.
+   Moving from the old .NET API? Use its `AppSettings:Secret` as `LWT_JWT_SECRET` so existing sessions stay signed in
+   (if it is shorter than 32 bytes the app won't start; use a new secret, which signs everyone out once).
 
 4. Point the backups at your storage. The `postgres-backups` volume at the bottom of `compose.yaml` is an NFS mount of
    `ugnas.lc:/volume2/backups/lwt`; change `addr=` and `device:` to your NAS, or replace it with a plain local volume
