@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, lte } from '
 import { getDb, schema } from './db';
 import { UserError } from './errors';
 import { addLog } from './logs';
-import { isLanguageCode } from '@/lib/languages';
+import { hasSplitter } from './languages';
 import type { Session } from './auth/session';
 import {
   LearningLevel,
@@ -36,6 +36,7 @@ const listColumns = {
   termCount: texts.termCount,
   processedTermCount: texts.processedTermCount,
   bookmark: texts.bookmark,
+  processingError: texts.processingError,
   createdDate: texts.createdDate,
 };
 
@@ -44,7 +45,7 @@ function toTextItem({ createdDate, ...t }: { createdDate: Date } & Omit<TextItem
 }
 
 function validate(input: TextInput) {
-  if (!isLanguageCode(input.languageCode)) throw new UserError('Unsupported language.');
+  if (!hasSplitter(input.languageCode)) throw new UserError('Unsupported language.');
   if (!input.title.trim()) throw new UserError("'Title' must not be empty.");
   if (!input.content.trim()) throw new UserError("'Content' must not be empty.");
 }
@@ -91,13 +92,13 @@ export async function createText(session: Session, input: TextInput) {
   });
 }
 
-/** Editing resets the term counts so the background job splits the text again. */
+/** Editing resets the term counts (and any processing failure) so the background job splits the text again. */
 export async function editText(id: number, userId: number, input: TextInput) {
   validate(input);
   await getOwnedText(id, userId);
   await getDb()
     .update(texts)
-    .set({ ...input, termCount: 0, processedTermCount: 0 })
+    .set({ ...input, termCount: 0, processedTermCount: 0, processingError: null, failedAt: null })
     .where(eq(texts.id, id));
 }
 
@@ -164,6 +165,24 @@ export async function getTermCounts(id: number, userId: number) {
   for (const row of rows) {
     const level = (row.learningLevel ?? LearningLevel.Skipped) as LearningLevel;
     result[level] += row.n;
+  }
+  return result;
+}
+
+/** getTermCounts for several texts in one query. */
+export async function getTermCountsForTexts(ids: number[], userId: number) {
+  const result = new Map(ids.map((id) => [id, emptyCounts()]));
+  if (!ids.length) return result;
+  const rows = await getDb()
+    .select({ textId: textTerms.textId, learningLevel: terms.learningLevel, n: count() })
+    .from(textTerms)
+    .innerJoin(texts, eq(textTerms.textId, texts.id))
+    .leftJoin(terms, eq(textTerms.termId, terms.id))
+    .where(and(inArray(textTerms.textId, ids), eq(texts.userId, userId)))
+    .groupBy(textTerms.textId, terms.learningLevel);
+  for (const row of rows) {
+    const level = (row.learningLevel ?? LearningLevel.Skipped) as LearningLevel;
+    result.get(row.textId)![level] += row.n;
   }
   return result;
 }

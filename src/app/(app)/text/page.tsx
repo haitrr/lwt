@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireSession } from '@/server/auth/session';
 import { LANGUAGES, languageName } from '@/lib/languages';
-import { getTermCounts, listTexts } from '@/server/texts';
+import { getTermCountsForTexts, listTexts } from '@/server/texts';
 import type { TextItem } from '@/lib/types';
 import { BookOpen, ChevronLeft, ChevronRight, Pencil, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +27,12 @@ function timeAgo(iso: string) {
 }
 
 function Status({ text }: { text: TextItem }) {
+  if (text.processingError)
+    return (
+      <Badge variant="outline" className="border-destructive/30 bg-destructive/10 text-destructive">
+        Failed
+      </Badge>
+    );
   if (text.termCount === 0)
     return (
       <Badge variant="outline" className="border-destructive/30 bg-destructive/10 text-destructive">
@@ -55,7 +61,10 @@ export default async function TextsPage({ searchParams }: PageProps<'/text'>) {
 
   const session = await requireSession();
   const texts = await listTexts(session.userId, { title, languageCode }, page, ITEMS_PER_PAGE);
-  const counts = await Promise.all(texts.items.map((t) => getTermCounts(t.id, session.userId)));
+  const counts = await getTermCountsForTexts(
+    texts.items.map((t) => t.id),
+    session.userId,
+  );
   const pageCount = Math.max(1, Math.ceil(texts.total / ITEMS_PER_PAGE));
   const pageHref = (p: number) => {
     const q = new URLSearchParams({ page: String(p) });
@@ -67,7 +76,9 @@ export default async function TextsPage({ searchParams }: PageProps<'/text'>) {
   return (
     <div className="flex flex-col gap-4">
       <RefreshWhileProcessing
-        active={texts.items.some((t) => t.termCount === 0 || t.processedTermCount < t.termCount)}
+        active={texts.items.some(
+          (t) => !t.processingError && (t.termCount === 0 || t.processedTermCount < t.termCount),
+        )}
       />
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">Texts</h1>
@@ -87,7 +98,7 @@ export default async function TextsPage({ searchParams }: PageProps<'/text'>) {
         </Card>
       ) : (
         <ul className="flex flex-col gap-3">
-          {texts.items.map((text, i) => (
+          {texts.items.map((text) => (
             <li key={text.id}>
               <Card className="grid gap-4 px-5 py-4 transition-colors hover:border-foreground/20 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_auto] md:items-center md:gap-6">
                 <div className="flex min-w-0 flex-col gap-2">
@@ -101,6 +112,11 @@ export default async function TextsPage({ searchParams }: PageProps<'/text'>) {
                     <Badge variant="secondary">{languageName(text.languageCode)}</Badge>
                     <span>{`Created ${timeAgo(text.createdAt)}`}</span>
                   </div>
+                  {text.processingError && (
+                    <p className="text-sm break-words text-destructive">
+                      {`Processing failed (edit the text to retry): ${text.processingError}`}
+                    </p>
+                  )}
                   <div className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm tabular-nums">
                     <Progress value={percentRead(text)} aria-label="Read" className="h-1.5" />
                     <Link href={`/text/read/${text.id}`} className="text-muted-foreground hover:text-foreground">
@@ -108,7 +124,7 @@ export default async function TextsPage({ searchParams }: PageProps<'/text'>) {
                     </Link>
                   </div>
                 </div>
-                <Vocabulary counts={counts[i]} />
+                <Vocabulary counts={counts.get(text.id)!} />
                 <div className="flex items-center gap-1 border-t pt-3 md:border-0 md:pt-0">
                   <Button asChild size="sm" className="mr-auto md:mr-0">
                     <Link href={`/text/read/${text.id}`}>

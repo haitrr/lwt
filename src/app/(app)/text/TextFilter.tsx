@@ -42,6 +42,7 @@ export default function TextFilter({ languages, title: initialTitle, languageCod
       </div>
       <LanguageSelect
         languages={languages}
+        textsOnly
         value={languageCode}
         onChange={(e) => setLanguageCode(e.target.value)}
         emptyLabel="All languages"
