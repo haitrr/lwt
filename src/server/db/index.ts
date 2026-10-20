@@ -10,7 +10,11 @@ declare global {
 function createPool() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error('DATABASE_URL is not set');
-  return new Pool({ connectionString, max: 10 });
+  const pool = new Pool({ connectionString, max: 10 });
+  // An idle client losing its connection (e.g. Postgres restarting) emits 'error' on the pool, which
+  // crashes the process when unhandled. The pool drops that client; the next query opens a new one.
+  pool.on('error', (e) => console.error(`Idle Postgres client failed: ${e.message}`));
+  return pool;
 }
 
 function createDb() {
