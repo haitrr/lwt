@@ -10,6 +10,9 @@
 # sees the key.
 set -euo pipefail
 
+# The production stack, unless COMPOSE_FILE says otherwise (docker-compose.yaml builds from this checkout).
+export COMPOSE_FILE=${COMPOSE_FILE:-docker-compose.prod.yml}
+
 SRC=${1:-}
 IDENTITY=${2:-${BACKUP_AGE_IDENTITY:-}}
 
