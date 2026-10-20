@@ -60,6 +60,13 @@ export type TextTermView = {
   count: number | null;
 };
 
+/** A dictionary lookup for a term: still running, its meaning, no entry, or the dictionary could not be asked. */
+export type DictionaryLookup =
+  | { status: 'loading' }
+  | { status: 'found'; meaning: string }
+  | { status: 'missing' }
+  | { status: 'unavailable' };
+
 export type TermView = {
   id: number;
   content: string;

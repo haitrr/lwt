@@ -5,6 +5,7 @@ import { lookUpMeaning } from '@/server/dictionary';
 import { UserError } from '@/server/errors';
 import { editTerm } from '@/server/terms';
 import { getTermCounts, getTextTerms, setBookmark } from '@/server/texts';
+import { getTranslatorSettings } from '@/server/users';
 import type { LearningLevel } from './types';
 
 // Server functions the reader calls from the browser. Each checks the session itself.
@@ -36,6 +37,6 @@ export async function saveTerm(termId: number, learningLevel: LearningLevel, mea
 }
 
 export async function lookUpTerm(word: string, from: string, to: string) {
-  await requireSession();
-  return lookUpMeaning(word, from, to);
+  const { userId } = await requireSession();
+  return lookUpMeaning(word, from, to, await getTranslatorSettings(userId));
 }

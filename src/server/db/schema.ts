@@ -105,6 +105,9 @@ export const userSettings = pgTable(
     userId: integer('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    // Microsoft Translator, asked when the dictionary service has no entry.
+    azureTranslatorKey: text('azure_translator_key'),
+    azureTranslatorRegion: text('azure_translator_region'),
   },
   (t) => [uniqueIndex('user_settings_user_id_key').on(t.userId)],
 );

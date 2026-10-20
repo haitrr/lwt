@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { loadTermCounts, loadTextTerms, lookUpTerm, saveBookmark, saveTerm } from '@/lib/reader';
-import { LearningLevel, type TermCounts, type TextReadInfo, type TextTermView } from '@/lib/types';
+import { LearningLevel, type DictionaryLookup, type TermCounts, type TextReadInfo, type TextTermView } from '@/lib/types';
 import Link from 'next/link';
 import { languageName } from '@/lib/languages';
 import { ArrowLeft, Bookmark, LoaderCircle } from 'lucide-react';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import TermToken from './TermToken';
 import TermPopover from './TermPopover';
 import TermPanel from './TermPanel';
+import { suggestionOf } from './DictionaryHint';
 import TextStats from './TextStats';
 import styles from './reader.module.css';
 
@@ -42,8 +43,8 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   const [hover, setHover] = useState<Hover | null>(null);
   const [counts, setCounts] = useState(initialCounts);
   const [viewing, setViewing] = useState(start);
-  // Dictionary suggestions by term id, shown until the user saves their own meaning.
-  const [suggestions, setSuggestions] = useState<Map<number, string>>(new Map());
+  // Dictionary lookups by term id; a found meaning is suggested until the user saves their own.
+  const [lookups, setLookups] = useState<Map<number, DictionaryLookup>>(new Map());
 
   const panelRef = useRef<HTMLDivElement>(null);
   const loading = useRef(false);
@@ -136,13 +137,19 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   const suggestMeaning = useCallback(
     (term: TextTermView) => {
       if (!dictionaryLanguage || term.id == null || term.meaning || NO_MEANING.has(term.learningLevel)) return;
-      if (suggestions.has(term.id)) return;
+      // Only a lookup that could not reach the dictionary is tried again.
+      const status = lookups.get(term.id)?.status;
+      if (status && status !== 'unavailable') return;
       const id = term.id;
-      void lookUpTerm(term.content, text.languageCode, dictionaryLanguage).then((meaning) => {
-        if (meaning) setSuggestions((prev) => new Map(prev).set(id, meaning));
-      });
+      const settle = (lookup: DictionaryLookup) => setLookups((prev) => new Map(prev).set(id, lookup));
+      settle({ status: 'loading' });
+      lookUpTerm(term.content, text.languageCode, dictionaryLanguage).then(
+        (meaning) =>
+          settle(meaning ? { status: 'found', meaning } : meaning === null ? { status: 'missing' } : { status: 'unavailable' }),
+        () => settle({ status: 'unavailable' }),
+      );
     },
-    [dictionaryLanguage, suggestions, text.languageCode],
+    [dictionaryLanguage, lookups, text.languageCode],
   );
 
   const markBookmark = useCallback(
@@ -264,7 +271,7 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
         <TermPanel
           key={selectedTerm.index}
           term={selectedTerm}
-          suggestion={suggestions.get(selectedTerm.id) ?? null}
+          lookup={lookups.get(selectedTerm.id)}
           onSave={async (level, meaning) => {
             await updateTerm(selectedTerm, level, meaning);
             setSelected(null);
@@ -276,12 +283,12 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
         <TermPopover
           term={hoverTerm}
           rect={hover.rect}
-          suggestion={suggestions.get(hoverTerm.id) ?? null}
+          lookup={lookups.get(hoverTerm.id)}
           onKeep={cancelHide}
           onLeave={scheduleHide}
           onChangeLevel={async (level) => {
             markBookmark(hoverTerm.index);
-            await updateTerm(hoverTerm, level, hoverTerm.meaning ?? suggestions.get(hoverTerm.id!) ?? '');
+            await updateTerm(hoverTerm, level, hoverTerm.meaning ?? suggestionOf(lookups.get(hoverTerm.id!)) ?? '');
           }}
         />
       )}

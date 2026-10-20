@@ -1,15 +1,20 @@
 import { LANGUAGES } from '@/lib/languages';
 import { requireSession } from '@/server/auth/session';
-import { getLanguageSettings, getUser } from '@/server/users';
+import { getLanguageSettings, getTranslatorSettingsView, getUser } from '@/server/users';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import DictionarySettingsForm from './DictionarySettingsForm';
 import PasswordForm from './PasswordForm';
+import TranslatorForm from './TranslatorForm';
 
 export const metadata = { title: 'Profile' };
 
 export default async function ProfilePage() {
   const { userId } = await requireSession();
-  const [user, settings] = await Promise.all([getUser(userId), getLanguageSettings(userId)]);
+  const [user, settings, translator] = await Promise.all([
+    getUser(userId),
+    getLanguageSettings(userId),
+    getTranslatorSettingsView(userId),
+  ]);
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <div className="flex items-center gap-3">
@@ -28,6 +33,18 @@ export default async function ProfilePage() {
         </CardHeader>
         <CardContent>
           <DictionarySettingsForm languages={LANGUAGES} settings={settings} />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Microsoft Translator</CardTitle>
+          <CardDescription>
+            Asked for a meaning when the dictionary has no entry, for English to or from another language. Without a
+            key it is skipped. A free Azure Translator resource covers 2 million characters a month.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TranslatorForm settings={translator} />
         </CardContent>
       </Card>
       <Card>

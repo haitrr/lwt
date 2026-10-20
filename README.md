@@ -50,7 +50,8 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
   | Japanese → English | [JMdict](https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project) by the EDRDG (via a pinned [jmdict-simplified](https://github.com/scriptin/jmdict-simplified) release) | CC BY-SA 4.0 |
   | English → English | [WordNet 3.1](https://wordnet.princeton.edu), Princeton University (via the `wordnet-db` package) | WordNet license |
 
-  Other language pairs get no suggestions. To update JMdict, change `JMDICT_TAG` and `JMDICT_SHA256` in
+  Other language pairs get no suggestions, unless the user saves a Microsoft Translator key on their profile: its
+  dictionary is then asked whenever the built-in one has no entry (English to or from another language). To update JMdict, change `JMDICT_TAG` and `JMDICT_SHA256` in
   `scripts/build-dictionary.mjs`; `npm update cedict-json` updates CC-CEDICT.
 - Pages are server components; mutations are server functions in `src/lib`.
 - The UI uses [shadcn/ui](https://ui.shadcn.com) components (`src/components/ui`, add more with `npx shadcn add <name>`) on
