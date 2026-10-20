@@ -1,51 +1,26 @@
-.reader {
-  display: flex;
-  flex-direction: column;
-  height: calc(100dvh - 5rem);
+/* The reader fills the space under the app header and scrolls the text inside it. */
+:global(main):has(> .reader) {
+  max-width: none;
+  padding: 0;
 }
 
-.top {
-  flex: none;
+.page {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 6rem;
+  white-space: pre-wrap;
+  font-size: 1.375rem;
+  line-height: 2.1;
 }
 
-.title {
-  font-size: 1.25rem;
-  margin: 0 0 0.5rem;
-}
-
-@media (max-width: 700px) {
-  .title {
-    display: none;
+@media (max-width: 640px) {
+  .page {
+    font-size: 1.25rem;
+    line-height: 2;
   }
 }
 
-.notice {
-  color: var(--text-secondary);
-}
-
-.body {
-  flex: 1;
-  display: flex;
-  min-height: 0;
-  gap: 0.5rem;
-}
-
-.content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-anchor: none;
-  white-space: pre-wrap;
-  font-size: 1.5rem;
-  line-height: 2.25rem;
-  padding: 0.5rem 0;
-}
-
-.more {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  text-align: center;
-}
-
+/* Thousands of tokens render here, so their styles stay in plain CSS rather than utility classes. */
 .skipped,
 .term {
   border-bottom: 2px solid transparent;
@@ -53,167 +28,37 @@
 
 .term {
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 3px;
   margin-right: 1px;
+  transition: filter 0.1s;
+}
+
+.term:hover {
+  filter: brightness(0.92);
 }
 
 .term:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
 }
 
 .term sup {
-  font-size: 0.75rem;
+  margin-left: 1px;
+  font-size: 0.6em;
   line-height: 0;
-}
-
-.term[data-level='unknown'] {
-  background: var(--level-unknown);
-}
-.term[data-level='learning-1'] {
-  background: var(--level-learning-1);
-}
-.term[data-level='learning-2'] {
-  background: var(--level-learning-2);
-}
-.term[data-level='learning-3'] {
-  background: var(--level-learning-3);
-}
-.term[data-level='learning-4'] {
-  background: var(--level-learning-4);
-}
-.term[data-level='learning-5'] {
-  background: var(--level-learning-5);
+  color: var(--muted-foreground);
 }
 
 .term[data-level^='learning'],
 .term[data-level='unknown'] {
-  color: #111;
+  background: color-mix(in srgb, var(--level-color) var(--term-tint), transparent);
 }
 
 .bookmark {
-  box-shadow: 0 0 0 3px #ff784e;
+  box-shadow: 0 0 0 2px var(--bookmark);
 }
 
 .selected {
-  outline: 2px solid var(--accent);
-}
-
-.progress {
-  flex: none;
-  width: 6px;
-  border-radius: 3px;
-  background: var(--border);
-  overflow: hidden;
-}
-
-.progress > div {
-  background: #009700;
-}
-
-.stats {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 0.5rem;
-}
-
-.segments {
-  display: flex;
-  gap: 2px;
-  height: 1.25rem;
-  font-size: 0.75rem;
-  line-height: 1.25rem;
-}
-
-.segments > div {
-  overflow: hidden;
-  white-space: nowrap;
-  padding: 0 0.25rem;
-  border-radius: 4px;
-  color: #111;
-}
-
-.segments [data-level='learned'] {
-  background: #7cc47f;
-}
-.segments [data-level='learning'] {
-  background: #f2a6a5;
-}
-.segments [data-level='unknown'] {
-  background: var(--level-unknown);
-}
-.segments [data-level='learning-1'] {
-  background: var(--level-learning-1);
-}
-.segments [data-level='learning-2'] {
-  background: var(--level-learning-2);
-}
-.segments [data-level='learning-3'] {
-  background: var(--level-learning-3);
-}
-.segments [data-level='learning-4'] {
-  background: var(--level-learning-4);
-}
-.segments [data-level='learning-5'] {
-  background: var(--level-learning-5);
-}
-
-.popover,
-.panel {
-  position: fixed;
-  z-index: 10;
-  background: Canvas;
-  color: CanvasText;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 4px 16px rgb(0 0 0 / 0.2);
-  padding: 0.75rem;
-}
-
-.popover {
-  width: 300px;
-}
-
-.panel {
-  left: 50%;
-  bottom: 1rem;
-  transform: translateX(-50%);
-  width: min(32rem, calc(100vw - 2rem));
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.popoverHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.termTitle,
-.close {
-  background: none;
-  color: inherit;
-  padding: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.meaning {
-  white-space: pre-line;
-}
-
-.hint {
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-}
-
-.bookmarkButton {
-  position: fixed;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  border-radius: 999px;
-  padding: 0.75rem 1rem;
-  background: #ff784e;
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
 }

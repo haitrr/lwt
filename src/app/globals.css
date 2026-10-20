@@ -1,56 +1,30 @@
-* {
-  box-sizing: border-box;
-}
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-}
+@custom-variant dark (&:is(.dark *));
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.header nav {
-  display: flex;
-  gap: 1rem;
-}
-
-main {
-  padding: 1rem;
-}
-
-.auth {
-  max-width: 320px;
-  margin: 4rem auto;
-}
-
-.auth form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.auth label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.error {
-  color: #c00;
-}
-
+/* shadcn/ui theme (new-york, neutral). The .dark class on <html> is set by ThemeToggle's script. */
 :root {
-  --border: #ddd;
-  --accent: #1976d2;
-  --danger: #c62828;
-  --text-secondary: #555;
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+
   /* Learning level colors, from the old app. */
   --level-unknown: #f27573;
   --level-learning-1: #c786d3;
@@ -59,69 +33,111 @@ main {
   --level-learning-4: #a2cf6e;
   --level-learning-5: #ffef62;
   --level-well-known: #d9d9d9;
+  --level-learned: #86d08a;
+  --level-learning: #f5b1b0;
+  --bookmark: #f97316;
+  /* How strongly a term is tinted in the reader. */
+  --term-tint: 55%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --border: #333;
-    --text-secondary: #aaa;
-    --level-well-known: #555;
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+
+  --level-well-known: #555b66;
+  --term-tint: 38%;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, 'Noto Sans CJK SC', 'Hiragino Sans', sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-level: var(--level-color);
+  --color-bookmark: var(--bookmark);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
     color-scheme: dark;
   }
-}
 
-.card {
-  max-width: 22rem;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
 
-.card h3 {
-  margin-top: 0;
-}
-
-button,
-.button {
-  padding: 0.4rem 0.9rem;
-  border: none;
-  border-radius: 4px;
-  background: var(--accent);
-  color: white;
-  font: inherit;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.6;
-}
-
-button.danger {
-  background: var(--danger);
-}
-
-input,
-select,
-textarea {
-  padding: 0.4rem;
-  font: inherit;
-}
-
-.filter,
-.row {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.row {
-  justify-content: space-between;
-}
-
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 48rem;
+  /* Any element with data-level gets that level's color as --level-color (bg-level, text-level). */
+  [data-level='unknown'] {
+    --level-color: var(--level-unknown);
+  }
+  [data-level='learning-1'] {
+    --level-color: var(--level-learning-1);
+  }
+  [data-level='learning-2'] {
+    --level-color: var(--level-learning-2);
+  }
+  [data-level='learning-3'] {
+    --level-color: var(--level-learning-3);
+  }
+  [data-level='learning-4'] {
+    --level-color: var(--level-learning-4);
+  }
+  [data-level='learning-5'] {
+    --level-color: var(--level-learning-5);
+  }
+  [data-level='well-known'] {
+    --level-color: var(--level-well-known);
+  }
+  [data-level='ignored'] {
+    --level-color: var(--muted-foreground);
+  }
+  [data-level='learned'] {
+    --level-color: var(--level-learned);
+  }
+  [data-level='learning'] {
+    --level-color: var(--level-learning);
+  }
 }
