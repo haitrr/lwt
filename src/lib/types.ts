@@ -56,6 +56,8 @@ export type TextReadInfo = {
   bookmark: number | null;
   termCount: number;
   processedTermCount: number;
+  /** Why splitting gave up; null unless it failed. */
+  processingError: string | null;
 };
 
 /** One token of a text in reading order; id/meaning/count are set when it is a real term. */
