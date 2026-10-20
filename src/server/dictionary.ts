@@ -33,6 +33,9 @@ function englishCandidates(word: string) {
   for (const [suffix, replacement] of ENGLISH_SUFFIXES) {
     if (lower.length > suffix.length + 1 && lower.endsWith(suffix)) candidates.push(lower.slice(0, -suffix.length) + replacement);
   }
+  // A doubled final consonant before the suffix: "planned" -> "plan", "bigger" -> "big".
+  const doubled = /^(.*([b-df-hj-np-tv-z]))\2(?:ed|ing|er|est)$/.exec(lower);
+  if (doubled) candidates.push(doubled[1]);
   return candidates;
 }
 
