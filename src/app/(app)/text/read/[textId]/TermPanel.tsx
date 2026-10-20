@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { importanceColor } from '@/lib/importance';
 import { LearningLevel, LEVEL_LABELS, nextLevel, type TextTermView } from '@/lib/types';
+import { ArrowUpIcon, CloseIcon, CopyIcon } from '@/components/icons';
 import styles from './reader.module.css';
 
 type Props = {
@@ -46,9 +47,10 @@ export default function TermPanel({ term, suggestion, onSave, onClose }: Props) 
           onClick={() => void navigator.clipboard?.writeText(term.content)}
         >
           {`${term.content} (${term.count ?? '-'})`}
+          <CopyIcon />
         </button>
-        <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
-          ×
+        <button type="button" className="ghost small" onClick={onClose} aria-label="Close">
+          <CloseIcon />
         </button>
       </div>
       <textarea
@@ -58,15 +60,16 @@ export default function TermPanel({ term, suggestion, onSave, onClose }: Props) 
         onChange={(e) => setMeaning(e.target.value)}
         disabled={saving}
       />
-      <div className="row">
-        <select value={level} onChange={(e) => setLevel(e.target.value as LearningLevel)} disabled={saving}>
+      <div className={styles.panelActions}>
+        <select aria-label="Level" value={level} onChange={(e) => setLevel(e.target.value as LearningLevel)} disabled={saving}>
           {EDITABLE_LEVELS.map((l) => (
             <option key={l} value={l}>
               {LEVEL_LABELS[l]}
             </option>
           ))}
         </select>
-        <button type="button" disabled={saving} onClick={() => void save(nextLevel(level))}>
+        <button type="button" className="secondary" disabled={saving} onClick={() => void save(nextLevel(level))}>
+          <ArrowUpIcon />
           Better
         </button>
         <button type="submit" disabled={saving}>

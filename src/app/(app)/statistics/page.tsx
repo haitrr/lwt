@@ -21,7 +21,7 @@ type Row = { key: string; label: string; value: number; level?: string };
 function BarList({ title, rows }: { title: string; rows: Row[] }) {
   const max = Math.max(1, ...rows.map((r) => r.value));
   return (
-    <figure className={styles.chart}>
+    <figure className={`card ${styles.chart}`}>
       <figcaption>{title}</figcaption>
       {rows.length === 0 ? (
         <p className={styles.empty}>No data yet.</p>
@@ -67,11 +67,31 @@ export default async function StatisticsPage() {
     value: levelCounts[level],
     level,
   }));
+  const sum = (counts: Record<string, number>) => Object.values(counts).reduce((a, b) => a + b, 0);
+  const tiles = [
+    { label: 'Texts', value: sum(textCounts) },
+    { label: 'Learned terms', value: sum(termCounts) },
+    { label: 'Well known', value: levelCounts[LearningLevel.WellKnown] ?? 0 },
+    { label: 'Languages', value: Object.keys(textCounts).length },
+  ];
   return (
-    <div className={styles.grid}>
-      <BarList title="Texts by language" rows={byLanguage(textCounts)} />
-      <BarList title="Learned terms by language" rows={byLanguage(termCounts)} />
-      <BarList title="Learned terms by level" rows={levels} />
-    </div>
+    <>
+      <div className="pageHeader">
+        <h1>Statistics</h1>
+      </div>
+      <div className={styles.tiles}>
+        {tiles.map((t) => (
+          <div key={t.label} className={`card ${styles.tile}`}>
+            <span>{t.label}</span>
+            <strong>{t.value.toLocaleString('en')}</strong>
+          </div>
+        ))}
+      </div>
+      <div className={styles.grid}>
+        <BarList title="Texts by language" rows={byLanguage(textCounts)} />
+        <BarList title="Learned terms by language" rows={byLanguage(termCounts)} />
+        <BarList title="Learned terms by level" rows={levels} />
+      </div>
+    </>
   );
 }

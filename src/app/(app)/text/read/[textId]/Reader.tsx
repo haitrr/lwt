@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { loadTermCounts, loadTextTerms, lookUpTerm, saveBookmark, saveTerm } from '@/lib/reader';
 import { LearningLevel, type TermCounts, type TextReadInfo, type TextTermView } from '@/lib/types';
+import Link from 'next/link';
+import { languageName } from '@/lib/languages';
+import { ArrowLeftIcon, BookmarkIcon } from '@/components/icons';
 import TermToken from './TermToken';
 import TermPopover from './TermPopover';
 import TermPanel from './TermPanel';
@@ -110,7 +113,9 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
     if (panel.scrollHeight - panel.scrollTop - panel.clientHeight < EDGE_PX) void loadMore('after');
     // Progress follows the first token visible at the top of the panel.
     const box = panel.getBoundingClientRect();
-    const el = document.elementFromPoint(box.left + 24, box.top + 24)?.closest<HTMLElement>('[data-index]');
+    // The text column is centered, so probe from its left edge rather than the panel's.
+    const left = panel.firstElementChild?.getBoundingClientRect().left ?? box.left;
+    const el = document.elementFromPoint(left + 24, box.top + 24)?.closest<HTMLElement>('[data-index]');
     if (el) setViewing(Number(el.dataset.index));
   };
 
@@ -218,7 +223,13 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
     <div className={styles.reader}>
       <title>{text.title}</title>
       <header className={styles.top}>
-        <h1 className={styles.title}>{text.title}</h1>
+        <div className={styles.titleRow}>
+          <Link href="/text" className={`button ghost small ${styles.back}`} aria-label="Back to texts" title="Back to texts">
+            <ArrowLeftIcon />
+          </Link>
+          <h1 className={styles.title}>{text.title}</h1>
+          <span className="badge">{languageName(text.languageCode)}</span>
+        </div>
         <TextStats counts={counts} termCount={text.termCount} />
       </header>
       {text.processedTermCount < text.termCount || text.termCount === 0 ? (
@@ -226,9 +237,11 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
       ) : null}
       <div className={styles.body}>
         <div ref={panelRef} className={styles.content} onScroll={onScroll} lang={text.languageCode}>
-          {range.begin > 0 && <p className={styles.more}>Scroll up for more</p>}
-          {tokens}
-          {terms.size === 0 && text.termCount > 0 && <p>Loading…</p>}
+          <div className={styles.page}>
+            {range.begin > 0 && <p className={styles.more}>Scroll up for more</p>}
+            {tokens}
+            {terms.size === 0 && text.termCount > 0 && <p className="loading">Loading…</p>}
+          </div>
         </div>
         <div className={styles.progress} aria-hidden>
           <div style={{ height: `${text.termCount ? (viewing * 100) / text.termCount : 0}%` }} />
@@ -266,6 +279,7 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
           title="Go to bookmark"
           onClick={() => document.getElementById(`t${bookmark}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' })}
         >
+          <BookmarkIcon />
           {`${percent}%`}
         </button>
       )}

@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react';
 import { deleteText } from '@/lib/texts';
+import { TrashIcon } from '@/components/icons';
 
 export default function DeleteTextButton({ id, title }: { id: number; title: string }) {
   const [pending, startTransition] = useTransition();
@@ -11,8 +12,15 @@ export default function DeleteTextButton({ id, title }: { id: number; title: str
     }
   };
   return (
-    <button type="button" className="danger" onClick={onClick} disabled={pending}>
-      Delete
+    <button
+      type="button"
+      className="danger small"
+      onClick={onClick}
+      disabled={pending}
+      aria-label={`Delete ${title}`}
+      title="Delete"
+    >
+      <TrashIcon />
     </button>
   );
 }
