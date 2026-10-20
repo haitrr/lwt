@@ -1,0 +1,30 @@
+# The app plus its Postgres database. The schema is created when the app starts.
+# To bring over the data of the old MySQL database, see "Moving from MySQL" in README.md.
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgres://lwt:${POSTGRES_PASSWORD}@postgres:5432/lwt
+      LWT_JWT_SECRET: ${LWT_JWT_SECRET}
+      LWT_DICTIONARY_API_ROOT: ${LWT_DICTIONARY_API_ROOT:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+  postgres:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: lwt
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: lwt
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'lwt']
+      interval: 2s
+      retries: 30
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+volumes:
+  postgres-data:

@@ -1,0 +1,95 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table .title {
+  text-align: left;
+  max-width: 20rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.processing,
+.done,
+.partial {
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  color: white;
+  white-space: nowrap;
+}
+
+.processing {
+  background: #ff0101;
+}
+
+.done {
+  background: #009700;
+}
+
+.partial {
+  background: #5ab7d4;
+}
+
+.level {
+  display: inline-block;
+  min-width: 2.5rem;
+  padding: 0.125rem;
+  border-radius: 4px;
+  color: #111;
+  background: var(--level-color);
+}
+
+.level[data-level='unknown'] {
+  --level-color: var(--level-unknown);
+}
+.level[data-level='learning-1'] {
+  --level-color: var(--level-learning-1);
+}
+.level[data-level='learning-2'] {
+  --level-color: var(--level-learning-2);
+}
+.level[data-level='learning-3'] {
+  --level-color: var(--level-learning-3);
+}
+.level[data-level='learning-4'] {
+  --level-color: var(--level-learning-4);
+}
+.level[data-level='learning-5'] {
+  --level-color: var(--level-learning-5);
+}
+.level[data-level='well-known'] {
+  --level-color: var(--level-well-known);
+}
+
+.pagination {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
