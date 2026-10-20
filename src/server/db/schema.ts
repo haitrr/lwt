@@ -30,6 +30,8 @@ export const users = pgTable(
     email: varchar('email', { length: 256 }),
     // ASP.NET Identity V2/V3 hashes, so passwords from the old API keep working.
     passwordHash: text('password_hash').notNull(),
+    // Bumped to sign out every session the user has (see src/server/auth/session.ts).
+    tokenVersion: integer('token_version').notNull().default(0),
   },
   (t) => [uniqueIndex('users_normalized_user_name_key').on(t.normalizedUserName)],
 );

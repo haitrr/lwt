@@ -16,7 +16,11 @@ export type TextItem = {
   /** Why splitting gave up; null unless it failed. */
   processingError: string | null;
   createdAt: string;
+  lastReadAt: string;
 };
+
+export const TEXT_SORTS = ['recent', 'newest', 'title'] as const;
+export type TextSort = (typeof TEXT_SORTS)[number];
 
 export type TextList = {
   total: number;

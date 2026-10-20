@@ -1,9 +1,10 @@
 'use server';
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { toFormState, type FormState } from './actionState';
 import { TOKEN_COOKIE } from './config';
+import { clearLoginAttempts, clientIp, limitAttempt } from '@/server/auth/attempts';
 import { createSessionToken, setSessionCookie } from '@/server/auth/session';
 import { checkCredentials, signUp } from '@/server/users';
 
@@ -18,9 +19,12 @@ function readCredentials(formData: FormData) {
 
 export async function login(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const { userName, password } = readCredentials(formData);
+  const ip = clientIp(await headers());
   const state = await toFormState(async () => {
+    limitAttempt('login', ip, userName);
     const user = await checkCredentials(userName, password);
-    await setSessionCookie(await createSessionToken(user.id, user.userName));
+    clearLoginAttempts(userName);
+    await setSessionCookie(await createSessionToken(user.id, user.userName, user.tokenVersion));
   }, { userName });
   if (state) return state;
   redirect('/');
@@ -28,7 +32,11 @@ export async function login(_prev: AuthState, formData: FormData): Promise<AuthS
 
 export async function register(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const { userName, password } = readCredentials(formData);
-  const state = await toFormState(() => signUp(userName, password), { userName });
+  const ip = clientIp(await headers());
+  const state = await toFormState(async () => {
+    limitAttempt('register', ip, userName);
+    await signUp(userName, password);
+  }, { userName });
   if (state) return state;
   redirect('/login');
 }
