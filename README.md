@@ -58,9 +58,9 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
 
 ## Installing with Docker
 
-You need Docker with the Compose plugin (`docker compose version`). Nothing is built on the host: every push to master
-publishes the app image to `ghcr.io/haitrr/lwt` as `latest` and `sha-<commit>` (`.github/workflows/docker.yml`), and
-the compose file pulls it with Postgres 17 and the backup service. The built-in dictionaries are inside the image.
+You need Docker with the Compose plugin (`docker compose version`). Nothing is built on the host: every release
+publishes the app image to `ghcr.io/haitrr/lwt` (see [Releasing](#releasing)), and the compose file pulls it with
+Postgres 17 and the backup service. The built-in dictionaries are inside the image.
 
 1. Download the compose file into an empty folder:
 
@@ -82,7 +82,7 @@ the compose file pulls it with Postgres 17 and the backup service. The built-in 
    POSTGRES_PASSWORD=<a long random password>
    LWT_JWT_SECRET=<a long random string, e.g. from: openssl rand -base64 48>
    BACKUP_AGE_RECIPIENT=age1...
-   # LWT_IMAGE_TAG=sha-<commit>        # optional: pin a build instead of latest
+   # LWT_IMAGE_TAG=0.2                 # optional: pin a release (0.2.1) or a line (0.2) instead of latest
    ```
 
    Moving from the old .NET API? Use its `AppSettings:Secret` as `LWT_JWT_SECRET` so existing sessions stay signed in.
@@ -98,8 +98,8 @@ the compose file pulls it with Postgres 17 and the backup service. The built-in 
    docker compose up -d
    ```
 
-To update, `docker compose pull && docker compose up -d`; to roll back, set `LWT_IMAGE_TAG=sha-<commit>` in `.env` and
-run the same. `docker compose logs -f web` shows the app's logs.
+To update, `docker compose pull && docker compose up -d`; to roll back, set `LWT_IMAGE_TAG` to the earlier version
+(e.g. `0.2.0`) in `.env` and run the same. `docker compose logs -f web` shows the app's logs.
 
 On the server that has this repository checked out, `./deploy.sh` does the update with a backup first: it runs
 `./backup.sh`, pulls the images and starts `docker-compose.prod.yml`. `docker-compose.yaml` is the same stack built from
@@ -147,3 +147,26 @@ The script creates the schema, copies users (passwords keep working), texts, ter
 their ids, and only reads from MySQL. It refuses to run if the Postgres database already has users. A few terms that
 MySQL kept apart but Postgres treats as the same word (`don't` and `don’t`) are merged into the older one, and the
 script prints each merge. See [MIGRATION.md](MIGRATION.md).
+
+## Releasing
+
+Versions follow [semantic versioning](https://semver.org): a major for changes that need the installer to do something
+(a breaking `.env` or compose change, a manual migration), a minor for new features, a patch for fixes. Commits to
+master publish no image; cutting a version does.
+
+1. Bump the version in a pull request and merge it. `npm version` updates `package.json` and `package-lock.json`:
+
+   ```shell
+   npm version minor --no-git-tag-version   # or major / patch / preminor --preid rc
+   ```
+
+2. Tag the merged commit on master with the same version, as a GitHub release:
+
+   ```shell
+   gh release create v0.2.0 --target master --generate-notes
+   ```
+
+The tag starts `.github/workflows/docker.yml`, which checks it matches `package.json` and publishes
+`ghcr.io/haitrr/lwt` as `0.2.0`, `0.2` and `latest` (and `1` for 1.0.0 onwards). A pre-release such as `v0.2.0-rc.1`
+is published only as `0.2.0-rc.1`. Pull requests that change the Dockerfile or its inputs build the image without
+publishing it.
