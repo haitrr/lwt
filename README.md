@@ -56,13 +56,58 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
 - The UI uses [shadcn/ui](https://ui.shadcn.com) components (`src/components/ui`, add more with `npx shadcn add <name>`) on
   Tailwind CSS v4, with light, dark and system themes.
 
-## Deploying
+## Installing with Docker
 
-Every push to master builds the app (Next.js standalone output) and publishes it to `ghcr.io/haitrr/lwt`, tagged `latest`
-and `sha-<commit>` (`.github/workflows/docker.yml`). On the server, `./deploy.sh` backs up the database, pulls the images
-and starts the stack in `docker-compose.prod.yml`: the app, Postgres and the backup service. Set `POSTGRES_PASSWORD`,
-`LWT_JWT_SECRET` and `BACKUP_AGE_RECIPIENT` in the environment or a `.env` file, and `LWT_IMAGE_TAG=sha-<commit>` to
-deploy a specific build. `docker compose up` runs the same stack built from the checkout instead.
+You need a Linux host with Docker Engine and the Compose plugin (`docker compose version`). The app image is built by CI
+on every push to master and published to `ghcr.io/haitrr/lwt` as `latest` and `sha-<commit>`
+(`.github/workflows/docker.yml`), so the host only pulls it. The stack in `docker-compose.prod.yml` is the app on port
+3000, Postgres 17 and the backup service. The built-in dictionaries ship inside the image; there is nothing to set up for
+them.
+
+1. Get the compose file and scripts:
+
+   ```shell
+   git clone https://github.com/haitrr/lwt.git && cd lwt
+   ```
+
+2. Make a backup key on your own machine (not the server). The backup service will not start without its public half:
+
+   ```shell
+   age-keygen -o lwt-backup.key        # keep this file offline; it is the only way to read a backup
+   grep 'public key' lwt-backup.key    # the age1… value for BACKUP_AGE_RECIPIENT
+   ```
+
+3. Create `.env` next to `docker-compose.prod.yml`:
+
+   ```shell
+   POSTGRES_PASSWORD=<a long random password>
+   LWT_JWT_SECRET=<a long random string, e.g. from: openssl rand -base64 48>
+   BACKUP_AGE_RECIPIENT=age1...
+   # LWT_IMAGE_TAG=sha-<commit>        # optional: pin a build instead of latest
+   ```
+
+   Moving from the old .NET API? Use its `AppSettings:Secret` as `LWT_JWT_SECRET` so existing sessions stay signed in.
+   Compose builds `DATABASE_URL` from `POSTGRES_PASSWORD`, so you don't set it here.
+
+4. Point the backups at your storage. The `postgres-backups` volume at the bottom of `docker-compose.prod.yml` is an NFS
+   mount of `ugnas.lc:/volume2/backups/lwt`; change `addr=` and `device:` to your NAS, or replace the volume with a
+   plain local one (`postgres-backups: {}`) to keep dumps on the host.
+
+5. Start it:
+
+   ```shell
+   ./deploy.sh
+   ```
+
+   It backs up the database (skipped on the first run, when there is nothing yet), pulls the images and runs
+   `docker compose up -d`. The app creates its tables on first start. Open `http://<host>:3000` and register an account,
+   or bring over the old data first (see [Moving from MySQL](#moving-from-mysql)).
+
+To update, run `./deploy.sh` again: it takes a backup, then pulls the newest `latest`. To roll back, set
+`LWT_IMAGE_TAG=sha-<commit>` in `.env` and run it once more. `docker compose logs -f web` shows the app's logs.
+
+To build the image from the checkout instead of pulling it, use the other compose file, which is the same stack with
+`build: .`: `COMPOSE_FILE=docker-compose.yaml docker compose up -d --build`. The scripts take the same `COMPOSE_FILE`.
 
 ### Backups
 
@@ -72,13 +117,7 @@ age`, so nothing reaches the NAS unencrypted. Hourly dumps are kept for 48 hours
 kept for 7 days, 4 weeks and 6 months. `./deploy.sh` also runs `./backup.sh` before each deploy, which keeps the last 20
 dumps in `deployments/`.
 
-Make a key pair on your own machine and set `BACKUP_AGE_RECIPIENT` to its public half; the service will not start
-without it:
-
-```shell
-age-keygen -o lwt-backup.key        # keep this file offline; it is the only way to read a backup
-grep 'public key' lwt-backup.key    # the age1… value for BACKUP_AGE_RECIPIENT
-```
+The key pair is the one from step 2 of the install; `BACKUP_AGE_RECIPIENT` is its public half.
 
 To restore, run `./restore.sh` with no arguments to list the dumps, then pass one with the private key. It asks you to
 type the database name, since it replaces the database's contents, and runs in one transaction, so a failed restore
@@ -90,13 +129,24 @@ changes nothing:
 
 ### Moving from MySQL
 
-Stop the old .NET API first, so nothing writes to MySQL during the copy. Then copy its data into an empty Postgres
-database:
+Stop the old .NET API first, so nothing writes to MySQL during the copy. Then copy its data into the new, still empty
+Postgres database. The image only holds the built app, so run the script from the checkout in a Node container on the
+stack's network (Compose names it after the folder, `lwt_default` here; `docker network ls` lists it):
 
 ```shell
-MYSQL_URL=mysql://user:pass@host:3306/lwt DATABASE_URL=postgres://user:pass@host:5432/lwt npm run import-mysql
+docker compose -f docker-compose.prod.yml up -d postgres
+docker run --rm -it --network lwt_default -v "$PWD":/src -w /src -u "$(id -u):$(id -g)" -e HOME=/tmp \
+  -e MYSQL_URL=mysql://user:pass@mysql-host:3306/lwt \
+  -e DATABASE_URL=postgres://lwt:<POSTGRES_PASSWORD>@postgres:5432/lwt \
+  node:22-alpine sh -c 'npm ci && npm run import-mysql'
+./deploy.sh
 ```
 
+`mysql-host` must be reachable from inside the container: a hostname or IP on your network, or the old MySQL
+container's name if you attach it to `lwt_default` too. Outside Docker it is just
+`MYSQL_URL=... DATABASE_URL=... npm run import-mysql`.
+
 The script creates the schema, copies users (passwords keep working), texts, terms, text splits, settings and logs with
-their ids, and only reads from MySQL. A few terms that MySQL kept apart but Postgres treats as the same word (`don't` and
-`don’t`) are merged into the older one, and the script prints each merge. See [MIGRATION.md](MIGRATION.md).
+their ids, and only reads from MySQL. It refuses to run if the Postgres database already has users. A few terms that
+MySQL kept apart but Postgres treats as the same word (`don't` and `don’t`) are merged into the older one, and the
+script prints each merge. See [MIGRATION.md](MIGRATION.md).
