@@ -31,6 +31,9 @@ step "Backing up database"
 if ./backup.sh; then ok "Backup complete"; else warn "Skipping backup, first deploy?"; fi
 
 step "Building and deploying app"
+# The backup image is pulled rather than built, and `up` alone keeps whichever
+# copy it pulled first, so it would never pick up the weekly rebuild.
+docker compose pull -q postgres-backup || warn "Could not pull the backup image, keeping the current one"
 docker compose up -d --build && ok "App deployed" || fail "Docker deploy failed"
 
 echo ""
