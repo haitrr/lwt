@@ -52,8 +52,8 @@ async function recordFailure({ id, lastModifiedDate }: PendingText, error: unkno
   await getDb()
     .update(texts)
     .set({ processingError: message.slice(0, 1000), failedAt: new Date(), lastModifiedDate: sql`${texts.lastModifiedDate}` })
-    // An edit in the meantime gets a fresh start.
-    .where(and(eq(texts.id, id), eq(texts.lastModifiedDate, lastModifiedDate)));
+    // An edit in the meantime gets a fresh start. The column keeps microseconds, the Date only milliseconds.
+    .where(and(eq(texts.id, id), sql`date_trunc('milliseconds', ${texts.lastModifiedDate}) = ${lastModifiedDate}`));
   failures.delete(id);
 }
 
