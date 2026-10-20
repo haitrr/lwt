@@ -247,7 +247,14 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
           <TextStats counts={counts} termCount={text.termCount} />
         </div>
       </header>
-      {text.processedTermCount < text.termCount || text.termCount === 0 ? (
+      {text.processingError ? (
+        <p className="flex-none bg-destructive/10 px-4 py-2 text-center text-sm break-words text-destructive" role="alert">
+          {`Splitting this text into words failed: ${text.processingError} — `}
+          <Link href={`/text/${text.id}/edit`} className="font-medium underline underline-offset-2">
+            Edit the text to retry
+          </Link>
+        </p>
+      ) : text.processedTermCount < text.termCount || text.termCount === 0 ? (
         <p className="flex-none bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-700 dark:text-amber-400">
           This text is still being split into words. Reload in a moment to see all of it.
         </p>

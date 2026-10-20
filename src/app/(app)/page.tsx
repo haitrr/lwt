@@ -68,6 +68,16 @@ function GetStarted({ userName }: { userName: string }) {
 }
 
 function ReadProgress({ text }: { text: TextItem }) {
+  if (text.processingError) {
+    return (
+      <p className="text-sm break-words text-destructive">
+        {`Splitting this text into words failed: ${text.processingError} — `}
+        <Link href={`/text/${text.id}/edit`} className="font-medium underline underline-offset-2">
+          Edit the text to retry
+        </Link>
+      </p>
+    );
+  }
   if (text.termCount === 0) {
     return <p className="text-sm text-muted-foreground">Still splitting this text into words…</p>;
   }
@@ -104,7 +114,7 @@ async function ContinueReading({ text, started, userId }: { text: TextItem; star
       </CardHeader>
       <CardContent className="grid gap-5">
         <ReadProgress text={text} />
-        {text.termCount > 0 && <Vocabulary counts={counts} />}
+        {text.termCount > 0 && !text.processingError && <Vocabulary counts={counts} />}
       </CardContent>
       <CardFooter className="gap-2">
         <Button asChild className="flex-1 sm:flex-none">
@@ -169,7 +179,11 @@ function RecentText({ text }: { text: TextItem }) {
       </Link>
       <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground tabular-nums">
         <Badge variant="secondary">{languageName(text.languageCode)}</Badge>
-        <span>{text.termCount === 0 ? 'Processing' : pct === 0 ? 'Not started' : `${pct}% read`}</span>
+        {text.processingError ? (
+          <span className="text-destructive">Failed</span>
+        ) : (
+          <span>{text.termCount === 0 ? 'Processing' : pct === 0 ? 'Not started' : `${pct}% read`}</span>
+        )}
       </div>
       <Progress value={pct} aria-label="Read" className="h-1.5" />
     </Card>

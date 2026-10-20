@@ -142,6 +142,7 @@ export async function readText(id: number, session: Session): Promise<TextReadIn
       languageCode: texts.languageCode,
       termCount: texts.termCount,
       processedTermCount: texts.processedTermCount,
+      processingError: texts.processingError,
     })
     .from(texts)
     .where(and(eq(texts.id, id), eq(texts.userId, session.userId)));
