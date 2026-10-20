@@ -1,0 +1,25 @@
+# The app plus the MySQL database. To keep using the database of the old .NET API,
+# point DATABASE_URL at it instead and drop the mysql service.
+services:
+  web:
+    build: .
+    restart: always
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/lwt
+      LWT_JWT_SECRET: ${LWT_JWT_SECRET}
+      LWT_DICTIONARY_API_ROOT: ${LWT_DICTIONARY_API_ROOT:-}
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: lwt
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+volumes:
+  mysql-data:

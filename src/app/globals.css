@@ -1,0 +1,127 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.header nav {
+  display: flex;
+  gap: 1rem;
+}
+
+main {
+  padding: 1rem;
+}
+
+.auth {
+  max-width: 320px;
+  margin: 4rem auto;
+}
+
+.auth form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.auth label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.error {
+  color: #c00;
+}
+
+:root {
+  --border: #ddd;
+  --accent: #1976d2;
+  --danger: #c62828;
+  --text-secondary: #555;
+  /* Learning level colors, from the old app. */
+  --level-unknown: #f27573;
+  --level-learning-1: #c786d3;
+  --level-learning-2: #4dabf5;
+  --level-learning-3: #33c9dc;
+  --level-learning-4: #a2cf6e;
+  --level-learning-5: #ffef62;
+  --level-well-known: #d9d9d9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --border: #333;
+    --text-secondary: #aaa;
+    --level-well-known: #555;
+    color-scheme: dark;
+  }
+}
+
+.card {
+  max-width: 22rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+button,
+.button {
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent);
+  color: white;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+}
+
+button.danger {
+  background: var(--danger);
+}
+
+input,
+select,
+textarea {
+  padding: 0.4rem;
+  font: inherit;
+}
+
+.filter,
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.row {
+  justify-content: space-between;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 48rem;
+}
