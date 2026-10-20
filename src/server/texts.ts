@@ -12,12 +12,19 @@ import {
   type TextItem,
   type TextList,
   type TextReadInfo,
+  type TextSort,
   type TextTermView,
 } from '@/lib/types';
 
 const { texts, textTerms, terms, logs } = schema;
 
 export type TextFilter = { title?: string; languageCode?: string };
+
+const ORDER_BY = {
+  recent: [desc(texts.lastReadAt), desc(texts.id)],
+  newest: [desc(texts.createdDate), desc(texts.id)],
+  title: [asc(texts.title), asc(texts.id)],
+} satisfies Record<TextSort, unknown[]>;
 export type TextInput = { title: string; languageCode: string; content: string };
 
 function filterConditions(userId: number, filter: TextFilter) {
@@ -37,10 +44,15 @@ const listColumns = {
   processedTermCount: texts.processedTermCount,
   bookmark: texts.bookmark,
   createdDate: texts.createdDate,
+  lastReadAt: texts.lastReadAt,
 };
 
-function toTextItem({ createdDate, ...t }: { createdDate: Date } & Omit<TextItem, 'createdAt'>): TextItem {
-  return { ...t, createdAt: createdDate.toISOString() };
+function toTextItem({
+  createdDate,
+  lastReadAt,
+  ...t
+}: { createdDate: Date; lastReadAt: Date } & Omit<TextItem, 'createdAt' | 'lastReadAt'>): TextItem {
+  return { ...t, createdAt: createdDate.toISOString(), lastReadAt: lastReadAt.toISOString() };
 }
 
 function validate(input: TextInput) {
@@ -59,8 +71,14 @@ async function getOwnedText(id: number, userId: number) {
   return text;
 }
 
-/** Most recently read first, like the old list. */
-export async function listTexts(userId: number, filter: TextFilter, page: number, itemPerPage: number): Promise<TextList> {
+/** Most recently read first by default, like the old list. */
+export async function listTexts(
+  userId: number,
+  filter: TextFilter,
+  page: number,
+  itemPerPage: number,
+  sort: TextSort = 'recent',
+): Promise<TextList> {
   const db = getDb();
   const where = filterConditions(userId, filter);
   const [rows, [{ total }]] = await Promise.all([
@@ -68,7 +86,7 @@ export async function listTexts(userId: number, filter: TextFilter, page: number
       .select(listColumns)
       .from(texts)
       .where(where)
-      .orderBy(desc(texts.lastReadAt))
+      .orderBy(...ORDER_BY[sort])
       .limit(itemPerPage)
       .offset(itemPerPage * (page - 1)),
     db.select({ total: count() }).from(texts).where(where),
@@ -164,6 +182,24 @@ export async function getTermCounts(id: number, userId: number) {
   for (const row of rows) {
     const level = (row.learningLevel ?? LearningLevel.Skipped) as LearningLevel;
     result[level] += row.n;
+  }
+  return result;
+}
+
+/** getTermCounts for several texts in one query, keyed by text id. */
+export async function getTermCountsByText(ids: number[], userId: number) {
+  const result = new Map(ids.map((id) => [id, emptyCounts()]));
+  if (!ids.length) return result;
+  const rows = await getDb()
+    .select({ textId: textTerms.textId, learningLevel: terms.learningLevel, n: count() })
+    .from(textTerms)
+    .innerJoin(texts, eq(textTerms.textId, texts.id))
+    .leftJoin(terms, eq(textTerms.termId, terms.id))
+    .where(and(inArray(textTerms.textId, ids), eq(texts.userId, userId)))
+    .groupBy(textTerms.textId, terms.learningLevel);
+  for (const row of rows) {
+    const level = (row.learningLevel ?? LearningLevel.Skipped) as LearningLevel;
+    result.get(row.textId)![level] += row.n;
   }
   return result;
 }

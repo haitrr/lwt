@@ -12,7 +12,11 @@ export type TextItem = {
   processedTermCount: number;
   bookmark: number | null;
   createdAt: string;
+  lastReadAt: string;
 };
+
+export const TEXT_SORTS = ['recent', 'newest', 'title'] as const;
+export type TextSort = (typeof TEXT_SORTS)[number];
 
 export type TextList = {
   total: number;
