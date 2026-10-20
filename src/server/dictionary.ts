@@ -1,108 +1,125 @@
 import 'server-only';
 import nlp from 'compromise';
+import { and, eq, inArray } from 'drizzle-orm';
+import { getDb, schema } from './db';
+import { japaneseBaseForm } from './languages/japanese';
 
-// Dictionaries asked in turn until one has the word:
-// - The service the old app used (lwt-dictionary), when LWT_DICTIONARY_API_ROOT is set:
-//   GET {root}/dictionary/{word}?fromLang=&toLang= answering { meaning }, or 404 when it has no entry.
-// - Microsoft Translator's dictionary lookup, when the user saved an Azure Translator key on their profile.
-//   It only pairs English with another language.
+// Lookups in the built-in dictionaries (see src/server/dictionaryImport.ts), then in Microsoft Translator's dictionary
+// when the user saved an Azure Translator key on their profile. A word is tried as written first, then in its
+// dictionary form: "walked" -> "walk" for English, 食べ -> 食べる for Japanese.
 
-/** The meaning, null when the dictionary has no entry, undefined when it could not be asked. */
-type Lookup = (word: string, from: string, to: string) => Promise<string | null | undefined>;
+const { dictionaryEntries } = schema;
 
-const TIMEOUT_MS = 5000;
+// Inflections WordNet lists under the base form; tried after compromise's guess.
+const ENGLISH_SUFFIXES: [string, string][] = [
+  ['ies', 'y'],
+  ['es', ''],
+  ['s', ''],
+  ['ied', 'y'],
+  ['ed', 'e'],
+  ['ed', ''],
+  ['ing', 'e'],
+  ['ing', ''],
+  ['er', ''],
+  ['est', ''],
+];
 
-/** Dictionary form of a word: "walked" -> "walk", "books" -> "book" for English. */
-function dictionaryForm(word: string, languageCode: string) {
-  if (languageCode !== 'en') return word.toLowerCase();
-  const doc = nlp(word);
+function englishCandidates(word: string) {
+  const lower = word.toLowerCase();
+  const doc = nlp(lower);
   doc.verbs().toInfinitive();
   doc.nouns().toSingular();
-  return doc.text().toLowerCase() || word.toLowerCase();
+  const candidates = [lower, doc.text().toLowerCase()];
+  for (const [suffix, replacement] of ENGLISH_SUFFIXES) {
+    if (lower.length > suffix.length + 1 && lower.endsWith(suffix)) candidates.push(lower.slice(0, -suffix.length) + replacement);
+  }
+  return candidates;
 }
 
-function lwtDictionary(): Lookup | null {
-  const root = process.env.LWT_DICTIONARY_API_ROOT;
-  if (!root) return null;
-  return async (word, from, to) => {
-    const url = new URL(`dictionary/${encodeURIComponent(word)}`, root.endsWith('/') ? root : `${root}/`);
-    url.searchParams.set('fromLang', from);
-    url.searchParams.set('toLang', to);
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
-      if (res.status === 404) return null;
-      if (!res.ok) return undefined;
-      const body = (await res.json()) as { meaning?: string };
-      return body.meaning || null;
-    } catch {
-      return undefined;
-    }
-  };
+async function candidates(word: string, languageCode: string): Promise<string[]> {
+  const trimmed = word.trim();
+  if (languageCode === 'en') return englishCandidates(trimmed);
+  if (languageCode === 'ja') return [trimmed, (await japaneseBaseForm(trimmed)) ?? trimmed];
+  return [trimmed];
 }
+
+async function lookUpBuiltIn(words: string[], from: string, to: string) {
+  const rows = await getDb()
+    .select({ word: dictionaryEntries.word, meaning: dictionaryEntries.meaning })
+    .from(dictionaryEntries)
+    .where(
+      and(
+        eq(dictionaryEntries.languageCode, from),
+        eq(dictionaryEntries.dictionaryLanguageCode, to),
+        inArray(dictionaryEntries.word, words),
+      ),
+    );
+  for (const w of words) {
+    const row = rows.find((r) => r.word === w);
+    if (row) return row.meaning;
+  }
+  return null;
+}
+
+/** An Azure Translator resource's key, and its region unless it is a global resource. */
+export type TranslatorSettings = { key: string; region: string | null };
 
 // Microsoft's codes where they differ from ours.
 const MICROSOFT_CODES: Record<string, string> = { zh: 'zh-Hans' };
+// Words one dictionary lookup request may hold.
+const MICROSOFT_MAX_WORDS = 10;
+const TIMEOUT_MS = 5000;
 
 type MicrosoftEntry = { translations: { displayTarget: string; posTag: string }[] };
 
 /** Translations grouped by part of speech, most confident first: "noun: đồng hồ tốc độ, công tơ mét". */
-function formatMicrosoftEntry(entry: MicrosoftEntry | undefined) {
+function formatMicrosoftEntry(entry: MicrosoftEntry) {
   const byPos = new Map<string, string[]>();
-  for (const t of entry?.translations ?? []) {
+  for (const t of entry.translations) {
     const pos = t.posTag.toLowerCase();
     byPos.set(pos, [...(byPos.get(pos) ?? []), t.displayTarget]);
   }
   return [...byPos].map(([pos, words]) => (pos === 'other' ? words.join(', ') : `${pos}: ${words.join(', ')}`)).join('\n') || null;
 }
 
-/** An Azure Translator resource's key, and its region unless it is a global resource. */
-export type TranslatorSettings = { key: string; region: string | null };
-
-function microsoftDictionary(translator: TranslatorSettings | null): Lookup | null {
-  if (!translator) return null;
-  const { key, region } = translator;
-  return async (word, from, to) => {
-    const url = new URL('https://api.cognitive.microsofttranslator.com/dictionary/lookup');
-    url.searchParams.set('api-version', '3.0');
-    url.searchParams.set('from', MICROSOFT_CODES[from] ?? from);
-    url.searchParams.set('to', MICROSOFT_CODES[to] ?? to);
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Ocp-Apim-Subscription-Key': key,
-          ...(region ? { 'Ocp-Apim-Subscription-Region': region } : {}),
-        },
-        body: JSON.stringify([{ Text: word }]),
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-      });
-      // 400 is a language pair it has no dictionary for, which asking again won't change.
-      if (res.status === 400) return null;
-      if (!res.ok) return undefined;
-      const [entry] = (await res.json()) as MicrosoftEntry[];
-      return formatMicrosoftEntry(entry);
-    } catch {
-      return undefined;
-    }
-  };
+/** Microsoft Translator's dictionary; only pairs English with another language. Undefined when it could not be asked. */
+async function lookUpMicrosoft(words: string[], from: string, to: string, { key, region }: TranslatorSettings) {
+  const url = new URL('https://api.cognitive.microsofttranslator.com/dictionary/lookup');
+  url.searchParams.set('api-version', '3.0');
+  url.searchParams.set('from', MICROSOFT_CODES[from] ?? from);
+  url.searchParams.set('to', MICROSOFT_CODES[to] ?? to);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Ocp-Apim-Subscription-Key': key,
+        ...(region ? { 'Ocp-Apim-Subscription-Region': region } : {}),
+      },
+      body: JSON.stringify(words.slice(0, MICROSOFT_MAX_WORDS).map((Text) => ({ Text }))),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+    // 400 is a language pair it has no dictionary for, which asking again won't change.
+    if (res.status === 400) return null;
+    if (!res.ok) return undefined;
+    const entries = (await res.json()) as MicrosoftEntry[];
+    const entry = entries.find((e) => e.translations.length > 0);
+    return entry ? formatMicrosoftEntry(entry) : null;
+  } catch {
+    return undefined;
+  }
 }
 
-/** The first meaning any configured dictionary has; null when none has the word, undefined when one could not be asked. */
+/** The meaning; null when no dictionary has the word, undefined when Microsoft could not be asked. */
 export async function lookUpMeaning(
   word: string,
   from: string,
   to: string,
   translator: TranslatorSettings | null,
 ): Promise<string | null | undefined> {
-  const dictionaries = [lwtDictionary(), microsoftDictionary(translator)].filter((d) => d != null);
-  if (dictionaries.length === 0) return undefined;
-  const form = dictionaryForm(word, from);
-  let failed = false;
-  for (const lookUp of dictionaries) {
-    const meaning = await lookUp(form, from, to);
-    if (meaning) return meaning;
-    if (meaning === undefined) failed = true;
-  }
-  return failed ? undefined : null;
+  const words = [...new Set((await candidates(word, from)).filter(Boolean))];
+  if (!words.length) return null;
+  const meaning = await lookUpBuiltIn(words, from, to);
+  if (meaning || !translator) return meaning;
+  return lookUpMicrosoft(words, from, to, translator);
 }

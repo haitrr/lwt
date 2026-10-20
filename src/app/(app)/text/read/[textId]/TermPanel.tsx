@@ -58,6 +58,7 @@ export default function TermPanel({ term, lookup, onSave, onClose }: Props) {
       </div>
       <Textarea
         rows={3}
+        className="max-h-[40dvh] overflow-y-auto"
         placeholder="Meaning"
         value={shownMeaning}
         onChange={(e) => setMeaning(e.target.value)}

@@ -1,9 +1,106 @@
 {
-  "id": "6e6babfb-3199-4917-8868-c1d6116b4ca6",
+  "id": "75563566-276e-4011-a325-dc7df54ee45f",
   "prevId": "52cd9881-7b63-4890-b25a-94c6950986cf",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.dictionaries": {
+      "name": "dictionaries",
+      "schema": "",
+      "columns": {
+        "language_code": {
+          "name": "language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dictionary_language_code": {
+          "name": "dictionary_language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sha256": {
+          "name": "sha256",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "imported_at": {
+          "name": "imported_at",
+          "type": "timestamp (6) with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "dictionaries_language_code_dictionary_language_code_pk": {
+          "name": "dictionaries_language_code_dictionary_language_code_pk",
+          "columns": [
+            "language_code",
+            "dictionary_language_code"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.dictionary_entries": {
+      "name": "dictionary_entries",
+      "schema": "",
+      "columns": {
+        "language_code": {
+          "name": "language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dictionary_language_code": {
+          "name": "dictionary_language_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "word": {
+          "name": "word",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meaning": {
+          "name": "meaning",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "dictionary_entries_language_code_dictionary_language_code_word_pk": {
+          "name": "dictionary_entries_language_code_dictionary_language_code_word_pk",
+          "columns": [
+            "language_code",
+            "dictionary_language_code",
+            "word"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.language_settings": {
       "name": "language_settings",
       "schema": "",
@@ -553,18 +650,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
-        },
-        "azure_translator_key": {
-          "name": "azure_translator_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "azure_translator_region": {
-          "name": "azure_translator_region",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {

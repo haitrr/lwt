@@ -9,7 +9,6 @@ services:
     environment:
       DATABASE_URL: postgres://lwt:${POSTGRES_PASSWORD}@postgres:5432/lwt
       LWT_JWT_SECRET: ${LWT_JWT_SECRET}
-      LWT_DICTIONARY_API_ROOT: ${LWT_DICTIONARY_API_ROOT:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -26,5 +25,32 @@ services:
       retries: 30
     volumes:
       - postgres-data:/var/lib/postgresql/data
+  postgres-backup:
+    # Hourly pg_dump, encrypted with age before it reaches the volume (github.com/haitrr/pg-backup).
+    # The tag matches the postgres major version above. See "Backups" in README.md.
+    image: ghcr.io/haitrr/pg-backup:17
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: lwt
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: lwt
+      # The public half of the backup key; the container refuses to start without it.
+      BACKUP_AGE_RECIPIENT: ${BACKUP_AGE_RECIPIENT:-}
+      BACKUP_KEEP_HOURS: 48
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+    volumes:
+      - postgres-backups:/backups
 volumes:
   postgres-data:
+  postgres-backups:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: 'addr=ugnas.lc,rw,noatime,nolock,intr,tcp,actimeo=1800,nfsvers=3'
+      device: ':/volume2/backups/lwt'

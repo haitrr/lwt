@@ -22,3 +22,10 @@ export async function cutJapanese(text: string): Promise<string[]> {
     .map((token) => (/^\s+$/.test(token.surface_form) ? token.surface_form.replace(/[ \t\n]/g, '') : token.surface_form))
     .filter((surface) => surface !== '');
 }
+
+/** Dictionary form of a single word, e.g. 食べ -> 食べる, or null when it isn't one word kuromoji knows. */
+export async function japaneseBaseForm(word: string): Promise<string | null> {
+  const tokens = (await getTokenizer()).tokenize(word);
+  if (tokens.length !== 1 || tokens[0].basic_form === '*') return null;
+  return tokens[0].basic_form;
+}
