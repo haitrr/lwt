@@ -165,7 +165,7 @@ export default function TermPanel({
         {newPhrase ? (
           <NativeSelect
             aria-label="Join where"
-            className="w-32 flex-none"
+            className="w-28 flex-none"
             value={everywhere ? 'everywhere' : 'here'}
             onChange={(e) => setEverywhere(e.target.value === 'everywhere')}
             disabled={saving}
@@ -180,7 +180,7 @@ export default function TermPanel({
           </Button>
         )}
         <Button type="submit" disabled={saving || phraseScope === 'loading'}>
-          {newPhrase ? 'Save phrase' : 'Save'}
+          Save
         </Button>
       </div>
     </form>
