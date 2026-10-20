@@ -48,6 +48,28 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
 `docker compose up` builds the app (Next.js standalone output) and starts it with Postgres. Set `POSTGRES_PASSWORD` and
 `LWT_JWT_SECRET` in the environment or a `.env` file.
 
+### Backups
+
+The `postgres-backup` service dumps the database every hour into the `postgres-backups` volume, an NFS mount of
+`ugnas.lc:/volume2/backups/lwt` (the same setup as Life). Each dump is `pg_dump | gzip | age`, so nothing reaches the NAS
+unencrypted. Hourly dumps are kept for 48 hours, with daily, weekly and monthly copies kept for 7 days, 4 weeks and 6
+months.
+
+Make a key pair on your own machine and set `BACKUP_AGE_RECIPIENT` to its public half; the service will not start
+without it:
+
+```shell
+age-keygen -o lwt-backup.key        # keep this file offline; it is the only way to read a backup
+grep 'public key' lwt-backup.key    # the age1… value for BACKUP_AGE_RECIPIENT
+```
+
+To restore, run `./restore.sh` with no arguments to list the dumps, then pass one with the private key. It asks you to
+type the database name, since it replaces the database's contents:
+
+```shell
+./restore.sh /backups/daily/20261020.sql.gz.age ~/lwt-backup.key
+```
+
 ### Moving from MySQL
 
 Stop the old .NET API first, so nothing writes to MySQL during the copy. Then copy its data into an empty Postgres
