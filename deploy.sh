@@ -1,6 +1,9 @@
 #!/bin/bash
-# Back up the database, then rebuild and restart the stack.
+# Back up the database, then pull the latest images and restart the stack.
 set -euo pipefail
+
+# The production stack, unless COMPOSE_FILE says otherwise (docker-compose.yaml builds from this checkout).
+export COMPOSE_FILE=${COMPOSE_FILE:-docker-compose.prod.yml}
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -9,7 +12,7 @@ RED='\033[0;31m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
-STEPS=2
+STEPS=3
 CURRENT=0
 
 step() {
@@ -30,11 +33,13 @@ step "Backing up database"
 # The backup service isn't running on a first deploy, so there is nothing to back up yet.
 if ./backup.sh; then ok "Backup complete"; else warn "Skipping backup, first deploy?"; fi
 
-step "Building and deploying app"
-# The backup image is pulled rather than built, and `up` alone keeps whichever
-# copy it pulled first, so it would never pick up the weekly rebuild.
-docker compose pull -q postgres-backup || warn "Could not pull the backup image, keeping the current one"
-docker compose up -d --build && ok "App deployed" || fail "Docker deploy failed"
+step "Pulling images"
+# `up` alone keeps whichever copy of an image it pulled first, so without this
+# neither a new app build nor the backup image's weekly rebuild would reach the host.
+docker compose pull -q && ok "Images pulled" || warn "Could not pull every image, keeping the current ones"
+
+step "Deploying app"
+docker compose up -d && ok "App deployed" || fail "Docker deploy failed"
 
 echo ""
 echo -e "${GREEN}${BOLD}=== All done at $(date '+%Y-%m-%d %H:%M:%S') ===${RESET}"

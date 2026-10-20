@@ -45,9 +45,11 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
 
 ## Deploying
 
-`./deploy.sh` backs up the database, then builds the app (Next.js standalone output) and starts it with Postgres and the
-backup service (`docker compose up -d --build`). Set `POSTGRES_PASSWORD`, `LWT_JWT_SECRET` and `BACKUP_AGE_RECIPIENT` in
-the environment or a `.env` file.
+Every push to master builds the app (Next.js standalone output) and publishes it to `ghcr.io/haitrr/lwt`, tagged `latest`
+and `sha-<commit>` (`.github/workflows/docker.yml`). On the server, `./deploy.sh` backs up the database, pulls the images
+and starts the stack in `docker-compose.prod.yml`: the app, Postgres and the backup service. Set `POSTGRES_PASSWORD`,
+`LWT_JWT_SECRET` and `BACKUP_AGE_RECIPIENT` in the environment or a `.env` file, and `LWT_IMAGE_TAG=sha-<commit>` to
+deploy a specific build. `docker compose up` runs the same stack built from the checkout instead.
 
 ### Backups
 
