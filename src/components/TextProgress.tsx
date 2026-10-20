@@ -42,13 +42,13 @@ export function Vocabulary({ counts }: { counts: TermCounts }) {
           >
             <span className="size-2 rounded-[2px] bg-level" />
             <span className="font-medium text-muted-foreground">{l.label}</span>
-            <span>{l.count}</span>
+            <span>{l.count.toLocaleString('en')}</span>
             {l.count > 0 && <span className="text-muted-foreground">{`${share(l.count)}%`}</span>}
           </li>
         ))}
         <li className="flex items-center gap-1 text-muted-foreground" title="Ignored">
           <span className="font-medium">Ignored</span>
-          <span>{counts[LearningLevel.Ignored] ?? 0}</span>
+          <span>{(counts[LearningLevel.Ignored] ?? 0).toLocaleString('en')}</span>
         </li>
       </ul>
     </div>
