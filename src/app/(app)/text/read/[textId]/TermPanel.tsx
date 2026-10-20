@@ -2,26 +2,27 @@
 
 import { useState } from 'react';
 import { importanceColor } from '@/lib/importance';
-import { LearningLevel, LEVEL_LABELS, nextLevel, type TextTermView } from '@/lib/types';
+import { LearningLevel, LEVEL_LABELS, nextLevel, type DictionaryLookup, type TextTermView } from '@/lib/types';
 import { ArrowUp, Copy, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
+import DictionaryHint, { suggestionOf } from './DictionaryHint';
 
 type Props = {
   term: TextTermView;
-  suggestion: string | null;
+  lookup: DictionaryLookup | undefined;
   onSave: (level: LearningLevel, meaning: string) => Promise<void>;
   onClose: () => void;
 };
 
 const EDITABLE_LEVELS = Object.values(LearningLevel).filter((l) => l !== LearningLevel.Skipped);
 
-export default function TermPanel({ term, suggestion, onSave, onClose }: Props) {
+export default function TermPanel({ term, lookup, onSave, onClose }: Props) {
   const [meaning, setMeaning] = useState(term.meaning ?? '');
   const [level, setLevel] = useState(term.learningLevel);
   const [saving, setSaving] = useState(false);
-  const shownMeaning = meaning || (term.meaning ? '' : (suggestion ?? ''));
+  const shownMeaning = meaning || (term.meaning ? '' : (suggestionOf(lookup) ?? ''));
 
   const save = async (nextLevelValue: LearningLevel) => {
     setSaving(true);
@@ -62,6 +63,7 @@ export default function TermPanel({ term, suggestion, onSave, onClose }: Props) 
         onChange={(e) => setMeaning(e.target.value)}
         disabled={saving}
       />
+      {!term.meaning && !meaning && <DictionaryHint lookup={lookup} />}
       <div className="flex gap-2">
         <NativeSelect
           aria-label="Level"

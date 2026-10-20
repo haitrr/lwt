@@ -1,22 +1,23 @@
 'use client';
 
 import { importanceColor } from '@/lib/importance';
-import { nextLevel, previousLevel, LEVEL_LABELS, type LearningLevel, type TextTermView } from '@/lib/types';
+import { nextLevel, previousLevel, LEVEL_LABELS, type DictionaryLookup, type LearningLevel, type TextTermView } from '@/lib/types';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import DictionaryHint, { suggestionOf } from './DictionaryHint';
 
 type Props = {
   term: TextTermView;
   rect: DOMRect;
-  suggestion: string | null;
+  lookup: DictionaryLookup | undefined;
   onKeep: () => void;
   onLeave: () => void;
   onChangeLevel: (level: LearningLevel) => void;
 };
 
-export default function TermPopover({ term, rect, suggestion, onKeep, onLeave, onChangeLevel }: Props) {
-  const meaning = term.meaning || suggestion;
+export default function TermPopover({ term, rect, lookup, onKeep, onLeave, onChangeLevel }: Props) {
+  const meaning = term.meaning || suggestionOf(lookup);
   const above = rect.top > window.innerHeight / 2;
   return (
     <div
@@ -42,10 +43,10 @@ export default function TermPopover({ term, rect, suggestion, onKeep, onLeave, o
           {`${term.count} in this text`}
         </div>
       ) : null}
-      <p className="whitespace-pre-line">
-        {meaning || <em className="text-muted-foreground">No meaning yet</em>}
-        {!term.meaning && suggestion && <span className="text-xs text-muted-foreground"> (dictionary)</span>}
-      </p>
+      {lookup?.status !== 'loading' && (
+        <p className="whitespace-pre-line">{meaning || <em className="text-muted-foreground">No meaning yet</em>}</p>
+      )}
+      {!term.meaning && <DictionaryHint lookup={lookup} />}
       <div className="grid grid-cols-2 gap-2">
         <Button size="sm" onClick={() => onChangeLevel(nextLevel(term.learningLevel))}>
           <ArrowUp />

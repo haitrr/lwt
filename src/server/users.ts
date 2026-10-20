@@ -1,6 +1,6 @@
 import 'server-only';
 import { eq } from 'drizzle-orm';
-import { getDb, schema } from './db';
+import { getDb, schema, type Tx } from './db';
 import { UserError } from './errors';
 import { hashPassword, verifyPassword } from './auth/password';
 import { isLanguageCode } from '@/lib/languages';
@@ -8,6 +8,8 @@ import { isLanguageCode } from '@/lib/languages';
 const { users, userSettings, languageSettings } = schema;
 
 export type LanguageSettingView = { id: number; languageCode: string; dictionaryLanguageCode: string };
+/** What the profile page shows of the Microsoft Translator settings; the key itself never leaves the server. */
+export type TranslatorSettingsView = { hasKey: boolean; region: string };
 
 export async function signUp(userName: string, password: string) {
   userName = userName.trim();
@@ -86,14 +88,47 @@ export async function saveLanguageSettings(
     }
   }
   await getDb().transaction(async (tx) => {
-    let [setting] = await tx.select({ id: userSettings.id }).from(userSettings).where(eq(userSettings.userId, userId));
-    if (!setting) {
-      const [{ id }] = await tx.insert(userSettings).values({ userId }).returning({ id: userSettings.id });
-      setting = { id };
-    }
+    const setting = await ensureUserSetting(tx, userId);
     await tx.delete(languageSettings).where(eq(languageSettings.userSettingId, setting.id));
     if (settings.length) {
       await tx.insert(languageSettings).values(settings.map((s) => ({ ...s, userSettingId: setting.id })));
     }
+  });
+}
+
+/** The user's settings row; users imported from the old database may not have one yet. */
+async function ensureUserSetting(tx: Tx, userId: number) {
+  const [setting] = await tx.select({ id: userSettings.id }).from(userSettings).where(eq(userSettings.userId, userId));
+  if (setting) return setting;
+  const [{ id }] = await tx.insert(userSettings).values({ userId }).returning({ id: userSettings.id });
+  return { id };
+}
+
+/** The user's Microsoft Translator key and region, or null when no key is set. */
+export async function getTranslatorSettings(userId: number) {
+  const [setting] = await getDb()
+    .select({ key: userSettings.azureTranslatorKey, region: userSettings.azureTranslatorRegion })
+    .from(userSettings)
+    .where(eq(userSettings.userId, userId));
+  return setting?.key ? { key: setting.key, region: setting.region || null } : null;
+}
+
+export async function getTranslatorSettingsView(userId: number): Promise<TranslatorSettingsView> {
+  const settings = await getTranslatorSettings(userId);
+  return { hasKey: settings != null, region: settings?.region ?? '' };
+}
+
+/** A blank key keeps the saved one; null removes it. */
+export async function saveTranslatorSettings(userId: number, key: string | null, region: string) {
+  key = key?.trim() ?? null;
+  await getDb().transaction(async (tx) => {
+    const setting = await ensureUserSetting(tx, userId);
+    await tx
+      .update(userSettings)
+      .set({
+        ...(key === '' ? {} : { azureTranslatorKey: key }),
+        azureTranslatorRegion: key === null ? null : region.trim() || null,
+      })
+      .where(eq(userSettings.id, setting.id));
   });
 }

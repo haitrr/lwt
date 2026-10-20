@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { toFormState, type FormState } from './actionState';
 import { requireSession } from '@/server/auth/session';
-import { changePassword as changeUserPassword, saveLanguageSettings } from '@/server/users';
+import { changePassword as changeUserPassword, saveLanguageSettings, saveTranslatorSettings } from '@/server/users';
 
 export async function saveDictionarySettings(_prev: FormState, formData: FormData): Promise<FormState> {
   const { userId } = await requireSession();
@@ -13,6 +13,16 @@ export async function saveDictionarySettings(_prev: FormState, formData: FormDat
   const state = await toFormState(() => saveLanguageSettings(userId, settings));
   revalidatePath('/profile');
   return state ?? { values: { saved: 'Saved.' } };
+}
+
+export async function saveTranslator(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { userId } = await requireSession();
+  const remove = formData.get('intent') === 'remove';
+  const key = remove ? null : String(formData.get('key') ?? '');
+  const region = String(formData.get('region') ?? '');
+  const state = await toFormState(() => saveTranslatorSettings(userId, key, region), remove ? undefined : { region });
+  revalidatePath('/profile');
+  return state ?? { values: { saved: remove ? 'Key removed.' : 'Saved.' } };
 }
 
 export async function changePassword(_prev: FormState, formData: FormData): Promise<FormState> {
