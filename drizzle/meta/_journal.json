@@ -26,8 +26,15 @@
     {
       "idx": 3,
       "version": "7",
-      "when": 1792486362758,
-      "tag": "0003_logs_activity_index",
+      "when": 1792486176433,
+      "tag": "0003_token_version",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792486991371,
+      "tag": "0004_logs_activity_index",
       "breakpoints": true
     }
   ]

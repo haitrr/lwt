@@ -1,5 +1,5 @@
 {
-  "id": "a4a6b99d-d56e-4405-924f-f7504a5cbb81",
+  "id": "c2c5ccb8-3900-4287-842a-c6fedec6c75c",
   "prevId": "95cdecf0-41fa-442c-9e19-2e441450ffaa",
   "version": "7",
   "dialect": "postgresql",
@@ -233,29 +233,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "logs_user_name_created_date_idx": {
-          "name": "logs_user_name_created_date_idx",
-          "columns": [
-            {
-              "expression": "user_name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -757,6 +735,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "token_version": {
+          "name": "token_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         }
       },
       "indexes": {

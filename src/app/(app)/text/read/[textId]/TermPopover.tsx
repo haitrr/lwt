@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { importanceColor } from '@/lib/importance';
 import { nextLevel, previousLevel, LEVEL_LABELS, type DictionaryLookup, type LearningLevel, type TextTermView } from '@/lib/types';
 import { ArrowDown, ArrowUp } from 'lucide-react';
@@ -13,11 +14,23 @@ type Props = {
   lookup: DictionaryLookup | undefined;
   onKeep: () => void;
   onLeave: () => void;
-  onChangeLevel: (level: LearningLevel) => void;
+  /** Resolves to null once saved, or to the error to show. */
+  onChangeLevel: (level: LearningLevel) => Promise<string | null>;
 };
 
 export default function TermPopover({ term, rect, lookup, onKeep, onLeave, onChangeLevel }: Props) {
+  const [changing, setChanging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const meaning = term.meaning || suggestionOf(lookup);
+
+  // One change at a time, so a double click cannot move the level twice from the same start.
+  const changeLevel = async (level: LearningLevel) => {
+    setChanging(true);
+    setError(null);
+    setError(await onChangeLevel(level));
+    setChanging(false);
+  };
+
   const above = rect.top > window.innerHeight / 2;
   return (
     <div
@@ -47,12 +60,22 @@ export default function TermPopover({ term, rect, lookup, onKeep, onLeave, onCha
         <p className="whitespace-pre-line">{meaning || <em className="text-muted-foreground">No meaning yet</em>}</p>
       )}
       {!term.meaning && <DictionaryHint lookup={lookup} />}
+      {error && (
+        <p className="text-destructive" role="alert">
+          {error}
+        </p>
+      )}
       <div className="grid grid-cols-2 gap-2">
-        <Button size="sm" onClick={() => onChangeLevel(nextLevel(term.learningLevel))}>
+        <Button size="sm" disabled={changing} onClick={() => void changeLevel(nextLevel(term.learningLevel))}>
           <ArrowUp />
           Better
         </Button>
-        <Button size="sm" variant="outline" onClick={() => onChangeLevel(previousLevel(term.learningLevel))}>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={changing}
+          onClick={() => void changeLevel(previousLevel(term.learningLevel))}
+        >
           <ArrowDown />
           Worse
         </Button>

@@ -1,8 +1,8 @@
 import 'server-only';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { getDb, schema, type Tx } from './db';
 import { UserError } from './errors';
-import { hashPassword, verifyPassword } from './auth/password';
+import { hashPassword, verifyDummyPassword, verifyPassword } from './auth/password';
 import { isLanguageCode } from '@/lib/languages';
 
 const { users, userSettings, languageSettings } = schema;
@@ -11,50 +11,68 @@ export type LanguageSettingView = { id: number; languageCode: string; dictionary
 /** What the profile page shows of the Microsoft Translator settings; the key itself never leaves the server. */
 export type TranslatorSettingsView = { hasKey: boolean; region: string };
 
+/** Only checked when a password is set, so older accounts with shorter ones can still sign in. */
+export const MIN_PASSWORD_LENGTH = 8;
+
+function checkNewPassword(password: string) {
+  if (!password) throw new UserError('Password is required.');
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    throw new UserError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+  }
+}
+
+/** Postgres' unique_violation, which drizzle passes on as the cause of its own error. */
+function isUniqueViolation(e: unknown) {
+  const err = (e as { code?: unknown; cause?: { code?: unknown } } | null);
+  return err?.code === '23505' || err?.cause?.code === '23505';
+}
+
 export async function signUp(userName: string, password: string) {
   userName = userName.trim();
   if (!userName) throw new UserError('User name is required.');
-  if (!password) throw new UserError('Password is required.');
-  const db = getDb();
-  const normalized = userName.toUpperCase();
-  const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.normalizedUserName, normalized));
-  if (existing) throw new UserError(`Username '${userName}' is already taken.`);
-
-  await db.transaction(async (tx) => {
-    const [{ id }] = await tx
-      .insert(users)
-      .values({
-        userName,
-        normalizedUserName: normalized,
-        passwordHash: hashPassword(password),
-      })
-      .returning({ id: users.id });
-    await tx.insert(userSettings).values({ userId: id });
-  });
+  checkNewPassword(password);
+  const passwordHash = await hashPassword(password);
+  try {
+    await getDb().transaction(async (tx) => {
+      const [{ id }] = await tx
+        .insert(users)
+        .values({ userName, normalizedUserName: userName.toUpperCase(), passwordHash })
+        .returning({ id: users.id });
+      await tx.insert(userSettings).values({ userId: id });
+    });
+  } catch (e) {
+    if (isUniqueViolation(e)) throw new UserError(`Username '${userName}' is already taken.`);
+    throw e;
+  }
 }
 
-/** Returns the user id when the credentials are right. */
+/** Returns the user when the credentials are right. */
 export async function checkCredentials(userName: string, password: string) {
   const [user] = await getDb()
-    .select({ id: users.id, userName: users.userName, passwordHash: users.passwordHash })
+    .select({ id: users.id, userName: users.userName, passwordHash: users.passwordHash, tokenVersion: users.tokenVersion })
     .from(users)
     .where(eq(users.normalizedUserName, userName.trim().toUpperCase()));
-  if (!user || !verifyPassword(password, user.passwordHash)) {
-    throw new UserError('Username or password is incorrect.');
-  }
-  return { id: user.id, userName: user.userName ?? userName };
+  // Hash the password either way, so a missing user takes as long as a wrong password.
+  const valid = user ? await verifyPassword(password, user.passwordHash) : await verifyDummyPassword(password);
+  if (!user || !valid) throw new UserError('Username or password is incorrect.');
+  return { id: user.id, userName: user.userName ?? userName, tokenVersion: user.tokenVersion };
 }
 
+/** Changes the password and signs out every session; returns the new token version for the current one. */
 export async function changePassword(userId: number, currentPassword: string, newPassword: string) {
   const db = getDb();
   const [user] = await db.select({ passwordHash: users.passwordHash }).from(users).where(eq(users.id, userId));
   if (!user) throw new UserError('User not found.', 404);
-  if (!verifyPassword(currentPassword, user.passwordHash)) throw new UserError('Current password is not correct.');
-  if (!newPassword) throw new UserError('Password is required.');
-  await db
+  if (!(await verifyPassword(currentPassword, user.passwordHash))) {
+    throw new UserError('Current password is not correct.');
+  }
+  checkNewPassword(newPassword);
+  const [updated] = await db
     .update(users)
-    .set({ passwordHash: hashPassword(newPassword) })
-    .where(eq(users.id, userId));
+    .set({ passwordHash: await hashPassword(newPassword), tokenVersion: sql`${users.tokenVersion} + 1` })
+    .where(eq(users.id, userId))
+    .returning({ userName: users.userName, tokenVersion: users.tokenVersion });
+  return updated;
 }
 
 export async function getUser(userId: number) {

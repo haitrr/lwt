@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { toFormState, type FormState } from './actionState';
-import { requireSession } from '@/server/auth/session';
+import { createSessionToken, requireSession, setSessionCookie } from '@/server/auth/session';
 import { changePassword as changeUserPassword, saveLanguageSettings, saveTranslatorSettings } from '@/server/users';
 
 export async function saveDictionarySettings(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -29,6 +29,10 @@ export async function changePassword(_prev: FormState, formData: FormData): Prom
   const { userId } = await requireSession();
   const current = String(formData.get('currentPassword') ?? '');
   const next = String(formData.get('newPassword') ?? '');
-  const state = await toFormState(() => changeUserPassword(userId, current, next));
+  const state = await toFormState(async () => {
+    // Other sessions are signed out by the change; this one gets a token for the new version.
+    const user = await changeUserPassword(userId, current, next);
+    await setSessionCookie(await createSessionToken(userId, user.userName, user.tokenVersion));
+  });
   return state ?? { values: { saved: 'Password changed.' } };
 }
