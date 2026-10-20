@@ -4,7 +4,7 @@ import { requireSession } from '@/server/auth/session';
 import { lookUpMeaning } from '@/server/dictionary';
 import { UserError } from '@/server/errors';
 import { editTerm } from '@/server/terms';
-import { getTermCounts, getTextTerms, setBookmark } from '@/server/texts';
+import { getTermCounts, getTextProgress, getTextTerms, setBookmark } from '@/server/texts';
 import { getTranslatorSettings } from '@/server/users';
 import type { LearningLevel } from './types';
 
@@ -18,6 +18,11 @@ export async function loadTextTerms(textId: number, indexFrom: number, indexTo: 
 export async function loadTermCounts(textId: number) {
   const { userId } = await requireSession();
   return getTermCounts(textId, userId);
+}
+
+export async function loadTextProgress(textId: number) {
+  const { userId } = await requireSession();
+  return getTextProgress(textId, userId);
 }
 
 export async function saveBookmark(textId: number, index: number) {

@@ -1,11 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { loadTermCounts, loadTextTerms, lookUpTerm, saveBookmark, saveTerm } from '@/lib/reader';
-import { LearningLevel, type DictionaryLookup, type TermCounts, type TextReadInfo, type TextTermView } from '@/lib/types';
+import { loadTermCounts, loadTextProgress, loadTextTerms, lookUpTerm, saveBookmark, saveTerm } from '@/lib/reader';
+import { advanceProcessing } from '@/lib/texts';
+import {
+  LearningLevel,
+  type DictionaryLookup,
+  type TermCounts,
+  type TextProgress,
+  type TextReadInfo,
+  type TextTermView,
+} from '@/lib/types';
 import Link from 'next/link';
 import { languageName } from '@/lib/languages';
-import { ArrowLeft, Bookmark, LoaderCircle } from 'lucide-react';
+import { ArrowLeft, Bookmark, CircleAlert, LoaderCircle, RotateCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import TermToken from './TermToken';
@@ -28,18 +36,61 @@ const INITIAL_BEFORE = 500;
 const INITIAL_AFTER = 1000;
 const LOAD_MORE = 300;
 const EDGE_PX = 200;
+// While the text is still being split, how often to check for newly split tokens.
+const POLL_MS = 1000;
 
 const NO_MEANING = new Set<LearningLevel>([LearningLevel.Skipped, LearningLevel.Ignored, LearningLevel.WellKnown]);
 
 export type Hover = { index: number; rect: DOMRect };
 
+type Range = { begin: number; end: number };
+
+/** Where reading starts: the bookmark, within the text. */
+function startOf(termCount: number, bookmark: number | null) {
+  return Math.min(bookmark ?? 0, Math.max(termCount - 1, 0));
+}
+
+function initialRange(termCount: number, bookmark: number | null): Range {
+  const start = startOf(termCount, bookmark);
+  return { begin: Math.max(0, start - INITIAL_BEFORE), end: Math.min(termCount - 1, start + INITIAL_AFTER) };
+}
+
+const isProcessing = (p: TextProgress) => !p.processingError && (p.termCount === 0 || p.processedTermCount < p.termCount);
+
+/** A failed load, shown where its tokens would be; Retry runs it again. */
+type LoadError = { where: 'top' | 'bottom'; retry: () => void };
+
+function LoadErrorNotice({ error }: { error: LoadError }) {
+  return (
+    <div role="alert" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 py-3 text-sm leading-normal whitespace-normal">
+      <span className="flex items-center gap-2 text-destructive">
+        <CircleAlert className="size-4 flex-none" />
+        Couldn&apos;t load this part of the text.
+      </span>
+      <Button variant="outline" size="sm" onClick={error.retry}>
+        <RotateCw />
+        Retry
+      </Button>
+    </div>
+  );
+}
+
 export default function Reader({ text, initialCounts, speakCode, dictionaryLanguage }: Props) {
-  const lastIndex = text.termCount - 1;
-  const start = Math.min(text.bookmark ?? 0, Math.max(lastIndex, 0));
+  // Splitting may still be going on; tokens below processedTermCount can be read.
+  const [progress, setProgress] = useState<TextProgress>({
+    termCount: text.termCount,
+    processedTermCount: text.processedTermCount,
+    processingError: text.processingError,
+  });
+  const processing = isProcessing(progress);
+  const lastIndex = progress.termCount - 1;
 
   const [terms, setTerms] = useState<Map<number, TextTermView>>(new Map());
-  const [range, setRange] = useState({ begin: Math.max(0, start - INITIAL_BEFORE), end: Math.min(lastIndex, start + INITIAL_AFTER) });
+  const [range, setRange] = useState(() => initialRange(text.termCount, text.bookmark));
   const [bookmark, setBookmarkState] = useState<number | null>(text.bookmark);
+  const start = startOf(progress.termCount, bookmark);
+  const [loadError, setLoadError] = useState<LoadError | null>(null);
+  const [countsError, setCountsError] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [hover, setHover] = useState<Hover | null>(null);
   const [counts, setCounts] = useState(initialCounts);
@@ -51,6 +102,11 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   const loading = useRef(false);
   const initialScrollDone = useRef(false);
   const prependAnchor = useRef<{ height: number; top: number } | null>(null);
+  // The latest range, for the processing poll, which shouldn't restart on every scroll load.
+  const rangeRef = useRef(range);
+  useEffect(() => {
+    rangeRef.current = range;
+  }, [range]);
 
   const mergeTerms = useCallback((loaded: TextTermView[]) => {
     setTerms((prev) => {
@@ -60,16 +116,36 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
     });
   }, []);
 
-  // First load around the bookmark.
+  const refreshCounts = useCallback(() => {
+    loadTermCounts(text.id).then(
+      (c) => {
+        setCounts(c);
+        setCountsError(false);
+      },
+      () => setCountsError(true),
+    );
+  }, [text.id]);
+
+  // First load around the bookmark, of the part that has been split so far; Retry runs it again.
+  const [initialAttempt, setInitialAttempt] = useState(0);
   useEffect(() => {
-    if (text.termCount === 0) return;
+    const to = Math.min(range.end, progress.processedTermCount - 1);
+    if (range.begin > to) return;
     loading.current = true;
-    loadTextTerms(text.id, range.begin, range.end)
-      .then(mergeTerms)
+    loadTextTerms(text.id, range.begin, to)
+      .then(mergeTerms, () =>
+        setLoadError({
+          where: 'bottom',
+          retry: () => {
+            setLoadError(null);
+            setInitialAttempt((n) => n + 1);
+          },
+        }),
+      )
       .finally(() => (loading.current = false));
-    // Only on mount; later ranges are fetched as they grow.
+    // Later ranges are fetched as they grow, so this only runs on mount and on Retry.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialAttempt]);
 
   // Once the first tokens render, bring the bookmark into view.
   useLayoutEffect(() => {
@@ -92,7 +168,8 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
       if (loading.current) return;
       const from = direction === 'before' ? Math.max(0, range.begin - LOAD_MORE) : range.end + 1;
       const to = direction === 'before' ? range.begin - 1 : Math.min(lastIndex, range.end + LOAD_MORE);
-      if (from > to) return;
+      // Past the split part the processing poll fills tokens in as they are ready.
+      if (from > to || from >= progress.processedTermCount) return;
       loading.current = true;
       try {
         const loaded = await loadTextTerms(text.id, from, to);
@@ -102,19 +179,72 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
         }
         mergeTerms(loaded);
         setRange((r) => (direction === 'before' ? { ...r, begin: from } : { ...r, end: to }));
+      } catch {
+        // Clearing the error loads again from the edge the reader is at.
+        setLoadError({ where: direction === 'before' ? 'top' : 'bottom', retry: () => setLoadError(null) });
       } finally {
         loading.current = false;
       }
     },
-    [range, lastIndex, text.id, mergeTerms],
+    [range, lastIndex, progress.processedTermCount, text.id, mergeTerms],
   );
+
+  const loadNearEdges = useCallback(() => {
+    const panel = panelRef.current;
+    if (!panel || loadError) return;
+    if (panel.scrollTop < EDGE_PX) void loadMore('before');
+    if (panel.scrollHeight - panel.scrollTop - panel.clientHeight < EDGE_PX) void loadMore('after');
+  }, [loadMore, loadError]);
+
+  // Keep loading while the reader sits at an edge, e.g. at the end of what has been split so far.
+  useEffect(() => {
+    if (initialScrollDone.current) loadNearEdges();
+  }, [terms, loadNearEdges]);
+
+  // While the text is being split, pick up the newly split tokens of the loaded range.
+  useEffect(() => {
+    if (!processing || loadError) return;
+    let stopped = false;
+    const timer = setTimeout(async () => {
+      try {
+        // Where no background loop runs (serverless), this does the splitting.
+        await advanceProcessing().catch(() => undefined);
+        const next = await loadTextProgress(text.id);
+        if (stopped) return;
+        let r = rangeRef.current;
+        let from = progress.processedTermCount;
+        if (next.termCount !== progress.termCount) {
+          // Split (again) from scratch: start over around the bookmark.
+          r = initialRange(next.termCount, bookmark);
+          from = 0;
+          initialScrollDone.current = false;
+          setTerms(new Map());
+          setRange(r);
+        }
+        const to = Math.min(r.end, next.processedTermCount - 1);
+        if (Math.max(r.begin, from) <= to) {
+          const loaded = await loadTextTerms(text.id, Math.max(r.begin, from), to);
+          if (stopped) return;
+          mergeTerms(loaded);
+        }
+        setProgress(next);
+        if (next.processedTermCount !== progress.processedTermCount) refreshCounts();
+      } catch {
+        if (stopped) return;
+        setLoadError({ where: 'bottom', retry: () => setLoadError(null) });
+      }
+    }, POLL_MS);
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [processing, progress, loadError, bookmark, text.id, mergeTerms, refreshCounts]);
 
   const onScroll = () => {
     const panel = panelRef.current;
     if (!panel) return;
     setHover(null);
-    if (panel.scrollTop < EDGE_PX) void loadMore('before');
-    if (panel.scrollHeight - panel.scrollTop - panel.clientHeight < EDGE_PX) void loadMore('after');
+    loadNearEdges();
     // Progress follows the first token visible at the top of the panel.
     const box = panel.getBoundingClientRect();
     // The text column is centered, so probe from its left edge rather than the panel's.
@@ -176,11 +306,11 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
         }
         return next;
       });
-      // The term is saved either way; stale counts catch up on the next save.
-      loadTermCounts(text.id).then(setCounts, () => {});
+      // The term is saved either way; failing to refresh the counts only shows a notice.
+      refreshCounts();
       return null;
     },
-    [text.id],
+    [refreshCounts],
   );
 
   const onTermClick = useCallback(
@@ -228,7 +358,8 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
 
   const selectedTerm = selected == null ? undefined : terms.get(selected);
   const hoverTerm = hover == null ? undefined : terms.get(hover.index);
-  const percent = text.termCount ? Math.round(((bookmark ?? 0) / text.termCount) * 10000) / 100 : 0;
+  const percent = progress.termCount ? Math.round(((bookmark ?? 0) / progress.termCount) * 10000) / 100 : 0;
+  const splitPercent = progress.termCount ? Math.floor((progress.processedTermCount * 100) / progress.termCount) : 0;
 
   return (
     <div className={`${styles.reader} flex h-[calc(100dvh-3.5rem)] flex-col`}>
@@ -244,20 +375,39 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
             <h1 className="truncate text-lg font-semibold">{text.title}</h1>
             <Badge variant="secondary">{languageName(text.languageCode)}</Badge>
           </div>
-          <TextStats counts={counts} termCount={text.termCount} />
+          {/* Counts cover the tokens split so far. */}
+          <TextStats counts={counts} termCount={progress.processedTermCount} />
+          {countsError && (
+            <p role="alert" className="flex flex-wrap items-center gap-x-2 text-xs text-destructive">
+              <CircleAlert className="size-3.5" />
+              Couldn&apos;t update the word counts.
+              <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={refreshCounts}>
+                Retry
+              </Button>
+            </p>
+          )}
         </div>
       </header>
-      {text.processedTermCount < text.termCount || text.termCount === 0 ? (
-        <p className="flex-none bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-700 dark:text-amber-400">
-          This text is still being split into words. Reload in a moment to see all of it.
+      {progress.processingError ? (
+        <p className="flex-none bg-destructive/10 px-4 py-2 text-center text-sm break-words text-destructive">
+          {`Splitting this text into words failed (edit the text to retry): ${progress.processingError}`}
+        </p>
+      ) : processing ? (
+        <p className="flex flex-none items-center justify-center gap-2 bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-700 dark:text-amber-400">
+          <LoaderCircle className="size-4 flex-none animate-spin" />
+          {`This text is still being split into words${splitPercent ? ` (${splitPercent}%)` : ''}. The rest appears here as it's ready.`}
         </p>
       ) : null}
       <div className="flex min-h-0 flex-1">
         <div ref={panelRef} className="flex-1 overflow-y-auto [overflow-anchor:none]" onScroll={onScroll} lang={text.languageCode}>
           <div className={styles.page}>
-            {range.begin > 0 && <p className="mb-4 text-center text-sm leading-normal text-muted-foreground">Scroll up for more</p>}
+            {loadError?.where === 'top' && <LoadErrorNotice error={loadError} />}
+            {range.begin > 0 && !loadError && (
+              <p className="mb-4 text-center text-sm leading-normal text-muted-foreground">Scroll up for more</p>
+            )}
             {tokens}
-            {terms.size === 0 && text.termCount > 0 && (
+            {loadError?.where === 'bottom' && <LoadErrorNotice error={loadError} />}
+            {terms.size === 0 && !loadError && (processing || progress.termCount > 0) && (
               <p className="flex items-center gap-2 text-sm leading-normal text-muted-foreground">
                 <LoaderCircle className="size-4 animate-spin" />
                 Loading…
@@ -266,7 +416,7 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
           </div>
         </div>
         <div className="my-3 mr-2 ml-1 w-1 flex-none overflow-hidden rounded-full bg-muted" aria-hidden>
-          <div className="rounded-full bg-primary" style={{ height: `${text.termCount ? (viewing * 100) / text.termCount : 0}%` }} />
+          <div className="rounded-full bg-primary" style={{ height: `${progress.termCount ? (viewing * 100) / progress.termCount : 0}%` }} />
         </div>
       </div>
       {selectedTerm && selectedTerm.id != null && (

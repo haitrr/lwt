@@ -11,6 +11,7 @@ import {
   type TextEditDetail,
   type TextItem,
   type TextList,
+  type TextProgress,
   type TextReadInfo,
   type TextSort,
   type TextTermView,
@@ -142,6 +143,7 @@ export async function readText(id: number, session: Session): Promise<TextReadIn
       languageCode: texts.languageCode,
       termCount: texts.termCount,
       processedTermCount: texts.processedTermCount,
+      processingError: texts.processingError,
     })
     .from(texts)
     .where(and(eq(texts.id, id), eq(texts.userId, session.userId)));
@@ -150,6 +152,19 @@ export async function readText(id: number, session: Session): Promise<TextReadIn
     await tx.update(texts).set({ lastReadAt: new Date() }).where(eq(texts.id, id));
     await addLog(tx, 'textRead', { TextId: id, LanguageCode: text.languageCode }, session.userName, { type: 'Text', id });
   });
+  return text;
+}
+
+export async function getTextProgress(id: number, userId: number): Promise<TextProgress> {
+  const [text] = await getDb()
+    .select({
+      termCount: texts.termCount,
+      processedTermCount: texts.processedTermCount,
+      processingError: texts.processingError,
+    })
+    .from(texts)
+    .where(and(eq(texts.id, id), eq(texts.userId, userId)));
+  if (!text) throw new UserError('Text not found.', 404);
   return text;
 }
 
