@@ -49,15 +49,19 @@ export type LearningLevel = (typeof LearningLevel)[keyof typeof LearningLevel];
 
 export type TermCounts = Partial<Record<LearningLevel, number>>;
 
-export type TextReadInfo = {
-  id: number;
-  title: string;
-  languageCode: string;
-  bookmark: number | null;
+/** How far splitting a text into terms has got; tokens below processedTermCount can be read. */
+export type TextProgress = {
   termCount: number;
   processedTermCount: number;
   /** Why splitting gave up; null unless it failed. */
   processingError: string | null;
+};
+
+export type TextReadInfo = TextProgress & {
+  id: number;
+  title: string;
+  languageCode: string;
+  bookmark: number | null;
 };
 
 /** One token of a text in reading order; id/meaning/count are set when it is a real term. */
