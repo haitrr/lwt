@@ -10,7 +10,6 @@ services:
     environment:
       DATABASE_URL: postgres://lwt:${POSTGRES_PASSWORD}@postgres:5432/lwt
       LWT_JWT_SECRET: ${LWT_JWT_SECRET}
-      LWT_DICTIONARY_API_ROOT: ${LWT_DICTIONARY_API_ROOT:-}
     depends_on:
       postgres:
         condition: service_healthy
