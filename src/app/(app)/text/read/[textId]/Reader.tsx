@@ -12,6 +12,7 @@ import TermToken from './TermToken';
 import TermPopover from './TermPopover';
 import TermPanel from './TermPanel';
 import { suggestionOf } from './DictionaryHint';
+import { panelMeaning, saveError } from './termEditing';
 import TextStats from './TextStats';
 import styles from './reader.module.css';
 
@@ -155,28 +156,29 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   const markBookmark = useCallback(
     (index: number) => {
       setBookmarkState(index);
-      void saveBookmark(text.id, index);
+      // The bookmark only marks the reading position; the next click saves it again.
+      saveBookmark(text.id, index).catch(() => {});
     },
     [text.id],
   );
 
   const updateTerm = useCallback(
+    /** Resolves to null once saved, or to the error to show; never rejects. */
     async (term: TextTermView, learningLevel: LearningLevel, meaning: string) => {
-      if (term.id == null) return;
-      const result = await saveTerm(term.id, learningLevel, meaning);
-      if (!result.ok) {
-        alert(result.error);
-        return;
-      }
+      if (term.id == null) return null;
+      const error = await saveError(saveTerm(term.id, learningLevel, meaning));
+      if (error) return error;
       // Every occurrence of the term in the loaded part of the text changes together.
       setTerms((prev) => {
         const next = new Map(prev);
         for (const [i, t] of prev) {
-          if (t.id === term.id) next.set(i, { ...t, learningLevel, meaning: NO_MEANING.has(learningLevel) ? null : meaning });
+          if (t.id === term.id) next.set(i, { ...t, learningLevel, meaning });
         }
         return next;
       });
-      setCounts(await loadTermCounts(text.id));
+      // The term is saved either way; stale counts catch up on the next save.
+      loadTermCounts(text.id).then(setCounts, () => {});
+      return null;
     },
     [text.id],
   );
@@ -273,22 +275,24 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
           term={selectedTerm}
           lookup={lookups.get(selectedTerm.id)}
           onSave={async (level, meaning) => {
-            await updateTerm(selectedTerm, level, meaning);
-            setSelected(null);
+            const error = await updateTerm(selectedTerm, level, meaning);
+            if (!error) setSelected(null);
+            return error;
           }}
           onClose={() => setSelected(null)}
         />
       )}
       {hover && hoverTerm && hoverTerm.id != null && (
         <TermPopover
+          key={hover.index}
           term={hoverTerm}
           rect={hover.rect}
           lookup={lookups.get(hoverTerm.id)}
           onKeep={cancelHide}
           onLeave={scheduleHide}
-          onChangeLevel={async (level) => {
+          onChangeLevel={(level) => {
             markBookmark(hoverTerm.index);
-            await updateTerm(hoverTerm, level, hoverTerm.meaning ?? suggestionOf(lookups.get(hoverTerm.id!)) ?? '');
+            return updateTerm(hoverTerm, level, panelMeaning(null, hoverTerm.meaning, suggestionOf(lookups.get(hoverTerm.id!))));
           }}
         />
       )}

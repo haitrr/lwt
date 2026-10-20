@@ -168,8 +168,6 @@ export async function getTermCounts(id: number, userId: number) {
   return result;
 }
 
-const HIDDEN_MEANING = new Set<string>([LearningLevel.Ignored, LearningLevel.Skipped, LearningLevel.WellKnown]);
-
 /** Tokens with index in [indexFrom, indexTo], each term with how often it occurs in the text. */
 export async function getTextTerms(id: number, userId: number, indexFrom: number, indexTo: number): Promise<TextTermView[]> {
   const db = getDb();
@@ -212,7 +210,8 @@ export async function getTextTerms(id: number, userId: number, indexFrom: number
       content: r.content,
       learningLevel,
       index: r.index,
-      meaning: HIDDEN_MEANING.has(learningLevel) ? null : (r.meaning ?? null),
+      // Sent for every level: the term panel saves what it shows, so a hidden meaning would be erased.
+      meaning: r.meaning ?? null,
       count: r.termId == null ? null : (counts.get(r.termId) ?? 0),
     };
   });
