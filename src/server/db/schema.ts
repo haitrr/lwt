@@ -30,6 +30,8 @@ export const users = pgTable(
     email: varchar('email', { length: 256 }),
     // ASP.NET Identity V2/V3 hashes, so passwords from the old API keep working.
     passwordHash: text('password_hash').notNull(),
+    // Bumped to sign out every session the user has (see src/server/auth/session.ts).
+    tokenVersion: integer('token_version').notNull().default(0),
   },
   (t) => [uniqueIndex('users_normalized_user_name_key').on(t.normalizedUserName)],
 );
@@ -55,6 +57,9 @@ export const texts = pgTable(
     lastReadAt: timestamp('last_read_at', { withTimezone: true, precision: 6 })
       .notNull()
       .$defaultFn(() => new Date()),
+    // Set when splitting keeps failing; the background job skips the text until it is edited.
+    processingError: text('processing_error'),
+    failedAt: timestamp('failed_at', { withTimezone: true, precision: 6 }),
   },
   (t) => [index('texts_user_id_idx').on(t.userId), index('texts_processed_term_count_idx').on(t.processedTermCount)],
 );
@@ -128,15 +133,24 @@ export const languageSettings = pgTable(
   (t) => [index('language_settings_user_setting_id_idx').on(t.userSettingId)],
 );
 
-export const logs = pgTable('logs', {
-  id: serial('id').primaryKey(),
-  ...timestamps,
-  event: text('event').notNull(),
-  data: text('data').notNull(),
-  userName: text('user_name').notNull(),
-  entityId: integer('entity_id'),
-  entityType: text('entity_type'),
-});
+export const logs = pgTable(
+  'logs',
+  {
+    id: serial('id').primaryKey(),
+    ...timestamps,
+    event: text('event').notNull(),
+    data: text('data').notNull(),
+    userName: text('user_name').notNull(),
+    entityId: integer('entity_id'),
+    entityType: text('entity_type'),
+  },
+  (t) => [
+    // The home page's "last read text" lookup.
+    index('logs_user_name_event_id_idx').on(t.userName, t.event, t.id.desc()),
+    // For the statistics page's activity, read per user over the last year.
+    index('logs_user_name_created_date_idx').on(t.userName, t.createdDate),
+  ],
+);
 
 // Built-in dictionaries (dictionary/*.tsv.gz, made by scripts/build-dictionary.mjs), loaded at startup by
 // src/server/dictionaryImport.ts. One row per headword and dictionary pair; meaning lines are separated by \n.

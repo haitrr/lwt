@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { getLanguage } from '.';
+import { getLanguage, termKey } from '.';
 import { buildPhraseSet, mergePhrases, phraseKey } from './phrases';
 
 async function tokensOf(code: string, text: string) {
   const language = getLanguage(code);
   const words = await language.split(text);
-  return words.map((w) => ({ text: w, key: language.shouldSkip(w) ? null : language.normalize(w) }));
+  return words.map((w) => ({ text: w, key: termKey(language, w) }));
 }
 
 async function merge(code: string, text: string, phrases: string[]) {

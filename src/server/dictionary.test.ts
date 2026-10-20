@@ -33,6 +33,16 @@ describe('lookUpMeaning', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['trotted', 'trot'],
+    ['planned', 'plan'],
+    ['bigger', 'big'],
+    ['hottest', 'hot'],
+  ])('finds %s under %s', async (word, base) => {
+    builtIn = [{ word: base, meaning: 'found' }];
+    expect(await lookUpMeaning(word, 'en', 'en', null)).toBe('found');
+  });
+
   it('falls back to Microsoft, grouping translations by part of speech', async () => {
     fetchMock.mockResolvedValueOnce(
       json([

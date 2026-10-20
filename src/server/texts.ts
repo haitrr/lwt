@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, lte } from '
 import { getDb, schema } from './db';
 import { UserError } from './errors';
 import { addLog } from './logs';
-import { isLanguageCode } from '@/lib/languages';
+import { hasSplitter } from './languages';
 import type { Session } from './auth/session';
 import {
   LearningLevel,
@@ -12,12 +12,19 @@ import {
   type TextItem,
   type TextList,
   type TextReadInfo,
+  type TextSort,
   type TextTermView,
 } from '@/lib/types';
 
 const { texts, textTerms, terms, logs } = schema;
 
 export type TextFilter = { title?: string; languageCode?: string };
+
+const ORDER_BY = {
+  recent: [desc(texts.lastReadAt), desc(texts.id)],
+  newest: [desc(texts.createdDate), desc(texts.id)],
+  title: [asc(texts.title), asc(texts.id)],
+} satisfies Record<TextSort, unknown[]>;
 export type TextInput = { title: string; languageCode: string; content: string };
 
 function filterConditions(userId: number, filter: TextFilter) {
@@ -36,15 +43,21 @@ const listColumns = {
   termCount: texts.termCount,
   processedTermCount: texts.processedTermCount,
   bookmark: texts.bookmark,
+  processingError: texts.processingError,
   createdDate: texts.createdDate,
+  lastReadAt: texts.lastReadAt,
 };
 
-function toTextItem({ createdDate, ...t }: { createdDate: Date } & Omit<TextItem, 'createdAt'>): TextItem {
-  return { ...t, createdAt: createdDate.toISOString() };
+function toTextItem({
+  createdDate,
+  lastReadAt,
+  ...t
+}: { createdDate: Date; lastReadAt: Date } & Omit<TextItem, 'createdAt' | 'lastReadAt'>): TextItem {
+  return { ...t, createdAt: createdDate.toISOString(), lastReadAt: lastReadAt.toISOString() };
 }
 
 function validate(input: TextInput) {
-  if (!isLanguageCode(input.languageCode)) throw new UserError('Unsupported language.');
+  if (!hasSplitter(input.languageCode)) throw new UserError('Unsupported language.');
   if (!input.title.trim()) throw new UserError("'Title' must not be empty.");
   if (!input.content.trim()) throw new UserError("'Content' must not be empty.");
 }
@@ -59,8 +72,14 @@ async function getOwnedText(id: number, userId: number) {
   return text;
 }
 
-/** Most recently read first, like the old list. */
-export async function listTexts(userId: number, filter: TextFilter, page: number, itemPerPage: number): Promise<TextList> {
+/** Most recently read first by default, like the old list. */
+export async function listTexts(
+  userId: number,
+  filter: TextFilter,
+  page: number,
+  itemPerPage: number,
+  sort: TextSort = 'recent',
+): Promise<TextList> {
   const db = getDb();
   const where = filterConditions(userId, filter);
   const [rows, [{ total }]] = await Promise.all([
@@ -68,7 +87,7 @@ export async function listTexts(userId: number, filter: TextFilter, page: number
       .select(listColumns)
       .from(texts)
       .where(where)
-      .orderBy(desc(texts.lastReadAt))
+      .orderBy(...ORDER_BY[sort])
       .limit(itemPerPage)
       .offset(itemPerPage * (page - 1)),
     db.select({ total: count() }).from(texts).where(where),
@@ -91,13 +110,13 @@ export async function createText(session: Session, input: TextInput) {
   });
 }
 
-/** Editing resets the term counts so the background job splits the text again. */
+/** Editing resets the term counts (and any processing failure) so the background job splits the text again. */
 export async function editText(id: number, userId: number, input: TextInput) {
   validate(input);
   await getOwnedText(id, userId);
   await getDb()
     .update(texts)
-    .set({ ...input, termCount: 0, processedTermCount: 0 })
+    .set({ ...input, termCount: 0, processedTermCount: 0, processingError: null, failedAt: null })
     .where(eq(texts.id, id));
 }
 
@@ -123,6 +142,7 @@ export async function readText(id: number, session: Session): Promise<TextReadIn
       languageCode: texts.languageCode,
       termCount: texts.termCount,
       processedTermCount: texts.processedTermCount,
+      processingError: texts.processingError,
     })
     .from(texts)
     .where(and(eq(texts.id, id), eq(texts.userId, session.userId)));
@@ -168,7 +188,23 @@ export async function getTermCounts(id: number, userId: number) {
   return result;
 }
 
-const HIDDEN_MEANING = new Set<string>([LearningLevel.Ignored, LearningLevel.Skipped, LearningLevel.WellKnown]);
+/** getTermCounts for several texts in one query, keyed by text id. */
+export async function getTermCountsByText(ids: number[], userId: number) {
+  const result = new Map(ids.map((id) => [id, emptyCounts()]));
+  if (!ids.length) return result;
+  const rows = await getDb()
+    .select({ textId: textTerms.textId, learningLevel: terms.learningLevel, n: count() })
+    .from(textTerms)
+    .innerJoin(texts, eq(textTerms.textId, texts.id))
+    .leftJoin(terms, eq(textTerms.termId, terms.id))
+    .where(and(inArray(textTerms.textId, ids), eq(texts.userId, userId)))
+    .groupBy(textTerms.textId, terms.learningLevel);
+  for (const row of rows) {
+    const level = (row.learningLevel ?? LearningLevel.Skipped) as LearningLevel;
+    result.get(row.textId)![level] += row.n;
+  }
+  return result;
+}
 
 /** Tokens with index in [indexFrom, indexTo], each term with how often it occurs in the text. */
 export async function getTextTerms(id: number, userId: number, indexFrom: number, indexTo: number): Promise<TextTermView[]> {
@@ -214,7 +250,8 @@ export async function getTextTerms(id: number, userId: number, indexFrom: number
       content: r.content,
       learningLevel,
       index: r.index,
-      meaning: HIDDEN_MEANING.has(learningLevel) ? null : (r.meaning ?? null),
+      // Sent for every level: the term panel saves what it shows, so a hidden meaning would be erased.
+      meaning: r.meaning ?? null,
       count: r.termId == null ? null : (counts.get(r.termId) ?? 0),
       phrase: r.phrase ?? false,
       autoJoin: r.autoJoin ?? false,

@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { parseId } from '@/lib/ids';
 import { requireSession } from '@/server/auth/session';
 import { UserError } from '@/server/errors';
 import { getLanguage } from '@/server/languages';
@@ -8,8 +9,8 @@ import { LANGUAGES } from '@/lib/languages';
 import Reader from './Reader';
 
 export default async function TextReadPage({ params }: PageProps<'/text/read/[textId]'>) {
-  const id = Number((await params).textId);
-  if (!Number.isInteger(id)) notFound();
+  const id = parseId((await params).textId);
+  if (id === null) notFound();
   const session = await requireSession();
   const text = await readText(id, session).catch((e) => {
     if (e instanceof UserError) notFound();

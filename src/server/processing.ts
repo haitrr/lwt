@@ -1,11 +1,12 @@
-import { and, asc, eq, inArray, lt, or, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { getDb, schema, type Tx } from './db';
-import { getLanguage, type Language } from './languages';
+import { getLanguage, termKey, type Language } from './languages';
 import { buildPhraseSet, mergePhrases } from './languages/phrases';
 import { LearningLevel } from '@/lib/types';
 
 // Background splitting of texts into text_terms, ported from the .NET TextTermProcessor.
-// A text is pending while ProcessedTermCount < TermCount, or both are 0 (new or just edited).
+// A text is pending while ProcessedTermCount < TermCount, or both are 0 (new or just edited),
+// unless it has failed MAX_ATTEMPTS times in a row (failed_at is set; editing clears it).
 // Each step handles one text and at most CHUNK_SIZE tokens, so long books are spread over many steps.
 // The user's auto-join phrase terms are merged in as one token each; text_terms.index stays the position in the
 // split text, so the words a phrase swallowed leave their indices unused and bookmarks don't move.
@@ -15,6 +16,7 @@ const { texts, terms, textTerms } = schema;
 const CHUNK_SIZE = 1000;
 const IDLE_DELAY_MS = 1000;
 const FAILURE_BACKOFF_MS = 60_000;
+const MAX_ATTEMPTS = 3;
 
 type PendingText = {
   id: number;
@@ -41,7 +43,22 @@ async function splitText(text: PendingText, language: Language) {
 }
 
 // Texts that just failed are skipped for a while so one bad text can't block the queue.
-const failedUntil = new Map<number, number>();
+// A few retries cover transient errors (deadlocks, dropped connections) before giving up.
+const failures = new Map<number, { attempts: number; until: number }>();
+
+async function recordFailure({ id, lastModifiedDate }: PendingText, error: unknown) {
+  const attempts = (failures.get(id)?.attempts ?? 0) + 1;
+  failures.set(id, { attempts, until: Date.now() + FAILURE_BACKOFF_MS });
+  console.error(`Failed to process text ${id} (attempt ${attempts})`, error);
+  if (attempts < MAX_ATTEMPTS) return;
+  const message = error instanceof Error ? error.message : String(error);
+  await getDb()
+    .update(texts)
+    .set({ processingError: message.slice(0, 1000), failedAt: new Date(), lastModifiedDate: sql`${texts.lastModifiedDate}` })
+    // An edit in the meantime gets a fresh start. The column keeps microseconds, the Date only milliseconds.
+    .where(and(eq(texts.id, id), sql`date_trunc('milliseconds', ${texts.lastModifiedDate}) = ${lastModifiedDate}`));
+  failures.delete(id);
+}
 
 async function setCounts(tx: Tx, id: number, termCount: number, processedTermCount: number) {
   // Keep LastModifiedDate as is: it identifies the content version in splitCache.
@@ -69,7 +86,8 @@ export async function resolveTermIds(tx: Tx, owner: { userId: number; languageCo
   };
 
   await load([...words]);
-  const missing = [...words].filter((w) => !ids.has(w));
+  // Sorted so concurrent transactions take the unique-index locks in the same order and can't deadlock.
+  const missing = [...words].filter((w) => !ids.has(w)).sort();
   if (missing.length) {
     await tx
       .insert(terms)
@@ -116,7 +134,7 @@ async function processText(tx: Tx, text: PendingText) {
 
   const from = text.processedTermCount;
   const phrases = buildPhraseSet(await loadPhraseKeys(tx, text), language.phraseSeparator);
-  const tokens = words.map((w) => ({ text: w, key: language.shouldSkip(w) ? null : language.normalize(w) }));
+  const tokens = words.map((w) => ({ text: w, key: termKey(language, w) }));
   // A phrase may run past the chunk; the next step then starts after it.
   const { merged, next } = mergePhrases(tokens, from, CHUNK_SIZE, phrases);
   const termIds = await resolveTermIds(tx, text, new Set(merged.flatMap((t) => (t.key === null ? [] : [t.key]))));
@@ -143,12 +161,15 @@ async function loadPhraseKeys(tx: Tx, text: PendingText) {
 /** Runs one step of work. Returns false when nothing is pending. */
 export async function processNextText(): Promise<boolean> {
   const now = Date.now();
-  const skip = [...failedUntil].filter(([, until]) => until > now).map(([id]) => id);
+  const skip = [...failures].filter(([, f]) => f.until > now).map(([id]) => id);
 
-  let picked: number | undefined;
+  let picked: PendingText | undefined;
   try {
-    return await getDb().transaction(async (tx) => {
-      const pending = or(lt(texts.processedTermCount, texts.termCount), eq(texts.processedTermCount, 0));
+    const result = await getDb().transaction(async (tx) => {
+      const pending = and(
+        or(lt(texts.processedTermCount, texts.termCount), eq(texts.processedTermCount, 0)),
+        isNull(texts.failedAt),
+      );
       const [text] = await tx
         .select({
           id: texts.id,
@@ -166,14 +187,15 @@ export async function processNextText(): Promise<boolean> {
         // Several app instances can run this loop; each takes a different text.
         .for('update', { skipLocked: true });
       if (!text) return false;
-      picked = text.id;
+      picked = text;
       await processText(tx, text);
       return true;
     });
+    if (picked) failures.delete(picked.id);
+    return result;
   } catch (e) {
-    if (picked === undefined) throw e;
-    failedUntil.set(picked, Date.now() + FAILURE_BACKOFF_MS);
-    console.error(`Failed to process text ${picked}`, e);
+    if (!picked) throw e;
+    await recordFailure(picked, e);
     return true;
   }
 }

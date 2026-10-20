@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import DictionaryHint, { suggestionOf } from './DictionaryHint';
+import { panelMeaning } from './termEditing';
 
 type Props = {
   /** A word, a saved phrase, or (id null) a phrase made of the selected words that saving creates. */
@@ -16,13 +17,16 @@ type Props = {
   lookup: DictionaryLookup | undefined;
   /** For selected words not joined here: the scope saving starts with, or loading while it is not known yet. */
   phraseScope?: 'here' | 'everywhere' | 'loading';
-  /** everywhere: a new phrase joins in all texts, not only here. */
-  onSave: (level: LearningLevel, meaning: string, everywhere: boolean) => Promise<void>;
+  /**
+   * everywhere: a new phrase joins in all texts, not only here.
+   * Resolves to null once saved, or to the error to show while the panel stays open.
+   */
+  onSave: (level: LearningLevel, meaning: string, everywhere: boolean) => Promise<string | null>;
   /** Add the word before or after to the selection; missing when punctuation is in the way. */
   onJoinBefore?: () => void;
   onJoinAfter?: () => void;
-  /** For a saved phrase: split it here or in all texts, or join it in all texts when it is joined only in some. */
-  onPhraseAction?: (action: PhraseAction) => Promise<void>;
+  /** For a saved phrase: split it here or in all texts, or join it in all texts. Resolves like onSave. */
+  onPhraseAction?: (action: PhraseAction) => Promise<string | null>;
   onClose: () => void;
 };
 
@@ -40,20 +44,20 @@ export default function TermPanel({
   onPhraseAction,
   onClose,
 }: Props) {
-  const [meaning, setMeaning] = useState(term.meaning ?? '');
+  // Null until the user types in the box.
+  const [edited, setEdited] = useState<string | null>(null);
   const [level, setLevel] = useState(term.learningLevel);
   const [everywhere, setEverywhere] = useState(phraseScope !== 'here');
   const [saving, setSaving] = useState(false);
-  const shownMeaning = meaning || (term.meaning ? '' : (suggestionOf(lookup) ?? ''));
+  const [error, setError] = useState<string | null>(null);
+  const shownMeaning = panelMeaning(edited, term.meaning, suggestionOf(lookup));
   const newPhrase = term.id == null;
 
-  const busy = async (action: () => Promise<void>) => {
+  const busy = async (action: () => Promise<string | null>) => {
     setSaving(true);
-    try {
-      await action();
-    } finally {
-      setSaving(false);
-    }
+    setError(null);
+    setError(await action());
+    setSaving(false);
   };
   const save = (nextLevelValue: LearningLevel) => busy(() => onSave(nextLevelValue, shownMeaning, everywhere));
 
@@ -135,10 +139,15 @@ export default function TermPanel({
         className="max-h-[40dvh] overflow-y-auto"
         placeholder="Meaning"
         value={shownMeaning}
-        onChange={(e) => setMeaning(e.target.value)}
+        onChange={(e) => setEdited(e.target.value)}
         disabled={saving}
       />
-      {!term.meaning && !meaning && <DictionaryHint lookup={lookup} />}
+      {!term.meaning && edited === null && <DictionaryHint lookup={lookup} />}
+      {error && (
+        <p className="text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      )}
       <div className="flex gap-2">
         <NativeSelect
           aria-label="Level"

@@ -2,6 +2,8 @@ export type Language = {
   name: string;
   code: string;
   speakCode: string;
+  /** Whether texts can be written in it, i.e. the server has a splitter for it. */
+  supportsTexts: boolean;
 };
 
 export type TextItem = {
@@ -11,8 +13,14 @@ export type TextItem = {
   termCount: number;
   processedTermCount: number;
   bookmark: number | null;
+  /** Why splitting gave up; null unless it failed. */
+  processingError: string | null;
   createdAt: string;
+  lastReadAt: string;
 };
+
+export const TEXT_SORTS = ['recent', 'newest', 'title'] as const;
+export type TextSort = (typeof TEXT_SORTS)[number];
 
 export type TextList = {
   total: number;
@@ -48,6 +56,8 @@ export type TextReadInfo = {
   bookmark: number | null;
   termCount: number;
   processedTermCount: number;
+  /** Why splitting gave up; null unless it failed. */
+  processingError: string | null;
 };
 
 /**

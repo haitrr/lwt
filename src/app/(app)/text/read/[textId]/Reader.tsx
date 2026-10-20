@@ -22,6 +22,7 @@ import TermToken from './TermToken';
 import TermPopover from './TermPopover';
 import TermPanel, { type PhraseAction } from './TermPanel';
 import { suggestionOf } from './DictionaryHint';
+import { panelMeaning, saveError } from './termEditing';
 import TextStats from './TextStats';
 import styles from './reader.module.css';
 
@@ -184,37 +185,41 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   const markBookmark = useCallback(
     (index: number) => {
       setBookmarkState(index);
-      void saveBookmark(text.id, index);
+      // The bookmark only marks the reading position; the next click saves it again.
+      saveBookmark(text.id, index).catch(() => {});
     },
     [text.id],
   );
 
   const updateTerm = useCallback(
+    /** Resolves to null once saved, or to the error to show; never rejects. */
     async (term: TextTermView, learningLevel: LearningLevel, meaning: string) => {
-      if (term.id == null) return;
-      const result = await saveTerm(term.id, learningLevel, meaning);
-      if (!result.ok) {
-        alert(result.error);
-        return;
-      }
+      if (term.id == null) return null;
+      const error = await saveError(saveTerm(term.id, learningLevel, meaning));
+      if (error) return error;
       // Every occurrence of the term in the loaded part of the text changes together.
       setTerms((prev) => {
         const next = new Map(prev);
         for (const [i, t] of prev) {
-          if (t.id === term.id) next.set(i, { ...t, learningLevel, meaning: NO_MEANING.has(learningLevel) ? null : meaning });
+          if (t.id === term.id) next.set(i, { ...t, learningLevel, meaning });
         }
         return next;
       });
-      setCounts(await loadTermCounts(text.id));
+      // The term is saved either way; stale counts catch up on the next save.
+      loadTermCounts(text.id).then(setCounts, () => {});
+      return null;
     },
     [text.id],
   );
 
   // Making or splitting a phrase changes tokens across the text, so the loaded part is fetched again.
+  // The change is saved either way; if this fails, the old tokens stay until the text is opened again.
   const reload = useCallback(async () => {
-    const loaded = await loadTextTerms(text.id, range.begin, range.end);
-    setTerms(new Map(loaded.map((t) => [t.index, t])));
-    setCounts(await loadTermCounts(text.id));
+    try {
+      const loaded = await loadTextTerms(text.id, range.begin, range.end);
+      setTerms(new Map(loaded.map((t) => [t.index, t])));
+      setCounts(await loadTermCounts(text.id));
+    } catch {}
   }, [text.id, range]);
 
   /** The next word from `index` in direction `step` that a phrase could join, or null past punctuation or a paragraph. */
@@ -352,7 +357,14 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
           <TextStats counts={counts} termCount={text.termCount} />
         </div>
       </header>
-      {text.processedTermCount < text.termCount || text.termCount === 0 ? (
+      {text.processingError ? (
+        <p className="flex-none bg-destructive/10 px-4 py-2 text-center text-sm break-words text-destructive" role="alert">
+          {`Splitting this text into words failed: ${text.processingError} — `}
+          <Link href={`/text/${text.id}/edit`} className="font-medium underline underline-offset-2">
+            Edit the text to retry
+          </Link>
+        </p>
+      ) : text.processedTermCount < text.termCount || text.termCount === 0 ? (
         <p className="flex-none bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-700 dark:text-amber-400">
           This text is still being split into words. Reload in a moment to see all of it.
         </p>
@@ -383,13 +395,15 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
           lookup={lookups.get(lookupKey(selectedTerm))}
           onSave={async (level, meaning, everywhere) => {
             if (selectedTerm.id != null) {
-              await updateTerm(selectedTerm, level, meaning);
-            } else {
-              const result = await savePhrase(text.id, selection.from, selection.to, level, meaning, everywhere);
-              if (!result.ok) return alert(result.error);
-              await reload();
+              const error = await updateTerm(selectedTerm, level, meaning);
+              if (!error) setSelection(null);
+              return error;
             }
+            const error = await saveError(savePhrase(text.id, selection.from, selection.to, level, meaning, everywhere));
+            if (error) return error;
+            await reload();
             setSelection(null);
+            return null;
           }}
           onJoinBefore={joinBefore == null ? undefined : () => select({ ...selection, from: joinBefore })}
           onJoinAfter={joinAfter == null ? undefined : () => select({ ...selection, to: joinAfter })}
@@ -397,13 +411,12 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
             selectedTerm.phrase && selectedTerm.id != null
               ? async (action: PhraseAction) => {
                   const id = selectedTerm.id!;
-                  const result =
-                    action === 'join-everywhere'
-                      ? await joinEverywhere(id)
-                      : await unmakePhrase(id, action === 'split-here' ? { textId: text.id, index: selectedTerm.index } : null);
-                  if (!result.ok) return alert(result.error);
+                  const at = action === 'split-here' ? { textId: text.id, index: selectedTerm.index } : null;
+                  const error = await saveError(action === 'join-everywhere' ? joinEverywhere(id) : unmakePhrase(id, at));
+                  if (error) return error;
                   await reload();
                   setSelection(null);
+                  return null;
                 }
               : undefined
           }
@@ -412,14 +425,15 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
       )}
       {hover && hoverTerm && hoverTerm.id != null && (
         <TermPopover
+          key={hover.index}
           term={hoverTerm}
           rect={hover.rect}
           lookup={lookups.get(lookupKey(hoverTerm))}
           onKeep={cancelHide}
           onLeave={scheduleHide}
-          onChangeLevel={async (level) => {
+          onChangeLevel={(level) => {
             markBookmark(hoverTerm.index);
-            await updateTerm(hoverTerm, level, hoverTerm.meaning ?? suggestionOf(lookups.get(lookupKey(hoverTerm))) ?? '');
+            return updateTerm(hoverTerm, level, panelMeaning(null, hoverTerm.meaning, suggestionOf(lookups.get(lookupKey(hoverTerm)))));
           }}
         />
       )}

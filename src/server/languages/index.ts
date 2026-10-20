@@ -20,7 +20,8 @@ const ENGLISH_SEPARATOR = /([^a-zA-Z’'-])/;
 const english: Language = {
   code: 'en',
   split: (text) => text.split(ENGLISH_SEPARATOR).filter(Boolean),
-  shouldSkip: (word) => /[^a-zA-Z’'-]/.test(word),
+  // Runs of only dashes or apostrophes (a "----" rule, a lone quote) are not words.
+  shouldSkip: (word) => /[^a-zA-Z’'-]/.test(word) || !/[a-zA-Z]/.test(word),
   normalize: (word) => word.toUpperCase(),
   phraseSeparator: ' ',
 };
@@ -41,22 +42,25 @@ const japanese: Language = {
   phraseSeparator: '',
 };
 
-const unsupported = (): never => {
-  throw new Error('Vietnamese is not supported yet.');
-};
+// Vietnamese is offered for dictionaries but has no splitter yet, so texts can't use it.
+const SPLITTERS: Language[] = [english, chinese, japanese];
 
-const vietnamese: Language = {
-  code: 'vi',
-  split: unsupported,
-  shouldSkip: unsupported,
-  normalize: unsupported,
-  phraseSeparator: '',
-};
-
-const SPLITTERS: Language[] = [english, chinese, japanese, vietnamese];
+export function hasSplitter(code: string) {
+  return SPLITTERS.some((l) => l.code === code);
+}
 
 export function getLanguage(code: string): Language {
   const language = SPLITTERS.find((l) => l.code === code);
   if (!language) throw new Error(`Language ${code} is not supported.`);
   return language;
+}
+
+/** terms.content is varchar(95); Postgres counts characters, not UTF-16 units. */
+export const MAX_TERM_LENGTH = 95;
+
+/** The terms-table key for a token, or null when it is skipped (punctuation, or too long to store). */
+export function termKey(language: Language, word: string): string | null {
+  if (language.shouldSkip(word)) return null;
+  const key = language.normalize(word);
+  return [...key].length > MAX_TERM_LENGTH ? null : key;
 }

@@ -3,7 +3,7 @@ import { and, asc, eq, gt, gte, inArray, lte, ne, or } from 'drizzle-orm';
 import { getDb, schema, type Tx } from './db';
 import { UserError } from './errors';
 import { addLog } from './logs';
-import { getLanguage, type Language } from './languages';
+import { getLanguage, termKey, type Language } from './languages';
 import { buildPhraseSet, matchPhrase, mergePhrases, phraseKey, type PhraseToken } from './languages/phrases';
 import { resolveTermIds } from './processing';
 import type { Session } from './auth/session';
@@ -79,9 +79,8 @@ async function autoJoinKeys(tx: Tx, owner: Owner, except?: number) {
 
 /** The term of the first word in `content`, as the splitter cuts it on its own. */
 async function firstWordTermId(tx: Tx, owner: Owner, language: Language, content: string) {
-  const first = (await language.split(content)).find((w) => !language.shouldSkip(w));
-  if (first === undefined) return undefined;
-  const key = language.normalize(first);
+  const key = (await language.split(content)).map((w) => termKey(language, w)).find((k) => k !== null);
+  if (key == null) return undefined;
   return (await resolveTermIds(tx, owner, new Set([key]))).get(key);
 }
 
@@ -282,7 +281,7 @@ export async function splitPhrase(session: Session, termId: number, at: { textId
     const inserts: { textId: number; index: number; text: string; key: string | null }[] = [];
     for (const occurrence of occurrences) {
       const words = await language.split(occurrence.content);
-      const tokens = words.map((w) => ({ text: w, key: language.shouldSkip(w) ? null : language.normalize(w) }));
+      const tokens = words.map((w) => ({ text: w, key: termKey(language, w) }));
       const [next] = await tx
         .select({ index: textTerms.index })
         .from(textTerms)
