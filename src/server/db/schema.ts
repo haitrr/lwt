@@ -140,8 +140,12 @@ export const logs = pgTable(
     entityId: integer('entity_id'),
     entityType: text('entity_type'),
   },
-  // The home page's "last read text" lookup.
-  (t) => [index('logs_user_name_event_id_idx').on(t.userName, t.event, t.id.desc())],
+  (t) => [
+    // The home page's "last read text" lookup.
+    index('logs_user_name_event_id_idx').on(t.userName, t.event, t.id.desc()),
+    // For the statistics page's activity, read per user over the last year.
+    index('logs_user_name_created_date_idx').on(t.userName, t.createdDate),
+  ],
 );
 
 // Built-in dictionaries (dictionary/*.tsv.gz, made by scripts/build-dictionary.mjs), loaded at startup by

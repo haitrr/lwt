@@ -36,6 +36,8 @@
   --level-learned: #86d08a;
   --level-learning: #f5b1b0;
   --bookmark: #f97316;
+  /* Activity calendar: one hue, mixed into the muted surface for lighter steps. */
+  --activity: oklch(0.55 0.14 150);
   /* How strongly a term is tinted in the reader. */
   --term-tint: 55%;
 }
@@ -61,6 +63,7 @@
   --ring: oklch(0.556 0 0);
 
   --level-well-known: #555b66;
+  --activity: oklch(0.75 0.16 150);
   --term-tint: 38%;
 }
 
@@ -136,6 +139,21 @@
   }
   [data-level='learned'] {
     --level-color: var(--level-learned);
+  }
+  [data-activity] {
+    background-color: var(--muted);
+  }
+  [data-activity='1'] {
+    background-color: color-mix(in oklch, var(--activity) 30%, var(--muted));
+  }
+  [data-activity='2'] {
+    background-color: color-mix(in oklch, var(--activity) 55%, var(--muted));
+  }
+  [data-activity='3'] {
+    background-color: color-mix(in oklch, var(--activity) 80%, var(--muted));
+  }
+  [data-activity='4'] {
+    background-color: var(--activity);
   }
   [data-level='learning'] {
     --level-color: var(--level-learning);

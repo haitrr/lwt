@@ -1,5 +1,5 @@
 {
-  "id": "50319d58-54fb-4b07-b3e2-99304e2de6f3",
+  "id": "de3c9fa7-19da-4e4f-918e-d9eab4a67a89",
   "prevId": "c2c5ccb8-3900-4287-842a-c6fedec6c75c",
   "version": "7",
   "dialect": "postgresql",
@@ -234,8 +234,8 @@
         }
       },
       "indexes": {
-        "logs_user_name_event_id_idx": {
-          "name": "logs_user_name_event_id_idx",
+        "logs_user_name_created_date_idx": {
+          "name": "logs_user_name_created_date_idx",
           "columns": [
             {
               "expression": "user_name",
@@ -244,15 +244,9 @@
               "nulls": "last"
             },
             {
-              "expression": "event",
+              "expression": "created_date",
               "isExpression": false,
               "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": false,
               "nulls": "last"
             }
           ],
@@ -596,18 +590,6 @@
           "type": "timestamp (6) with time zone",
           "primaryKey": false,
           "notNull": true
-        },
-        "processing_error": {
-          "name": "processing_error",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "failed_at": {
-          "name": "failed_at",
-          "type": "timestamp (6) with time zone",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
