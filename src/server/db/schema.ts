@@ -124,15 +124,20 @@ export const languageSettings = pgTable(
   (t) => [index('language_settings_user_setting_id_idx').on(t.userSettingId)],
 );
 
-export const logs = pgTable('logs', {
-  id: serial('id').primaryKey(),
-  ...timestamps,
-  event: text('event').notNull(),
-  data: text('data').notNull(),
-  userName: text('user_name').notNull(),
-  entityId: integer('entity_id'),
-  entityType: text('entity_type'),
-});
+export const logs = pgTable(
+  'logs',
+  {
+    id: serial('id').primaryKey(),
+    ...timestamps,
+    event: text('event').notNull(),
+    data: text('data').notNull(),
+    userName: text('user_name').notNull(),
+    entityId: integer('entity_id'),
+    entityType: text('entity_type'),
+  },
+  // For the statistics page's activity, read per user over the last year.
+  (t) => [index('logs_user_name_created_date_idx').on(t.userName, t.createdDate)],
+);
 
 // Built-in dictionaries (dictionary/*.tsv.gz, made by scripts/build-dictionary.mjs), loaded at startup by
 // src/server/dictionaryImport.ts. One row per headword and dictionary pair; meaning lines are separated by \n.
