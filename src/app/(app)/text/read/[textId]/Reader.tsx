@@ -389,8 +389,11 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
         </div>
       </header>
       {progress.processingError ? (
-        <p className="flex-none bg-destructive/10 px-4 py-2 text-center text-sm break-words text-destructive">
-          {`Splitting this text into words failed (edit the text to retry): ${progress.processingError}`}
+        <p className="flex-none bg-destructive/10 px-4 py-2 text-center text-sm break-words text-destructive" role="alert">
+          {`Splitting this text into words failed: ${progress.processingError} — `}
+          <Link href={`/text/${text.id}/edit`} className="font-medium underline underline-offset-2">
+            Edit the text to retry
+          </Link>
         </p>
       ) : processing ? (
         <p className="flex flex-none items-center justify-center gap-2 bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-700 dark:text-amber-400">
