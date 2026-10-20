@@ -16,6 +16,7 @@ you know it, and track progress. Next.js (App Router, TypeScript) with Postgres;
 ```shell
 cp .env.example .env.local   # set DATABASE_URL and LWT_JWT_SECRET
 npm install
+npm run build-dictionary     # optional: the built-in dictionaries, see below
 npm run dev
 ```
 
@@ -26,7 +27,6 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
 | --- | --- |
 | `DATABASE_URL` | Postgres connection string (tested with 17), e.g. `postgres://user:pass@host:5432/lwt` |
 | `LWT_JWT_SECRET` | Secret for session tokens. Use the .NET API's `AppSettings:Secret` to keep its tokens valid. |
-| `LWT_DICTIONARY_API_ROOT` | Optional. Dictionary service for meaning suggestions (`GET {root}/dictionary/{word}?fromLang=&toLang=`). |
 
 `npm test` runs the unit tests, `npm run lint` and `npm run typecheck` the static checks.
 
@@ -39,6 +39,19 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
   `src/instrumentation.ts`), 1000 words per step, like the .NET `TextTermProcessor`. Chinese uses a port of Jieba.Net's
   segmenter with the same dictionary, Japanese uses kuromoji (IPADIC, as the old MeCab service did). The tests check
   both against output recorded from the old API.
+- Meaning suggestions in the reader come from dictionaries built into the app, so they work offline.
+  `npm run build-dictionary` (run by the Dockerfile) turns open dictionary data into `dictionary/*.tsv.gz`, and the
+  app loads any file that changed into the `dictionary_entries` table when it starts. Lookups try the word as written,
+  then its dictionary form (`walked` → `walk`, `食べ` → `食べる`).
+
+  | From → to | Data | License |
+  | --- | --- | --- |
+  | Chinese → English | [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict) (via the `cedict-json` package) | CC BY-SA 4.0 |
+  | Japanese → English | [JMdict](https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project) by the EDRDG (via a pinned [jmdict-simplified](https://github.com/scriptin/jmdict-simplified) release) | CC BY-SA 4.0 |
+  | English → English | [WordNet 3.1](https://wordnet.princeton.edu), Princeton University (via the `wordnet-db` package) | WordNet license |
+
+  Other language pairs get no suggestions. To update JMdict, change `JMDICT_TAG` and `JMDICT_SHA256` in
+  `scripts/build-dictionary.mjs`; `npm update cedict-json` updates CC-CEDICT.
 - Pages are server components; mutations are server functions in `src/lib`.
 - The UI uses [shadcn/ui](https://ui.shadcn.com) components (`src/components/ui`, add more with `npx shadcn add <name>`) on
   Tailwind CSS v4, with light, dark and system themes.

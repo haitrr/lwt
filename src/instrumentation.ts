@@ -4,5 +4,7 @@ export async function register() {
     await migrateDatabase();
     const { startTextProcessing } = await import('./server/processing');
     startTextProcessing();
+    const { importDictionaries } = await import('./server/dictionaryImport');
+    importDictionaries().catch((e) => console.error('Importing the built-in dictionaries failed', e));
   }
 }
