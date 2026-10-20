@@ -231,7 +231,9 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   const percent = text.termCount ? Math.round(((bookmark ?? 0) / text.termCount) * 10000) / 100 : 0;
 
   return (
-    <div className={`${styles.reader} flex h-[calc(100dvh-3.5rem)] flex-col`}>
+    // Pinned under the app header instead of restyling <main>: cacheComponents keeps visited pages mounted in
+    // <main>, so a parent selector would leak to them. z-40 lets the popover overlap the header (z-30).
+    <div className="fixed inset-x-0 top-14 bottom-0 z-40 flex flex-col bg-background">
       <title>{text.title}</title>
       <header className="flex-none border-b bg-card">
         <div className="mx-auto flex max-w-3xl flex-col gap-2.5 px-4 py-3">
