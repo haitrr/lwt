@@ -58,16 +58,15 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
 
 ## Installing with Docker
 
-You need a Linux host with Docker Engine and the Compose plugin (`docker compose version`). The app image is built by CI
-on every push to master and published to `ghcr.io/haitrr/lwt` as `latest` and `sha-<commit>`
-(`.github/workflows/docker.yml`), so the host only pulls it. The stack in `docker-compose.prod.yml` is the app on port
-3000, Postgres 17 and the backup service. The built-in dictionaries ship inside the image; there is nothing to set up for
-them.
+You need Docker with the Compose plugin (`docker compose version`). Nothing is built on the host: every push to master
+publishes the app image to `ghcr.io/haitrr/lwt` as `latest` and `sha-<commit>` (`.github/workflows/docker.yml`), and
+the compose file pulls it with Postgres 17 and the backup service. The built-in dictionaries are inside the image.
 
-1. Get the compose file and scripts:
+1. Download the compose file into an empty folder:
 
    ```shell
-   git clone https://github.com/haitrr/lwt.git && cd lwt
+   mkdir lwt && cd lwt
+   curl -fsSL -o compose.yaml https://raw.githubusercontent.com/haitrr/lwt/master/docker-compose.prod.yml
    ```
 
 2. Make a backup key on your own machine (not the server). The backup service will not start without its public half:
@@ -77,7 +76,7 @@ them.
    grep 'public key' lwt-backup.key    # the age1… value for BACKUP_AGE_RECIPIENT
    ```
 
-3. Create `.env` next to `docker-compose.prod.yml`:
+3. Create `.env` next to `compose.yaml`:
 
    ```shell
    POSTGRES_PASSWORD=<a long random password>
@@ -87,27 +86,24 @@ them.
    ```
 
    Moving from the old .NET API? Use its `AppSettings:Secret` as `LWT_JWT_SECRET` so existing sessions stay signed in.
-   Compose builds `DATABASE_URL` from `POSTGRES_PASSWORD`, so you don't set it here.
 
-4. Point the backups at your storage. The `postgres-backups` volume at the bottom of `docker-compose.prod.yml` is an NFS
-   mount of `ugnas.lc:/volume2/backups/lwt`; change `addr=` and `device:` to your NAS, or replace the volume with a
-   plain local one (`postgres-backups: {}`) to keep dumps on the host.
+4. Point the backups at your storage. The `postgres-backups` volume at the bottom of `compose.yaml` is an NFS mount of
+   `ugnas.lc:/volume2/backups/lwt`; change `addr=` and `device:` to your NAS, or replace it with a plain local volume
+   (`postgres-backups: {}`) to keep the dumps on the host.
 
-5. Start it:
+5. Start it, and open `http://<host>:3000` to register an account (or bring over the old data first, see
+   [Moving from MySQL](#moving-from-mysql)). The app creates its tables on first start.
 
    ```shell
-   ./deploy.sh
+   docker compose up -d
    ```
 
-   It backs up the database (skipped on the first run, when there is nothing yet), pulls the images and runs
-   `docker compose up -d`. The app creates its tables on first start. Open `http://<host>:3000` and register an account,
-   or bring over the old data first (see [Moving from MySQL](#moving-from-mysql)).
+To update, `docker compose pull && docker compose up -d`; to roll back, set `LWT_IMAGE_TAG=sha-<commit>` in `.env` and
+run the same. `docker compose logs -f web` shows the app's logs.
 
-To update, run `./deploy.sh` again: it takes a backup, then pulls the newest `latest`. To roll back, set
-`LWT_IMAGE_TAG=sha-<commit>` in `.env` and run it once more. `docker compose logs -f web` shows the app's logs.
-
-To build the image from the checkout instead of pulling it, use the other compose file, which is the same stack with
-`build: .`: `COMPOSE_FILE=docker-compose.yaml docker compose up -d --build`. The scripts take the same `COMPOSE_FILE`.
+On the server that has this repository checked out, `./deploy.sh` does the update with a backup first: it runs
+`./backup.sh`, pulls the images and starts `docker-compose.prod.yml`. `docker-compose.yaml` is the same stack built from
+the checkout (`COMPOSE_FILE=docker-compose.yaml docker compose up -d --build`).
 
 ### Backups
 
@@ -127,24 +123,25 @@ changes nothing:
 ./restore.sh /backups/daily/20261020.sql.gz.age ~/lwt-backup.key
 ```
 
+Installed from the compose file alone, fetch the script next to `compose.yaml` and point it there:
+
+```shell
+curl -fsSLO https://raw.githubusercontent.com/haitrr/lwt/master/restore.sh && chmod +x restore.sh
+COMPOSE_FILE=compose.yaml ./restore.sh
+```
+
 ### Moving from MySQL
 
 Stop the old .NET API first, so nothing writes to MySQL during the copy. Then copy its data into the new, still empty
-Postgres database. The image only holds the built app, so run the script from the checkout in a Node container on the
-stack's network (Compose names it after the folder, `lwt_default` here; `docker network ls` lists it):
+Postgres database with the import script that ships in the image, and start the rest:
 
 ```shell
-docker compose -f docker-compose.prod.yml up -d postgres
-docker run --rm -it --network lwt_default -v "$PWD":/src -w /src -u "$(id -u):$(id -g)" -e HOME=/tmp \
-  -e MYSQL_URL=mysql://user:pass@mysql-host:3306/lwt \
-  -e DATABASE_URL=postgres://lwt:<POSTGRES_PASSWORD>@postgres:5432/lwt \
-  node:22-alpine sh -c 'npm ci && npm run import-mysql'
-./deploy.sh
+docker compose run --rm -e MYSQL_URL=mysql://user:pass@mysql-host:3306/lwt web node scripts/import-mysql.mjs
+docker compose up -d
 ```
 
-`mysql-host` must be reachable from inside the container: a hostname or IP on your network, or the old MySQL
-container's name if you attach it to `lwt_default` too. Outside Docker it is just
-`MYSQL_URL=... DATABASE_URL=... npm run import-mysql`.
+`mysql-host` must be reachable from inside the container: a hostname or IP on your network (not `localhost`). Outside
+Docker it is `MYSQL_URL=... DATABASE_URL=... npm run import-mysql` from a checkout.
 
 The script creates the schema, copies users (passwords keep working), texts, terms, text splits, settings and logs with
 their ids, and only reads from MySQL. It refuses to run if the Postgres database already has users. A few terms that
