@@ -1,5 +1,4 @@
 import 'server-only';
-import { randomBytes, randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 import { getDb, schema } from './db';
 import { UserError } from './errors';
@@ -9,14 +8,6 @@ import { isLanguageCode } from '@/lib/languages';
 const { users, userSettings, languageSettings } = schema;
 
 export type LanguageSettingView = { id: number; languageCode: string; dictionaryLanguageCode: string };
-
-function securityStamp() {
-  // Identity's format: 20 random bytes, base32.
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  let bits = '';
-  for (const b of randomBytes(20)) bits += b.toString(2).padStart(8, '0');
-  return bits.match(/.{5}/g)!.map((chunk) => alphabet[parseInt(chunk, 2)]).join('');
-}
 
 export async function signUp(userName: string, password: string) {
   userName = userName.trim();
@@ -34,10 +25,8 @@ export async function signUp(userName: string, password: string) {
         userName,
         normalizedUserName: normalized,
         passwordHash: hashPassword(password),
-        securityStamp: securityStamp(),
-        concurrencyStamp: randomUUID(),
       })
-      .$returningId();
+      .returning({ id: users.id });
     await tx.insert(userSettings).values({ userId: id });
   });
 }
@@ -62,7 +51,7 @@ export async function changePassword(userId: number, currentPassword: string, ne
   if (!newPassword) throw new UserError('Password is required.');
   await db
     .update(users)
-    .set({ passwordHash: hashPassword(newPassword), securityStamp: securityStamp(), concurrencyStamp: randomUUID() })
+    .set({ passwordHash: hashPassword(newPassword) })
     .where(eq(users.id, userId));
 }
 
@@ -99,7 +88,7 @@ export async function saveLanguageSettings(
   await getDb().transaction(async (tx) => {
     let [setting] = await tx.select({ id: userSettings.id }).from(userSettings).where(eq(userSettings.userId, userId));
     if (!setting) {
-      const [{ id }] = await tx.insert(userSettings).values({ userId }).$returningId();
+      const [{ id }] = await tx.insert(userSettings).values({ userId }).returning({ id: userSettings.id });
       setting = { id };
     }
     await tx.delete(languageSettings).where(eq(languageSettings.userSettingId, setting.id));

@@ -1,93 +1,132 @@
-import { bigint, boolean, datetime, int, longtext, mysqlTable, varchar } from 'drizzle-orm/mysql-core';
+import { bigint, customType, index, integer, pgTable, serial, text, timestamp, uniqueIndex, varchar } from 'drizzle-orm/pg-core';
 
-// Mirrors the tables the .NET API (EF Core + ASP.NET Identity) created, so the same database
-// keeps working. Column names are PascalCase because that is what EF generated.
+// Tables and columns follow the old .NET API's MySQL schema, renamed to snake_case.
+// scripts/import-mysql.mjs copies an existing database over.
 
 const timestamps = {
-  createdDate: datetime('CreatedDate', { fsp: 6 })
+  createdDate: timestamp('created_date', { withTimezone: true, precision: 6 })
     .notNull()
     .$defaultFn(() => new Date()),
-  lastModifiedDate: datetime('LastModifiedDate', { fsp: 6 })
+  lastModifiedDate: timestamp('last_modified_date', { withTimezone: true, precision: 6 })
     .notNull()
     .$defaultFn(() => new Date())
     .$onUpdateFn(() => new Date()),
 };
 
-export const users = mysqlTable('users', {
-  id: int('Id').primaryKey().autoincrement(),
-  userName: varchar('UserName', { length: 256 }),
-  normalizedUserName: varchar('NormalizedUserName', { length: 256 }),
-  email: varchar('Email', { length: 256 }),
-  normalizedEmail: varchar('NormalizedEmail', { length: 256 }),
-  emailConfirmed: boolean('EmailConfirmed').notNull().$defaultFn(() => false),
-  passwordHash: longtext('PasswordHash'),
-  securityStamp: longtext('SecurityStamp'),
-  concurrencyStamp: longtext('ConcurrencyStamp'),
-  phoneNumber: longtext('PhoneNumber'),
-  phoneNumberConfirmed: boolean('PhoneNumberConfirmed').notNull().$defaultFn(() => false),
-  twoFactorEnabled: boolean('TwoFactorEnabled').notNull().$defaultFn(() => false),
-  lockoutEnd: datetime('LockoutEnd', { fsp: 6 }),
-  lockoutEnabled: boolean('LockoutEnabled').notNull().$defaultFn(() => true),
-  accessFailedCount: int('AccessFailedCount').notNull().$defaultFn(() => 0),
-  currentLanguageId: int('CurrentLanguageId'),
+/**
+ * Term content compares like MySQL's utf8mb4_0900_ai_ci did: ignoring case, accents and width,
+ * so e.g. ｱ and ア are the same term. The lwt_ci collation is created by the first migration.
+ */
+const termContent = customType<{ data: string }>({
+  dataType: () => 'varchar(95) COLLATE lwt_ci',
 });
 
-export const texts = mysqlTable('texts', {
-  id: int('Id').primaryKey().autoincrement(),
-  ...timestamps,
-  userId: int('UserId').notNull(),
-  bookmark: bigint('Bookmark', { mode: 'number', unsigned: true }),
-  title: longtext('Title').notNull(),
-  content: longtext('Content').notNull(),
-  languageCode: longtext('LanguageCode').notNull(),
-  termCount: bigint('TermCount', { mode: 'number' }).notNull().$defaultFn(() => 0),
-  processedTermCount: bigint('ProcessedTermCount', { mode: 'number' }).notNull().$defaultFn(() => 0),
-  lastReadAt: datetime('LastReadAt', { fsp: 6 })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
+export const users = pgTable(
+  'users',
+  {
+    id: serial('id').primaryKey(),
+    userName: varchar('user_name', { length: 256 }).notNull(),
+    normalizedUserName: varchar('normalized_user_name', { length: 256 }).notNull(),
+    email: varchar('email', { length: 256 }),
+    // ASP.NET Identity V2/V3 hashes, so passwords from the old API keep working.
+    passwordHash: text('password_hash').notNull(),
+  },
+  (t) => [uniqueIndex('users_normalized_user_name_key').on(t.normalizedUserName)],
+);
 
-export const terms = mysqlTable('terms', {
-  id: int('Id').primaryKey().autoincrement(),
-  ...timestamps,
-  // utf8mb4_0900_ai_ci: lookups are case- and accent-insensitive, and the unique index
-  // (Content, LanguageCode, UserId) treats e.g. ｱ and ア as the same term.
-  content: varchar('Content', { length: 95 }).notNull(),
-  languageCode: varchar('LanguageCode', { length: 95 }).notNull(),
-  meaning: longtext('Meaning').notNull(),
-  userId: int('UserId').notNull(),
-  learningLevel: longtext('LearningLevel').notNull(),
-});
+export const texts = pgTable(
+  'texts',
+  {
+    id: serial('id').primaryKey(),
+    ...timestamps,
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    bookmark: bigint('bookmark', { mode: 'number' }),
+    title: text('title').notNull(),
+    content: text('content').notNull(),
+    languageCode: text('language_code').notNull(),
+    termCount: bigint('term_count', { mode: 'number' })
+      .notNull()
+      .$defaultFn(() => 0),
+    processedTermCount: bigint('processed_term_count', { mode: 'number' })
+      .notNull()
+      .$defaultFn(() => 0),
+    lastReadAt: timestamp('last_read_at', { withTimezone: true, precision: 6 })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [index('texts_user_id_idx').on(t.userId), index('texts_processed_term_count_idx').on(t.processedTermCount)],
+);
 
-export const textTerms = mysqlTable('text_terms', {
-  id: int('Id').primaryKey().autoincrement(),
-  ...timestamps,
-  textId: int('TextId').notNull(),
-  termId: int('TermId'),
-  content: longtext('Content').notNull(),
-  index: bigint('Index', { mode: 'number' }).notNull(),
-});
+export const terms = pgTable(
+  'terms',
+  {
+    id: serial('id').primaryKey(),
+    ...timestamps,
+    content: termContent('content').notNull(),
+    languageCode: varchar('language_code', { length: 95 }).notNull(),
+    meaning: text('meaning').notNull(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    learningLevel: text('learning_level').notNull(),
+  },
+  (t) => [
+    uniqueIndex('terms_content_language_code_user_id_key').on(t.content, t.languageCode, t.userId),
+    index('terms_user_id_idx').on(t.userId),
+  ],
+);
 
-export const userSettings = mysqlTable('user_settings', {
-  id: int('Id').primaryKey().autoincrement(),
-  ...timestamps,
-  userId: int('UserId').notNull(),
-});
+export const textTerms = pgTable(
+  'text_terms',
+  {
+    id: serial('id').primaryKey(),
+    ...timestamps,
+    textId: integer('text_id')
+      .notNull()
+      .references(() => texts.id, { onDelete: 'cascade' }),
+    termId: integer('term_id').references(() => terms.id),
+    content: text('content').notNull(),
+    index: bigint('index', { mode: 'number' }).notNull(),
+  },
+  (t) => [
+    index('text_terms_text_id_index_idx').on(t.textId, t.index),
+    index('text_terms_text_id_term_id_idx').on(t.textId, t.termId),
+    index('text_terms_term_id_idx').on(t.termId),
+  ],
+);
 
-export const languageSettings = mysqlTable('language_settings', {
-  id: int('Id').primaryKey().autoincrement(),
-  ...timestamps,
-  dictionaryLanguageCode: longtext('DictionaryLanguageCode').notNull(),
-  languageCode: longtext('LanguageCode').notNull(),
-  userSettingId: int('UserSettingId'),
-});
+export const userSettings = pgTable(
+  'user_settings',
+  {
+    id: serial('id').primaryKey(),
+    ...timestamps,
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (t) => [uniqueIndex('user_settings_user_id_key').on(t.userId)],
+);
 
-export const logs = mysqlTable('logs', {
-  id: int('Id').primaryKey().autoincrement(),
+export const languageSettings = pgTable(
+  'language_settings',
+  {
+    id: serial('id').primaryKey(),
+    ...timestamps,
+    dictionaryLanguageCode: text('dictionary_language_code').notNull(),
+    languageCode: text('language_code').notNull(),
+    userSettingId: integer('user_setting_id').references(() => userSettings.id),
+  },
+  (t) => [index('language_settings_user_setting_id_idx').on(t.userSettingId)],
+);
+
+export const logs = pgTable('logs', {
+  id: serial('id').primaryKey(),
   ...timestamps,
-  event: longtext('Event').notNull(),
-  data: longtext('Data').notNull(),
-  userName: longtext('UserName').notNull(),
-  entityId: int('EntityId'),
-  entityType: longtext('EntityType'),
+  event: text('event').notNull(),
+  data: text('data').notNull(),
+  userName: text('user_name').notNull(),
+  entityId: integer('entity_id'),
+  entityType: text('entity_type'),
 });

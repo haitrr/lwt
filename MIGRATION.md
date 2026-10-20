@@ -15,12 +15,15 @@ Everything the old app did is ported. The old code is on `master` here (API and 
 
 ## Data
 
-No migration: the same MySQL tables and columns are used. Existing logins, texts, terms and settings keep working, and
-the `logs` table keeps being written in the same format (it also drives "last read").
+The data moves from MySQL to Postgres with `npm run import-mysql` (see the README). Tables keep their meaning and ids,
+with snake_case names, and the unused ASP.NET Identity tables (roles, claims, logins, tokens) are dropped. Existing
+logins, texts, terms and settings keep working, and the `logs` table keeps being written in the same format (it also
+drives "last read").
 
 Behavior changes worth knowing:
 - Emoji are kept as one token. The old splitter cut them into two broken characters.
-- A word that matches an existing term only under MySQL's case/accent-insensitive collation (e.g. `ｱ` vs `ア`) now links to
-  that term. The old processor failed on the unique index and retried that text forever.
+- A word that matches an existing term only when ignoring case, accents or width (e.g. `ｱ` vs `ア`) now links to that
+  term. The old processor failed on the unique index and retried that text forever.
+- Postgres also treats `'` and `’` as the same, so `don't` and `don’t` are one term now.
 - Line breaks typed into the text form are stored as `\n`, like before.
 - Vietnamese is listed but still can't be split, as before.

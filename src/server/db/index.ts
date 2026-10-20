@@ -1,23 +1,22 @@
 import 'server-only';
-import { drizzle } from 'drizzle-orm/mysql2';
-import mysql from 'mysql2/promise';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
 import * as schema from './schema';
 
 declare global {
-  var lwtPool: mysql.Pool | undefined;
+  var lwtPool: Pool | undefined;
 }
 
 function createPool() {
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error('DATABASE_URL is not set');
-  // EF stored DateTime as UTC without a zone; read and write it the same way.
-  return mysql.createPool({ uri: url, timezone: 'Z', connectionLimit: 10 });
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error('DATABASE_URL is not set');
+  return new Pool({ connectionString, max: 10 });
 }
 
 function createDb() {
   // Reuse one pool across dev hot reloads.
   const pool = (globalThis.lwtPool ??= createPool());
-  return drizzle(pool, { schema, mode: 'default' });
+  return drizzle(pool, { schema });
 }
 
 export type Db = ReturnType<typeof createDb>;

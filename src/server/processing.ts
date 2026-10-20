@@ -50,7 +50,7 @@ async function setCounts(tx: Tx, id: number, termCount: number, processedTermCou
 
 /**
  * Maps each normalized word to its term id, creating "unknown" terms for new words.
- * terms.Content is compared case- and accent-insensitively by MySQL, so a word can match a
+ * terms.content is compared case- and accent-insensitively (lwt_ci), so a word can match a
  * term stored with different spelling; those are resolved one by one.
  */
 async function resolveTermIds(tx: Tx, text: PendingText, words: Set<string>) {
@@ -70,7 +70,6 @@ async function resolveTermIds(tx: Tx, text: PendingText, words: Set<string>) {
   if (missing.length) {
     await tx
       .insert(terms)
-      .ignore()
       .values(
         missing.map((content) => ({
           content,
@@ -79,7 +78,8 @@ async function resolveTermIds(tx: Tx, text: PendingText, words: Set<string>) {
           learningLevel: LearningLevel.Unknown,
           meaning: '',
         })),
-      );
+      )
+      .onConflictDoNothing();
     await load(missing);
   }
   for (const word of missing.filter((w) => !ids.has(w))) {

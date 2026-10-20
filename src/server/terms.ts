@@ -46,7 +46,7 @@ export async function createTerm(
     const [{ id }] = await tx
       .insert(terms)
       .values({ ...input, content, userId: session.userId })
-      .$returningId();
+      .returning({ id: terms.id });
     await addLog(
       tx,
       'termCreated',

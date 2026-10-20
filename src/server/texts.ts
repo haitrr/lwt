@@ -1,5 +1,5 @@
 import 'server-only';
-import { and, asc, count, desc, eq, gte, inArray, isNotNull, lte, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, lte } from 'drizzle-orm';
 import { getDb, schema } from './db';
 import { UserError } from './errors';
 import { addLog } from './logs';
@@ -24,7 +24,7 @@ function filterConditions(userId: number, filter: TextFilter) {
   const conditions = [eq(texts.userId, userId)];
   if (filter.languageCode) conditions.push(eq(texts.languageCode, filter.languageCode));
   if (filter.title) {
-    conditions.push(sql`lower(${texts.title}) like ${`%${filter.title.toLowerCase().replace(/[\\%_]/g, '\\$&')}%`}`);
+    conditions.push(ilike(texts.title, `%${filter.title.replace(/[\\%_]/g, '\\$&')}%`));
   }
   return and(...conditions);
 }
@@ -82,7 +82,7 @@ export async function createText(session: Session, input: TextInput) {
     const [{ id }] = await tx
       .insert(texts)
       .values({ ...input, userId: session.userId, termCount: 0, processedTermCount: 0 })
-      .$returningId();
+      .returning({ id: texts.id });
     await addLog(tx, 'textCreated', { Title: input.title, LanguageCode: input.languageCode }, session.userName, {
       type: 'Text',
       id,

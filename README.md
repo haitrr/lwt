@@ -1,8 +1,8 @@
 # lwt
 
 [LWT](https://sourceforge.net/projects/lwt/)-style reading app: import texts, read them with every word colored by how well
-you know it, and track progress. Next.js (App Router, TypeScript) with MySQL; it replaces both the old .NET API (this repo's `master`) and the
-React app in [haitrr/lwt.web](https://github.com/haitrr/lwt.web), and works on the API's existing database as is.
+you know it, and track progress. Next.js (App Router, TypeScript) with Postgres; it replaces both the old .NET API on MySQL
+(this repo's `master`) and the React app in [haitrr/lwt.web](https://github.com/haitrr/lwt.web).
 
 ![Reading a text: hover a word to see its meaning and move it up a level, click it to edit](docs/screenshots/demo.gif)
 
@@ -19,12 +19,12 @@ npm install
 npm run dev
 ```
 
-The app expects the schema the .NET API created with its EF Core migrations, saved in [db/schema.sql](db/schema.sql).
-Load that file into a fresh database (`docker compose` does it for you), or point the app at the existing one.
+The app creates and updates its tables when it starts (Drizzle migrations in `drizzle/`). After changing
+`src/server/db/schema.ts`, run `npx drizzle-kit generate` to add a migration.
 
 | Variable | |
 | --- | --- |
-| `DATABASE_URL` | MySQL 8 connection string, e.g. `mysql://user:pass@host:3306/lwt` |
+| `DATABASE_URL` | Postgres connection string (tested with 17), e.g. `postgres://user:pass@host:5432/lwt` |
 | `LWT_JWT_SECRET` | Secret for session tokens. Use the .NET API's `AppSettings:Secret` to keep its tokens valid. |
 | `LWT_DICTIONARY_API_ROOT` | Optional. Dictionary service for meaning suggestions (`GET {root}/dictionary/{word}?fromLang=&toLang=`). |
 
@@ -32,8 +32,9 @@ Load that file into a fresh database (`docker compose` does it for you), or poin
 
 ## How it works
 
-- `src/server` is the backend: Drizzle on the existing tables (`db/schema.ts`), ASP.NET Identity compatible password
-  hashes (`auth/password.ts`), and the text, term and user logic ported from the .NET services.
+- `src/server` is the backend: Drizzle on Postgres (`db/schema.ts`), ASP.NET Identity compatible password hashes
+  (`auth/password.ts`), and the text, term and user logic ported from the .NET services. Terms are compared ignoring
+  case, accents and width, like the old MySQL collation did.
 - New and edited texts are split into words in the background (`server/processing.ts`, started from
   `src/instrumentation.ts`), 1000 words per step, like the .NET `TextTermProcessor`. Chinese uses a port of Jieba.Net's
   segmenter with the same dictionary, Japanese uses kuromoji (IPADIC, as the old MeCab service did). The tests check
@@ -42,6 +43,18 @@ Load that file into a fresh database (`docker compose` does it for you), or poin
 
 ## Deploying
 
-`docker compose up` builds the app (Next.js standalone output) and starts it with MySQL. To move from the .NET API, point
-`DATABASE_URL` at its database and stop the old API and the Japanese segmenter service: both apps would otherwise split
-texts at the same time. See [MIGRATION.md](MIGRATION.md).
+`docker compose up` builds the app (Next.js standalone output) and starts it with Postgres. Set `POSTGRES_PASSWORD` and
+`LWT_JWT_SECRET` in the environment or a `.env` file.
+
+### Moving from MySQL
+
+Stop the old .NET API first, so nothing writes to MySQL during the copy. Then copy its data into an empty Postgres
+database:
+
+```shell
+MYSQL_URL=mysql://user:pass@host:3306/lwt DATABASE_URL=postgres://user:pass@host:5432/lwt npm run import-mysql
+```
+
+The script creates the schema, copies users (passwords keep working), texts, terms, text splits, settings and logs with
+their ids, and only reads from MySQL. A few terms that MySQL kept apart but Postgres treats as the same word (`don't` and
+`don’t`) are merged into the older one, and the script prints each merge. See [MIGRATION.md](MIGRATION.md).
