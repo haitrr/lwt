@@ -1,0 +1,7 @@
+/* Word tints by learning level, the reader's colors made translucent so the page's text stays readable. */
+::highlight(lwt-unknown) { background-color: rgb(242 117 115 / 0.45); }
+::highlight(lwt-learning-1) { background-color: rgb(199 134 211 / 0.45); }
+::highlight(lwt-learning-2) { background-color: rgb(77 171 245 / 0.4); }
+::highlight(lwt-learning-3) { background-color: rgb(51 201 220 / 0.4); }
+::highlight(lwt-learning-4) { background-color: rgb(162 207 110 / 0.45); }
+::highlight(lwt-learning-5) { background-color: rgb(255 239 98 / 0.5); }

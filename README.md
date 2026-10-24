@@ -57,6 +57,23 @@ The app creates and updates its tables when it starts (Drizzle migrations in `dr
 - The UI uses [shadcn/ui](https://ui.shadcn.com) components (`src/components/ui`, add more with `npx shadcn add <name>`) on
   Tailwind CSS v4, with light, dark and system themes.
 
+## Browser extension
+
+`extension/` is a Chrome extension (Manifest V3, Chrome 128+) for learning while reading any web page. Words get
+your LWT learning levels as tints. Clicking a word opens a card: it shows the saved or dictionary meaning, and you can
+set the level with the buttons or the keys `1`–`5`, `w`, `i`. On links and buttons, Alt+click a word instead, so the
+link still works with a normal click. Levels you set are your normal LWT terms, so they also show in the reader and in
+the statistics.
+
+1. Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked** and pick the `extension` folder.
+2. In the extension's popup, enter your LWT server address and sign in.
+3. On a site you want to read, pick its language and tick **Read this site with LWT**. The extension remembers the
+   sites you switch on.
+
+The extension uses JSON routes under `/api/ext` (`src/app/api/ext`, logic in `src/server/webReading.ts`), which take
+the session token as `Authorization: Bearer`. Nothing about the pages you read is stored: their text is only split into
+words. A term is created only when you set a word's level.
+
 ## Installing with Docker
 
 You need Docker with the Compose plugin (`docker compose version`). Nothing is built on the host: every release

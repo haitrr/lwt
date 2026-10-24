@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>LWT Web Reader</h1>
+
+    <form id="login" hidden>
+      <label>Server <input name="server" type="url" placeholder="https://lwt.example.com" required /></label>
+      <label>User name <input name="userName" autocomplete="username" required /></label>
+      <label>Password <input name="password" type="password" autocomplete="current-password" required /></label>
+      <button type="submit">Sign in</button>
+    </form>
+
+    <section id="site" hidden>
+      <p class="muted">Signed in as <strong id="user"></strong> on <span id="server"></span>.</p>
+      <p id="host"></p>
+      <label>Language <select id="language"></select></label>
+      <label class="row"><input id="enabled" type="checkbox" /> Read this site with LWT</label>
+      <p class="muted">Click a word to see it and set its level. On links, Alt+click.</p>
+      <button id="logout" type="button" class="link">Sign out</button>
+    </section>
+
+    <p id="error" role="alert"></p>
+    <script src="popup.js"></script>
+  </body>
+</html>

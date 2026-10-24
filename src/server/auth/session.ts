@@ -39,9 +39,8 @@ export async function verifySessionToken(token: string): Promise<SessionToken | 
   }
 }
 
-/** The signed-in user, or null when there is no token or it was revoked. Looked up once per request. */
-export const getSession = cache(async (): Promise<Session | null> => {
-  const token = (await cookies()).get(TOKEN_COOKIE)?.value;
+/** The token's user, or null when the token is bad or was revoked. */
+async function sessionFromToken(token: string | undefined): Promise<Session | null> {
   const claims = token ? await verifySessionToken(token) : null;
   if (!claims) return null;
   const [user] = await getDb()
@@ -50,7 +49,21 @@ export const getSession = cache(async (): Promise<Session | null> => {
     .where(eq(schema.users.id, claims.userId));
   if (user?.tokenVersion !== claims.tokenVersion) return null;
   return { userId: claims.userId, userName: claims.userName };
+}
+
+/** The signed-in user, or null when there is no token or it was revoked. Looked up once per request. */
+export const getSession = cache(async (): Promise<Session | null> => {
+  return sessionFromToken((await cookies()).get(TOKEN_COOKIE)?.value);
 });
+
+/**
+ * The user of an "Authorization: Bearer <token>" request, as the browser extension sends them.
+ * Only the API routes read it; the cookie stays the only way into pages and server actions.
+ */
+export async function getBearerSession(headers: Headers): Promise<Session | null> {
+  const match = /^Bearer\s+(\S+)$/i.exec(headers.get('authorization') ?? '');
+  return sessionFromToken(match?.[1]);
+}
 
 /** The signed-in user, or a redirect to /login. */
 export async function requireSession(): Promise<Session> {
