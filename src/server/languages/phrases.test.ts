@@ -27,7 +27,7 @@ describe('phrases', () => {
     expect(merged.map((t) => t.key)).toEqual(['JOHN MAYNARD KEYNES', null, 'AND', null, 'MAYNARD KEYNES']);
   });
 
-  it('joins across a line break but not punctuation or a paragraph', async () => {
+  it('joins across a line break but not a paragraph, and keeps punctuation in the key', async () => {
     const phrases = ['QUANTITATIVE EASING'];
     expect((await merge('en', 'quantitative\neasing', phrases)).length).toBe(1);
     expect((await merge('en', 'quantitative  easing', phrases)).length).toBe(1);
@@ -50,11 +50,39 @@ describe('phrases', () => {
     expect(mergePhrases(tokens, 0, tokens.length, set).merged.map((t) => t.text)).toEqual(['凯恩斯', '说']);
   });
 
-  it('builds a phrase key only from two or more words in a row', async () => {
+  it('builds a phrase key from two or more tokens that start with a word', async () => {
     expect(phraseKey(await tokensOf('en', 'John Maynard'), ' ')).toBe('JOHN MAYNARD');
     expect(phraseKey(await tokensOf('en', 'John'), ' ')).toBeNull();
-    expect(phraseKey(await tokensOf('en', 'John, Maynard'), ' ')).toBeNull();
     expect(phraseKey(await tokensOf('en', 'John '), ' ')).toBeNull();
+    expect(phraseKey(await tokensOf('en', '(John'), ' ')).toBeNull();
+    expect(phraseKey(await tokensOf('en', 'John\n\nMaynard'), ' ')).toBeNull();
+  });
+
+  it('keeps numbers and punctuation in a phrase as written, spaces as one separator', async () => {
+    expect(phraseKey(await tokensOf('en', 'GPT-6'), ' ')).toBe('GPT-6');
+    expect(phraseKey(await tokensOf('en', 'COVID-19'), ' ')).toBe('COVID-19');
+    expect(phraseKey(await tokensOf('en', 'U.S.'), ' ')).toBe('U.S.');
+    expect(phraseKey(await tokensOf('en', 'Mr.  Smith'), ' ')).toBe('MR. SMITH');
+    expect(phraseKey(await tokensOf('en', 'John, Maynard'), ' ')).toBe('JOHN, MAYNARD');
+    expect(phraseKey(await tokensOf('en', 'gpt- 6'), ' ')).toBe('GPT- 6');
+  });
+
+  it('merges a phrase with numbers and punctuation only where it is written the same', async () => {
+    const merged = await merge('en', 'GPT-6 beats GPT-5 and gpt-6.', ['GPT-6']);
+    expect(merged.filter((t) => t.key === 'GPT-6').map((t) => t.text)).toEqual(['GPT-6', 'gpt-6']);
+    expect(merged.map((t) => t.text)).toContain('GPT-');
+  });
+
+  it('keeps punctuation in Chinese and Japanese phrases but no spaces', () => {
+    const tokens = [
+      { text: '東京', key: '東京' },
+      { text: '・', key: null },
+      { text: '大阪', key: '大阪' },
+      { text: ' ', key: null },
+      { text: '線', key: '線' },
+    ];
+    expect(phraseKey(tokens.slice(0, 3), '')).toBe('東京・大阪');
+    expect(phraseKey(tokens, '')).toBeNull();
   });
 
   it('stops a chunk after a phrase that runs past it', async () => {

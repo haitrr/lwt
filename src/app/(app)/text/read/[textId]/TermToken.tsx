@@ -25,7 +25,7 @@ function TermToken({ term, bookmarked, selected, onClick, onHover }: Props) {
 
   if (term.learningLevel === LearningLevel.Skipped) {
     return (
-      <span id={id} data-index={term.index} className={styles.skipped}>
+      <span id={id} data-index={term.index} className={[styles.skipped, selected && styles.selected].filter(Boolean).join(' ')}>
         {term.content}
       </span>
     );

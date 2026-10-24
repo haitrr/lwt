@@ -9,7 +9,7 @@ import { resolveTermIds } from './processing';
 import type { Session } from './auth/session';
 import { isLearningLevel } from '@/lib/types';
 
-// Phrase terms join words the splitter cut apart ("John Maynard Keynes"). Whether words form a phrase can depend on
+// Phrase terms join tokens the splitter cut apart ("John Maynard Keynes", "GPT-6"). Whether words form a phrase can depend on
 // where they appear, so the user joins or splits either one occurrence or all of them. An auto-join phrase is merged
 // in every text of its language, texts split later included (src/server/processing.ts); the others only where joined.
 
@@ -111,9 +111,7 @@ async function readSelection(session: Session, { textId, from, to }: { textId: n
     .leftJoin(terms, eq(textTerms.termId, terms.id))
     .where(and(eq(textTerms.textId, textId), gte(textTerms.index, from), lte(textTerms.index, to)))
     .orderBy(asc(textTerms.index));
-  const key = phraseKey(toTokens(rows, language), language.phraseSeparator);
-  if (!key) throw new UserError('A phrase is two or more words in a row, without punctuation between them.');
-  if (key.length > MAX_PHRASE_LENGTH) throw new UserError(`A phrase can be at most ${MAX_PHRASE_LENGTH} characters.`);
+  const key = checkKey(phraseKey(toTokens(rows, language), language.phraseSeparator));
   return { owner, language, rows, key };
 }
 
@@ -139,46 +137,85 @@ export async function makePhrase(
   const { owner, language, rows, key } = await readSelection(session, input);
 
   return getDb().transaction(async (tx) => {
-    const owned = and(eq(terms.userId, owner.userId), eq(terms.languageCode, owner.languageCode));
-    const [existing] = await tx
-      .select({ id: terms.id, learningLevel: terms.learningLevel, autoJoin: terms.autoJoin })
-      .from(terms)
-      .where(and(owned, eq(terms.content, key)));
-    const values = {
-      meaning: input.meaning,
-      learningLevel: input.learningLevel,
-      phrase: true,
-      autoJoin: input.everywhere || (existing?.autoJoin ?? false),
-    };
-    let id: number;
-    if (existing) {
-      id = existing.id;
-      await tx.update(terms).set(values).where(eq(terms.id, id));
-      const snapshot = (learningLevel: string) => ({ Content: key, LanguageCode: owner.languageCode, LearningLevel: learningLevel });
-      await addLog(
-        tx,
-        'termEdited',
-        { Before: snapshot(existing.learningLevel), After: snapshot(input.learningLevel) },
-        session.userName,
-        { type: 'Term', id },
-      );
-    } else {
-      [{ id }] = await tx
-        .insert(terms)
-        .values({ ...values, content: key, languageCode: owner.languageCode, userId: owner.userId })
-        .returning({ id: terms.id });
-      await addLog(
-        tx,
-        'termCreated',
-        { LanguageCode: owner.languageCode, Content: key, LearningLevel: input.learningLevel },
-        session.userName,
-        { type: 'Term', id },
-      );
-    }
+    const id = await savePhraseTerm(tx, session, owner, key, input);
     await mergeRows(tx, rows, id);
     if (input.everywhere) await joinEverywhere(tx, owner, language, id, key, [rows[0].termId!, rows[0].content]);
     return id;
   });
+}
+
+/**
+ * Makes `content` (text as written, e.g. from a web page) one term that joins in every text, as makePhrase does with
+ * everywhere. Returns the phrase term.
+ */
+export async function makePhraseEverywhere(
+  session: Session,
+  input: { languageCode: string; content: string; learningLevel: string; meaning: string },
+) {
+  if (!isLearningLevel(input.learningLevel)) throw new UserError('Invalid learning level.');
+  const language = getLanguage(input.languageCode);
+  const owner = { userId: session.userId, languageCode: input.languageCode };
+  const content = input.content.trim();
+  const words = await language.split(content);
+  const key = checkKey(phraseKey(words.map((w) => ({ text: w, key: termKey(language, w) })), language.phraseSeparator));
+
+  const id = await getDb().transaction(async (tx) => {
+    const id = await savePhraseTerm(tx, session, owner, key, { ...input, everywhere: true });
+    await joinEverywhere(tx, owner, language, id, key, [content]);
+    return id;
+  });
+  return { id, key };
+}
+
+function checkKey(key: string | null) {
+  if (!key) throw new UserError('A phrase is a word followed by more words, numbers or punctuation, in one paragraph.');
+  if ([...key].length > MAX_PHRASE_LENGTH) throw new UserError(`A phrase can be at most ${MAX_PHRASE_LENGTH} characters.`);
+  return key;
+}
+
+/** Saves the level and meaning of the phrase term `key`, making it when there is none. */
+async function savePhraseTerm(
+  tx: Tx,
+  session: Session,
+  owner: Owner,
+  key: string,
+  input: { learningLevel: string; meaning: string; everywhere: boolean },
+) {
+  const owned = and(eq(terms.userId, owner.userId), eq(terms.languageCode, owner.languageCode));
+  const [existing] = await tx
+    .select({ id: terms.id, learningLevel: terms.learningLevel, autoJoin: terms.autoJoin })
+    .from(terms)
+    .where(and(owned, eq(terms.content, key)));
+  const values = {
+    meaning: input.meaning,
+    learningLevel: input.learningLevel,
+    phrase: true,
+    autoJoin: input.everywhere || (existing?.autoJoin ?? false),
+  };
+  if (existing) {
+    await tx.update(terms).set(values).where(eq(terms.id, existing.id));
+    const snapshot = (learningLevel: string) => ({ Content: key, LanguageCode: owner.languageCode, LearningLevel: learningLevel });
+    await addLog(
+      tx,
+      'termEdited',
+      { Before: snapshot(existing.learningLevel), After: snapshot(input.learningLevel) },
+      session.userName,
+      { type: 'Term', id: existing.id },
+    );
+    return existing.id;
+  }
+  const [{ id }] = await tx
+    .insert(terms)
+    .values({ ...values, content: key, languageCode: owner.languageCode, userId: owner.userId })
+    .returning({ id: terms.id });
+  await addLog(
+    tx,
+    'termCreated',
+    { LanguageCode: owner.languageCode, Content: key, LearningLevel: input.learningLevel },
+    session.userName,
+    { type: 'Term', id },
+  );
+  return id;
 }
 
 /** Makes a phrase auto-join and joins it in every text where its words appear apart. */
@@ -215,7 +252,7 @@ async function joinEverywhere(
     if (id !== undefined && id !== phraseId) startIds.add(id);
   }
   if (startIds.size === 0) return;
-  // Occurrences may have more spaces between the words than the key, so look a little further.
+  // Occurrences may have more spaces between the tokens than the key, so look a little further.
   const span = key.length * 2 + 8;
   const set = buildPhraseSet([key], language.phraseSeparator);
   const found = await tx

@@ -31,6 +31,19 @@ describe('splitSegments', () => {
     ]);
   });
 
+  it('merges phrases with numbers and punctuation, like GPT-6', async () => {
+    const text = 'Beat GPT-6 and the U.S. too';
+    const [tokens] = await splitSegments(getLanguage('en'), [text], buildPhraseSet(['GPT-6', 'U.S.'], ' '));
+    expect(tokens.map((t) => [text.slice(t.start, t.end), t.key])).toEqual([
+      ['Beat', 'BEAT'],
+      ['GPT-6', 'GPT-6'],
+      ['and', 'AND'],
+      ['the', 'THE'],
+      ['U.S.', 'U.S.'],
+      ['too', 'TOO'],
+    ]);
+  });
+
   it('finds Japanese words although the splitter drops spaces', async () => {
     const text = '猫が 好き';
     const [tokens] = await splitSegments(getLanguage('ja'), [text], none(''));

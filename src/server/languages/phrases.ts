@@ -1,5 +1,5 @@
-// Phrases are terms the user made from several words, like "John Maynard Keynes", that the splitter cut apart.
-// Wherever their words appear in a row, they are stored as one token and one term.
+// Phrases are terms the user made from tokens the splitter cut apart, like "John Maynard Keynes", "GPT-6" or "U.S.".
+// Wherever their tokens appear in a row, they are stored as one token and one term.
 
 /** A token in reading order: its text as written, and its term key (normalized content) unless it's a separator. */
 export type PhraseToken = { text: string; key: string | null };
@@ -10,30 +10,36 @@ function isGap(text: string) {
 }
 
 /**
- * Walks words from tokens[start], calling onWord with the phrase key built so far each time another word joins.
- * Words are joined by separator; with an empty separator (Chinese, Japanese) only directly adjacent words join.
- * Stops at punctuation, at a paragraph break, or when onWord returns false.
+ * Walks tokens from tokens[start], which must be a word, calling onToken with the phrase key built so far each time
+ * another word, number or punctuation mark joins. Tokens written together join as they are ("GPT-6"); spaces between
+ * them read as one separator, and with an empty separator (Chinese, Japanese) spaces aren't allowed.
+ * Stops at a paragraph break, or when onToken returns false.
  */
-function walk(tokens: PhraseToken[], start: number, separator: string, onWord: (key: string, end: number) => boolean) {
+function walk(tokens: PhraseToken[], start: number, separator: string, onToken: (key: string, end: number) => boolean) {
   const first = tokens[start]?.key;
-  if (first == null || !onWord(first, start)) return;
+  if (first == null || !onToken(first, start)) return;
   let key = first;
+  let gap = false;
   let newlines = 0;
   for (let i = start + 1; i < tokens.length; i++) {
     const token = tokens[i];
-    if (token.key == null) {
-      if (!separator || !isGap(token.text)) return;
+    if (token.key == null && isGap(token.text)) {
+      if (!separator) return;
       newlines += token.text.split('\n').length - 1;
       if (newlines > 1) return;
+      gap = true;
       continue;
     }
-    key += separator + token.key;
+    // Words of a separated language were always joined by the separator; only punctuation and numbers sit close.
+    const close = !gap && (token.key == null || tokens[i - 1].key == null || !separator);
+    key += (close ? '' : separator) + (token.key ?? token.text.toUpperCase());
+    gap = false;
     newlines = 0;
-    if (!onWord(key, i)) return;
+    if (!onToken(key, i)) return;
   }
 }
 
-/** The key of a phrase made of exactly these tokens, or null when they can't form one (one word, punctuation inside). */
+/** The key of a phrase made of exactly these tokens, or null when they can't form one (one token, not starting with a word, a paragraph break). */
 export function phraseKey(tokens: PhraseToken[], separator: string): string | null {
   let result: string | null = null;
   walk(tokens, 0, separator, (key, end) => {

@@ -65,6 +65,11 @@ set the level with the buttons or the keys `1`–`5`, `w`, `i`. On links and but
 link still works with a normal click. Levels you set are your normal LWT terms, so they also show in the reader and in
 the statistics.
 
+Select a few words to make them one term, for what the splitter cuts apart: "New York", "GPT-6", "U.S.". It is joined
+everywhere, on pages and in your texts, and the ✂ button on its card splits it again. A dock at the bottom left shows
+the page's words by level and how far down you've read, and switches read mode, in which words ignore clicks and
+selections. The reader has the same read mode, switched with the button at its bottom left.
+
 1. Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked** and pick the `extension` folder.
 2. In the extension's popup, enter your LWT server address and sign in.
 3. On a site you want to read, pick its language and tick **Read this site with LWT**. The extension remembers the

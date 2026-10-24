@@ -24,7 +24,7 @@ import {
 } from '@/lib/types';
 import Link from 'next/link';
 import { languageName } from '@/lib/languages';
-import { ArrowLeft, Bookmark, CircleAlert, LoaderCircle, RotateCw } from 'lucide-react';
+import { ArrowLeft, BookOpen, Bookmark, CircleAlert, LoaderCircle, MousePointerClick, RotateCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import TermToken from './TermToken';
@@ -55,15 +55,19 @@ const POLL_MS = 1000;
 const NO_MEANING = new Set<LearningLevel>([LearningLevel.Skipped, LearningLevel.Ignored, LearningLevel.WellKnown]);
 
 export type Hover = { index: number; rect: DOMRect };
-/** Selected tokens, first to last, grown from the clicked one (anchor); more than one word makes a new phrase. */
+/** Selected tokens, first to last, grown from the clicked one (anchor); more than one token makes a new phrase. */
 type Selection = { from: number; to: number; anchor: number };
 /** The saved phrase that selected words spell, looked up by `${from}-${to}`; term is null when there is none. */
 type KnownPhrase = { range: string; term: Awaited<ReturnType<typeof loadPhrase>> };
 
-// Mirrors src/server/languages/phrases.ts: words join across spaces with at most one line break.
-const NO_PHRASE_GAP = /\S|\n[^]*\n/;
+// Mirrors src/server/languages/phrases.ts: tokens join across spaces with at most one line break.
+const SPACE = /^\s+$/;
+const PARAGRAPH_BREAK = /\n[^]*\n/;
 
 type Range = { begin: number; end: number };
+
+// Read mode leaves the words alone: no hover previews, and clicks don't select or move the bookmark.
+const READ_MODE_KEY = 'lwt-read-mode';
 
 /** Where reading starts: the bookmark, within the text. */
 function startOf(termCount: number, bookmark: number | null) {
@@ -118,6 +122,25 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   const [viewing, setViewing] = useState(start);
   // Dictionary lookups by lower-cased word or phrase; a found meaning is suggested until the user saves their own.
   const [lookups, setLookups] = useState<Map<string, DictionaryLookup>>(new Map());
+  const [readMode, setReadMode] = useState(false);
+  useEffect(() => {
+    try {
+      // Read after mounting, so the server-rendered page and the first client render agree.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setReadMode(localStorage.getItem(READ_MODE_KEY) === 'on');
+    } catch {}
+  }, []);
+  const toggleReadMode = () => {
+    const next = !readMode;
+    setReadMode(next);
+    if (next) {
+      setSelection(null);
+      setHover(null);
+    }
+    try {
+      localStorage.setItem(READ_MODE_KEY, next ? 'on' : 'off');
+    } catch {}
+  };
 
   const panelRef = useRef<HTMLDivElement>(null);
   const loading = useRef(false);
@@ -353,16 +376,24 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
     refreshCounts();
   }, [text.id, range, refreshCounts]);
 
-  /** The next word from `index` in direction `step` that a phrase could join, or null past punctuation or a paragraph. */
-  const joinableWord = useCallback(
+  /**
+   * The next token from `index` in direction `step` that a phrase could take in: a word, number or punctuation mark,
+   * or null past a paragraph break (or any space in Chinese and Japanese). Phrases start with a word, so going back
+   * it is the next word, with the punctuation before it.
+   */
+  const joinableToken = useCallback(
     (index: number, step: 1 | -1) => {
       let gap = '';
       for (let i = index + step; i >= range.begin && i <= range.end; i += step) {
         const t = terms.get(i);
         if (!t) continue; // inside a phrase
-        if (t.id != null) return i;
-        gap += t.content;
-        if (!phraseSeparator || NO_PHRASE_GAP.test(gap)) return null;
+        if (SPACE.test(t.content)) {
+          gap += t.content;
+          if (!phraseSeparator || PARAGRAPH_BREAK.test(gap)) return null;
+          continue;
+        }
+        if (step === 1 || t.id != null) return i;
+        gap = '';
       }
       return null;
     },
@@ -390,13 +421,14 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
 
   const onTermClick = useCallback(
     (term: TextTermView, extend: boolean) => {
+      if (readMode) return;
       setHover(null);
-      // Shift-click grows the selection into a phrase, when only spaces lie between.
+      // Shift-click grows the selection into a phrase, when no paragraph break lies between.
       if (extend && selection) {
         const from = Math.min(selection.from, term.index);
         const to = Math.max(selection.to, term.index);
         let i: number | null = from;
-        while (i != null && i < to) i = joinableWord(i, 1);
+        while (i != null && i < to) i = joinableToken(i, 1);
         if (i === to) {
           select({ from, to, anchor: selection.anchor });
           return;
@@ -405,7 +437,7 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
       markBookmark(term.index);
       select({ from: term.index, to: term.index, anchor: term.index });
     },
-    [selection, joinableWord, markBookmark, select],
+    [readMode, selection, joinableToken, markBookmark, select],
   );
 
   // The popover stays up briefly after the pointer leaves, so it can be reached.
@@ -418,6 +450,7 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
 
   const onTermHover = useCallback(
     (term: TextTermView, rect: DOMRect | null) => {
+      if (readMode) return;
       if (!rect) {
         scheduleHide();
         return;
@@ -427,7 +460,7 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
       speak(term.content);
       suggestMeaning(term);
     },
-    [speak, suggestMeaning, cancelHide, scheduleHide],
+    [readMode, speak, suggestMeaning, cancelHide, scheduleHide],
   );
 
   // A bookmark on a word inside a phrase shows on the phrase.
@@ -456,8 +489,8 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   const selectedTerm: PhraseView | undefined =
     selection == null || selectedWords.length === 0
       ? undefined
-      : selectedWords.length === 1
-        ? selectedWords[0]
+      : selectedTokens.length === 1
+        ? selectedTokens[0]
         : phraseView(
             selectedTokens,
             selection.from,
@@ -466,8 +499,8 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
   // New words join everywhere by default; a saved phrase's other occurrences were left apart on purpose.
   const phraseScope =
     selectedTerm?.id !== null ? undefined : !selectedTerm.lookedUp ? 'loading' : selectedTerm.phraseId ? 'here' : 'everywhere';
-  const joinBefore = selection && joinableWord(selection.from, -1);
-  const joinAfter = selection && joinableWord(selection.to, 1);
+  const joinBefore = selection && joinableToken(selection.from, -1);
+  const joinAfter = selection && joinableToken(selection.to, 1);
   const hoverTerm = hover == null ? undefined : terms.get(hover.index);
   const percent = progress.termCount ? Math.round(((bookmark ?? 0) / progress.termCount) * 10000) / 100 : 0;
   const splitPercent = progress.termCount ? Math.floor((progress.processedTermCount * 100) / progress.termCount) : 0;
@@ -516,7 +549,7 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
       ) : null}
       <div className="flex min-h-0 flex-1">
         <div ref={panelRef} className="flex-1 overflow-y-auto [overflow-anchor:none]" onScroll={onScroll} lang={text.languageCode}>
-          <div className={styles.page}>
+          <div className={[styles.page, readMode && styles.reading].filter(Boolean).join(' ')}>
             {loadError?.where === 'top' && <LoadErrorNotice error={loadError} />}
             {range.begin > 0 && !loadError && (
               <p className="mb-4 text-center text-sm leading-normal text-muted-foreground">Scroll up for more</p>
@@ -586,6 +619,17 @@ export default function Reader({ text, initialCounts, speakCode, dictionaryLangu
           }}
         />
       )}
+      <Button
+        size="lg"
+        variant={readMode ? 'default' : 'outline'}
+        className="fixed bottom-6 left-6 z-20 rounded-full px-5 shadow-lg"
+        aria-pressed={readMode}
+        title={readMode ? 'Read mode: words ignore hovering and clicks. Click to learn again.' : 'Turn on read mode: words ignore hovering and clicks'}
+        onClick={toggleReadMode}
+      >
+        {readMode ? <BookOpen /> : <MousePointerClick />}
+        {readMode ? 'Reading' : 'Learning'}
+      </Button>
       {!selection && bookmark != null && (
         <Button
           size="lg"
@@ -617,7 +661,7 @@ function lookupKey(term: TextTermView) {
 /** Selected words not joined here yet; phraseId is set when they spell a saved phrase, lookedUp once that is known. */
 type PhraseView = TextTermView & { phraseId?: number; lookedUp?: boolean };
 
-/** A phrase not saved yet, from the selected tokens: spaces and line breaks between its words read as one space. */
+/** A phrase not saved yet, from the selected tokens: spaces and line breaks between them read as one space. */
 function phraseView(tokens: TextTermView[], index: number, known: KnownPhrase | null | undefined): PhraseView {
   return {
     id: null,

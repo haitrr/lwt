@@ -1,5 +1,7 @@
 // Reads the page with LWT once the user switches it on for this site: words are tinted by learning level with the CSS
 // Custom Highlight API, which leaves the page's DOM alone, and clicking one opens a card to look it up and set its level.
+// Selecting several words (or "GPT-6", "U.S.") offers to join them into one term. A dock shows the page's word levels and
+// how far it has been read, and switches read mode, in which words ignore clicks and selections.
 
 (() => {
   const SHOWN_LEVELS = ['unknown', 'learning-1', 'learning-2', 'learning-3', 'learning-4', 'learning-5'];
@@ -30,6 +32,7 @@
   let flushTimer = null;
   let running = Promise.resolve();
   let ui = null;
+  let readMode = false;
 
   function api(path, method = 'GET', body) {
     return chrome.runtime.sendMessage({ type: 'api', path, method, body });
@@ -109,6 +112,7 @@
 
   function paint() {
     const highlights = Object.fromEntries(SHOWN_LEVELS.map((l) => [l, new Highlight()]));
+    const counts = {};
     for (const [text, tokens] of nodes) {
       if (!text.isConnected) {
         nodes.delete(text);
@@ -117,9 +121,16 @@
       for (const token of tokens) {
         const level = terms.get(token.key)?.learningLevel ?? 'unknown';
         highlights[level]?.add(rangeOf(text, token));
+        counts[level] = (counts[level] ?? 0) + 1;
       }
     }
     for (const level of SHOWN_LEVELS) CSS.highlights.set(`lwt-${level}`, highlights[level]);
+    updateStats(counts);
+  }
+
+  /** Reads the page again, e.g. after a phrase was made or split; tokens are replaced as their results come back. */
+  function refresh() {
+    enqueue(() => annotate([...nodes.keys()].filter((t) => t.isConnected)));
   }
 
   function observe() {
@@ -152,6 +163,7 @@
     const texts = new Set();
     collect(document.body, texts);
     observe();
+    showDock();
     enqueue(() => annotate([...texts]));
   }
 
@@ -165,6 +177,8 @@
     terms.clear();
     for (const level of SHOWN_LEVELS) CSS.highlights.delete(`lwt-${level}`);
     closeCard();
+    ui?.dock?.remove();
+    if (ui) ui.dock = null;
   }
 
   // --- The word card ---
@@ -198,9 +212,38 @@
     }
     .levels button[aria-pressed='true'] { border-color: #1a1a1a; }
     .toast { position: fixed; right: 16px; bottom: 16px; width: auto; max-width: 320px; }
+    .chip {
+      position: absolute; z-index: 2147483647; padding: 4px 10px; cursor: pointer;
+      font: 600 12px/1.4 system-ui, sans-serif; color: #fff; background: #1f2937;
+      border: none; border-radius: 999px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    }
+    .dock {
+      position: fixed; left: 12px; bottom: 12px; z-index: 2147483646; box-sizing: border-box; width: 260px;
+      padding: 8px; display: flex; flex-direction: column; gap: 6px;
+      font: 12px/1.3 system-ui, sans-serif; color: #1a1a1a; background: rgba(255, 255, 255, 0.96);
+      border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+    }
+    .dock .row { display: flex; align-items: center; gap: 8px; }
+    .mode {
+      padding: 3px 10px; cursor: pointer; font: 600 12px/1.4 system-ui, sans-serif; color: inherit;
+      background: transparent; border: 1px solid #ccc; border-radius: 999px;
+    }
+    .mode[aria-pressed='true'] { color: #fff; background: #1f2937; border-color: #1f2937; }
+    .percent { margin-left: auto; color: #666; font-variant-numeric: tabular-nums; }
+    .bar { display: flex; gap: 2px; height: 16px; font-size: 10px; line-height: 16px; font-weight: 600; }
+    .bar > div { overflow: hidden; padding: 0 4px; white-space: nowrap; color: #1a1a1a; border-radius: 2px; }
+    .bar > div:first-child { border-radius: 8px 2px 2px 8px; }
+    .bar > div:last-child { border-radius: 2px 8px 8px 2px; }
+    .bar > div:only-child { border-radius: 8px; }
+    .progress { height: 4px; overflow: hidden; background: #e5e7eb; border-radius: 2px; }
+    .progress > div { height: 100%; width: 0; background: #f97316; }
     @media (prefers-color-scheme: dark) {
-      .card, .toast { color: #eee; background: #222; border-color: #444; }
+      .card, .toast, .dock { color: #eee; background: #222; border-color: #444; }
       .levels button[aria-pressed='true'] { border-color: #eee; }
+      .mode { border-color: #555; }
+      .mode[aria-pressed='true'] { color: #111; background: #eee; border-color: #eee; }
+      .percent { color: #aaa; }
+      .progress { background: #444; }
     }
   `;
   const LEVEL_COLORS = {
@@ -212,6 +255,8 @@
     'learning-5': '#ffef62',
     'well-known': '#d9d9d9',
     ignored: '#9ca3af',
+    learned: '#86d08a',
+    learning: '#f5b1b0',
   };
 
   function ensureUi() {
@@ -223,7 +268,7 @@
     sheet.replaceSync(STYLES);
     root.adoptedStyleSheets = [sheet];
     document.documentElement.append(host);
-    ui = { host, root, card: null, toastTimer: null };
+    ui = { host, root, card: null, chip: null, dock: null, toastTimer: null };
     return ui;
   }
 
@@ -237,7 +282,8 @@
 
   function closeCard() {
     ui?.card?.remove();
-    if (ui) ui.card = null;
+    ui?.chip?.remove();
+    if (ui) Object.assign(ui, { card: null, chip: null });
   }
 
   function speak(word) {
@@ -247,50 +293,100 @@
     speechSynthesis.speak(utterance);
   }
 
-  function openCard(text, token) {
+  /** The card for a word on the page: its term, if any, is updated or made from the word. */
+  function openWordCard(text, token) {
+    const term = terms.get(token.key);
+    const code = languageCode;
+    openCard({
+      word: text.data.slice(token.start, token.end),
+      rect: rangeOf(text, token).getBoundingClientRect(),
+      term,
+      async save(learningLevel, meaning) {
+        const word = text.data.slice(token.start, token.end);
+        const res = await api('/api/ext/terms', 'PUT', {
+          ...(term ? { termId: term.id } : { languageCode: code, word }),
+          learningLevel,
+          meaning,
+        });
+        if (res?.ok && code === languageCode) {
+          const { id, meaning: saved, learningLevel: level } = res.data;
+          terms.set(token.key, { id, learningLevel: level, meaning: saved, phrase: term?.phrase ?? false });
+          paint();
+        }
+        return res;
+      },
+      async split() {
+        const res = await api('/api/ext/phrases/split', 'POST', { termId: term.id });
+        if (res?.ok && code === languageCode) refresh();
+        return res;
+      },
+    });
+  }
+
+  /** The card for selected text that isn't one term yet: saving joins it into one term everywhere. */
+  function openPhraseCard(text, rect) {
+    const code = languageCode;
+    openCard({
+      word: text.replace(/\s+/g, ' ').trim(),
+      rect,
+      term: null,
+      hint: 'Saving joins these into one term, here and wherever they appear.',
+      async save(learningLevel, meaning) {
+        const res = await api('/api/ext/phrases', 'POST', { languageCode: code, text, learningLevel, meaning });
+        if (res?.ok && code === languageCode) {
+          getSelection().removeAllRanges();
+          refresh();
+        }
+        return res;
+      },
+    });
+  }
+
+  function openCard({ word, rect, term, hint: hintText = '', save, split }) {
     const { root } = ensureUi();
     closeCard();
-    const word = text.data.slice(token.start, token.end);
-    const term = terms.get(token.key);
     const current = term?.learningLevel ?? 'unknown';
     const code = languageCode;
 
     const meaning = el('textarea', { value: term?.meaning ?? '', placeholder: 'Meaning' });
-    const hint = el('div', { className: 'hint' });
-    const save = async (learningLevel) => {
+    const hint = el('div', { className: 'hint', textContent: hintText });
+    const run = async (action) => {
       hint.textContent = 'Saving…';
-      const res = await api('/api/ext/terms', 'PUT', {
-        ...(term ? { termId: term.id } : { languageCode: code, word }),
-        learningLevel,
-        meaning: meaning.value.trim(),
-      });
+      const res = await action();
       if (!res?.ok) {
         hint.textContent = res?.error ?? 'Could not save.';
         return;
       }
-      if (code !== languageCode) return;
-      const { id, meaning: saved } = res.data;
-      terms.set(token.key, { id, learningLevel: res.data.learningLevel, meaning: saved });
-      paint();
       closeCard();
     };
     const levels = LEVEL_KEYS.map(([level, label, title]) => {
       const button = el('button', { type: 'button', textContent: label.toUpperCase(), title: `${title} (${label})` });
       button.style.setProperty('--c', LEVEL_COLORS[level]);
-      button.setAttribute('aria-pressed', String(level === current));
-      button.addEventListener('click', () => save(level));
+      button.setAttribute('aria-pressed', String(Boolean(term) && level === current));
+      button.addEventListener('click', () => run(() => save(level, meaning.value.trim())));
       return button;
     });
     meaning.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        save(current);
+        run(() => save(current, meaning.value.trim()));
       }
     });
 
     const card = el('div', { className: 'card' }, [
       el('div', { className: 'head' }, [
         el('span', { className: 'word', textContent: word }),
+        ...(term?.phrase && split
+          ? [
+              el('button', {
+                className: 'icon',
+                type: 'button',
+                textContent: '✂',
+                title: 'Split back into separate words, everywhere',
+                onclick: () => run(split),
+              }),
+            ]
+          : []),
         el('button', { className: 'icon', type: 'button', textContent: '🔊', title: 'Speak', onclick: () => speak(word) }),
         el('button', { className: 'icon', type: 'button', textContent: '✕', title: 'Close (Esc)', onclick: closeCard }),
       ]),
@@ -302,7 +398,7 @@
     card.tabIndex = -1;
     root.append(card);
     ui.card = card;
-    place(card, rangeOf(text, token).getBoundingClientRect());
+    place(card, rect);
     // Focused so the level keys work right away.
     card.focus({ preventScroll: true });
 
@@ -312,18 +408,20 @@
         if (ui?.card !== card) return;
         const found = res?.ok && res.data.status === 'found';
         if (found && !meaning.value) meaning.value = res.data.meaning;
-        hint.textContent = found
+        const status = found
           ? 'From the dictionary.'
           : res?.ok && res.data.status === 'no-dictionary'
             ? 'Choose a dictionary language for this language in your LWT profile.'
             : res?.ok && res.data.status === 'missing'
               ? 'Not in the dictionary.'
               : 'The dictionary could not be reached.';
+        hint.textContent = hintText ? `${status} ${hintText}` : status;
       });
     }
   }
 
   function place(card, rect) {
+    if (!rect) return;
     const width = card.offsetWidth;
     const height = card.offsetHeight;
     const left = Math.max(8, Math.min(rect.left, innerWidth - width - 8));
@@ -372,7 +470,7 @@
   document.addEventListener(
     'click',
     (e) => {
-      if (!languageCode || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      if (!languageCode || readMode || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
       if (ui && e.composedPath().includes(ui.host)) return;
       if (!getSelection().isCollapsed) return;
       const hit = tokenAt(e.clientX, e.clientY);
@@ -384,15 +482,147 @@
       if (e.target instanceof Element && e.target.closest(INTERACTIVE) && !e.altKey) return;
       e.preventDefault();
       e.stopPropagation();
-      openCard(hit.text, hit.token);
+      openWordCard(hit.text, hit.token);
     },
     true,
   );
 
+  // --- Selecting words to join ---
+
+  /** The token of an annotated text node around offset; atEnd looks for one ending there rather than starting. */
+  function tokenAround(node, offset, atEnd) {
+    return nodes.get(node)?.find((t) => (atEnd ? t.start < offset && offset <= t.end : t.start <= offset && offset < t.end));
+  }
+
+  function onSelectionDone() {
+    const selection = getSelection();
+    if (!languageCode || readMode || selection.isCollapsed || !selection.rangeCount) return;
+    if (ui && (ui.host.contains(selection.anchorNode) || selection.anchorNode === ui.host)) return;
+    const range = selection.getRangeAt(0).cloneRange();
+    if (!nodes.has(range.startContainer) && !nodes.has(range.endContainer)) return;
+    // Whole words: a selection that starts or ends inside one takes all of it.
+    const first = tokenAround(range.startContainer, range.startOffset, false);
+    const last = tokenAround(range.endContainer, range.endOffset, true);
+    if (first) range.setStart(range.startContainer, first.start);
+    if (last) range.setEnd(range.endContainer, last.end);
+    const text = range.toString();
+    if (!text.trim() || text.length > 300) return;
+    if (first && first === last && range.startContainer === range.endContainer) {
+      openWordCard(range.startContainer, first);
+      return;
+    }
+    const { root } = ensureUi();
+    closeCard();
+    const rect = range.getBoundingClientRect();
+    const chip = el('button', { className: 'chip', type: 'button', textContent: 'Make one term', title: text.trim() });
+    // Keeps the page selection while clicking.
+    chip.addEventListener('mousedown', (e) => e.preventDefault());
+    chip.addEventListener('click', () => openPhraseCard(text, rect));
+    root.append(chip);
+    ui.chip = chip;
+    chip.style.left = `${Math.max(8, Math.min(rect.right - chip.offsetWidth, innerWidth - chip.offsetWidth - 8)) + scrollX}px`;
+    chip.style.top = `${rect.bottom + 6 + scrollY}px`;
+  }
+
+  document.addEventListener('mouseup', (e) => {
+    if (e.button !== 0 || (ui && e.composedPath().includes(ui.host))) return;
+    // The selection is final once this event is over.
+    setTimeout(onSelectionDone, 0);
+  });
+
+  // --- The dock: page statistics, reading progress and read mode ---
+
+  const SHORT_LABELS = { unknown: 'UK', 'learning-1': 'L1', 'learning-2': 'L2', 'learning-3': 'L3', 'learning-4': 'L4', 'learning-5': 'L5' };
+  const LONG_LABELS = Object.fromEntries(LEVEL_KEYS.map(([level, , title]) => [level, title]));
+
+  function showDock() {
+    const { root } = ensureUi();
+    if (ui.dock) return;
+    const mode = el('button', { className: 'mode', type: 'button' });
+    mode.addEventListener('click', () => setReadMode(!readMode));
+    const percent = el('span', { className: 'percent' });
+    const words = el('div', { className: 'bar', role: 'img' });
+    const byLevel = el('div', { className: 'bar', role: 'img' });
+    const progress = el('div', { className: 'progress', title: 'How far down the page you are' }, [el('div')]);
+    ui.dock = el('div', { className: 'dock' }, [el('div', { className: 'row' }, [mode, percent]), words, byLevel, progress]);
+    Object.assign(ui.dock, { mode, percent, words, byLevel, progress: progress.firstChild });
+    root.append(ui.dock);
+    renderMode();
+    updateProgress();
+  }
+
+  function renderMode() {
+    const mode = ui?.dock?.mode;
+    if (!mode) return;
+    mode.textContent = readMode ? '📖 Reading' : '👆 Learning';
+    mode.setAttribute('aria-pressed', String(readMode));
+    mode.title = readMode
+      ? 'Read mode: words ignore clicks and selections. Click to learn again.'
+      : 'Turn on read mode: words ignore clicks and selections';
+  }
+
+  function setReadMode(on) {
+    readMode = on;
+    if (on) closeCard();
+    renderMode();
+    chrome.storage.local.set({ readMode: on });
+  }
+
+  function fillBar(bar, segments, label) {
+    const total = segments.reduce((n, s) => n + s.value, 0);
+    bar.setAttribute('aria-label', `${label}: ${segments.map((s) => `${s.title} ${s.value}`).join(', ')}`);
+    bar.replaceChildren(
+      ...segments
+        .filter((s) => s.value > 0)
+        .map((s) => {
+          const share = Math.round((s.value * 100) / total);
+          const part = el('div', { textContent: share >= 12 ? `${s.label} ${share}%` : '', title: `${s.title}: ${s.value} (${share}%)` });
+          part.style.flexGrow = String(s.value);
+          part.style.background = LEVEL_COLORS[s.key];
+          return part;
+        }),
+    );
+  }
+
+  /** Word occurrences on the page by level, as the reader's statistics bars show a text's. */
+  function updateStats(counts) {
+    const dock = ui?.dock;
+    if (!dock) return;
+    const known = counts['well-known'] ?? 0;
+    const learning = SHOWN_LEVELS.reduce((n, l) => n + (counts[l] ?? 0), 0);
+    fillBar(
+      dock.words,
+      [
+        { key: 'learned', label: 'Learned', title: 'Learned', value: known },
+        { key: 'learning', label: 'Learning', title: 'Learning', value: learning },
+      ],
+      'Words',
+    );
+    fillBar(
+      dock.byLevel,
+      SHOWN_LEVELS.map((l) => ({ key: l, label: SHORT_LABELS[l], title: LONG_LABELS[l], value: counts[l] ?? 0 })),
+      'Learning words by level',
+    );
+  }
+
+  let progressFrame = 0;
+  function updateProgress() {
+    progressFrame = 0;
+    const dock = ui?.dock;
+    if (!dock) return;
+    const scrollable = document.documentElement.scrollHeight - innerHeight;
+    const share = scrollable > 0 ? Math.min(1, Math.max(0, scrollY / scrollable)) : 1;
+    dock.progress.style.width = `${share * 100}%`;
+    dock.percent.textContent = `${Math.round(share * 100)}% read`;
+  }
+
+  addEventListener('scroll', () => (progressFrame ||= requestAnimationFrame(updateProgress)), { passive: true });
+  addEventListener('resize', () => (progressFrame ||= requestAnimationFrame(updateProgress)), { passive: true });
+
   document.addEventListener(
     'keydown',
     (e) => {
-      if (ui?.card && e.key === 'Escape') closeCard();
+      if ((ui?.card || ui?.chip) && e.key === 'Escape') closeCard();
     },
     true,
   );
@@ -411,7 +641,15 @@
     }
   });
 
-  chrome.storage.local.get(['sites', 'token']).then(({ sites = {}, token }) => {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local' || !changes.readMode) return;
+    readMode = Boolean(changes.readMode.newValue);
+    if (readMode) closeCard();
+    renderMode();
+  });
+
+  chrome.storage.local.get(['sites', 'token', 'readMode']).then(({ sites = {}, token, readMode: savedReadMode }) => {
+    readMode = Boolean(savedReadMode);
     const code = sites[location.hostname];
     if (code && token && document.body) enable(code);
   });

@@ -22,7 +22,7 @@ type Props = {
    * Resolves to null once saved, or to the error to show while the panel stays open.
    */
   onSave: (level: LearningLevel, meaning: string, everywhere: boolean) => Promise<string | null>;
-  /** Add the word before or after to the selection; missing when punctuation is in the way. */
+  /** Add the token before or after to the selection; missing at a paragraph break. */
   onJoinBefore?: () => void;
   onJoinAfter?: () => void;
   /** For a saved phrase: split it here or in all texts, or join it in all texts. Resolves like onSave. */
@@ -98,8 +98,8 @@ export default function TermPanel({
             size="icon-sm"
             disabled={!onJoinAfter || saving}
             onClick={onJoinAfter}
-            aria-label="Join the next word"
-            title="Join the next word (or shift-click it)"
+            aria-label="Join what comes next"
+            title="Join what comes next: a word, number or punctuation mark (or shift-click a word)"
           >
             <ChevronRight />
           </Button>

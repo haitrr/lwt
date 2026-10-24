@@ -5,6 +5,7 @@ import { lookUpMeaning } from './dictionary';
 import { UserError } from './errors';
 import { getLanguage, hasSplitter, termKey, type Language } from './languages';
 import { buildPhraseSet, mergePhrases, type PhraseSet } from './languages/phrases';
+import { makePhraseEverywhere, splitPhrase } from './phrases';
 import { createTerm, editTerm, getTerm } from './terms';
 import { getLanguageSettings, getTranslatorSettings } from './users';
 import type { Session } from './auth/session';
@@ -22,7 +23,7 @@ export const MAX_CHARS = 50_000;
 /** A word or phrase in a segment: its UTF-16 offsets there and its term key. */
 export type WebToken = { start: number; end: number; key: string };
 
-export type WebTerm = { id: number; learningLevel: LearningLevel; meaning: string };
+export type WebTerm = { id: number; learningLevel: LearningLevel; meaning: string; phrase: boolean };
 
 export type WebAnnotation = {
   /** The words of each segment sent, in order; separators are left out. */
@@ -99,11 +100,11 @@ export async function annotateWebText(session: Session, input: { languageCode?: 
   const byFold = new Map<string, WebTerm>();
   for (let i = 0; i < keys.length; i += 1000) {
     const rows = await db
-      .select({ id: terms.id, content: terms.content, learningLevel: terms.learningLevel, meaning: terms.meaning })
+      .select({ id: terms.id, content: terms.content, learningLevel: terms.learningLevel, meaning: terms.meaning, phrase: terms.phrase })
       .from(terms)
       .where(and(owned, inArray(terms.content, keys.slice(i, i + 1000))));
-    for (const { content, id, learningLevel, meaning } of rows) {
-      byFold.set(fold(content), { id, learningLevel: learningLevel as LearningLevel, meaning });
+    for (const { content, id, learningLevel, meaning, phrase } of rows) {
+      byFold.set(fold(content), { id, learningLevel: learningLevel as LearningLevel, meaning, phrase });
     }
   }
   const found: Record<string, WebTerm> = {};
@@ -153,4 +154,30 @@ export async function lookUpWebWord(session: Session, languageCode: string, word
   if (!dictionaryLanguage) return { status: 'no-dictionary' };
   const meaning = await lookUpMeaning(word, languageCode, dictionaryLanguage, await getTranslatorSettings(session.userId));
   return meaning ? { status: 'found', meaning } : { status: meaning === null ? 'missing' : 'unavailable' };
+}
+
+/**
+ * Makes text the user selected on a page ("GPT-6") one term, joined wherever it appears: on pages and in their texts.
+ * The page then needs annotating again to show it.
+ */
+export async function makeWebPhrase(
+  session: Session,
+  input: { languageCode?: unknown; text?: unknown; learningLevel?: unknown; meaning?: unknown },
+) {
+  const language = requireLanguage(input.languageCode);
+  const text = typeof input.text === 'string' ? input.text : '';
+  if (!text.trim() || text.length > 500) throw new UserError('Select a few words to join.');
+  return makePhraseEverywhere(session, {
+    languageCode: language.code,
+    content: text,
+    learningLevel: String(input.learningLevel ?? ''),
+    meaning: typeof input.meaning === 'string' ? input.meaning.trim() : '',
+  });
+}
+
+/** Splits a phrase back into its words everywhere, deleting the phrase term. */
+export async function splitWebPhrase(session: Session, input: { termId?: unknown }) {
+  if (typeof input.termId !== 'number') throw new UserError('termId is required.');
+  await splitPhrase(session, input.termId, null);
+  return { ok: true };
 }
