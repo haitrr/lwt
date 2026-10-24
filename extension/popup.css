@@ -1,0 +1,10 @@
+body { font: 13px/1.4 system-ui, sans-serif; width: 280px; margin: 12px; color: #1a1a1a; }
+h1 { font-size: 15px; margin: 0 0 10px; }
+label { display: block; margin: 8px 0; }
+label input:not([type='checkbox']), select { display: block; width: 100%; box-sizing: border-box; margin-top: 2px; padding: 4px; }
+.row { display: flex; gap: 6px; align-items: center; }
+button { padding: 5px 10px; }
+.link { border: none; background: none; padding: 0; color: #2563eb; cursor: pointer; }
+.muted { color: #666; }
+#host { font-weight: 600; word-break: break-all; }
+#error { color: #b91c1c; }

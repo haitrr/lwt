@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "LWT Web Reader",
+  "version": "0.1.0",
+  "description": "Learn the words of any web page with your LWT account: see their levels, look them up and save them.",
+  "minimum_chrome_version": "128",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LWT Web Reader"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "css": [
+        "content.css"
+      ]
+    }
+  ]
+}

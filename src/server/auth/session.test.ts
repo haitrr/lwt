@@ -13,7 +13,7 @@ vi.mock('../db', async () => {
   return { schema, getDb: () => ({ select: () => ({ from: () => ({ where: async () => rows() }) }) }) };
 });
 vi.stubEnv('LWT_JWT_SECRET', SECRET);
-const { createSessionToken, getSession, verifySessionToken } = await import('./session');
+const { createSessionToken, getBearerSession, getSession, verifySessionToken } = await import('./session');
 
 /** A token as the .NET API issued them: no tokenVersion claim. */
 function dotnetToken() {
@@ -63,5 +63,25 @@ describe('session tokens', () => {
     cookie = await createSessionToken(7, 'ann', 0);
     storedVersion = undefined;
     expect(await getSession()).toBeNull();
+  });
+});
+
+describe('getBearerSession', () => {
+  beforeEach(() => {
+    storedVersion = 0;
+  });
+
+  it('reads the token from the Authorization header', async () => {
+    const token = await createSessionToken(7, 'ann', 0);
+    expect(await getBearerSession(new Headers({ authorization: `Bearer ${token}` }))).toEqual({ userId: 7, userName: 'ann' });
+  });
+
+  it('rejects a missing, malformed or revoked token', async () => {
+    const token = await createSessionToken(7, 'ann', 0);
+    expect(await getBearerSession(new Headers())).toBeNull();
+    expect(await getBearerSession(new Headers({ authorization: token }))).toBeNull();
+    expect(await getBearerSession(new Headers({ authorization: 'Bearer nonsense' }))).toBeNull();
+    storedVersion = 1;
+    expect(await getBearerSession(new Headers({ authorization: `Bearer ${token}` }))).toBeNull();
   });
 });
