@@ -23,6 +23,9 @@ async function api({ method = 'GET', path, body }) {
   }
   const data = await res.json().catch(() => null);
   if (res.status === 401 && token) await chrome.storage.local.remove(['token', 'userName', 'languages']);
+  if (res.status === 404 && !data?.error) {
+    return { ok: false, status: 404, error: `${server} has no extension API: is it LWT, updated to a version with the extension?` };
+  }
   if (!res.ok) return { ok: false, status: res.status, error: data?.error ?? `LWT answered ${res.status}.` };
   return { ok: true, status: res.status, data };
 }
