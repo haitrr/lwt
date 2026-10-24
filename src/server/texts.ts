@@ -230,6 +230,8 @@ export async function getTextTerms(id: number, userId: number, indexFrom: number
       index: textTerms.index,
       learningLevel: terms.learningLevel,
       meaning: terms.meaning,
+      phrase: terms.phrase,
+      autoJoin: terms.autoJoin,
     })
     .from(textTerms)
     .innerJoin(texts, eq(textTerms.textId, texts.id))
@@ -265,6 +267,8 @@ export async function getTextTerms(id: number, userId: number, indexFrom: number
       // Sent for every level: the term panel saves what it shows, so a hidden meaning would be erased.
       meaning: r.meaning ?? null,
       count: r.termId == null ? null : (counts.get(r.termId) ?? 0),
+      phrase: r.phrase ?? false,
+      autoJoin: r.autoJoin ?? false,
     };
   });
 }

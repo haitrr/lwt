@@ -3,37 +3,63 @@
 import { useState } from 'react';
 import { importanceColor } from '@/lib/importance';
 import { LearningLevel, LEVEL_LABELS, nextLevel, type DictionaryLookup, type TextTermView } from '@/lib/types';
-import { ArrowUp, Copy, X } from 'lucide-react';
+import { ArrowUp, ChevronLeft, ChevronRight, Copy, Link, Unlink, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import DictionaryHint, { suggestionOf } from './DictionaryHint';
 import { panelMeaning } from './termEditing';
 
 type Props = {
+  /** A word, a saved phrase, or (id null) a phrase made of the selected words that saving creates. */
   term: TextTermView;
   lookup: DictionaryLookup | undefined;
-  /** Resolves to null once saved, or to the error to show while the panel stays open. */
-  onSave: (level: LearningLevel, meaning: string) => Promise<string | null>;
+  /** For selected words not joined here: the scope saving starts with, or loading while it is not known yet. */
+  phraseScope?: 'here' | 'everywhere' | 'loading';
+  /**
+   * everywhere: a new phrase joins in all texts, not only here.
+   * Resolves to null once saved, or to the error to show while the panel stays open.
+   */
+  onSave: (level: LearningLevel, meaning: string, everywhere: boolean) => Promise<string | null>;
+  /** Add the word before or after to the selection; missing when punctuation is in the way. */
+  onJoinBefore?: () => void;
+  onJoinAfter?: () => void;
+  /** For a saved phrase: split it here or in all texts, or join it in all texts. Resolves like onSave. */
+  onPhraseAction?: (action: PhraseAction) => Promise<string | null>;
   onClose: () => void;
 };
 
+export type PhraseAction = 'split-here' | 'split-everywhere' | 'join-everywhere';
+
 const EDITABLE_LEVELS = Object.values(LearningLevel).filter((l) => l !== LearningLevel.Skipped);
 
-export default function TermPanel({ term, lookup, onSave, onClose }: Props) {
+export default function TermPanel({
+  term,
+  phraseScope,
+  lookup,
+  onSave,
+  onJoinBefore,
+  onJoinAfter,
+  onPhraseAction,
+  onClose,
+}: Props) {
   // Null until the user types in the box.
   const [edited, setEdited] = useState<string | null>(null);
   const [level, setLevel] = useState(term.learningLevel);
+  const [everywhere, setEverywhere] = useState(phraseScope !== 'here');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const shownMeaning = panelMeaning(edited, term.meaning, suggestionOf(lookup));
+  const newPhrase = term.id == null;
 
-  const save = async (nextLevelValue: LearningLevel) => {
+  const busy = async (action: () => Promise<string | null>) => {
     setSaving(true);
     setError(null);
-    setError(await onSave(nextLevelValue, shownMeaning));
+    setError(await action());
     setSaving(false);
   };
+  const save = (nextLevelValue: LearningLevel) => busy(() => onSave(nextLevelValue, shownMeaning, everywhere));
 
   return (
     <form
@@ -46,18 +72,68 @@ export default function TermPanel({ term, lookup, onSave, onClose }: Props) {
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
-          className="flex items-center gap-1.5 text-xl font-bold hover:opacity-80 [&>svg]:size-3.5 [&>svg]:text-muted-foreground"
+          className="flex min-w-0 items-center gap-1.5 text-xl font-bold hover:opacity-80 [&>svg]:size-3.5 [&>svg]:shrink-0 [&>svg]:text-muted-foreground"
           title="Copy"
           style={{ color: term.count ? importanceColor(term.count) : undefined }}
           onClick={() => void navigator.clipboard?.writeText(term.content)}
         >
-          {`${term.content} (${term.count ?? '-'})`}
+          <span className="truncate">{term.id == null ? term.content : `${term.content} (${term.count ?? '-'})`}</span>
           <Copy />
         </button>
-        <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
-          <X />
-        </Button>
+        <div className="flex flex-none items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={!onJoinBefore || saving}
+            onClick={onJoinBefore}
+            aria-label="Join the previous word"
+            title="Join the previous word"
+          >
+            <ChevronLeft />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={!onJoinAfter || saving}
+            onClick={onJoinAfter}
+            aria-label="Join the next word"
+            title="Join the next word (or shift-click it)"
+          >
+            <ChevronRight />
+          </Button>
+          {onPhraseAction && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="ghost" size="icon-sm" disabled={saving} aria-label="Phrase" title="Split or join">
+                  <Unlink />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => void busy(() => onPhraseAction('split-here'))}>
+                  <Unlink />
+                  Split here only
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void busy(() => onPhraseAction('split-everywhere'))}>
+                  <Unlink />
+                  Split in all texts
+                </DropdownMenuItem>
+                {!term.autoJoin && (
+                  <DropdownMenuItem onSelect={() => void busy(() => onPhraseAction('join-everywhere'))}>
+                    <Link />
+                    Join in all texts
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
+            <X />
+          </Button>
+        </div>
       </div>
+
       <Textarea
         rows={3}
         className="max-h-[40dvh] overflow-y-auto"
@@ -86,11 +162,24 @@ export default function TermPanel({ term, lookup, onSave, onClose }: Props) {
             </NativeSelectOption>
           ))}
         </NativeSelect>
-        <Button type="button" variant="outline" disabled={saving} onClick={() => void save(nextLevel(level))}>
-          <ArrowUp />
-          Better
-        </Button>
-        <Button type="submit" disabled={saving}>
+        {newPhrase ? (
+          <NativeSelect
+            aria-label="Join where"
+            className="w-28 flex-none"
+            value={everywhere ? 'everywhere' : 'here'}
+            onChange={(e) => setEverywhere(e.target.value === 'everywhere')}
+            disabled={saving}
+          >
+            <NativeSelectOption value="everywhere">All texts</NativeSelectOption>
+            <NativeSelectOption value="here">Here only</NativeSelectOption>
+          </NativeSelect>
+        ) : (
+          <Button type="button" variant="outline" disabled={saving} onClick={() => void save(nextLevel(level))}>
+            <ArrowUp />
+            Better
+          </Button>
+        )}
+        <Button type="submit" disabled={saving || phraseScope === 'loading'}>
           Save
         </Button>
       </div>

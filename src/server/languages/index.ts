@@ -11,6 +11,8 @@ export type Language = {
   shouldSkip(word: string): boolean;
   /** Key used for the terms table. */
   normalize(word: string): string;
+  /** Joins the words of a phrase term: "JOHN MAYNARD KEYNES" in English, nothing in Chinese and Japanese. */
+  phraseSeparator: string;
 };
 
 const ENGLISH_SEPARATOR = /([^a-zA-Z’'-])/;
@@ -21,6 +23,7 @@ const english: Language = {
   // Runs of only dashes or apostrophes (a "----" rule, a lone quote) are not words.
   shouldSkip: (word) => /[^a-zA-Z’'-]/.test(word) || !/[a-zA-Z]/.test(word),
   normalize: (word) => word.toUpperCase(),
+  phraseSeparator: ' ',
 };
 
 const chinese: Language = {
@@ -28,6 +31,7 @@ const chinese: Language = {
   split: cutChinese,
   shouldSkip: (word) => !/^\p{Lo}+$/u.test(word),
   normalize: (word) => word,
+  phraseSeparator: '',
 };
 
 const japanese: Language = {
@@ -35,6 +39,7 @@ const japanese: Language = {
   split: cutJapanese,
   shouldSkip: (word) => !/^[぀-ゟ゠-ヿ＀-ﾟ一-龯㐀-䶿]+$/.test(word),
   normalize: (word) => word,
+  phraseSeparator: '',
 };
 
 // Vietnamese is offered for dictionaries but has no splitter yet, so texts can't use it.

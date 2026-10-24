@@ -1,12 +1,15 @@
 import { and, asc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { getDb, schema, type Tx } from './db';
 import { getLanguage, termKey, type Language } from './languages';
+import { buildPhraseSet, mergePhrases } from './languages/phrases';
 import { LearningLevel } from '@/lib/types';
 
 // Background splitting of texts into text_terms, ported from the .NET TextTermProcessor.
 // A text is pending while ProcessedTermCount < TermCount, or both are 0 (new or just edited),
 // unless it has failed MAX_ATTEMPTS times in a row (failed_at is set; editing clears it).
 // Each step handles one text and at most CHUNK_SIZE tokens, so long books are spread over many steps.
+// The user's auto-join phrase terms are merged in as one token each; text_terms.index stays the position in the
+// split text, so the words a phrase swallowed leave their indices unused and bookmarks don't move.
 
 const { texts, terms, textTerms } = schema;
 
@@ -70,10 +73,10 @@ async function setCounts(tx: Tx, id: number, termCount: number, processedTermCou
  * terms.content is compared case- and accent-insensitively (lwt_ci), so a word can match a
  * term stored with different spelling; those are resolved one by one.
  */
-async function resolveTermIds(tx: Tx, text: PendingText, words: Set<string>) {
+export async function resolveTermIds(tx: Tx, owner: { userId: number; languageCode: string }, words: Set<string>) {
   const ids = new Map<string, number>();
   if (words.size === 0) return ids;
-  const owned = and(eq(terms.userId, text.userId), eq(terms.languageCode, text.languageCode));
+  const owned = and(eq(terms.userId, owner.userId), eq(terms.languageCode, owner.languageCode));
   const load = async (contents: string[]) => {
     const rows = await tx
       .select({ id: terms.id, content: terms.content })
@@ -91,8 +94,8 @@ async function resolveTermIds(tx: Tx, text: PendingText, words: Set<string>) {
       .values(
         missing.map((content) => ({
           content,
-          languageCode: text.languageCode,
-          userId: text.userId,
+          languageCode: owner.languageCode,
+          userId: owner.userId,
           learningLevel: LearningLevel.Unknown,
           meaning: '',
         })),
@@ -130,19 +133,29 @@ async function processText(tx: Tx, text: PendingText) {
   }
 
   const from = text.processedTermCount;
-  const chunk = words.slice(from, from + CHUNK_SIZE);
-  const normalized = chunk.map((w) => termKey(language, w));
-  const termIds = await resolveTermIds(tx, text, new Set(normalized.filter((w): w is string => w !== null)));
+  const phrases = buildPhraseSet(await loadPhraseKeys(tx, text), language.phraseSeparator);
+  const tokens = words.map((w) => ({ text: w, key: termKey(language, w) }));
+  // A phrase may run past the chunk; the next step then starts after it.
+  const { merged, next } = mergePhrases(tokens, from, CHUNK_SIZE, phrases);
+  const termIds = await resolveTermIds(tx, text, new Set(merged.flatMap((t) => (t.key === null ? [] : [t.key]))));
 
   await tx.insert(textTerms).values(
-    chunk.map((content, i) => ({
+    merged.map((t) => ({
       textId: text.id,
-      termId: normalized[i] === null ? null : (termIds.get(normalized[i]!) ?? null),
-      content,
-      index: from + i,
+      termId: t.key === null ? null : (termIds.get(t.key) ?? null),
+      content: t.text,
+      index: t.index,
     })),
   );
-  await setCounts(tx, text.id, text.termCount, from + chunk.length);
+  await setCounts(tx, text.id, text.termCount, next);
+}
+
+async function loadPhraseKeys(tx: Tx, text: PendingText) {
+  const rows = await tx
+    .select({ content: terms.content })
+    .from(terms)
+    .where(and(eq(terms.userId, text.userId), eq(terms.languageCode, text.languageCode), eq(terms.autoJoin, true)));
+  return rows.map((r) => r.content);
 }
 
 /** Runs one step of work. Returns false when nothing is pending. */

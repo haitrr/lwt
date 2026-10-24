@@ -9,7 +9,8 @@ type Props = {
   term: TextTermView;
   bookmarked: boolean;
   selected: boolean;
-  onClick: (term: TextTermView) => void;
+  /** extend is true for a shift-click, which grows the selection to this word. */
+  onClick: (term: TextTermView, extend: boolean) => void;
   onHover: (term: TextTermView, rect: DOMRect | null) => void;
 };
 
@@ -44,15 +45,17 @@ function TermToken({ term, bookmarked, selected, onClick, onHover }: Props) {
       className={[styles.term, bookmarked && styles.bookmark, selected && styles.selected].filter(Boolean).join(' ')}
       data-level={term.learningLevel}
       style={learning && count ? { borderBottomColor: importanceColor(count) } : undefined}
-      onClick={() => {
+      onClick={(e) => {
         cancelHover();
-        onClick(term);
+        onClick(term, e.shiftKey);
       }}
+      // Keep shift-click from selecting page text.
+      onMouseDown={(e) => e.shiftKey && e.preventDefault()}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           cancelHover();
-          onClick(term);
+          onClick(term, e.shiftKey);
         }
       }}
       onMouseEnter={
